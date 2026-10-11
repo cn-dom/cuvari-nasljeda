@@ -80,6 +80,8 @@ function App() {
   const [commentDrafts, setCommentDrafts] = useState({});
   const [editingPostId, setEditingPostId] = useState(null);
   const [editDraft, setEditDraft] = useState("");
+  const [memberPickerOpen, setMemberPickerOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState("");
 
   const postCount = useMemo(() => posts.length, [posts]);
   const visiblePosts = useMemo(() => posts.filter((post) => {
@@ -91,7 +93,7 @@ function App() {
 
   function publishPost() {
     const text = draft.trim();
-    if (!text) {
+    if (!text && !selectedImage) {
       setNotice("Napiši nekoliko riječi prije objave.");
       return;
     }
@@ -104,6 +106,7 @@ function App() {
         time: "Upravo sada",
         tag: "NOVA OBJAVA",
         text,
+        imageUrl: selectedImage,
         likes: 0,
         comments: 0,
         icon: "💬",
@@ -112,7 +115,9 @@ function App() {
       ...current,
     ]);
     setDraft("");
-    setNotice("Objava je dodana samo u ovaj lokalni prikaz. Još se ne sprema u bazu.");
+    setSelectedImage("");
+    setMemberPickerOpen(false);
+    setNotice("Objava je dodana samo u ovaj lokalni prikaz. Fotografija i tekst nisu poslani na poslužitelj.");
   }
 
   function toggleLike(id) {
@@ -277,9 +282,35 @@ function App() {
                 rows="3"
               />
             </div>
+            {selectedImage && (
+              <div className="composer-image-preview">
+                <img src={selectedImage} alt="Pregled odabrane fotografije" />
+                <button type="button" onClick={() => setSelectedImage("")}>Ukloni fotografiju</button>
+                <small>Privremeni pregled samo u ovom pregledniku · najviše 5 MB</small>
+              </div>
+            )}
             <div className="composer-bottom">
               <div className="composer-tools" aria-label="Opcije objave">
-                <button onClick={() => setNotice("Dodavanje fotografija povezujemo sa Supabase Storageom u sljedećoj fazi.")}>▧ <span>Fotografija</span></button>
+                <label className="composer-file-button">▧ <span>Fotografija</span>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    aria-label="Odaberi fotografiju"
+                    onChange={(event) => {
+                      const file = event.target.files && event.target.files[0];
+                      if (!file) return;
+                      if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) {
+                        setNotice("Odaberi sliku do 5 MB (JPG, PNG, WebP ili GIF).");
+                        event.target.value = "";
+                        return;
+                      }
+                      const reader = new FileReader();
+                      reader.onload = () => setSelectedImage(typeof reader.result === "string" ? reader.result : "");
+                      reader.onerror = () => setNotice("Fotografiju nije bilo moguće učitati u pregled.");
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
                 <div className="emoji-tool-wrap">
                   <button type="button" aria-expanded={emojiPickerOpen} onClick={() => setEmojiPickerOpen((open) => !open)}>☺ <span>Emoji</span></button>
                   {emojiPickerOpen && (
@@ -290,7 +321,27 @@ function App() {
                     </div>
                   )}
                 </div>
-                <button onClick={() => setNotice("Označavanje članova bit će dostupno nakon uvođenja profila.")}>@ <span>Označi člana</span></button>
+                <div className="mention-tool-wrap">
+                  <button type="button" aria-expanded={memberPickerOpen} onClick={() => setMemberPickerOpen((open) => !open)}>@ <span>Označi člana</span></button>
+                  {memberPickerOpen && (
+                    <div className="mention-picker" aria-label="Probni izbor članova">
+                      <strong>Označi člana</strong>
+                      <p>Primjer izgleda · profili još nisu povezani</p>
+                      {[
+                        { name: "Marija K.", handle: "@marija_prica" },
+                        { name: "Ivan P.", handle: "@ivan_povijest" },
+                        { name: "Čuvari nasljeđa", handle: "@cuvari_nasljeda" },
+                      ].map((member) => (
+                        <button type="button" key={member.handle} onClick={() => {
+                          setDraft((value) => value + (value && !value.endsWith(" ") ? " " : "") + member.handle + " ");
+                          setMemberPickerOpen(false);
+                        }}>
+                          <span>{member.name}</span><small>{member.handle}</small>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               <button className="primary-button" onClick={publishPost}>Objavi <span>↗</span></button>
             </div>
@@ -343,7 +394,8 @@ function App() {
                     <button className="primary-button" onClick={() => saveEdit(post.id)}>Spremi izmjene</button>
                   </div>
                 </div>
-              ) : <p className="post-text">{post.text}</p>}
+              ) : post.text ? <p className="post-text">{post.text}</p> : null}
+              {post.imageUrl && <img className="post-user-image" src={post.imageUrl} alt="Fotografija uz objavu" />}
               {post.id === 1 && (
                 <div className="heritage-art" role="img" aria-label="Dekorativni motiv hrvatske baštine">
                   <div className="heritage-art-grid" />
