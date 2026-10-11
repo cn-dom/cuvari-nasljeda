@@ -868,7 +868,7 @@ function App() {
                 onClick={() => setActiveNav(item.label)}
               >
                 <span className="side-icon">{item.icon}</span>{item.label}
-                {item.label === "Poruke" && <span className="side-count">{messages.filter((message) => message.recipient_id === session?.user?.id).length || ""}</span>}
+                {item.label === "Poruke" && <span className="side-count">✉</span>}
                 {item.label === "Obavijesti" && <span className="side-count">{notifications.filter((notification) => !notification.read_at).length || ""}</span>}
               </button>
             ))}
