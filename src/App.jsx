@@ -828,6 +828,45 @@ function App() {
     setGroupBusy(false);
   }
 
+  async function leaveGroupChat() {
+    const group = groupChats.find((item) => item.id === activeGroupId);
+    if (!group || !supabase || !session?.user?.id) return;
+    if (!window.confirm("Napustiti grupu „" + group.name + "”? Nakon izlaska više nećeš vidjeti njezine poruke.")) return;
+    setGroupBusy(true);
+    const { error } = await supabase.rpc("leave_group_chat", { target_group_id: group.id });
+    if (error) {
+      const detail = String(error.message || "");
+      setNotice(detail.includes("last admin") || detail.includes("last administrator")
+        ? "Ne možeš napustiti grupu dok si njezin jedini administrator. Najprije prenesi administratorsku ulogu drugom članu."
+        : "Grupu nije moguće napustiti. Provjeri je li ažurirani SQL nacrt group-chats.sql primijenjen na testnoj bazi.");
+    } else {
+      setGroupChats((current) => current.filter((item) => item.id !== group.id));
+      setGroupMessages((current) => current.filter((item) => item.group_id !== group.id));
+      setActiveGroupId((current) => current === group.id ? "" : current);
+      setNotice("Napustio/la si grupu „" + group.name + "”.");
+    }
+    setGroupBusy(false);
+  }
+
+  async function deleteGroupChat() {
+    const group = groupChats.find((item) => item.id === activeGroupId);
+    const myMembership = group?.members?.find((item) => item.user_id === session?.user?.id);
+    if (!group || !supabase || myMembership?.role !== "admin") return;
+    if (!window.confirm("Trajno izbrisati grupu „" + group.name + "” i sve njezine poruke? Ova radnja ne može se poništiti.")) return;
+    if (!window.confirm("Potvrdi još jednom: zaista želiš trajno izbrisati ovu grupu za sve članove?")) return;
+    setGroupBusy(true);
+    const { error } = await supabase.rpc("delete_group_chat", { target_group_id: group.id });
+    if (error) {
+      setNotice("Grupu nije moguće izbrisati. Provjeri je li ažurirani SQL nacrt group-chats.sql primijenjen na testnoj bazi.");
+    } else {
+      setGroupChats((current) => current.filter((item) => item.id !== group.id));
+      setGroupMessages((current) => current.filter((item) => item.group_id !== group.id));
+      setActiveGroupId((current) => current === group.id ? "" : current);
+      setNotice("Grupa „" + group.name + "” i njezine poruke trajno su izbrisane.");
+    }
+    setGroupBusy(false);
+  }
+
   async function sendGroupMessage(event) {
     event.preventDefault();
     const body = groupMessageDraft.trim();
@@ -1644,6 +1683,14 @@ function App() {
                               })}</div>
                             </div>
                           </>}
+                          <div className="group-chat-admin-form group-chat-danger-actions">
+                            <label>Radnje za grupu</label>
+                            <div>
+                              <button type="button" className="post-menu-button" onClick={leaveGroupChat} disabled={groupBusy}>Napusti grupu</button>
+                              {isAdmin && <button type="button" className="post-menu-button danger" onClick={deleteGroupChat} disabled={groupBusy}>Trajno izbriši grupu</button>}
+                            </div>
+                            <small>Grupu može izbrisati samo administrator. Brisanje uklanja i sve poruke grupe.</small>
+                          </div>
                         </>;
                       })()}
                       <div className="group-chat-messages">{groupMessages.map((message) => {
