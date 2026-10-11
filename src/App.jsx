@@ -504,7 +504,7 @@ function App() {
     <div className="app-shell">
       <div className="preview-ribbon">
         <span className="status-dot" /> RAZVOJNI PREGLED
-        <span>Objave su zasad probne i ne spremaju se na poslužitelj.</span>
+        <span>Zajednica je u razvoju · povezivanje i pojedine funkcije još se provjeravaju.</span>
       </div>
 
       <header className="topbar">
@@ -549,7 +549,7 @@ function App() {
               <p>Mjesto za ljude koji čuvaju priče, običaje i uspomene.</p>
               <div className="community-stats">
                 <div><strong>—</strong><span>članova</span></div>
-                <div><strong>{postCount}</strong><span>probnih objava</span></div>
+                <div><strong>{postCount}</strong><span>objava na zidu</span></div>
               </div>
             </div>
           </div>
