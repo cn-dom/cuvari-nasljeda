@@ -410,7 +410,7 @@ function App() {
   useEffect(() => {
     let cancelled = false;
     async function loadMemberDirectory() {
-      if (activeNav !== "Čuvari nasljeđa" || !supabase || !session?.user?.id) return;
+      if (!["Čuvari nasljeđa", "Poruke"].includes(activeNav) || !supabase || !session?.user?.id) return;
       setMemberDirectoryBusy(true);
       const { data, error } = await supabase
         .from("profiles")
