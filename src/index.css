@@ -568,3 +568,10 @@ button { -webkit-tap-highlight-color: transparent; }
   .group-chat-member-actions { justify-content: flex-start; }
   .group-chat-admin-form > div:not(.group-chat-member-admin-list) { align-items: stretch; flex-direction: column; }
 }
+
+/* Izlazak iz grupe i potvrđeno brisanje */
+
+.group-chat-danger-actions { border-color: #ead2d5; background: #fffafb; }
+.group-chat-danger-actions > label { color: #8d2735; }
+.group-chat-danger-actions > small { color: #7a6870; font-size: 10px; line-height: 1.45; }
+.group-chat-danger-actions .danger { border-color: #e5bcc2; color: #9a2636; background: #fff; }
