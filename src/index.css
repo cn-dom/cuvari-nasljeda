@@ -362,3 +362,21 @@ button { -webkit-tap-highlight-color: transparent; }
 .blocked-member-row:last-child { border-bottom: 0; }
 .blocked-member-row span { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 11px; color: var(--ink); }
 .blocked-member-row button { flex-shrink: 0; border: 1px solid var(--line); border-radius: 7px; background: #fff; color: var(--navy); padding: 6px 8px; font-size: 10px; font-weight: 700; }
+
+
+/* Imenik članova zajednice */
+.member-directory { padding: 20px; margin-bottom: 16px; }
+.member-directory-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.member-directory-heading h2 { margin: 5px 0 6px; color: var(--navy); font-size: 21px; }
+.member-directory-heading p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.member-directory-count { white-space: nowrap; border-radius: 999px; background: #f0f3f6; padding: 7px 10px; color: var(--navy); font-size: 11px; font-weight: 800; }
+.member-directory-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+.member-directory-card { display: flex; align-items: flex-start; gap: 10px; min-width: 0; border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+.member-directory-info { flex: 1; min-width: 0; }
+.member-directory-info strong, .member-directory-info span { display: block; overflow-wrap: anywhere; }
+.member-directory-info strong { color: var(--navy); font-size: 12px; }
+.member-directory-info span { color: var(--muted); font-size: 10px; margin-top: 3px; }
+.member-directory-info p { margin: 8px 0 0; color: var(--ink); font-size: 11px; line-height: 1.55; overflow-wrap: anywhere; }
+.member-directory-card > button { flex-shrink: 0; }
+.directory-empty { padding: 18px 0; color: var(--muted); font-size: 12px; }
+@media (max-width: 760px) { .member-directory { padding: 14px; } .member-directory-grid { grid-template-columns: minmax(0, 1fr); } .member-directory-card { flex-wrap: wrap; } .member-directory-card > button { margin-left: auto; } }
