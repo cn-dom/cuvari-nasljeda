@@ -103,6 +103,9 @@ function App() {
   const [reportBusy, setReportBusy] = useState(false);
   const [blockedMembers, setBlockedMembers] = useState([]);
   const [blockBusyId, setBlockBusyId] = useState(null);
+  const [memberDirectory, setMemberDirectory] = useState([]);
+  const [memberDirectoryQuery, setMemberDirectoryQuery] = useState("");
+  const [memberDirectoryBusy, setMemberDirectoryBusy] = useState(false);
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -397,6 +400,30 @@ function App() {
     }
     setBlockBusyId(null);
   }
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadMemberDirectory() {
+      if (activeNav !== "Čuvari nasljeđa" || !supabase || !session?.user?.id) return;
+      setMemberDirectoryBusy(true);
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, display_name, username, bio, created_at")
+        .neq("id", session.user.id)
+        .order("display_name", { ascending: true })
+        .limit(100);
+      if (cancelled) return;
+      if (error) {
+        setNotice("Imenik članova nije dostupan. Provjeri postoji li tablica profiles i jesu li RLS pravila primijenjena.");
+        setMemberDirectory([]);
+      } else {
+        setMemberDirectory((data || []).filter((member) => !blockedMembers.some((blocked) => blocked.id === member.id)));
+      }
+      setMemberDirectoryBusy(false);
+    }
+    loadMemberDirectory();
+    return () => { cancelled = true; };
+  }, [activeNav, session?.user?.id, blockedMembers]);
 
   async function submitReport(event) {
     event.preventDefault();
@@ -859,6 +886,36 @@ function App() {
                 </button>
               </p>
               <p className="auth-footnote">Koristi samo testni račun dok ne provjerimo postavke i pravila pristupa.</p>
+            </section>
+          )}
+
+          {activeNav === "Čuvari nasljeđa" && (
+            <section className="member-directory card" aria-labelledby="member-directory-title">
+              <div className="member-directory-heading">
+                <div><span className="eyebrow">LJUDI U ZAJEDNICI</span><h2 id="member-directory-title">Čuvari nasljeđa</h2><p>Upoznaj članove, njihove interese i priče koje žele sačuvati.</p></div>
+                <span className="member-directory-count">{memberDirectory.length} članova</span>
+              </div>
+              {!session?.user?.id ? (
+                <div className="directory-empty"><p>Prijavi se za pregled imenika članova zajednice.</p><button className="primary-button" onClick={() => { setAuthOpen(true); setAuthMessage(""); }}>Prijava / Registracija</button></div>
+              ) : (
+                <>
+                  <label className="sr-only" htmlFor="member-directory-search">Pretraži članove</label>
+                  <input id="member-directory-search" className="feed-search" type="search" value={memberDirectoryQuery} onChange={(event) => setMemberDirectoryQuery(event.target.value)} placeholder="Pretraži ime, korisničko ime ili interese…" />
+                  {memberDirectoryBusy ? <p className="directory-empty">Učitavam članove…</p> : (() => {
+                    const q = memberDirectoryQuery.trim().toLocaleLowerCase("hr");
+                    const filtered = memberDirectory.filter((member) => `${member.display_name || ""} ${member.username || ""} ${member.bio || ""}`.toLocaleLowerCase("hr").includes(q));
+                    return filtered.length ? <div className="member-directory-grid">{filtered.map((member) => {
+                      const displayName = member.display_name || member.username || "Čuvar nasljeđa";
+                      const initials = displayName.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN";
+                      return <article className="member-directory-card" key={member.id}>
+                        <Avatar initials={initials} />
+                        <div className="member-directory-info"><strong>{displayName}</strong><span>@{member.username || "clan"}</span><p>{member.bio || "Ovaj član još nije dodao opis profila."}</p></div>
+                        <button type="button" className="post-menu-button danger" disabled={blockBusyId === member.id} onClick={() => toggleBlockMember({ authorId: member.id, author: displayName, handle: "@" + (member.username || "clan") })}>{blockedMembers.some((blocked) => blocked.id === member.id) ? "Odblokiraj" : "Blokiraj"}</button>
+                      </article>;
+                    })}</div> : <p className="directory-empty">Nema članova koji odgovaraju pretrazi.</p>;
+                  })()}
+                </>
+              )}
             </section>
           )}
 
