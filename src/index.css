@@ -233,3 +233,28 @@ button { -webkit-tap-highlight-color: transparent; }
 .empty-feed strong { color: var(--navy); font-size: 14px; }
 .empty-feed p { color: #7d8996; font-size: 11px; }
 .empty-feed .outline-button { margin: 0 auto; cursor: pointer; }
+
+
+/* Komentari i vlasničke radnje na probnom zidu */
+.post-menu { display: flex; align-items: center; gap: 5px; margin-left: auto; align-self: flex-start; }
+.post-menu-button { border: 1px solid #e2e7ec; border-radius: 7px; padding: 6px 8px; background: #fff; color: var(--navy); font-size: 9px; font-weight: 800; }
+.post-menu-button:hover { border-color: var(--blue); background: #f2f6fa; }
+.post-menu-button.danger { color: var(--red); }
+.post-menu-button.danger:hover { border-color: #e8b9bf; background: #fff1f2; }
+.edit-post-box { display: grid; gap: 9px; margin: 10px 0 15px; }
+.edit-post-box textarea { width: 100%; resize: vertical; border: 1px solid var(--line); border-radius: 9px; padding: 11px; color: var(--ink); font: inherit; font-size: 12px; line-height: 1.6; }
+.inline-form-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.inline-form-actions .outline-button { cursor: pointer; }
+.comments-panel { padding: 13px 0 14px; border-top: 1px solid #edf0f3; }
+.comments-list { display: grid; gap: 10px; }
+.comment-item { display: flex; align-items: flex-start; gap: 9px; }
+.comment-item .avatar { width: 32px; height: 32px; font-size: 9px; }
+.comment-bubble { min-width: 0; flex: 1; border-radius: 0 11px 11px 11px; padding: 9px 11px; background: #f4f6f8; }
+.comment-bubble strong { display: block; color: var(--navy); font-size: 10px; }
+.comment-bubble p { margin: 5px 0 0; color: #4b5865; font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-wrap; }
+.comments-empty { margin: 0 0 11px; color: #8a95a0; font-size: 10px; }
+.comment-form { display: flex; gap: 8px; margin-top: 12px; }
+.comment-form input { width: 100%; min-width: 0; border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; background: #fbfcfd; color: var(--ink); font: inherit; font-size: 11px; }
+.comment-form input:focus { outline: 2px solid #244f7625; border-color: var(--blue); }
+.comment-form .primary-button { flex-shrink: 0; cursor: pointer; }
+.local-only-note { margin: 9px 0 0; color: #89939d; font-size: 9px; }
