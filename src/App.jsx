@@ -1602,18 +1602,24 @@ function App() {
         </aside>
 
         <section className="feed-column" aria-label="Zid zajednice">
-          <div className="welcome-panel">
+          <section className="welcome-panel" aria-label="Dobrodošlica u PatriaSoul">
+            <div className="welcome-photo-layer" aria-hidden="true">
+              <div className="welcome-landscape-sun" />
+              <div className="welcome-fortress"><span /><span /><span /></div>
+              <div className="welcome-flag"><i /><i /><i /><b>✚</b></div>
+            </div>
             <div className="welcome-copy">
-              <span className="eyebrow">DOBRO DOŠLI U ZAJEDNICU</span>
-              <h1>Priče koje nas povezuju.<br /><em>Nasljeđe koje čuvamo.</em></h1>
-              <p>Dijelimo uspomene, učimo jedni od drugih i prenosimo hrvatsko nasljeđe budućim naraštajima.</p>
+              <span className="eyebrow">VJERA · OBITELJ · DOMOVINA</span>
+              <h1>Zajedno čuvamo<br />našu povijest,<br /><em>naše nasljeđe.</em></h1>
+              <p>Priče, fotografije i uspomene koje povezuju Hrvatsku i njezine ljude.</p>
+              <button type="button" className="welcome-cta" onClick={() => document.getElementById("post-draft")?.focus()}>Podijeli svoju priču <span aria-hidden="true">↗</span></button>
             </div>
             <div className="welcome-symbol" aria-hidden="true">
               <span className="symbol-sun">✦</span>
               <span className="symbol-letters">PS</span>
               <span className="symbol-caption">ČUVARI<br />NASLJEĐA</span>
             </div>
-          </div>
+          </section>
 
           {notice && (
             <div className="notice" role="status">
@@ -1953,7 +1959,11 @@ function App() {
             </section>
           )}
 
-          <section className="composer card">
+          <section className="composer card" aria-label="Izradi objavu">
+            <div className="composer-heading">
+              <span className="composer-heading-mark" aria-hidden="true">✎</span>
+              <div><strong>Što želiš podijeliti?</strong><small>Tvoja priča može sačuvati dio nasljeđa.</small></div>
+            </div>
             <div className="composer-top">
               <Avatar initials={comment.initials || comment.author.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN"} variant={comment.owner ? "avatar-you" : ""} />
               <label className="sr-only" htmlFor="post-draft">Napiši objavu</label>
