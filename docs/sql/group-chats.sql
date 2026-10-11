@@ -329,8 +329,7 @@ begin
   if new.id is distinct from old.id
      or new.group_id is distinct from old.group_id
      or new.sender_id is distinct from old.sender_id
-     or new.created_at is distinct from old.created_at
-     or new.reply_to_id is distinct from old.reply_to_id then
+     or new.created_at is distinct from old.created_at then
     raise exception 'Group message identity and reply target cannot be changed';
   end if;
   if new.reply_to_id is not null and not exists (
