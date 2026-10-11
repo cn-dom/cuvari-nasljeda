@@ -220,3 +220,16 @@ button { -webkit-tap-highlight-color: transparent; }
   .post-action { font-size: 9px; }
   .heritage-art strong { font-size: 23px; }
 }
+
+/* Zid zajednice: pretraživanje i tematski filtri */
+.feed-controls { display: grid; gap: 11px; padding: 13px; margin: 0 0 14px; }
+.feed-search { width: 100%; min-width: 0; border: 1px solid var(--line); border-radius: 9px; padding: 11px 13px; background: #fbfcfd; color: var(--ink); font: inherit; font-size: 12px; outline: none; }
+.feed-search:focus { border-color: var(--blue); box-shadow: 0 0 0 3px #244f7612; }
+.feed-filter-list { display: flex; flex-wrap: wrap; gap: 7px; }
+.feed-filter { border: 1px solid #e1e6eb; border-radius: 999px; background: #fff; color: #657382; padding: 7px 10px; font-size: 9px; font-weight: 800; cursor: pointer; }
+.feed-filter:hover, .feed-filter.active { border-color: var(--navy); background: var(--navy); color: #fff; }
+.feed-total { color: #7d8996; font-size: 10px; white-space: nowrap; }
+.empty-feed { padding: 26px 18px; text-align: center; }
+.empty-feed strong { color: var(--navy); font-size: 14px; }
+.empty-feed p { color: #7d8996; font-size: 11px; }
+.empty-feed .outline-button { margin: 0 auto; cursor: pointer; }
