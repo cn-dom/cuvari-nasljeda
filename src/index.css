@@ -592,3 +592,8 @@ button { -webkit-tap-highlight-color: transparent; }
 .group-reaction:hover { border-color: #c5d0db; background: #f6f8fa; }
 .group-reaction.selected { border-color: #b8c9da; background: #eaf1f7; color: #183b5b; }
 .group-reaction:disabled { opacity: .55; cursor: wait; }
+
+.group-message-reply-quote, .group-replying-banner { margin: 8px 0; padding: 8px 10px; border-left: 3px solid #b8c9da; border-radius: 6px; background: rgba(235,241,247,.8); color: #435365; }
+.group-message-reply-quote small, .group-replying-banner small { display: block; font-size: 11px; font-weight: 700; color: #526d86; }
+.group-message-reply-quote p, .group-replying-banner p { margin: 3px 0 0; font-size: 12px; overflow-wrap: anywhere; }
+.group-replying-banner { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
