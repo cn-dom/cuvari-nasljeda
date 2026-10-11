@@ -412,27 +412,64 @@ function App() {
     setEditDraft(post.text);
   }
 
-  function saveEdit(id) {
+  async function saveEdit(id) {
     const text = editDraft.trim();
     if (!text) {
       setNotice("Objava ne može biti prazna.");
       return;
     }
-    setPosts((current) => current.map((post) => post.id === id ? { ...post, text, time: "Uređeno upravo sada" } : post));
+    if (!supabase || !session?.user?.id) {
+      setNotice("Za trajno uređivanje objave potrebno je prijaviti se.");
+      return;
+    }
+    const { data, error } = await supabase
+      .from("posts")
+      .update({ body: text, updated_at: new Date().toISOString() })
+      .eq("id", id)
+      .eq("author_id", session.user.id)
+      .select("id, body, updated_at")
+      .maybeSingle();
+    if (error || !data) {
+      setNotice("Objava nije uređena u bazi. Provjeri vlasništvo nad objavom i RLS pravila.");
+      return;
+    }
+    setPosts((current) => current.map((post) => post.id === id
+      ? { ...post, text: data.body || "", time: "Uređeno " + new Date(data.updated_at || Date.now()).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" }) }
+      : post));
     setEditingPostId(null);
     setEditDraft("");
-    setNotice("Objava je uređena samo u lokalnom prikazu; trajno uređivanje još nije povezano.");
+    setNotice("Vlastita objava uspješno je uređena i spremljena.");
   }
 
-  function deletePost(id) {
-    setPosts((current) => current.filter((post) => post.id !== id || !post.owner));
+  async function deletePost(id) {
+    if (!supabase || !session?.user?.id) {
+      setNotice("Za trajno brisanje objave potrebno je prijaviti se.");
+      return;
+    }
+    if (!window.confirm("Želiš li trajno izbrisati ovu svoju objavu?")) return;
+    const { data, error } = await supabase
+      .from("posts")
+      .delete()
+      .eq("id", id)
+      .eq("author_id", session.user.id)
+      .select("id")
+      .maybeSingle();
+    if (error || !data) {
+      setNotice("Objava nije izbrisana. Možeš brisati samo vlastite objave; provjeri RLS pravila.");
+      return;
+    }
+    setPosts((current) => current.filter((post) => post.id !== id));
     setCommentsByPost((current) => {
       const next = { ...current };
       delete next[id];
       return next;
     });
     setOpenComments((current) => current.filter((item) => item !== id));
-    setNotice("Vlastita probna objava i njezini komentari uklonjeni su iz lokalnog prikaza; brisanje iz baze još nije povezano.");
+    if (editingPostId === id) {
+      setEditingPostId(null);
+      setEditDraft("");
+    }
+    setNotice("Vlastita objava izbrisana je iz baze zajednice.");
   }
 
   return (
