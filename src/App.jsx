@@ -347,8 +347,8 @@ function App() {
     let imagePath = "";
     if (selectedImageFile) {
       const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-      if (!allowedTypes.includes(selectedImageFile.type) || selectedImageFile.size > 5 * 1024 * 1024) {
-        setNotice("Fotografija mora biti JPG, PNG, WebP ili GIF i ne smije biti veća od 5 MB.");
+      if (!allowedTypes.includes(selectedImageFile.type) || selectedImageFile.size > 10 * 1024 * 1024) {
+        setNotice("Fotografija mora biti JPG, PNG, WebP ili GIF i ne smije biti veća od 10 MB.");
         return;
       }
       const extensionByType = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
@@ -725,7 +725,7 @@ function App() {
               <div className="composer-image-preview">
                 <img src={selectedImage} alt="Pregled odabrane fotografije" />
                 <button type="button" onClick={() => { setSelectedImage(""); setSelectedImageFile(null); }}>Ukloni fotografiju</button>
-                <small>Privatna fotografija · najviše 5 MB · učitat će se tek nakon slanja objave</small>
+                <small>Privatna fotografija · najviše 10 MB · učitat će se tek nakon slanja objave</small>
               </div>
             )}
             <div className="composer-bottom">
@@ -738,8 +738,8 @@ function App() {
                     onChange={(event) => {
                       const file = event.target.files && event.target.files[0];
                       if (!file) return;
-                      if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) {
-                        setNotice("Odaberi sliku do 5 MB (JPG, PNG, WebP ili GIF).");
+                      if (!file.type.startsWith("image/") || file.size > 10 * 1024 * 1024) {
+                        setNotice("Odaberi sliku do 10 MB (JPG, PNG, WebP ili GIF).");
                         setSelectedImageFile(null);
                         setSelectedImage("");
                         event.target.value = "";
