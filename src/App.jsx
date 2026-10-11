@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 import { Picker } from "emoji-mart";
 import emojiData from "@emoji-mart/data";
