@@ -737,14 +737,23 @@ function App() {
       setGroupBusy(false);
       return;
     }
-    const membershipRows = [{ group_id: group.id, user_id: session.user.id, role: "admin" },
-      ...members.map((user_id) => ({ group_id: group.id, user_id, role: "member" }))];
-    const { error: membersError } = await supabase.from("group_chat_members").insert(membershipRows);
-    if (membersError) {
-      setNotice("Grupa je stvorena, ali članove nije moguće dodati. Provjeri SQL nacrt; možda će trebati ukloniti nedovršenu grupu.");
+    const creatorMembership = { group_id: group.id, user_id: session.user.id, role: "admin" };
+    const { error: creatorError } = await supabase.from("group_chat_members").insert(creatorMembership);
+    if (creatorError) {
+      setNotice("Grupa je stvorena, ali nije moguće postaviti administratora. Provjeri SQL nacrt; možda će trebati ukloniti nedovršenu grupu.");
       setGroupBusy(false);
       return;
     }
+    const selectedMemberships = members.map((user_id) => ({ group_id: group.id, user_id, role: "member" }));
+    const { data: insertedMembers, error: membersError } = selectedMemberships.length
+      ? await supabase.from("group_chat_members").insert(selectedMemberships).select("group_id, user_id, role")
+      : { data: [], error: null };
+    if (membersError) {
+      setNotice("Grupa je stvorena, ali neke članove nije moguće dodati. Provjeri administratorska RLS pravila.");
+      setGroupBusy(false);
+      return;
+    }
+    const membershipRows = [creatorMembership, ...(insertedMembers || selectedMemberships)];
     setGroupChats((current) => [{ ...group, members: membershipRows }, ...current]);
     setActiveGroupId(group.id);
     setGroupDraftName("");
