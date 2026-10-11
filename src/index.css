@@ -411,3 +411,41 @@ button { -webkit-tap-highlight-color: transparent; }
 .notification-copy small { color: var(--muted); font-size: 10px; }
 .notification-item > button { flex-shrink: 0; }
 @media (max-width: 760px) { .notifications-panel { padding: 14px; } .notification-item { flex-wrap: wrap; } .notification-item > button { margin-left: 46px; } }
+
+
+/* Emoji Mart — cjelovit pretraživ emoji izbornik */
+.emoji-picker-host {
+  position: absolute;
+  z-index: 35;
+  left: 0;
+  bottom: calc(100% + 9px);
+  width: min(352px, calc(100vw - 32px));
+  max-width: calc(100vw - 28px);
+  overflow: hidden;
+  border: 1px solid #dfe5eb;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 14px 38px #172b4022;
+}
+.emoji-picker-host em-emoji-picker {
+  display: block;
+  width: 100%;
+  max-height: min(430px, 68vh);
+  --rgb-background: 255, 255, 255;
+  --rgb-input: 246, 248, 250;
+  --rgb-color: 24, 43, 64;
+  --rgb-accent: 36, 79, 118;
+  --rgb-border: 222, 229, 236;
+  --rgb-hover: 239, 244, 248;
+}
+@media (max-width: 520px) {
+  .emoji-picker-host {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+    max-width: none;
+  }
+  .emoji-picker-host em-emoji-picker { max-height: min(68vh, 500px); }
+}
