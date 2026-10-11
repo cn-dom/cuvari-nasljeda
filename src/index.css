@@ -476,3 +476,22 @@ button { -webkit-tap-highlight-color: transparent; }
 .private-message-edit-form .private-message-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .private-message-edit-form .private-message-footer > span { display: inline-flex; gap: 5px; }
 @media (max-width: 520px) { .private-message-actions-inline { justify-content: flex-start; } .private-message-footer { align-items: flex-start; flex-direction: column; } }
+
+
+/* Pretraživanje privatnih razgovora */
+.message-search-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+.message-search-heading h3 { margin-bottom: 9px; }
+.message-search-heading > span, .message-search-summary, .message-search-limit { color: var(--muted); font-size: 11px; }
+.message-search-field { display: flex; align-items: center; gap: 8px; width: 100%; margin: 0 0 14px; padding: 7px 10px; border: 1px solid #cbd6e0; border-radius: 11px; background: #fff; }
+.message-search-field > span { color: var(--muted); font-size: 22px; line-height: 1; }
+.message-search-field input { flex: 1; min-width: 0; border: 0; outline: 0; color: var(--ink); background: transparent; font: inherit; font-size: 12px; }
+.message-search-field button { flex-shrink: 0; border: 0; border-radius: 7px; padding: 6px 8px; color: var(--navy); background: #edf2f7; font-size: 11px; cursor: pointer; }
+.message-search-field button:disabled { opacity: .45; cursor: default; }
+.message-search-results { display: grid; gap: 7px; margin-top: 16px; }
+.message-search-results h3 { margin-bottom: 2px; }
+.message-search-result { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); text-align: left; cursor: pointer; }
+.message-search-result:hover { border-color: #b8cce0; background: #f5f8fb; }
+.message-search-result strong { color: var(--navy); font-size: 12px; }
+.message-search-result small { color: var(--muted); font-size: 10px; }
+.message-search-result p { grid-column: 1 / -1; margin: 2px 0 0; overflow-wrap: anywhere; white-space: pre-wrap; font-size: 12px; line-height: 1.5; }
+.message-search-limit { margin-top: 5px; }
