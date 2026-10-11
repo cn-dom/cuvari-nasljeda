@@ -114,6 +114,7 @@ function App() {
   const [mentionBusy, setMentionBusy] = useState(false);
   const [messages, setMessages] = useState([]);
   const [messageRecipient, setMessageRecipient] = useState("");
+  const [messageSearch, setMessageSearch] = useState("");
   const [messageDraft, setMessageDraft] = useState("");
   const [replyingToMessage, setReplyingToMessage] = useState(null);
   const [editingMessageId, setEditingMessageId] = useState(null);
@@ -761,6 +762,30 @@ function App() {
       (message.sender_id === messageRecipient && message.recipient_id === session.user.id)
     );
   }, [messages, messageRecipient, session?.user?.id]);
+  const searchedMessages = useMemo(() => {
+    const query = messageSearch.trim().toLocaleLowerCase("hr");
+    if (!query) return messages;
+    return messages.filter((message) => {
+      const otherId = message.sender_id === session?.user?.id ? message.recipient_id : message.sender_id;
+      const member = memberDirectory.find((item) => item.id === otherId);
+      const haystack = [
+        message.body,
+        member?.display_name,
+        member?.username,
+        message.sender_id === session?.user?.id ? "poslano" : "primljeno",
+      ].filter(Boolean).join(" ").toLocaleLowerCase("hr");
+      return haystack.includes(query);
+    });
+  }, [messages, messageSearch, memberDirectory, session?.user?.id]);
+  const searchedConversations = useMemo(() => {
+    if (!messageSearch.trim()) return messageConversations;
+    const ids = new Set(searchedMessages.flatMap((message) => {
+      const otherId = message.sender_id === session?.user?.id ? message.recipient_id : message.sender_id;
+      return otherId ? [otherId] : [];
+    }));
+    return messageConversations.filter((conversation) => ids.has(conversation.memberId));
+  }, [messageConversations, messageSearch, searchedMessages, session?.user?.id]);
+
 
   const postCount = useMemo(() => posts.length, [posts]);
   const visiblePosts = useMemo(() => posts.filter((post) => {
@@ -1242,10 +1267,13 @@ function App() {
                     <div className="private-message-actions"><small>{messageDraft.length}/2000 znakova</small><button className="primary-button" type="submit">Pošalji poruku ↗</button></div>
                   </form>
                   <div className="message-conversations">
+                    <div className="message-search-heading"><h3>Pretraži poruke i razgovore</h3><span>{searchedMessages.length} poruka</span></div>
+                    <label className="message-search-field" htmlFor="private-message-search"><span aria-hidden="true">⌕</span><input id="private-message-search" type="search" value={messageSearch} onChange={(event) => setMessageSearch(event.target.value)} placeholder="Traži tekst poruke ili ime člana…" autoComplete="off" /><button type="button" onClick={() => setMessageSearch("")} disabled={!messageSearch} aria-label="Očisti pretragu">Očisti</button></label>
+                    {messageSearch.trim() && <p className="message-search-summary">Pronađeno {searchedMessages.length} poruka u {searchedConversations.length} razgovora.</p>}
                     <h3>Razgovori</h3>
-                    {messagesBusy ? <p className="directory-empty">Učitavam razgovore…</p> : messageConversations.length ? (
+                    {messagesBusy ? <p className="directory-empty">Učitavam razgovore…</p> : searchedConversations.length ? (
                       <div className="message-conversation-list">
-                        {messageConversations.map(({ memberId, latest }) => {
+                        {searchedConversations.map(({ memberId, latest }) => {
                           const member = memberDirectory.find((item) => item.id === memberId);
                           const displayName = member?.display_name || member?.username || "Čuvar nasljeđa";
                           return <button type="button" key={memberId} className={messageRecipient === memberId ? "message-conversation selected" : "message-conversation"} onClick={() => setMessageRecipient(memberId)}>
@@ -1255,7 +1283,8 @@ function App() {
                           </button>;
                         })}
                       </div>
-                    ) : <p className="directory-empty">Razgovori će se pojaviti ovdje nakon prve poslane ili primljene poruke.</p>}
+                    ) : <p className="directory-empty">{messageSearch.trim() ? "Nema razgovora koji odgovaraju pretrazi." : "Razgovori će se pojaviti ovdje nakon prve poslane ili primljene poruke."}</p>}
+                    {messageSearch.trim() && searchedMessages.length > 0 && <div className="message-search-results"><h3>Pronađene poruke</h3>{searchedMessages.slice(0, 30).map((message) => { const otherId = message.sender_id === session.user.id ? message.recipient_id : message.sender_id; const member = memberDirectory.find((item) => item.id === otherId); const displayName = member?.display_name || member?.username || "Čuvar nasljeđa"; return <button type="button" className="message-search-result" key={message.id} onClick={() => { setMessageRecipient(otherId); setMessageSearch(""); setNotice("Otvoren razgovor s " + displayName + "."); }}><strong>{displayName}</strong><small>{new Date(message.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" })}</small><p>{message.body}</p></button>; })}{searchedMessages.length > 30 && <small className="message-search-limit">Prikazano je prvih 30 rezultata. Suzi pretragu za preciznije rezultate.</small>}</div>}
                   </div>
                   <div className="private-message-list">
                     <h3>{messageRecipient ? "Razgovor" : "Odaberi razgovor"}</h3>
