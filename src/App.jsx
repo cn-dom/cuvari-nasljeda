@@ -120,6 +120,8 @@ function App() {
   const [groupChats, setGroupChats] = useState([]);
   const [activeGroupId, setActiveGroupId] = useState("");
   const [groupMessages, setGroupMessages] = useState([]);
+  const [groupMessageReactions, setGroupMessageReactions] = useState([]);
+  const [groupReactionBusy, setGroupReactionBusy] = useState("");
   const [groupDraftName, setGroupDraftName] = useState("");
   const [groupSelectedMembers, setGroupSelectedMembers] = useState([]);
   const [groupMessageDraft, setGroupMessageDraft] = useState("");
@@ -723,6 +725,26 @@ function App() {
     return () => { cancelled = true; };
   }, [activeGroupId, activeNav, session?.user?.id]);
 
+  useEffect(() => {
+    let cancelled = false;
+    async function loadGroupMessageReactions() {
+      if (!activeGroupId || activeNav !== "Poruke" || !supabase || !session?.user?.id) {
+        setGroupMessageReactions([]);
+        return;
+      }
+      const { data, error } = await supabase.from("group_chat_message_reactions")
+        .select("id, message_id, group_id, user_id, reaction")
+        .eq("group_id", activeGroupId);
+      if (cancelled) return;
+      if (error) {
+        setGroupMessageReactions([]);
+        setNotice("Reakcije grupnih poruka nisu dostupne. Provjeri SQL nacrt i RLS pravila.");
+      } else setGroupMessageReactions(data || []);
+    }
+    loadGroupMessageReactions();
+    return () => { cancelled = true; };
+  }, [activeGroupId, activeNav, session?.user?.id]);
+
   async function createGroupChat(event) {
     event.preventDefault();
     if (!supabase || !session?.user?.id) return;
@@ -906,6 +928,28 @@ function App() {
       setNotice("Grupna poruka je izbrisana.");
     }
     setGroupMessageActionBusyId(null);
+  }
+
+  async function toggleGroupMessageReaction(message, reaction) {
+    if (!supabase || !session?.user?.id || !message?.id || !activeGroupId) return;
+    const existing = groupMessageReactions.find((item) =>
+      item.message_id === message.id && item.user_id === session.user.id && item.reaction === reaction
+    );
+    const busyKey = message.id + ":" + reaction;
+    setGroupReactionBusy(busyKey);
+    const result = existing
+      ? await supabase.from("group_chat_message_reactions").delete().eq("id", existing.id).eq("user_id", session.user.id)
+      : await supabase.from("group_chat_message_reactions").insert({
+          message_id: message.id, group_id: message.group_id, user_id: session.user.id, reaction,
+        }).select("id, message_id, group_id, user_id, reaction").single();
+    if (result.error) {
+      setNotice("Reakcija nije spremljena. Provjeri SQL nacrt i RLS pravila grupnih razgovora.");
+    } else if (existing) {
+      setGroupMessageReactions((current) => current.filter((item) => item.id !== existing.id));
+    } else if (result.data) {
+      setGroupMessageReactions((current) => current.some((item) => item.id === result.data.id) ? current : [...current, result.data]);
+    }
+    setGroupReactionBusy("");
   }
 
   async function sendGroupMessage(event) {
@@ -1125,6 +1169,17 @@ function App() {
           if (current.some((message) => message.id === incoming.id)) return current;
           return incoming.group_id === activeGroupId ? [...current, incoming].sort((x, y) => new Date(x.created_at) - new Date(y.created_at)) : current;
         });
+      })
+      .on("postgres_changes", {
+        event: "INSERT", schema: "public", table: "group_chat_message_reactions",
+      }, (payload) => {
+        const incoming = payload.new;
+        if (incoming?.id && incoming.group_id === activeGroupId) setGroupMessageReactions((current) => current.some((item) => item.id === incoming.id) ? current : [...current, incoming]);
+      })
+      .on("postgres_changes", {
+        event: "DELETE", schema: "public", table: "group_chat_message_reactions",
+      }, (payload) => {
+        if (payload.old?.id) setGroupMessageReactions((current) => current.filter((item) => item.id !== payload.old.id));
       })
       .on("postgres_changes", {
         event: "INSERT", schema: "public", table: "notifications", filter: "recipient_id=eq." + userId,
@@ -1744,6 +1799,13 @@ function App() {
                             <textarea value={groupMessageEditDraft} onChange={(event) => setGroupMessageEditDraft(event.target.value)} maxLength={2000} rows="3" required />
                             <div><button type="submit" className="post-menu-button" disabled={groupMessageActionBusyId === message.id || !groupMessageEditDraft.trim()}>Spremi</button><button type="button" className="post-menu-button" disabled={groupMessageActionBusyId === message.id} onClick={() => { setGroupEditingMessageId(null); setGroupMessageEditDraft(""); }}>Odustani</button></div>
                           </form> : <p>{message.body}</p>}
+                          <div className="group-message-reactions" aria-label="Reakcije na poruku">
+                            {["❤️", "👍", "😂", "🙏", "🇭🇷"].map((emoji) => {
+                              const matching = groupMessageReactions.filter((item) => item.message_id === message.id && item.reaction === emoji);
+                              const selected = matching.some((item) => item.user_id === session.user.id);
+                              return <button key={emoji} type="button" className={selected ? "group-reaction selected" : "group-reaction"} aria-pressed={selected} title={matching.length + " reakcija"} disabled={groupReactionBusy === message.id + ":" + emoji} onClick={() => toggleGroupMessageReaction(message, emoji)}>{emoji}<span>{matching.length || ""}</span></button>;
+                            })}
+                          </div>
                           <div className="group-message-meta"><small>{new Date(message.created_at).toLocaleString("hr-HR", { dateStyle: "short", timeStyle: "short" })}</small>
                             {outgoing && !editing && <span className="group-message-actions"><button type="button" className="post-menu-button" disabled={groupMessageActionBusyId === message.id} onClick={() => { setGroupEditingMessageId(message.id); setGroupMessageEditDraft(message.body); }}>Uredi</button><button type="button" className="post-menu-button danger" disabled={groupMessageActionBusyId === message.id} onClick={() => deleteGroupMessage(message)}>Izbriši</button></span>}
                           </div>
