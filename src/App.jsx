@@ -199,7 +199,38 @@ function App() {
         };
       });
       setPosts(rows);
-      setNotice("");
+      if (rows.length) {
+        const postIds = rows.map((post) => post.id);
+        const { data: commentRows, error: commentsError } = await supabase
+          .from("comments")
+          .select("id, post_id, author_id, body, created_at, profiles(display_name, username)")
+          .in("post_id", postIds)
+          .order("created_at", { ascending: true });
+        if (cancelled) return;
+        if (commentsError) {
+          setCommentsByPost({});
+          setNotice("Objave su učitane, ali komentari nisu dostupni. Provjeri tablicu comments i njezina RLS pravila.");
+        } else {
+          const grouped = {};
+          (commentRows || []).forEach((row) => {
+            const profile = row.profiles || {};
+            const author = profile.display_name || profile.username || "Čuvar nasljeđa";
+            if (!grouped[row.post_id]) grouped[row.post_id] = [];
+            grouped[row.post_id].push({
+              id: row.id,
+              author,
+              initials: author.split(/\\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
+              text: row.body || "",
+              owner: row.author_id === session.user.id,
+            });
+          });
+          setCommentsByPost(grouped);
+          setNotice("");
+        }
+      } else {
+        setCommentsByPost({});
+        setNotice("");
+      }
     }
     loadCommunityFeed();
     return () => { cancelled = true; };
@@ -340,15 +371,39 @@ function App() {
       : [...current, id]);
   }
 
-  function addComment(id) {
+  async function addComment(id) {
     const text = (commentDrafts[id] || "").trim();
     if (!text) {
       setNotice("Napiši komentar prije slanja.");
       return;
     }
-    setCommentsByPost((current) => ({ ...current, [id]: [...(current[id] || []), { id: Date.now(), author: "Ti — probni profil", text }] }));
+    if (!supabase || !session?.user?.id) {
+      setNotice("Za slanje komentara koji se trajno sprema potrebno je prijaviti se.");
+      return;
+    }
+    const { data, error } = await supabase
+      .from("comments")
+      .insert({ post_id: id, author_id: session.user.id, body: text })
+      .select("id, post_id, author_id, body, created_at, profiles(display_name, username)")
+      .single();
+    if (error) {
+      setNotice("Komentar nije spremljen: " + (error.message || "provjeri tablicu comments i RLS pravila."));
+      return;
+    }
+    const profile = data.profiles || {};
+    const author = profile.display_name || profile.username || session.user.email || "Čuvar nasljeđa";
+    setCommentsByPost((current) => ({
+      ...current,
+      [id]: [...(current[id] || []), {
+        id: data.id,
+        author,
+        initials: author.split(/\\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
+        text: data.body || "",
+        owner: data.author_id === session.user.id,
+      }],
+    }));
     setCommentDrafts((current) => ({ ...current, [id]: "" }));
-    setNotice("Komentar je dodan samo u lokalni prikaz; trajno spremanje komentara još nije povezano.");
+    setNotice("Komentar je spremljen u bazu zajednice.");
   }
 
   function startEdit(post) {
@@ -546,7 +601,7 @@ function App() {
 
           <section className="composer card">
             <div className="composer-top">
-              <Avatar initials="TI" variant="avatar-you" />
+              <Avatar initials={comment.initials || comment.author.split(/\\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN"} variant={comment.owner ? "avatar-you" : ""} />
               <label className="sr-only" htmlFor="post-draft">Napiši objavu</label>
               <textarea
                 id="post-draft"
@@ -709,14 +764,14 @@ function App() {
                         <Avatar initials="TI" variant="avatar-you" />
                         <div className="comment-bubble"><strong>{comment.author}</strong><p>{comment.text}</p></div>
                       </div>
-                    )) : <p className="comments-empty">Još nema komentara dodanih u ovom probnom prikazu.</p>}
+                    )) : <p className="comments-empty">Još nema komentara uz ovu objavu.</p>}
                   </div>
                   <form className="comment-form" onSubmit={(event) => { event.preventDefault(); addComment(post.id); }}>
                     <label className="sr-only" htmlFor={"comment-" + post.id}>Napiši komentar</label>
                     <input id={"comment-" + post.id} value={commentDrafts[post.id] || ""} onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))} placeholder="Napiši komentar…" />
                     <button className="primary-button" type="submit">Pošalji</button>
                   </form>
-                  <p className="local-only-note">Probna funkcija · komentari se zasad ne spremaju na poslužitelj.</p>
+                  <p className="local-only-note">Komentari se spremaju u zajednicu nakon uspješnog slanja.</p>
                 </section>
               )}
             </article>
