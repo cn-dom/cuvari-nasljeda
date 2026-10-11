@@ -73,7 +73,7 @@ To su pravila dizajna, ne gotove politike za slijepo kopiranje. Prije implementa
 
 ## Pregledni SQL nacrt
 
-Pripremljen je zaseban SQL nacrt u [docs/sql/community-core.sql](./sql/community-core.sql). Sadrži tablice profila, objava, komentara i reakcija, indekse, osnovna ograničenja, RLS politike i okidač za stvaranje početnog profila nakon registracije.
+Pripremljen je zaseban SQL nacrt u [docs/sql/community-core.sql](./sql/community-core.sql). Sadrži tablice profila, objava, komentara i reakcija, indekse, osnovna ograničenja, RLS politike, okidač za stvaranje početnog profila te nacrt privatnog Storage bucketa `community-images` s ograničenjem veličine/tipova i pravilima čitanja/pisanja po vlasniku.
 
 **Nacrt nije primijenjen ni na jedan Supabase projekt.** Prije primjene potrebno je provjeriti politike s anonimnim korisnikom i s dva različita računa, uključujući pokušaje izmjene i brisanja tuđih zapisa.
 
@@ -82,7 +82,8 @@ Pripremljen je zaseban SQL nacrt u [docs/sql/community-core.sql](./sql/community
 - Privatni bucket community-images za početnu verziju; fotografije poslužiti putem kratkotrajnih potpisanih URL-ova ili kontroliranog pristupa.
 - Putanja objekta mora počinjati ID-jem vlasnika, npr. <auth.uid()>/<random-uuid>.webp.
 - Dopustiti samo odobrene vrste slika i razumnu granicu veličine; ne vjerovati samo ekstenziji datoteke.
-- Pravila Storagea trebaju ograničiti umetanje, zamjenu, čitanje i brisanje prema vlasništvu i pravilima objave.
+- U SQL nacrt dodana su Storage pravila: prijavljeni članovi mogu čitati slike zajednice; upload, zamjena i brisanje ograničeni su na vlastitu mapu `<auth.uid()>/...`. Bucket se stvara kao privatan samo ako još ne postoji; postojeće postavke bucketa se ne prepisuju.
+- Ograničenje MIME vrste i veličine na bucketu korisno je, ali nije potpuna provjera sadržaja datoteke. Klijent i poslužiteljska logika moraju dodatno validirati upload.
 - Pri brisanju objave očistiti pripadajući objekt uz provjeru vlasništva; baza i Storage nisu jedna atomska transakcija.
 - Nikad ne stavljati service_role ili tajni ključ u VITE_ varijable ili preglednik.
 
