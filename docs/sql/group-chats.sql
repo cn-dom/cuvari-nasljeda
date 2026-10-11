@@ -92,6 +92,38 @@ create policy group_chats_insert_creator on public.group_chats
 for insert to authenticated
 with check (created_by = auth.uid() and char_length(trim(name)) between 2 and 60);
 
+-- Keep ownership and membership identity immutable through direct table updates.
+create or replace function public.guard_group_chat_admin_changes()
+returns trigger
+language plpgsql
+set search_path = public, pg_temp
+as $
+begin
+  if tg_table_name = 'group_chats' then
+    if new.created_by is distinct from old.created_by then
+      raise exception 'Group creator cannot be changed directly';
+    end if;
+    return new;
+  end if;
+  if new.group_id is distinct from old.group_id or new.user_id is distinct from old.user_id then
+    raise exception 'Group membership identity cannot be changed';
+  end if;
+  if new.role is distinct from old.role
+     and coalesce(current_setting('patriasoul.admin_transfer', true), '') <> 'on' then
+    raise exception 'Use the admin transfer function to change roles';
+  end if;
+  return new;
+end;
+$;
+
+drop trigger if exists guard_group_chats_admin_changes on public.group_chats;
+create trigger guard_group_chats_admin_changes before update on public.group_chats
+for each row execute function public.guard_group_chat_admin_changes();
+
+drop trigger if exists guard_group_chat_members_admin_changes on public.group_chat_members;
+create trigger guard_group_chat_members_admin_changes before update on public.group_chat_members
+for each row execute function public.guard_group_chat_admin_changes();
+
 drop policy if exists group_chats_update_admin on public.group_chats;
 create policy group_chats_update_admin on public.group_chats
 for update to authenticated
@@ -146,6 +178,7 @@ begin
   ) then
     raise exception 'Target must already be a group member';
   end if;
+  perform set_config('patriasoul.admin_transfer', 'on', true);
   update public.group_chat_members
     set role = 'member'
     where group_id = target_group_id and user_id = auth.uid() and role = 'admin';
