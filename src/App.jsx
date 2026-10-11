@@ -125,6 +125,7 @@ function App() {
   const [groupDraftName, setGroupDraftName] = useState("");
   const [groupSelectedMembers, setGroupSelectedMembers] = useState([]);
   const [groupMessageDraft, setGroupMessageDraft] = useState("");
+  const [replyingToGroupMessage, setReplyingToGroupMessage] = useState(null);
   const [groupEditingMessageId, setGroupEditingMessageId] = useState(null);
   const [groupMessageEditDraft, setGroupMessageEditDraft] = useState("");
   const [groupMessageActionBusyId, setGroupMessageActionBusyId] = useState(null);
@@ -713,7 +714,7 @@ function App() {
     async function loadGroupMessages() {
       if (!activeGroupId || activeNav !== "Poruke" || !supabase || !session?.user?.id) { setGroupMessages([]); return; }
       const { data, error } = await supabase.from("group_chat_messages")
-        .select("id, group_id, sender_id, body, created_at")
+        .select("id, group_id, sender_id, body, created_at, reply_to_id")
         .eq("group_id", activeGroupId).order("created_at", { ascending: true }).limit(200);
       if (cancelled) return;
       if (error) {
@@ -901,7 +902,7 @@ function App() {
     setGroupMessageActionBusyId(message.id);
     const { data, error } = await supabase.from("group_chat_messages").update({ body })
       .eq("id", message.id).eq("sender_id", session.user.id)
-      .select("id, group_id, sender_id, body, created_at").single();
+      .select("id, group_id, sender_id, body, created_at, reply_to_id").single();
     if (error) setNotice("Uređivanje poruke nije uspjelo. Provjeri SQL/RLS pravila grupnih razgovora.");
     else {
       setGroupMessages((current) => current.map((item) => item.id === data.id ? data : item));
@@ -958,11 +959,12 @@ function App() {
     if (!supabase || !session?.user?.id || !activeGroupId || !body) return;
     if (body.length > 2000) { setNotice("Poruka grupe može imati najviše 2000 znakova."); return; }
     const { data, error } = await supabase.from("group_chat_messages")
-      .insert({ group_id: activeGroupId, sender_id: session.user.id, body })
-      .select("id, group_id, sender_id, body, created_at").single();
+      .insert({ group_id: activeGroupId, sender_id: session.user.id, body, reply_to_id: replyingToGroupMessage?.id || null })
+      .select("id, group_id, sender_id, body, created_at, reply_to_id").single();
     if (error) { setNotice("Grupna poruka nije poslana. Provjeri tablice i RLS pravila."); return; }
     setGroupMessages((current) => [...current.filter((item) => item.id !== data.id), data]);
     setGroupMessageDraft("");
+    setReplyingToGroupMessage(null);
   }
 
   async function sendPrivateMessage(event) {
@@ -1795,6 +1797,7 @@ function App() {
                         const editing = groupEditingMessageId === message.id;
                         return <article key={message.id} className={outgoing ? "group-chat-message outgoing" : "group-chat-message"}>
                           <strong>{outgoing ? "Ti" : (sender?.display_name || sender?.username || "Čuvar nasljeđa")}</strong>
+                          {message.reply_to_id && <div className="group-message-reply-quote"><small>Odgovor na poruku</small><p>{groupMessages.find((item) => item.id === message.reply_to_id)?.body || "Izvorna poruka nije dostupna u učitanom razgovoru."}</p></div>}
                           {editing ? <form className="group-message-edit-form" onSubmit={saveGroupMessageEdit}>
                             <textarea value={groupMessageEditDraft} onChange={(event) => setGroupMessageEditDraft(event.target.value)} maxLength={2000} rows="3" required />
                             <div><button type="submit" className="post-menu-button" disabled={groupMessageActionBusyId === message.id || !groupMessageEditDraft.trim()}>Spremi</button><button type="button" className="post-menu-button" disabled={groupMessageActionBusyId === message.id} onClick={() => { setGroupEditingMessageId(null); setGroupMessageEditDraft(""); }}>Odustani</button></div>
@@ -1807,11 +1810,12 @@ function App() {
                             })}
                           </div>
                           <div className="group-message-meta"><small>{new Date(message.created_at).toLocaleString("hr-HR", { dateStyle: "short", timeStyle: "short" })}</small>
-                            {outgoing && !editing && <span className="group-message-actions"><button type="button" className="post-menu-button" disabled={groupMessageActionBusyId === message.id} onClick={() => { setGroupEditingMessageId(message.id); setGroupMessageEditDraft(message.body); }}>Uredi</button><button type="button" className="post-menu-button danger" disabled={groupMessageActionBusyId === message.id} onClick={() => deleteGroupMessage(message)}>Izbriši</button></span>}
+                            <span className="group-message-actions"><button type="button" className="post-menu-button" onClick={() => setReplyingToGroupMessage({ id: message.id, body: message.body, sender: outgoing ? "Ti" : (sender?.display_name || sender?.username || "Čuvar nasljeđa") })}>Odgovori</button>{outgoing && !editing && <><button type="button" className="post-menu-button" disabled={groupMessageActionBusyId === message.id} onClick={() => { setGroupEditingMessageId(message.id); setGroupMessageEditDraft(message.body); }}>Uredi</button><button type="button" className="post-menu-button danger" disabled={groupMessageActionBusyId === message.id} onClick={() => deleteGroupMessage(message)}>Izbriši</button></>}</span>
                           </div>
                         </article>;
                       })}{!groupMessages.length && <p className="directory-empty">Ovo je početak grupnog razgovora. Pošalji prvu poruku.</p>}</div>
                       <form className="group-chat-compose" onSubmit={sendGroupMessage}>
+                        {replyingToGroupMessage && <div className="group-replying-banner"><div><small>Odgovaraš članu: {replyingToGroupMessage.sender}</small><p>{replyingToGroupMessage.body}</p></div><button type="button" className="post-menu-button" onClick={() => setReplyingToGroupMessage(null)}>Odustani</button></div>}
                         <textarea value={groupMessageDraft} onChange={(event) => setGroupMessageDraft(event.target.value)} maxLength={2000} rows="2" placeholder="Poruka za grupu…" required />
                         <div className="private-message-actions"><small>{groupMessageDraft.length}/2000</small><button type="submit" className="primary-button">Pošalji u grupu ↗</button></div>
                       </form>
