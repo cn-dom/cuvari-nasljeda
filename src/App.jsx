@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
+import { Picker } from "emoji-mart";
+import emojiData from "@emoji-mart/data";
 
 const initialPosts = [
   {
@@ -74,6 +76,7 @@ function App() {
   const [liked, setLiked] = useState([]);
   const [reactionsByPost, setReactionsByPost] = useState({});
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const emojiPickerHost = useRef(null);
   const [notice, setNotice] = useState("");
   const [feedFilter, setFeedFilter] = useState("Sve objave");
   const [feedSearch, setFeedSearch] = useState("");
@@ -115,6 +118,32 @@ function App() {
   const [messagesBusy, setMessagesBusy] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [notificationsBusy, setNotificationsBusy] = useState(false);
+
+  useEffect(() => {
+    if (!emojiPickerOpen || !emojiPickerHost.current) return undefined;
+    const picker = new Picker({
+      data: emojiData,
+      theme: "light",
+      set: "native",
+      locale: "en",
+      categories: ["frequent", "people", "nature", "foods", "activity", "places", "objects", "symbols", "flags"],
+      previewPosition: "none",
+      navPosition: "top",
+      searchPosition: "sticky",
+      perLine: 8,
+      dynamicWidth: true,
+      onEmojiSelect: (emoji) => {
+        if (emoji?.native) setDraft((value) => value + emoji.native);
+        setEmojiPickerOpen(false);
+      },
+      onClickOutside: () => setEmojiPickerOpen(false),
+    });
+    emojiPickerHost.current.replaceChildren(picker);
+    return () => {
+      picker.remove();
+      if (emojiPickerHost.current) emojiPickerHost.current.replaceChildren();
+    };
+  }, [emojiPickerOpen]);
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -1156,11 +1185,7 @@ function App() {
                 <div className="emoji-tool-wrap">
                   <button type="button" aria-expanded={emojiPickerOpen} onClick={() => setEmojiPickerOpen((open) => !open)}>☺ <span>Emoji</span></button>
                   {emojiPickerOpen && (
-                    <div className="emoji-picker" aria-label="Odaberi emoji">
-                      {["🇭🇷", "❤️", "🙏", "👏", "😊", "🌿", "🏛️", "📜", "🕯️", "🌊", "🌞", "🕊️"].map((emoji) => (
-                        <button type="button" key={emoji} aria-label={"Dodaj emoji " + emoji} onClick={() => { setDraft((value) => value + emoji); setEmojiPickerOpen(false); }}>{emoji}</button>
-                      ))}
-                    </div>
+                    <div className="emoji-picker-host" ref={emojiPickerHost} aria-label="Odaberi emoji" />
                   )}
                 </div>
                 <div className="mention-tool-wrap">
