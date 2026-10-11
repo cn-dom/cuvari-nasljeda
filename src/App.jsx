@@ -97,6 +97,10 @@ function App() {
   const [profileBio, setProfileBio] = useState("");
   const [profileBusy, setProfileBusy] = useState(false);
   const [profileMessage, setProfileMessage] = useState("");
+  const [reportPost, setReportPost] = useState(null);
+  const [reportReason, setReportReason] = useState("spam");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reportBusy, setReportBusy] = useState(false);
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -323,6 +327,41 @@ function App() {
       setProfileMessage(error?.message || "Profil nije spremljen. Pokušaj ponovno.");
     } finally {
       setProfileBusy(false);
+    }
+  }
+
+  async function submitReport(event) {
+    event.preventDefault();
+    if (!supabase || !session?.user?.id) {
+      setReportPost(null);
+      setAuthOpen(true);
+      setAuthMessage("Za prijavu sadržaja potrebno je prijaviti se.");
+      return;
+    }
+    if (!reportPost?.id || typeof reportPost.id !== "string") {
+      setNotice("Ova ogledna objava nema zapis u bazi i ne može se prijaviti.");
+      setReportPost(null);
+      return;
+    }
+    setReportBusy(true);
+    try {
+      const { error } = await supabase.from("content_reports").insert({
+        reporter_id: session.user.id,
+        post_id: reportPost.id,
+        reason: reportReason,
+        details: reportDetails.trim() || null,
+      });
+      if (error) throw error;
+      setReportPost(null);
+      setReportReason("spam");
+      setReportDetails("");
+      setNotice("Prijava je poslana moderatorima. Hvala što pomažeš čuvati sigurnost zajednice.");
+    } catch (error) {
+      setNotice(error?.code === "42P01" || error?.code === "PGRST205"
+        ? "Prijave još nisu aktivirane u testnoj bazi. Najprije treba pregledati i primijeniti ažurirani SQL nacrt."
+        : "Prijava nije spremljena. Provjeri postoji li tablica content_reports i jesu li RLS pravila primijenjena.");
+    } finally {
+      setReportBusy(false);
     }
   }
 
@@ -643,6 +682,40 @@ function App() {
             </div>
           )}
 
+          {reportPost && (
+            <section className="report-panel card" aria-labelledby="report-title">
+              <div className="auth-panel-heading">
+                <div>
+                  <span className="eyebrow">SIGURNOST ZAJEDNICE</span>
+                  <h2 id="report-title">Prijavi objavu</h2>
+                  <p className="profile-email">Prijava je povjerljiva i dostupna samo ovlaštenim moderatorima.</p>
+                </div>
+                <button type="button" className="auth-close" aria-label="Zatvori prijavu" onClick={() => setReportPost(null)}>×</button>
+              </div>
+              <p className="report-target">Prijavljuješ objavu korisnika <strong>{reportPost.author}</strong>.</p>
+              <form className="auth-form" onSubmit={submitReport}>
+                <label htmlFor="report-reason">Razlog prijave</label>
+                <select id="report-reason" value={reportReason} onChange={(event) => setReportReason(event.target.value)}>
+                  <option value="spam">Neželjeni sadržaj ili spam</option>
+                  <option value="harassment">Uznemiravanje ili prijetnje</option>
+                  <option value="hate">Govor mržnje</option>
+                  <option value="misinformation">Obmanjujući ili lažni sadržaj</option>
+                  <option value="privacy">Povreda privatnosti</option>
+                  <option value="copyright">Moguća povreda autorskih prava</option>
+                  <option value="other">Drugi razlog</option>
+                </select>
+                <label htmlFor="report-details">Dodatno objašnjenje (neobavezno)</label>
+                <textarea id="report-details" className="profile-bio-input" value={reportDetails} onChange={(event) => setReportDetails(event.target.value)} maxLength={1000} rows={3} placeholder="Objasni što bi moderatori trebali provjeriti…" />
+                <small className="profile-hint">{reportDetails.length}/1000 znakova</small>
+                <div className="inline-form-actions">
+                  <button type="button" className="outline-button" onClick={() => setReportPost(null)}>Odustani</button>
+                  <button className="auth-submit" type="submit" disabled={reportBusy}>{reportBusy ? "Slanje…" : "Pošalji prijavu"}</button>
+                </div>
+              </form>
+              <p className="auth-footnote">Prijava ne skriva niti automatski briše objavu. Odluku donosi moderator nakon pregleda.</p>
+            </section>
+          )}
+
           {profileOpen && session && (
             <section className="profile-panel card" aria-labelledby="profile-title">
               <div className="auth-panel-heading">
@@ -822,7 +895,7 @@ function App() {
                       <button className="post-menu-button danger" onClick={() => deletePost(post.id)}>Izbriši</button>
                     </>
                   ) : (
-                    <button className="more-button" aria-label="Prijavi objavu" onClick={() => setNotice("Prijava objave bit će spojena s pravilima i administratorskim alatima.")}>•••</button>
+                    <button className="more-button" aria-label="Prijavi objavu" title="Prijavi objavu" onClick={() => { if (!session?.user?.id) { setAuthOpen(true); setAuthMessage("Prijavi se kako bi mogao/la prijaviti sadržaj."); return; } setReportPost(post); setReportReason("spam"); setReportDetails(""); }}>•••</button>
                   )}
                 </div>
               </div>
@@ -847,7 +920,7 @@ function App() {
                 </div>
               )}
               <div className="post-metrics">
-                <span>♥ {post.likes + (liked.includes(post.id) ? 1 : 0)} podrške</span>
+                <span>♥ {post.likes} podrške</span>
                 <span>{post.comments + (commentsByPost[post.id] || []).length} komentara</span>
               </div>
               <div className="post-reactions" aria-label="Reakcije na objavu">
