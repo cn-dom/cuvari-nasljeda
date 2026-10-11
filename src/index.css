@@ -575,3 +575,11 @@ button { -webkit-tap-highlight-color: transparent; }
 .group-chat-danger-actions > label { color: #8d2735; }
 .group-chat-danger-actions > small { color: #7a6870; font-size: 10px; line-height: 1.45; }
 .group-chat-danger-actions .danger { border-color: #e5bcc2; color: #9a2636; background: #fff; }
+
+/* Uređivanje i brisanje vlastitih poruka u grupnim razgovorima */
+.group-message-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.group-message-actions { display: inline-flex; gap: 5px; }
+.group-message-actions .post-menu-button, .group-message-edit-form .post-menu-button { padding: 4px 8px; font-size: 11px; }
+.group-message-edit-form { display: grid; gap: 7px; margin: 8px 0; }
+.group-message-edit-form textarea { width: 100%; resize: vertical; border: 1px solid var(--border, #d8dce2); border-radius: 8px; padding: 9px; font: inherit; }
+.group-message-edit-form > div { display: flex; gap: 6px; flex-wrap: wrap; }
