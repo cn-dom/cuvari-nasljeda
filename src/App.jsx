@@ -12,6 +12,7 @@ const initialPosts = [
     likes: 18,
     comments: 4,
     icon: "🏛️",
+    owner: false,
   },
   {
     id: 2,
@@ -24,6 +25,7 @@ const initialPosts = [
     likes: 12,
     comments: 7,
     icon: "🧵",
+    owner: false,
   },
   {
     id: 3,
@@ -36,6 +38,7 @@ const initialPosts = [
     likes: 9,
     comments: 2,
     icon: "📜",
+    owner: false,
   },
 ];
 
@@ -70,6 +73,11 @@ function App() {
   const [notice, setNotice] = useState("");
   const [feedFilter, setFeedFilter] = useState("Sve objave");
   const [feedSearch, setFeedSearch] = useState("");
+  const [openComments, setOpenComments] = useState([]);
+  const [commentsByPost, setCommentsByPost] = useState({});
+  const [commentDrafts, setCommentDrafts] = useState({});
+  const [editingPostId, setEditingPostId] = useState(null);
+  const [editDraft, setEditDraft] = useState("");
 
   const postCount = useMemo(() => posts.length, [posts]);
   const visiblePosts = useMemo(() => posts.filter((post) => {
@@ -97,6 +105,7 @@ function App() {
         likes: 0,
         comments: 0,
         icon: "💬",
+        owner: true,
       },
       ...current,
     ]);
@@ -108,6 +117,52 @@ function App() {
     setLiked((current) => current.includes(id)
       ? current.filter((item) => item !== id)
       : [...current, id]);
+  }
+
+  function toggleComments(id) {
+    setOpenComments((current) => current.includes(id)
+      ? current.filter((item) => item !== id)
+      : [...current, id]);
+  }
+
+  function addComment(id) {
+    const text = (commentDrafts[id] || "").trim();
+    if (!text) {
+      setNotice("Napiši komentar prije slanja.");
+      return;
+    }
+    setCommentsByPost((current) => ({ ...current, [id]: [...(current[id] || []), { id: Date.now(), author: "Ti — probni profil", text }] }));
+    setCommentDrafts((current) => ({ ...current, [id]: "" }));
+    setNotice("Komentar je dodan samo u lokalni prikaz; nije spremljen u bazu.");
+  }
+
+  function startEdit(post) {
+    if (!post.owner) return;
+    setEditingPostId(post.id);
+    setEditDraft(post.text);
+  }
+
+  function saveEdit(id) {
+    const text = editDraft.trim();
+    if (!text) {
+      setNotice("Objava ne može biti prazna.");
+      return;
+    }
+    setPosts((current) => current.map((post) => post.id === id ? { ...post, text, time: "Uređeno upravo sada" } : post));
+    setEditingPostId(null);
+    setEditDraft("");
+    setNotice("Objava je uređena samo u lokalnom prikazu.");
+  }
+
+  function deletePost(id) {
+    setPosts((current) => current.filter((post) => post.id !== id || !post.owner));
+    setCommentsByPost((current) => {
+      const next = { ...current };
+      delete next[id];
+      return next;
+    });
+    setOpenComments((current) => current.filter((item) => item !== id));
+    setNotice("Vlastita probna objava i njezini komentari uklonjeni su iz lokalnog prikaza.");
   }
 
   return (
@@ -249,10 +304,28 @@ function App() {
                   <strong>{post.author}</strong>
                   <span>{post.handle} <b>·</b> {post.time}</span>
                 </div>
-                <button className="more-button" aria-label="Više opcija" onClick={() => setNotice("Prijava objave i izbornik vlasničkih radnji bit će povezani u fazi sigurnosti.")}>•••</button>
+                <div className="post-menu">
+                  {post.owner ? (
+                    <>
+                      <button className="post-menu-button" onClick={() => startEdit(post)}>Uredi</button>
+                      <button className="post-menu-button danger" onClick={() => deletePost(post.id)}>Izbriši</button>
+                    </>
+                  ) : (
+                    <button className="more-button" aria-label="Prijavi objavu" onClick={() => setNotice("Prijava objave bit će spojena s pravilima i administratorskim alatima.")}>•••</button>
+                  )}
+                </div>
               </div>
               <div className="post-tag"><span>{post.icon}</span> {post.tag}</div>
-              <p className="post-text">{post.text}</p>
+              {editingPostId === post.id ? (
+                <div className="edit-post-box">
+                  <label className="sr-only" htmlFor={"edit-post-" + post.id}>Uredi svoju objavu</label>
+                  <textarea id={"edit-post-" + post.id} value={editDraft} onChange={(event) => setEditDraft(event.target.value)} rows="4" />
+                  <div className="inline-form-actions">
+                    <button className="outline-button" onClick={() => { setEditingPostId(null); setEditDraft(""); }}>Odustani</button>
+                    <button className="primary-button" onClick={() => saveEdit(post.id)}>Spremi izmjene</button>
+                  </div>
+                </div>
+              ) : <p className="post-text">{post.text}</p>}
               {post.id === 1 && (
                 <div className="heritage-art" role="img" aria-label="Dekorativni motiv hrvatske baštine">
                   <div className="heritage-art-grid" />
@@ -263,15 +336,33 @@ function App() {
               )}
               <div className="post-metrics">
                 <span>♥ {post.likes + (liked.includes(post.id) ? 1 : 0)} podrške</span>
-                <span>{post.comments} komentara</span>
+                <span>{post.comments + (commentsByPost[post.id] || []).length} komentara</span>
               </div>
               <div className="post-actions">
                 <button className={liked.includes(post.id) ? "post-action liked" : "post-action"} onClick={() => toggleLike(post.id)}>
                   <span>♡</span> Podržavam
                 </button>
-                <button className="post-action" onClick={() => setNotice("Komentari i odgovori bit će povezani u fazi zida zajednice.")}><span>▢</span> Komentiraj</button>
+                <button className={openComments.includes(post.id) ? "post-action liked" : "post-action"} onClick={() => toggleComments(post.id)}><span>▢</span> Komentiraj</button>
                 <button className="post-action" onClick={() => setNotice("Dijeljenje objava bit će dostupno nakon povezivanja profila.")}><span>↗</span> Podijeli</button>
               </div>
+              {openComments.includes(post.id) && (
+                <section className="comments-panel" aria-label={"Komentari uz objavu: " + post.author}>
+                  <div className="comments-list">
+                    {(commentsByPost[post.id] || []).length ? (commentsByPost[post.id] || []).map((comment) => (
+                      <div className="comment-item" key={comment.id}>
+                        <Avatar initials="TI" variant="avatar-you" />
+                        <div className="comment-bubble"><strong>{comment.author}</strong><p>{comment.text}</p></div>
+                      </div>
+                    )) : <p className="comments-empty">Još nema komentara dodanih u ovom probnom prikazu.</p>}
+                  </div>
+                  <form className="comment-form" onSubmit={(event) => { event.preventDefault(); addComment(post.id); }}>
+                    <label className="sr-only" htmlFor={"comment-" + post.id}>Napiši komentar</label>
+                    <input id={"comment-" + post.id} value={commentDrafts[post.id] || ""} onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))} placeholder="Napiši komentar…" />
+                    <button className="primary-button" type="submit">Pošalji</button>
+                  </form>
+                  <p className="local-only-note">Probna funkcija · komentari se zasad ne spremaju na poslužitelj.</p>
+                </section>
+              )}
             </article>
           )) : <div className="empty-feed card"><strong>Nema pronađenih objava.</strong><p>Pokušaj drugu riječ ili odaberi „Sve objave”.</p><button className="outline-button" onClick={() => { setFeedSearch(""); setFeedFilter("Sve objave"); }}>Poništi filtre</button></div>}
           <div className="end-of-feed"><span>✦</span><p>Svaka priča čuva dio našeg zajedničkog nasljeđa.</p></div>
