@@ -115,6 +115,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [messageRecipient, setMessageRecipient] = useState("");
   const [messageDraft, setMessageDraft] = useState("");
+  const [replyingToMessage, setReplyingToMessage] = useState(null);
   const [messagesBusy, setMessagesBusy] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [notificationsBusy, setNotificationsBusy] = useState(false);
@@ -498,7 +499,7 @@ function App() {
       setMessagesBusy(true);
       const { data, error } = await supabase
         .from("private_messages")
-        .select("id, sender_id, recipient_id, body, created_at")
+        .select("id, sender_id, recipient_id, body, created_at, reply_to_id")
         .or("sender_id.eq." + session.user.id + ",recipient_id.eq." + session.user.id)
         .order("created_at", { ascending: true })
         .limit(200);
@@ -584,13 +585,15 @@ function App() {
       sender_id: session.user.id,
       recipient_id: messageRecipient,
       body,
-    }).select("id, sender_id, recipient_id, body, created_at").single();
+      reply_to_id: replyingToMessage?.id || null,
+    }).select("id, sender_id, recipient_id, body, created_at, reply_to_id").single();
     if (error) {
       setNotice("Poruka nije poslana. Provjeri postoji li tablica private_messages i jesu li RLS pravila primijenjena.");
       return;
     }
-    setMessages((current) => [...current, data]);
+    setMessages((current) => [...current.filter((message) => message.id !== data.id), data]);
     setMessageDraft("");
+    setReplyingToMessage(null);
     setNotice("Privatna poruka je poslana.");
   }
 
@@ -1169,6 +1172,7 @@ function App() {
                       <option value="">Odaberi člana…</option>
                       {memberDirectory.filter((member) => !blockedMembers.some((blocked) => blocked.id === member.id)).map((member) => <option key={member.id} value={member.id}>{member.display_name || member.username || "Čuvar nasljeđa"}{member.username ? " · @" + member.username : ""}</option>)}
                     </select>
+                    {replyingToMessage && <div className="message-reply-compose"><div><strong>Odgovor na poruku</strong><p>{replyingToMessage.body}</p></div><button type="button" onClick={() => setReplyingToMessage(null)} aria-label="Odustani od odgovora">×</button></div>}
                     <label htmlFor="private-message-draft">Poruka</label>
                     <textarea id="private-message-draft" value={messageDraft} onChange={(event) => setMessageDraft(event.target.value)} maxLength={2000} rows="3" placeholder="Napiši privatnu poruku…" required />
                     <div className="private-message-actions"><small>{messageDraft.length}/2000 znakova</small><button className="primary-button" type="submit">Pošalji poruku ↗</button></div>
@@ -1195,10 +1199,12 @@ function App() {
                       const outgoing = message.sender_id === session.user.id;
                       const otherId = outgoing ? message.recipient_id : message.sender_id;
                       const member = memberDirectory.find((item) => item.id === otherId);
+                      const repliedMessage = message.reply_to_id ? activeConversationMessages.find((item) => item.id === message.reply_to_id) : null;
                       return <article className={outgoing ? "private-message outgoing" : "private-message"} key={message.id}>
                         <strong>{outgoing ? "Ti" : (member?.display_name || member?.username || "Čuvar nasljeđa")}</strong>
+                        {message.reply_to_id && <div className="private-message-reply-quote"><small>Odgovor na poruku</small><p>{repliedMessage?.body || "Izvorna poruka nije dostupna u učitanom razgovoru."}</p></div>}
                         <p>{message.body}</p>
-                        <small>{new Date(message.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" })}</small>
+                        <div className="private-message-footer"><small>{new Date(message.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" })}</small><button type="button" className="private-message-reply-button" onClick={() => { setReplyingToMessage(message); setMessageRecipient(otherId); }}>Odgovori</button></div>
                       </article>;
                     }) : <p className="directory-empty">Još nema poruka u ovom razgovoru.</p>}
                   </div>
