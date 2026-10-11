@@ -124,6 +124,8 @@ function App() {
   const [groupSelectedMembers, setGroupSelectedMembers] = useState([]);
   const [groupMessageDraft, setGroupMessageDraft] = useState("");
   const [groupBusy, setGroupBusy] = useState(false);
+  const [groupNameDraft, setGroupNameDraft] = useState("");
+  const [groupMemberToAdd, setGroupMemberToAdd] = useState("");
   const [messageRecipient, setMessageRecipient] = useState("");
   const [messageSearch, setMessageSearch] = useState("");
   const [messageDraft, setMessageDraft] = useState("");
@@ -748,6 +750,72 @@ function App() {
     setGroupDraftName("");
     setGroupSelectedMembers([]);
     setNotice("Grupni razgovor je stvoren.");
+    setGroupBusy(false);
+  }
+
+  async function saveGroupName(event) {
+    event.preventDefault();
+    const group = groupChats.find((item) => item.id === activeGroupId);
+    const name = groupNameDraft.trim();
+    if (!group || name.length < 2 || name.length > 60 || !supabase) return;
+    setGroupBusy(true);
+    const { error } = await supabase.from("group_chats").update({ name }).eq("id", group.id);
+    if (error) setNotice("Naziv grupe nije promijenjen. Provjeri administratorska RLS pravila.");
+    else {
+      setGroupChats((current) => current.map((item) => item.id === group.id ? { ...item, name } : item));
+      setGroupNameDraft("");
+      setNotice("Naziv grupnog razgovora je promijenjen.");
+    }
+    setGroupBusy(false);
+  }
+
+  async function addGroupMember() {
+    const group = groupChats.find((item) => item.id === activeGroupId);
+    const userId = groupMemberToAdd;
+    if (!group || !userId || !supabase || group.members?.some((item) => item.user_id === userId)) return;
+    setGroupBusy(true);
+    const { data, error } = await supabase.from("group_chat_members")
+      .insert({ group_id: group.id, user_id: userId, role: "member" })
+      .select("group_id, user_id, role").single();
+    if (error) setNotice("Člana nije moguće dodati. Provjeri je li tvoj račun administrator grupe i primijeni SQL nacrt.");
+    else {
+      setGroupChats((current) => current.map((item) => item.id === group.id ? { ...item, members: [...(item.members || []), data] } : item));
+      setGroupMemberToAdd("");
+      setNotice("Član je dodan u grupu.");
+    }
+    setGroupBusy(false);
+  }
+
+  async function removeGroupMember(member) {
+    const group = groupChats.find((item) => item.id === activeGroupId);
+    if (!group || !member || !supabase) return;
+    if (member.user_id === session?.user?.id) {
+      setNotice("Za sada ne možeš sam/a napustiti grupu kroz ovu kontrolu; administrator mora upravljati članstvom.");
+      return;
+    }
+    const profile = memberDirectory.find((item) => item.id === member.user_id);
+    if (!window.confirm("Ukloniti člana " + (profile?.display_name || profile?.username || "iz grupe") + "?")) return;
+    setGroupBusy(true);
+    const { error } = await supabase.from("group_chat_members").delete().eq("group_id", group.id).eq("user_id", member.user_id);
+    if (error) setNotice("Člana nije moguće ukloniti. Provjeri administratorska RLS pravila.");
+    else {
+      setGroupChats((current) => current.map((item) => item.id === group.id ? { ...item, members: item.members.filter((row) => row.user_id !== member.user_id) } : item));
+      setNotice("Član je uklonjen iz grupe.");
+    }
+    setGroupBusy(false);
+  }
+
+  async function transferGroupAdmin(member) {
+    const group = groupChats.find((item) => item.id === activeGroupId);
+    if (!group || !member || !supabase || member.role === "admin") return;
+    if (!window.confirm("Prenijeti administratorsku ulogu na odabranog člana? Nakon toga tvoj račun više neće biti administrator.")) return;
+    setGroupBusy(true);
+    const { error } = await supabase.rpc("transfer_group_chat_admin", { target_group_id: group.id, new_admin_user_id: member.user_id });
+    if (error) setNotice("Prijenos administratorske uloge nije uspio. Provjeri je li SQL nacrt group-chats.sql ažuriran.");
+    else {
+      setGroupChats((current) => current.map((item) => item.id === group.id ? { ...item, members: item.members.map((row) => ({ ...row, role: row.user_id === member.user_id ? "admin" : (row.role === "admin" ? "member" : row.role) })) } : item));
+      setNotice("Administratorska uloga je prenesena.");
+    }
     setGroupBusy(false);
   }
 
@@ -1543,7 +1611,32 @@ function App() {
                       </button>)}
                     </div>}
                     {activeGroupId && <div className="group-chat-thread">
-                      <h4>{groupChats.find((group) => group.id === activeGroupId)?.name || "Grupni razgovor"}</h4>
+                      {(() => {
+                        const selectedGroup = groupChats.find((group) => group.id === activeGroupId);
+                        const myMembership = selectedGroup?.members?.find((item) => item.user_id === session.user.id);
+                        const isAdmin = myMembership?.role === "admin";
+                        const eligibleMembers = memberDirectory.filter((member) => member.id !== session.user.id && !selectedGroup?.members?.some((item) => item.user_id === member.id));
+                        return <>
+                          <div className="group-chat-admin-heading"><h4>{selectedGroup?.name || "Grupni razgovor"}</h4><span>{isAdmin ? "Administrator" : "Član"}</span></div>
+                          {isAdmin && <>
+                            <form className="group-chat-admin-form" onSubmit={saveGroupName}>
+                              <label htmlFor="group-name-edit">Promijeni naziv grupe</label>
+                              <div><input id="group-name-edit" value={groupNameDraft} onChange={(event) => setGroupNameDraft(event.target.value)} placeholder={selectedGroup?.name || "Novi naziv"} maxLength={60} required /><button className="post-menu-button" type="submit" disabled={groupBusy || groupNameDraft.trim().length < 2}>Spremi</button></div>
+                            </form>
+                            <div className="group-chat-admin-form">
+                              <label htmlFor="group-member-add">Dodaj člana</label>
+                              <div><select id="group-member-add" value={groupMemberToAdd} onChange={(event) => setGroupMemberToAdd(event.target.value)}><option value="">Odaberi člana…</option>{eligibleMembers.map((member) => <option key={member.id} value={member.id}>{member.display_name || member.username || "Čuvar nasljeđa"}</option>)}</select><button className="post-menu-button" type="button" onClick={addGroupMember} disabled={groupBusy || !groupMemberToAdd}>Dodaj</button></div>
+                            </div>
+                            <div className="group-chat-admin-form"><label>Upravljanje članovima</label>
+                              <div className="group-chat-member-admin-list">{(selectedGroup?.members || []).map((member) => {
+                                const profile = memberDirectory.find((item) => item.id === member.user_id);
+                                const memberName = member.user_id === session.user.id ? "Ti" : (profile?.display_name || profile?.username || "Čuvar nasljeđa");
+                                return <div className="group-chat-member-admin" key={member.user_id}><span>{memberName}<small>{member.role === "admin" ? "Administrator" : "Član"}</small></span>{member.user_id !== session.user.id && <span className="group-chat-member-actions">{member.role !== "admin" && <button type="button" className="post-menu-button" disabled={groupBusy} onClick={() => transferGroupAdmin(member)}>Postavi admina</button>}<button type="button" className="post-menu-button danger" disabled={groupBusy || member.role === "admin"} onClick={() => removeGroupMember(member)}>Ukloni</button></span>}</div>;
+                              })}</div>
+                            </div>
+                          </>}
+                        </>;
+                      })()}
                       <div className="group-chat-messages">{groupMessages.map((message) => {
                         const sender = memberDirectory.find((member) => member.id === message.sender_id);
                         const outgoing = message.sender_id === session.user.id;
