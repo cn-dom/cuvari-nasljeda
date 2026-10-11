@@ -1520,19 +1520,25 @@ function App() {
             <small>ČUVARI NASLJEĐA</small>
           </span>
         </a>
-        <nav className="topnav" aria-label="Glavna navigacija">
-          {navItems.slice(0, 4).map((item) => (
-            <button
-              className={activeNav === item.label ? "topnav-link active" : "topnav-link"}
-              key={item.label}
-              onClick={() => setActiveNav(item.label)}
-            >
-              {item.label}
-            </button>
-          ))}
+        <div className="global-search-wrap">
+          <span className="global-search-icon" aria-hidden="true">⌕</span>
+          <input
+            className="global-search"
+            type="search"
+            aria-label="Pretraži objave i članove"
+            placeholder="Pretraži objave, članove i grupe…"
+            value={feedSearch}
+            onChange={(event) => { setFeedSearch(event.target.value); setActiveNav("Zid zajednice"); }}
+          />
+          {feedSearch && <button className="global-search-clear" type="button" aria-label="Očisti pretragu" onClick={() => setFeedSearch("")}>×</button>}
+        </div>
+        <nav className="topnav" aria-label="Brza navigacija">
+          <button className={activeNav === "Zid zajednice" ? "topnav-link active" : "topnav-link"} onClick={() => setActiveNav("Zid zajednice")} aria-label="Početna">⌂</button>
+          <button className={activeNav === "Čuvari nasljeđa" ? "topnav-link active" : "topnav-link"} onClick={() => setActiveNav("Čuvari nasljeđa")} aria-label="Članovi">♧</button>
+          <button className={activeNav === "Poruke" ? "topnav-link active" : "topnav-link"} onClick={() => setActiveNav("Poruke")} aria-label="Poruke">✉</button>
+          <button className={activeNav === "Obavijesti" ? "topnav-link active" : "topnav-link"} onClick={() => setActiveNav("Obavijesti")} aria-label="Obavijesti">♧</button>
         </nav>
         <div className="top-actions">
-          <button className="icon-button" aria-label="Pretraživanje" onClick={() => setNotice("Pretraživanje će biti povezano u sljedećoj fazi.")}>⌕</button>
           {session ? (
             <div className="auth-session-actions">
               <button className="profile-open-button" onClick={() => { setProfileOpen(true); setProfileMessage(""); }}><span className="profile-mini-avatar">{(session.user?.user_metadata?.display_name || session.user?.email || "Č").slice(0, 1).toLocaleUpperCase("hr")}</span><span className="auth-user-label">{session.user?.user_metadata?.display_name || session.user?.email || "Moj profil"}</span><span className="profile-open-label">Moj profil</span></button>
