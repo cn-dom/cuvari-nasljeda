@@ -1,40 +1,50 @@
 # PatriaSoul – Čuvari nasljeđa
 
-Domoljubna društvena mreža za hrvatsko zajedništvo, povijest, baštinu i znanje.
+**Društvena mreža hrvatskog zajedništva — besplatna i nekomercijalna.**
+
+PatriaSoul – Čuvari nasljeđa zamišljena je kao mjesto za povezivanje ljudi kroz hrvatsku povijest, baštinu, kulturu, vjeru, znanje i zajedništvo.
 
 ## Temelj projekta
 
 Ovaj repozitorij namijenjen je prilagodbi platforme [OpenSourceCommunity](https://github.com/JonJLevesque/OpenSourceCommunity) za PatriaSoul – Čuvari nasljeđa.
 
-**Važno:** izvorni projekt ima licencu koja ograničava komercijalnu uporabu. Prije javnog pokretanja ili monetizacije potrebno je provjeriti aktualne uvjete licence i po potrebi dobiti dopuštenje autora.
+Projekt je planiran kao besplatna, nekomercijalna usluga: bez naplate članstva, pretplata, oglasa ili drugih izvora prihoda. Izvorna licenca zabranjuje komercijalnu uporabu bez zasebnog pisanog dopuštenja autora. Izvorna licenca i obavijesti o autorstvu moraju ostati sačuvane.
 
-## Plan prilagodbe
+## Planirane funkcije
 
-- Hrvatsko sučelje i identitet PatriaSoul: crveno-bijelo-plava paleta, hrvatska zastava i suptilan hrvatski pleter/šahovnica.
-- Profili članova i postavke privatnosti.
-- Zid zajednice: tekstualne objave, fotografije, komentari, reakcije i označavanje članova.
+- Registracija, prijava, profili članova i postavke privatnosti.
+- Zid zajednice: objave s tekstom i fotografijama, komentari i reakcije.
+- Emoji i reakcije koje rade na računalu i mobitelu.
+- Označavanje drugih članova u objavama i komentarima.
 - Grupe, stranice, događaji i kalendar.
-- Dijeljenje hrvatskih kvizova i rezultata na zidu i u komentarima.
+- Dijeljenje PatriaSoul kvizova i rezultata na zidu.
 - Privatne poruke i obavijesti.
-- Prijava sadržaja, blokiranje korisnika i alati za moderiranje.
+- Pretraživanje članova i sadržaja.
+- Prijava neprimjerenog sadržaja, blokiranje članova i administratorsko moderiranje.
 - Članovi mogu uređivati i brisati vlastite objave, fotografije i komentare.
-- Administratorske ovlasti i provjere kvalitete.
+- Hrvatsko sučelje i identitet PatriaSoul: crveno-bijelo-plava paleta, hrvatska zastava i suptilni hrvatski motivi.
+
+Navedeno su ciljevi prilagodbe, a ne tvrdnja da su funkcije već implementirane.
 
 ## Tehnologija i sigurnost
 
-Planirani cilj je GitHub + Cloudflare + Supabase, nakon provjere kompatibilnosti stvarnog izvornog koda. Postojeće PatriaSoul baze i produkcija ne smiju se koristiti za početno testiranje.
+Planirani cilj je GitHub + Cloudflare + Supabase, nakon provjere kompatibilnosti stvarnog izvornog koda.
 
-1. Najprije pregledati izvorni kod, licencu, konfiguraciju i upute za Cloudflare.
-2. Pokrenuti probnu instalaciju s **odvojenim testnim Supabase projektom**.
-3. Provjeriti prijavu, dozvole, migracije baze, pohranu fotografija i moderiranje.
-4. Tek nakon uspješnih provjera prilagoditi izgled i funkcije.
-5. Ne dodavati ključeve, tokene ili tajne u repozitorij.
+- Za testiranje koristiti isključivo zaseban Supabase projekt.
+- Ne povezivati aplikaciju s postojećim PatriaSoul bazama ili produkcijom tijekom početnog razvoja.
+- Ne pokretati migracije, `db:push` ili seed nad postojećom bazom.
+- Ne spremati API ključeve, tokene ni druge tajne u repozitorij.
+- Prije javnog pokretanja provjeriti autentikaciju, RLS politike, prava pristupa, upload fotografija, CORS i moderiranje.
 
-## Izvorni projekt
+## Izvorni projekt i pripisivanje autorstva
 
-- Projekt: [OpenSourceCommunity](https://github.com/JonJLevesque/OpenSourceCommunity)
-- Ovaj repozitorij: [cn-dom/cuvari-nasljeda](https://github.com/cn-dom/cuvari-nasljeda)
+- Izvor: [OpenSourceCommunity](https://github.com/JonJLevesque/OpenSourceCommunity)
+- Prilagodba: PatriaSoul – Čuvari nasljeđa
+- Izvorna licenca: [LICENSE](./LICENSE)
+- Tehnička provjera: [docs/PROVJERA-IZVORA.md](./docs/PROVJERA-IZVORA.md)
+
+Izvorni projekt i njegovi autori ne smiju se pogrešno predstavljati kao da su izvorno napisani za PatriaSoul. Sve izmjene treba jasno dokumentirati.
 
 ## Status
 
-Početna dokumentacija je postavljena. Aplikacijski kod još nije uvezen niti je aplikacija deployana. Sljedeći korak je uvoz i tehnička provjera izvornog projekta prije spajanja na bilo koju bazu ili produkcijsku uslugu.
+Trenutačno su postavljeni početna dokumentacija, kopija izvorne licence i tehnička provjera. Aplikacijski kod još nije uvezen, testiran ni deployan. Sljedeći korak je uvoz izvornog koda uz očuvanje licence, zatim izolirano pokretanje i provjera prije prilagodbe sučelja.
