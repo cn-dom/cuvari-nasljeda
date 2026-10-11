@@ -110,6 +110,9 @@ function App() {
   const [memberDirectory, setMemberDirectory] = useState([]);
   const [memberDirectoryQuery, setMemberDirectoryQuery] = useState("");
   const [memberDirectoryBusy, setMemberDirectoryBusy] = useState(false);
+  const [memberPresence, setMemberPresence] = useState([]);
+  const [showActivity, setShowActivity] = useState(true);
+  const [presenceBusy, setPresenceBusy] = useState(false);
   const [mentionMembers, setMentionMembers] = useState([]);
   const [mentionBusy, setMentionBusy] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -452,6 +455,58 @@ function App() {
     setBlockBusyId(null);
   }
 
+  function getPresenceStatus(lastSeenAt) {
+    if (!lastSeenAt) return { label: "Izvan mreže", state: "offline" };
+    const elapsed = Date.now() - new Date(lastSeenAt).getTime();
+    if (elapsed <= 2 * 60 * 1000) return { label: "Na mreži", state: "online" };
+    if (elapsed <= 5 * 60 * 1000) return { label: "Nedavno aktivan", state: "recent" };
+    return { label: "Izvan mreže", state: "offline" };
+  }
+
+  async function saveActivityVisibility(visible) {
+    if (!supabase || !session?.user?.id) return;
+    setPresenceBusy(true);
+    const { error } = await supabase.from("member_presence").upsert({
+      user_id: session.user.id,
+      last_seen_at: new Date().toISOString(),
+      show_activity: visible,
+    }, { onConflict: "user_id" });
+    if (error) {
+      setNotice("Postavka privatnosti aktivnosti nije spremljena. Provjeri SQL nacrt member-presence.sql.");
+    } else {
+      setShowActivity(visible);
+      setMemberPresence((current) => {
+        const next = current.filter((row) => row.user_id !== session.user.id);
+        return [...next, { user_id: session.user.id, last_seen_at: new Date().toISOString(), show_activity: visible }];
+      });
+      setNotice(visible ? "Status aktivnosti vidljiv je članovima." : "Sakrili smo tvoj status aktivnosti od drugih članova.");
+    }
+    setPresenceBusy(false);
+  }
+
+  useEffect(() => {
+    if (!supabase || !session?.user?.id) return undefined;
+    let cancelled = false;
+    const userId = session.user.id;
+    const updatePresence = async () => {
+      const { error } = await supabase.from("member_presence").upsert({
+        user_id: userId, last_seen_at: new Date().toISOString(),
+      }, { onConflict: "user_id" });
+      if (error && !cancelled) setNotice("Status aktivnosti još nije aktivan. Pregledaj SQL nacrt member-presence.sql.");
+    };
+    updatePresence();
+    const intervalId = window.setInterval(updatePresence, 60 * 1000);
+    const onVisible = () => { if (document.visibilityState === "visible") updatePresence(); };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", updatePresence);
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", updatePresence);
+    };
+  }, [session?.user?.id]);
+
   useEffect(() => {
     let cancelled = false;
     async function loadMemberDirectory() {
@@ -470,11 +525,29 @@ function App() {
       } else {
         setMemberDirectory((data || []).filter((member) => !blockedMembers.some((blocked) => blocked.id === member.id)));
       }
+      const { data: presenceRows, error: presenceError } = await supabase
+        .from("member_presence").select("user_id, last_seen_at, show_activity");
+      if (cancelled) return;
+      if (!presenceError) setMemberPresence(presenceRows || []);
+      const { data: ownPresence } = await supabase.from("member_presence")
+        .select("user_id, last_seen_at, show_activity").eq("user_id", session.user.id).maybeSingle();
+      if (!cancelled && ownPresence) setShowActivity(ownPresence.show_activity !== false);
       setMemberDirectoryBusy(false);
     }
     loadMemberDirectory();
     return () => { cancelled = true; };
   }, [activeNav, session?.user?.id, blockedMembers]);
+
+  useEffect(() => {
+    if (!supabase || !session?.user?.id) return undefined;
+    const channel = supabase.channel("patriasoul-presence")
+      .on("postgres_changes", { event: "*", schema: "public", table: "member_presence" }, (payload) => {
+        const row = payload.new;
+        if (row?.user_id) setMemberPresence((current) => [...current.filter((item) => item.user_id !== row.user_id), row]);
+        else if (payload.old?.user_id) setMemberPresence((current) => current.filter((item) => item.user_id !== payload.old.user_id));
+      }).subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [session?.user?.id]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1541,6 +1614,10 @@ function App() {
                 <div className="directory-empty"><p>Prijavi se za pregled imenika članova zajednice.</p><button className="primary-button" onClick={() => { setAuthOpen(true); setAuthMessage(""); }}>Prijava / Registracija</button></div>
               ) : (
                 <>
+                  <div className="member-presence-preferences">
+                    <label><input type="checkbox" checked={showActivity} disabled={presenceBusy} onChange={(event) => saveActivityVisibility(event.target.checked)} /> Prikaži moj status aktivnosti drugim članovima</label>
+                    <small>{showActivity ? "Članovi mogu vidjeti jesi li na mreži ili kada si nedavno bio/la aktivan/na." : "Tvoj status aktivnosti skriven je od drugih članova."}</small>
+                  </div>
                   <label className="sr-only" htmlFor="member-directory-search">Pretraži članove</label>
                   <input id="member-directory-search" className="feed-search" type="search" value={memberDirectoryQuery} onChange={(event) => setMemberDirectoryQuery(event.target.value)} placeholder="Pretraži ime, korisničko ime ili interese…" />
                   {memberDirectoryBusy ? <p className="directory-empty">Učitavam članove…</p> : (() => {
@@ -1551,7 +1628,7 @@ function App() {
                       const initials = displayName.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN";
                       return <article className="member-directory-card" key={member.id}>
                         <Avatar initials={initials} />
-                        <div className="member-directory-info"><strong>{displayName}</strong><span>@{member.username || "clan"}</span><p>{member.bio || "Ovaj član još nije dodao opis profila."}</p></div>
+                        <div className="member-directory-info"><strong>{displayName}</strong><span>@{member.username || "clan"}</span><span className={"member-presence-status " + getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).state}><i aria-hidden="true" />{getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).label}</span><p>{member.bio || "Ovaj član još nije dodao opis profila."}</p></div>
                         <button type="button" className="post-menu-button danger" disabled={blockBusyId === member.id} onClick={() => toggleBlockMember({ authorId: member.id, author: displayName, handle: "@" + (member.username || "clan") })}>{blockedMembers.some((blocked) => blocked.id === member.id) ? "Odblokiraj" : "Blokiraj"}</button>
                       </article>;
                     })}</div> : <p className="directory-empty">Nema članova koji odgovaraju pretrazi.</p>;
