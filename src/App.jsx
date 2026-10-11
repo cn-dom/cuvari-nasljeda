@@ -2066,7 +2066,7 @@ function App() {
           </section>
 
           {visiblePosts.length ? visiblePosts.map((post) => (
-            <article className="post-card card" key={post.id}>
+            <article className="post-card card" id={"objava-" + post.id} key={post.id}>
               <div className="post-header">
                 <Avatar initials={post.initials} variant={post.id === 1 ? "avatar-community" : ""} />
                 <div className="post-author">
@@ -2128,7 +2128,17 @@ function App() {
                   <span>♡</span> Podržavam
                 </button>
                 <button className={openComments.includes(post.id) ? "post-action liked" : "post-action"} onClick={() => toggleComments(post.id)}><span>▢</span> Komentiraj</button>
-                <button className="post-action" onClick={() => setNotice("Dijeljenje objava bit će dostupno nakon povezivanja profila.")}><span>↗</span> Podijeli</button>
+                <button className="post-action" onClick={async () => {
+                  const shareUrl = window.location.origin + window.location.pathname + "#objava-" + post.id;
+                  const shareText = (post.text || "PatriaSoul – Čuvari nasljeđa").slice(0, 240);
+                  if (navigator.share) {
+                    try { await navigator.share({ title: "PatriaSoul – Čuvari nasljeđa", text: shareText, url: shareUrl }); }
+                    catch (error) { if (error?.name !== "AbortError") setNotice("Dijeljenje trenutačno nije uspjelo."); }
+                  } else if (navigator.clipboard?.writeText) {
+                    try { await navigator.clipboard.writeText(shareUrl); setNotice("Poveznica na objavu kopirana je u međuspremnik."); }
+                    catch { setNotice("Kopiranje nije dostupno u ovom pregledniku."); }
+                  } else { setNotice(shareUrl); }
+                }}><span>↗</span> Podijeli</button>
               </div>
               {openComments.includes(post.id) && (
                 <section className="comments-panel" aria-label={"Komentari uz objavu: " + post.author}>
