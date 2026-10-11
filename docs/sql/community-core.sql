@@ -112,9 +112,7 @@ begin
     new.id,
     coalesce(nullif(trim(new.raw_user_meta_data ->> 'display_name'), ''), '')
   )
-  on conflict (id) do update
-set file_size_limit = excluded.file_size_limit,
-    allowed_mime_types = excluded.allowed_mime_types;
+  on conflict (id) do nothing;
   return new;
 end;
 $$;
@@ -135,7 +133,36 @@ values (
   10485760,
   array['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 )
-on conflict (id) do nothing;
+on conflict (id) do update
+set file_size_limit = excluded.file_size_limit,
+    allowed_mime_types = excluded.allowed_mime_types;
+
+-- Content reports are private submissions. No SELECT/UPDATE policy is granted here:
+-- ordinary members cannot read reports or change their moderation status.
+create table if not exists public.content_reports (
+  id uuid primary key default gen_random_uuid(),
+  reporter_id uuid not null references public.profiles(id) on delete cascade,
+  post_id uuid not null references public.posts(id) on delete cascade,
+  reason text not null check (reason in ('spam', 'harassment', 'hate', 'misinformation', 'privacy', 'copyright', 'other')),
+  details text,
+  status text not null default 'pending' check (status in ('pending', 'reviewed', 'dismissed', 'actioned')),
+  created_at timestamptz not null default now(),
+  constraint content_reports_details_length check (details is null or char_length(details) <= 1000)
+);
+
+create index if not exists content_reports_status_created_idx
+  on public.content_reports (status, created_at asc);
+create index if not exists content_reports_post_idx
+  on public.content_reports (post_id, created_at desc);
+
+alter table public.content_reports enable row level security;
+
+create policy "content_reports_insert_own" on public.content_reports
+  for insert to authenticated
+  with check (reporter_id = (select auth.uid()));
+
+-- Intentionally no member SELECT/UPDATE/DELETE policy. Moderator access needs a
+-- separately designed, server-enforced role system before it is enabled.
 
 -- Signed-in members may view community images through authenticated Storage requests.
 create policy "community_images_read_authenticated"
