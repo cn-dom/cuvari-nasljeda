@@ -629,6 +629,27 @@ function App() {
     }
   }
 
+  const messageConversations = useMemo(() => {
+    if (!session?.user?.id) return [];
+    const latestByMember = new Map();
+    messages.forEach((message) => {
+      const otherId = message.sender_id === session.user.id ? message.recipient_id : message.sender_id;
+      if (!otherId) return;
+      const current = latestByMember.get(otherId);
+      if (!current || new Date(message.created_at).getTime() > new Date(current.created_at).getTime()) {
+        latestByMember.set(otherId, { memberId: otherId, latest: message });
+      }
+    });
+    return [...latestByMember.values()].sort((a, b) => new Date(b.latest.created_at) - new Date(a.latest.created_at));
+  }, [messages, session?.user?.id]);
+  const activeConversationMessages = useMemo(() => {
+    if (!session?.user?.id || !messageRecipient) return [];
+    return messages.filter((message) =>
+      (message.sender_id === session.user.id && message.recipient_id === messageRecipient) ||
+      (message.sender_id === messageRecipient && message.recipient_id === session.user.id)
+    );
+  }, [messages, messageRecipient, session?.user?.id]);
+
   const postCount = useMemo(() => posts.length, [posts]);
   const visiblePosts = useMemo(() => posts.filter((post) => {
     const matchesFilter = feedFilter === "Sve objave" || post.tag.toLocaleLowerCase("hr").includes(feedFilter.toLocaleLowerCase("hr"));
@@ -1107,9 +1128,25 @@ function App() {
                     <textarea id="private-message-draft" value={messageDraft} onChange={(event) => setMessageDraft(event.target.value)} maxLength={2000} rows="3" placeholder="Napiši privatnu poruku…" required />
                     <div className="private-message-actions"><small>{messageDraft.length}/2000 znakova</small><button className="primary-button" type="submit">Pošalji poruku ↗</button></div>
                   </form>
+                  <div className="message-conversations">
+                    <h3>Razgovori</h3>
+                    {messagesBusy ? <p className="directory-empty">Učitavam razgovore…</p> : messageConversations.length ? (
+                      <div className="message-conversation-list">
+                        {messageConversations.map(({ memberId, latest }) => {
+                          const member = memberDirectory.find((item) => item.id === memberId);
+                          const displayName = member?.display_name || member?.username || "Čuvar nasljeđa";
+                          return <button type="button" key={memberId} className={messageRecipient === memberId ? "message-conversation selected" : "message-conversation"} onClick={() => setMessageRecipient(memberId)}>
+                            <Avatar initials={displayName.split(/\\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN"} />
+                            <span className="message-conversation-copy"><strong>{displayName}</strong><small>{latest.sender_id === session.user.id ? "Ti: " : ""}{latest.body}</small></span>
+                            <time>{new Date(latest.created_at).toLocaleDateString("hr-HR")}</time>
+                          </button>;
+                        })}
+                      </div>
+                    ) : <p className="directory-empty">Razgovori će se pojaviti ovdje nakon prve poslane ili primljene poruke.</p>}
+                  </div>
                   <div className="private-message-list">
-                    <h3>Poruke</h3>
-                    {messagesBusy ? <p className="directory-empty">Učitavam poruke…</p> : messages.length ? messages.slice().reverse().map((message) => {
+                    <h3>{messageRecipient ? "Razgovor" : "Odaberi razgovor"}</h3>
+                    {messagesBusy ? <p className="directory-empty">Učitavam poruke…</p> : !messageRecipient ? <p className="directory-empty">Odaberi člana u polju „Primatelj” ili postojeći razgovor iznad.</p> : activeConversationMessages.length ? activeConversationMessages.map((message) => {
                       const outgoing = message.sender_id === session.user.id;
                       const otherId = outgoing ? message.recipient_id : message.sender_id;
                       const member = memberDirectory.find((item) => item.id === otherId);
@@ -1118,7 +1155,7 @@ function App() {
                         <p>{message.body}</p>
                         <small>{new Date(message.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" })}</small>
                       </article>;
-                    }) : <p className="directory-empty">Još nema poruka ili tablica nije dostupna.</p>}
+                    }) : <p className="directory-empty">Još nema poruka u ovom razgovoru.</p>}
                   </div>
                 </>
               )}
