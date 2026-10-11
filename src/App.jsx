@@ -1207,6 +1207,9 @@ function App() {
           if (current.some((message) => message.id === incoming.id)) return current;
           return incoming.group_id === activeGroupId ? [...current, incoming].sort((x, y) => new Date(x.created_at) - new Date(y.created_at)) : current;
         });
+        supabase.rpc("get_group_unread_counts").then(({ data, error }) => {
+          if (!error) setGroupUnreadCounts(Object.fromEntries((data || []).map((row) => [row.group_id, Number(row.unread_count) || 0])));
+        });
       })
       .on("postgres_changes", {
         event: "INSERT", schema: "public", table: "group_chat_message_reads", filter: "group_id=eq." + activeGroupId,
