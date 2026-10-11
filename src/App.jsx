@@ -49,6 +49,7 @@ const navItems = [
   { icon: "▦", label: "Grupe" },
   { icon: "▣", label: "Događaji" },
   { icon: "✉", label: "Poruke" },
+  { icon: "♧", label: "Obavijesti" },
 ];
 
 function BrandMark() {
@@ -112,6 +113,8 @@ function App() {
   const [messageRecipient, setMessageRecipient] = useState("");
   const [messageDraft, setMessageDraft] = useState("");
   const [messagesBusy, setMessagesBusy] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [notificationsBusy, setNotificationsBusy] = useState(false);
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -483,6 +486,44 @@ function App() {
     return () => { cancelled = true; };
   }, [activeNav, session?.user?.id]);
 
+  useEffect(() => {
+    let cancelled = false;
+    async function loadNotifications() {
+      if (activeNav !== "Obavijesti" || !supabase || !session?.user?.id) return;
+      setNotificationsBusy(true);
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("id, actor_id, type, title, body, reference_id, created_at, read_at")
+        .eq("recipient_id", session.user.id)
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (cancelled) return;
+      if (error) {
+        setNotifications([]);
+        setNotice("Obavijesti još nisu dostupne. Potrebno je pregledati i primijeniti SQL nacrt u testnoj bazi.");
+      } else {
+        setNotifications(data || []);
+      }
+      setNotificationsBusy(false);
+    }
+    loadNotifications();
+    return () => { cancelled = true; };
+  }, [activeNav, session?.user?.id]);
+
+  async function markNotificationRead(notification) {
+    if (!supabase || !session?.user?.id || !notification?.id || notification.read_at) return;
+    const readAt = new Date().toISOString();
+    const { error } = await supabase.from("notifications")
+      .update({ read_at: readAt })
+      .eq("id", notification.id)
+      .eq("recipient_id", session.user.id);
+    if (error) {
+      setNotice("Obavijest nije označena kao pročitana. Provjeri RLS pravila.");
+      return;
+    }
+    setNotifications((current) => current.map((item) => item.id === notification.id ? { ...item, read_at: readAt } : item));
+  }
+
   async function sendPrivateMessage(event) {
     event.preventDefault();
     const body = messageDraft.trim();
@@ -827,7 +868,8 @@ function App() {
                 onClick={() => setActiveNav(item.label)}
               >
                 <span className="side-icon">{item.icon}</span>{item.label}
-                {item.label === "Poruke" && <span className="side-count">0</span>}
+                {item.label === "Poruke" && <span className="side-count">{messages.filter((message) => message.recipient_id === session?.user?.id).length || ""}</span>}
+                {item.label === "Obavijesti" && <span className="side-count">{notifications.filter((notification) => !notification.read_at).length || ""}</span>}
               </button>
             ))}
           </section>
@@ -971,6 +1013,32 @@ function App() {
                 </button>
               </p>
               <p className="auth-footnote">Koristi samo testni račun dok ne provjerimo postavke i pravila pristupa.</p>
+            </section>
+          )}
+
+          {activeNav === "Obavijesti" && (
+            <section className="notifications-panel card" aria-labelledby="notifications-title">
+              <div className="member-directory-heading">
+                <div><span className="eyebrow">NOVOSTI ZA TEBE</span><h2 id="notifications-title">Obavijesti</h2><p>Ovdje se prikazuju obavijesti povezane s aktivnostima na PatriaSoul zajednici.</p></div>
+                <span className="member-directory-count">{notifications.filter((item) => !item.read_at).length} nepročitanih</span>
+              </div>
+              {!session?.user?.id ? (
+                <div className="directory-empty"><p>Prijavi se kako bi pregledao/la svoje obavijesti.</p><button className="primary-button" onClick={() => { setAuthOpen(true); setAuthMessage(""); }}>Prijava / Registracija</button></div>
+              ) : notificationsBusy ? <p className="directory-empty">Učitavam obavijesti…</p> : notifications.length ? (
+                <div className="notification-list">
+                  {notifications.map((notification) => (
+                    <article className={notification.read_at ? "notification-item" : "notification-item unread"} key={notification.id}>
+                      <span className="notification-mark" aria-hidden="true">{notification.type === "private_message" ? "✉" : "•"}</span>
+                      <div className="notification-copy">
+                        <strong>{notification.title || "Nova obavijest"}</strong>
+                        <p>{notification.body || "Imaš novu aktivnost u zajednici."}</p>
+                        <small>{new Date(notification.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" })}</small>
+                      </div>
+                      {!notification.read_at && <button type="button" className="post-menu-button" onClick={() => markNotificationRead(notification)}>Označi pročitano</button>}
+                    </article>
+                  ))}
+                </div>
+              ) : <p className="directory-empty">Još nema obavijesti. Kad stigne nova privatna poruka, pojavit će se ovdje.</p>}
             </section>
           )}
 
