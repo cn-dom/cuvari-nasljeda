@@ -101,6 +101,8 @@ function App() {
   const [reportReason, setReportReason] = useState("spam");
   const [reportDetails, setReportDetails] = useState("");
   const [reportBusy, setReportBusy] = useState(false);
+  const [blockedMembers, setBlockedMembers] = useState([]);
+  const [blockBusyId, setBlockBusyId] = useState(null);
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -172,6 +174,20 @@ function App() {
         setPosts(initialPosts);
         return;
       }
+      const { data: blockRows, error: blockError } = await supabase
+        .from("blocked_users")
+        .select("blocked_id")
+        .eq("blocker_id", session.user.id);
+      if (cancelled) return;
+      const blockedIds = !blockError ? (blockRows || []).map((row) => row.blocked_id) : [];
+      setBlockedMembers(blockedIds.map((id) => ({ id, name: id })));
+      if (blockedIds.length) {
+        const { data: blockedProfiles } = await supabase.from("profiles").select("id, display_name, username").in("id", blockedIds);
+        if (!cancelled && blockedProfiles) {
+          const byId = Object.fromEntries(blockedProfiles.map((profile) => [profile.id, profile]));
+          setBlockedMembers(blockedIds.map((id) => ({ id, name: byId[id]?.display_name || byId[id]?.username || id, username: byId[id]?.username || "" })));
+        }
+      }
       const { data, error } = await supabase
         .from("posts")
         .select("id, author_id, body, image_path, created_at, profiles(display_name, username)")
@@ -183,7 +199,7 @@ function App() {
         setPosts(initialPosts);
         return;
       }
-      const rows = await Promise.all((data || []).map(async (row) => {
+      const rows = await Promise.all((data || []).filter((row) => !blockedIds.includes(row.author_id)).map(async (row) => {
         const profile = row.profiles || {};
         const name = profile.display_name || "Čuvar nasljeđa";
         const username = profile.username || "clan";
@@ -196,6 +212,7 @@ function App() {
         }
         return {
           id: row.id,
+          authorId: row.author_id,
           initials: name.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
           author: name,
           handle: "@" + username,
@@ -328,6 +345,57 @@ function App() {
     } finally {
       setProfileBusy(false);
     }
+  }
+
+  async function toggleBlockMember(post) {
+    const memberId = post?.authorId;
+    if (!supabase || !session?.user?.id) {
+      setAuthOpen(true);
+      setAuthMessage("Prijavi se kako bi mogao/la blokirati člana.");
+      return;
+    }
+    if (!memberId || memberId === session.user.id) {
+      setNotice("Ovu oglednu objavu ili vlastiti profil nije moguće blokirati.");
+      return;
+    }
+    const existing = blockedMembers.some((member) => member.id === memberId);
+    const action = existing ? "odblokirati" : "blokirati";
+    if (!window.confirm("Želiš li " + action + " člana " + post.author + "? " + (existing ? "Njegove objave ponovno će se prikazivati." : "Njegove objave bit će skrivene s tvog zida."))) return;
+    setBlockBusyId(memberId);
+    try {
+      const result = existing
+        ? await supabase.from("blocked_users").delete().eq("blocker_id", session.user.id).eq("blocked_id", memberId)
+        : await supabase.from("blocked_users").insert({ blocker_id: session.user.id, blocked_id: memberId });
+      if (result.error) throw result.error;
+      if (existing) {
+        setBlockedMembers((current) => current.filter((member) => member.id !== memberId));
+        setNotice("Član je odblokiran. Osvježi zid kako bi se njegove objave ponovno učitale.");
+      } else {
+        setBlockedMembers((current) => [...current, { id: memberId, name: post.author, username: post.handle }]);
+        setPosts((current) => current.filter((item) => item.authorId !== memberId));
+        setNotice("Član je blokiran. Njegove objave skrivene su s tvog zida.");
+      }
+    } catch (error) {
+      setNotice(error?.code === "42P01" || error?.code === "PGRST205"
+        ? "Blokiranje još nije aktivirano u testnoj bazi. Potrebno je pregledati i primijeniti SQL nacrt."
+        : "Promjena blokiranja nije spremljena. Provjeri tablicu blocked_users i njezina RLS pravila.");
+    } finally {
+      setBlockBusyId(null);
+    }
+  }
+
+  async function unblockMember(member) {
+    if (!supabase || !session?.user?.id) return;
+    setBlockBusyId(member.id);
+    const { error } = await supabase.from("blocked_users").delete()
+      .eq("blocker_id", session.user.id).eq("blocked_id", member.id);
+    if (error) {
+      setNotice("Člana nije moguće odblokirati. Provjeri tablicu blocked_users i RLS pravila.");
+    } else {
+      setBlockedMembers((current) => current.filter((item) => item.id !== member.id));
+      setNotice("Član je odblokiran. Osvježi zid kako bi se njegove objave ponovno učitale.");
+    }
+    setBlockBusyId(null);
   }
 
   async function submitReport(event) {
@@ -652,6 +720,18 @@ function App() {
             ))}
           </section>
 
+          {session && blockedMembers.length > 0 && (
+            <section className="side-section blocked-members-section">
+              <h3>BLOKIRANI ČLANOVI</h3>
+              {blockedMembers.map((member) => (
+                <div className="blocked-member-row" key={member.id}>
+                  <span title={member.id}>{member.name}</span>
+                  <button type="button" disabled={blockBusyId === member.id} onClick={() => unblockMember(member)}>{blockBusyId === member.id ? "…" : "Odblokiraj"}</button>
+                </div>
+              ))}
+            </section>
+          )}
+
           <section className="side-section values-card">
             <h3>NAŠA TRI TEMELJA</h3>
             <p><span>✦</span> Vjera</p>
@@ -895,7 +975,10 @@ function App() {
                       <button className="post-menu-button danger" onClick={() => deletePost(post.id)}>Izbriši</button>
                     </>
                   ) : (
-                    <button className="more-button" aria-label="Prijavi objavu" title="Prijavi objavu" onClick={() => { if (!session?.user?.id) { setAuthOpen(true); setAuthMessage("Prijavi se kako bi mogao/la prijaviti sadržaj."); return; } setReportPost(post); setReportReason("spam"); setReportDetails(""); }}>•••</button>
+                    <div className="post-menu-actions">
+                      <button className="post-menu-button" disabled={blockBusyId === post.authorId} onClick={() => toggleBlockMember(post)}>{blockedMembers.some((member) => member.id === post.authorId) ? "Odblokiraj" : "Blokiraj"}</button>
+                      <button className="post-menu-button danger" aria-label="Prijavi objavu" title="Prijavi objavu" onClick={() => { if (!session?.user?.id) { setAuthOpen(true); setAuthMessage("Prijavi se kako bi mogao/la prijaviti sadržaj."); return; } setReportPost(post); setReportReason("spam"); setReportDetails(""); }}>Prijavi</button>
+                    </div>
                   )}
                 </div>
               </div>
