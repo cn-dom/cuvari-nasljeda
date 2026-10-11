@@ -114,6 +114,13 @@ function App() {
   const [mentionBusy, setMentionBusy] = useState(false);
   const [messages, setMessages] = useState([]);
   const [messageReactions, setMessageReactions] = useState([]);
+  const [groupChats, setGroupChats] = useState([]);
+  const [activeGroupId, setActiveGroupId] = useState("");
+  const [groupMessages, setGroupMessages] = useState([]);
+  const [groupDraftName, setGroupDraftName] = useState("");
+  const [groupSelectedMembers, setGroupSelectedMembers] = useState([]);
+  const [groupMessageDraft, setGroupMessageDraft] = useState("");
+  const [groupBusy, setGroupBusy] = useState(false);
   const [messageRecipient, setMessageRecipient] = useState("");
   const [messageSearch, setMessageSearch] = useState("");
   const [messageDraft, setMessageDraft] = useState("");
@@ -587,6 +594,101 @@ function App() {
       return;
     }
     if (!notification?.read_at) await markNotificationRead(notification);
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadGroupChats() {
+      if (activeNav !== "Poruke" || !supabase || !session?.user?.id) return;
+      const { data: memberships, error: membershipError } = await supabase
+        .from("group_chat_members").select("group_id, role").eq("user_id", session.user.id);
+      if (cancelled) return;
+      if (membershipError) {
+        setGroupChats([]);
+        setNotice("Grupni razgovori još nisu aktivirani. Potrebno je pregledati i primijeniti SQL nacrt group-chats.sql na testnoj bazi.");
+        return;
+      }
+      const ids = (memberships || []).map((row) => row.group_id);
+      if (!ids.length) { setGroupChats([]); setGroupMessages([]); setActiveGroupId(""); return; }
+      const { data: groups, error: groupsError } = await supabase
+        .from("group_chats").select("id, name, created_by, created_at").in("id", ids).order("created_at", { ascending: false });
+      if (cancelled) return;
+      if (groupsError) { setNotice("Popis grupnih razgovora nije dostupan."); return; }
+      const { data: memberRows } = await supabase
+        .from("group_chat_members").select("group_id, user_id, role").in("group_id", ids);
+      if (cancelled) return;
+      const enriched = (groups || []).map((group) => ({
+        ...group,
+        members: (memberRows || []).filter((row) => row.group_id === group.id),
+      }));
+      setGroupChats(enriched);
+      setActiveGroupId((current) => current && ids.includes(current) ? current : (enriched[0]?.id || ""));
+    }
+    loadGroupChats();
+    return () => { cancelled = true; };
+  }, [activeNav, session?.user?.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadGroupMessages() {
+      if (!activeGroupId || activeNav !== "Poruke" || !supabase || !session?.user?.id) { setGroupMessages([]); return; }
+      const { data, error } = await supabase.from("group_chat_messages")
+        .select("id, group_id, sender_id, body, created_at")
+        .eq("group_id", activeGroupId).order("created_at", { ascending: true }).limit(200);
+      if (cancelled) return;
+      if (error) {
+        setGroupMessages([]);
+        setNotice("Poruke grupe nisu dostupne. Provjeri SQL nacrt i RLS pravila.");
+      } else setGroupMessages(data || []);
+    }
+    loadGroupMessages();
+    return () => { cancelled = true; };
+  }, [activeGroupId, activeNav, session?.user?.id]);
+
+  async function createGroupChat(event) {
+    event.preventDefault();
+    if (!supabase || !session?.user?.id) return;
+    const name = groupDraftName.trim();
+    const members = [...new Set(groupSelectedMembers.filter((id) => id !== session.user.id))];
+    if (name.length < 2 || name.length > 60 || members.length < 1) {
+      setNotice("Unesi naziv grupe (2–60 znakova) i odaberi barem jednog člana.");
+      return;
+    }
+    setGroupBusy(true);
+    const { data: group, error } = await supabase.from("group_chats")
+      .insert({ name, created_by: session.user.id }).select("id, name, created_by, created_at").single();
+    if (error) {
+      setNotice("Grupu nije moguće stvoriti. Provjeri SQL nacrt group-chats.sql i RLS pravila.");
+      setGroupBusy(false);
+      return;
+    }
+    const membershipRows = [{ group_id: group.id, user_id: session.user.id, role: "admin" },
+      ...members.map((user_id) => ({ group_id: group.id, user_id, role: "member" }))];
+    const { error: membersError } = await supabase.from("group_chat_members").insert(membershipRows);
+    if (membersError) {
+      setNotice("Grupa je stvorena, ali članove nije moguće dodati. Provjeri SQL nacrt; možda će trebati ukloniti nedovršenu grupu.");
+      setGroupBusy(false);
+      return;
+    }
+    setGroupChats((current) => [{ ...group, members: membershipRows }, ...current]);
+    setActiveGroupId(group.id);
+    setGroupDraftName("");
+    setGroupSelectedMembers([]);
+    setNotice("Grupni razgovor je stvoren.");
+    setGroupBusy(false);
+  }
+
+  async function sendGroupMessage(event) {
+    event.preventDefault();
+    const body = groupMessageDraft.trim();
+    if (!supabase || !session?.user?.id || !activeGroupId || !body) return;
+    if (body.length > 2000) { setNotice("Poruka grupe može imati najviše 2000 znakova."); return; }
+    const { data, error } = await supabase.from("group_chat_messages")
+      .insert({ group_id: activeGroupId, sender_id: session.user.id, body })
+      .select("id, group_id, sender_id, body, created_at").single();
+    if (error) { setNotice("Grupna poruka nije poslana. Provjeri tablice i RLS pravila."); return; }
+    setGroupMessages((current) => [...current.filter((item) => item.id !== data.id), data]);
+    setGroupMessageDraft("");
   }
 
   async function sendPrivateMessage(event) {
@@ -1341,6 +1443,38 @@ function App() {
                     ) : <p className="directory-empty">{messageSearch.trim() ? "Nema razgovora koji odgovaraju pretrazi." : "Razgovori će se pojaviti ovdje nakon prve poslane ili primljene poruke."}</p>}
                     {messageSearch.trim() && searchedMessages.length > 0 && <div className="message-search-results"><h3>Pronađene poruke</h3>{searchedMessages.slice(0, 30).map((message) => { const otherId = message.sender_id === session.user.id ? message.recipient_id : message.sender_id; const member = memberDirectory.find((item) => item.id === otherId); const displayName = member?.display_name || member?.username || "Čuvar nasljeđa"; return <button type="button" className="message-search-result" key={message.id} onClick={() => { setMessageRecipient(otherId); setMessageSearch(""); setNotice("Otvoren razgovor s " + displayName + "."); }}><strong>{displayName}</strong><small>{new Date(message.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" })}</small><p>{message.body}</p></button>; })}{searchedMessages.length > 30 && <small className="message-search-limit">Prikazano je prvih 30 rezultata. Suzi pretragu za preciznije rezultate.</small>}</div>}
                   </div>
+                  <section className="group-chat-panel" aria-labelledby="group-chat-title">
+                    <div className="message-search-heading"><h3 id="group-chat-title">Grupni razgovori</h3><span>{groupChats.length} grupa</span></div>
+                    <form className="group-chat-create" onSubmit={createGroupChat}>
+                      <label htmlFor="group-chat-name">Naziv nove grupe</label>
+                      <input id="group-chat-name" value={groupDraftName} onChange={(event) => setGroupDraftName(event.target.value)} maxLength={60} placeholder="Npr. Čuvari povijesti Dalmacije" required />
+                      <label htmlFor="group-chat-members">Dodaj članove (odaberi jednog ili više)</label>
+                      <select id="group-chat-members" multiple value={groupSelectedMembers} onChange={(event) => setGroupSelectedMembers(Array.from(event.target.selectedOptions, (option) => option.value))} size={Math.min(5, Math.max(3, memberDirectory.length))}>
+                        {memberDirectory.filter((member) => member.id !== session.user.id && !blockedMembers.some((blocked) => blocked.id === member.id)).map((member) => <option key={member.id} value={member.id}>{member.display_name || member.username || "Čuvar nasljeđa"}{member.username ? " · @" + member.username : ""}</option>)}
+                      </select>
+                      <div className="private-message-actions"><small>{groupSelectedMembers.length} odabranih članova</small><button className="primary-button" type="submit" disabled={groupBusy}>{groupBusy ? "Stvaram grupu…" : "＋ Stvori grupu"}</button></div>
+                    </form>
+                    {groupChats.length > 0 && <div className="message-conversation-list group-chat-list">
+                      {groupChats.map((group) => <button type="button" key={group.id} className={activeGroupId === group.id ? "message-conversation selected" : "message-conversation"} onClick={() => setActiveGroupId(group.id)}>
+                        <Avatar initials="👥" /><span className="message-conversation-copy"><strong>{group.name}</strong><small>{group.members?.length || 0} članova</small></span>
+                      </button>)}
+                    </div>}
+                    {activeGroupId && <div className="group-chat-thread">
+                      <h4>{groupChats.find((group) => group.id === activeGroupId)?.name || "Grupni razgovor"}</h4>
+                      <div className="group-chat-messages">{groupMessages.map((message) => {
+                        const sender = memberDirectory.find((member) => member.id === message.sender_id);
+                        const outgoing = message.sender_id === session.user.id;
+                        return <article key={message.id} className={outgoing ? "group-chat-message outgoing" : "group-chat-message"}>
+                          <strong>{outgoing ? "Ti" : (sender?.display_name || sender?.username || "Čuvar nasljeđa")}</strong>
+                          <p>{message.body}</p><small>{new Date(message.created_at).toLocaleString("hr-HR", { dateStyle: "short", timeStyle: "short" })}</small>
+                        </article>;
+                      })}{!groupMessages.length && <p className="directory-empty">Ovo je početak grupnog razgovora. Pošalji prvu poruku.</p>}</div>
+                      <form className="group-chat-compose" onSubmit={sendGroupMessage}>
+                        <textarea value={groupMessageDraft} onChange={(event) => setGroupMessageDraft(event.target.value)} maxLength={2000} rows="2" placeholder="Poruka za grupu…" required />
+                        <div className="private-message-actions"><small>{groupMessageDraft.length}/2000</small><button type="submit" className="primary-button">Pošalji u grupu ↗</button></div>
+                      </form>
+                    </div>}
+                  </section>
                   <div className="private-message-list">
                     <h3>{messageRecipient ? "Razgovor" : "Odaberi razgovor"}</h3>
                     {messagesBusy ? <p className="directory-empty">Učitavam poruke…</p> : !messageRecipient ? <p className="directory-empty">Odaberi člana u polju „Primatelj” ili postojeći razgovor iznad.</p> : activeConversationMessages.length ? activeConversationMessages.map((message) => {
