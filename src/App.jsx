@@ -161,11 +161,34 @@ function App() {
   }
 
   useEffect(() => {
-    const metadata = session?.user?.user_metadata || {};
-    setProfileName(metadata.display_name || "");
-    setProfileUsername(metadata.username || "");
-    setProfileBio(metadata.bio || "");
-  }, [session?.user?.id, session?.user?.user_metadata?.display_name, session?.user?.user_metadata?.username, session?.user?.user_metadata?.bio]);
+    let cancelled = false;
+    async function loadProfile() {
+      const metadata = session?.user?.user_metadata || {};
+      setProfileName(metadata.display_name || "");
+      setProfileUsername(metadata.username || "");
+      setProfileBio(metadata.bio || "");
+      if (!supabase || !session?.user?.id) return;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("username, display_name, bio")
+        .eq("id", session.user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      if (error) {
+        // Keep the account metadata as an editing fallback, but never claim the DB profile loaded.
+        setProfileMessage("Profilna tablica nije dostupna ili nema dopušten pristup. Provjeri primijenjeni SQL nacrt i RLS pravila.");
+        return;
+      }
+      if (data) {
+        setProfileName(data.display_name || "");
+        setProfileUsername(data.username || "");
+        setProfileBio(data.bio || "");
+        setProfileMessage("");
+      }
+    }
+    loadProfile();
+    return () => { cancelled = true; };
+  }, [session?.user?.id]);
 
   async function saveProfile(event) {
     event.preventDefault();
@@ -182,16 +205,15 @@ function App() {
     setProfileBusy(true);
     setProfileMessage("");
     try {
-      const { data, error } = await supabase.auth.updateUser({
-        data: {
-          display_name: profileName.trim(),
-          username: cleanUsername,
-          bio: profileBio.trim(),
-        },
-      });
+      const { error } = await supabase.from("profiles").upsert({
+        id: session.user.id,
+        display_name: profileName.trim(),
+        username: cleanUsername || null,
+        bio: profileBio.trim(),
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "id" });
       if (error) throw error;
-      setSession((current) => current ? { ...current, user: data.user } : current);
-      setProfileMessage("Profil je spremljen u podatke računa.");
+      setProfileMessage("Profil je spremljen u bazi zajednice.");
     } catch (error) {
       setProfileMessage(error?.message || "Profil nije spremljen. Pokušaj ponovno.");
     } finally {
@@ -233,7 +255,7 @@ function App() {
     setDraft("");
     setSelectedImage("");
     setMemberPickerOpen(false);
-    setNotice("Objava je dodana samo u ovaj lokalni prikaz. Fotografija i tekst nisu poslani na poslužitelj.");
+    setNotice("Objava je dodana samo u ovaj lokalni prikaz. Trajno spremanje zida bit će aktivirano nakon povezivanja baze.");
   }
 
   function toggleLike(id) {
@@ -263,7 +285,7 @@ function App() {
     }
     setCommentsByPost((current) => ({ ...current, [id]: [...(current[id] || []), { id: Date.now(), author: "Ti — probni profil", text }] }));
     setCommentDrafts((current) => ({ ...current, [id]: "" }));
-    setNotice("Komentar je dodan samo u lokalni prikaz; nije spremljen u bazu.");
+    setNotice("Komentar je dodan samo u lokalni prikaz; trajno spremanje komentara još nije povezano.");
   }
 
   function startEdit(post) {
@@ -281,7 +303,7 @@ function App() {
     setPosts((current) => current.map((post) => post.id === id ? { ...post, text, time: "Uređeno upravo sada" } : post));
     setEditingPostId(null);
     setEditDraft("");
-    setNotice("Objava je uređena samo u lokalnom prikazu.");
+    setNotice("Objava je uređena samo u lokalnom prikazu; trajno uređivanje još nije povezano.");
   }
 
   function deletePost(id) {
@@ -292,7 +314,7 @@ function App() {
       return next;
     });
     setOpenComments((current) => current.filter((item) => item !== id));
-    setNotice("Vlastita probna objava i njezini komentari uklonjeni su iz lokalnog prikaza.");
+    setNotice("Vlastita probna objava i njezini komentari uklonjeni su iz lokalnog prikaza; brisanje iz baze još nije povezano.");
   }
 
   return (
