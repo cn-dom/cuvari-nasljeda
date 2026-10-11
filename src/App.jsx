@@ -68,8 +68,16 @@ function App() {
   const [activeNav, setActiveNav] = useState("Zid zajednice");
   const [liked, setLiked] = useState([]);
   const [notice, setNotice] = useState("");
+  const [feedFilter, setFeedFilter] = useState("Sve objave");
+  const [feedSearch, setFeedSearch] = useState("");
 
   const postCount = useMemo(() => posts.length, [posts]);
+  const visiblePosts = useMemo(() => posts.filter((post) => {
+    const matchesFilter = feedFilter === "Sve objave" || post.tag.toLocaleLowerCase("hr").includes(feedFilter.toLocaleLowerCase("hr"));
+    const query = feedSearch.trim().toLocaleLowerCase("hr");
+    const matchesSearch = !query || `${post.author} ${post.handle} ${post.tag} ${post.text}`.toLocaleLowerCase("hr").includes(query);
+    return matchesFilter && matchesSearch;
+  }), [posts, feedFilter, feedSearch]);
 
   function publishPost() {
     const text = draft.trim();
@@ -220,10 +228,20 @@ function App() {
               <span className="eyebrow">ŽIVOT ZAJEDNICE</span>
               <h2>{activeNav === "Zid zajednice" ? "Zid zajednice" : activeNav}</h2>
             </div>
-            <button className="sort-button" onClick={() => setNotice("Sortiranje po najnovijem i najpopularnijem dodat ćemo uz povezivanje baze.")}>Najnovije⌄</button>
+            <span className="feed-total">{visiblePosts.length} objava</span>
           </div>
 
-          {posts.map((post) => (
+          <section className="feed-controls card" aria-label="Pretraživanje i filtriranje zida">
+            <label className="sr-only" htmlFor="feed-search">Pretraži objave</label>
+            <input id="feed-search" className="feed-search" type="search" value={feedSearch} onChange={(event) => setFeedSearch(event.target.value)} placeholder="Pretraži priče, članove i teme…" />
+            <div className="feed-filter-list" aria-label="Filtriraj objave">
+              {["Sve objave", "BAŠTINA", "OBITELJSKE PRIČE", "POVIJEST"].map((filter) => (
+                <button key={filter} type="button" className={feedFilter === filter ? "feed-filter active" : "feed-filter"} onClick={() => setFeedFilter(filter)} aria-pressed={feedFilter === filter}>{filter}</button>
+              ))}
+            </div>
+          </section>
+
+          {visiblePosts.length ? visiblePosts.map((post) => (
             <article className="post-card card" key={post.id}>
               <div className="post-header">
                 <Avatar initials={post.initials} variant={post.id === 1 ? "avatar-community" : ""} />
@@ -255,7 +273,7 @@ function App() {
                 <button className="post-action" onClick={() => setNotice("Dijeljenje objava bit će dostupno nakon povezivanja profila.")}><span>↗</span> Podijeli</button>
               </div>
             </article>
-          ))}
+          )) : <div className="empty-feed card"><strong>Nema pronađenih objava.</strong><p>Pokušaj drugu riječ ili odaberi „Sve objave”.</p><button className="outline-button" onClick={() => { setFeedSearch(""); setFeedFilter("Sve objave"); }}>Poništi filtre</button></div>}
           <div className="end-of-feed"><span>✦</span><p>Svaka priča čuva dio našeg zajedničkog nasljeđa.</p></div>
         </section>
 
