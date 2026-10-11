@@ -112,7 +112,9 @@ begin
     new.id,
     coalesce(nullif(trim(new.raw_user_meta_data ->> 'display_name'), ''), '')
   )
-  on conflict (id) do nothing;
+  on conflict (id) do update
+set file_size_limit = excluded.file_size_limit,
+    allowed_mime_types = excluded.allowed_mime_types;
   return new;
 end;
 $$;
@@ -124,13 +126,13 @@ create trigger on_auth_user_created_profile
 
 
 -- Private image bucket for community posts.
--- Existing bucket settings are intentionally not overwritten by this draft.
+-- Keep the private image bucket aligned with the 10 MB application upload limit.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (
   'community-images',
   'community-images',
   false,
-  5242880,
+  10485760,
   array['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 )
 on conflict (id) do nothing;
