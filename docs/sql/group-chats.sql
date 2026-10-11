@@ -309,6 +309,40 @@ $;
 revoke all on function public.delete_group_chat(uuid) from public;
 grant execute on function public.delete_group_chat(uuid) to authenticated;
 
+
+-- Odgovori na pojedinačne poruke u grupnim razgovorima.
+alter table public.group_chat_messages
+  add column if not exists reply_to_id uuid null
+  references public.group_chat_messages(id) on delete set null;
+
+create index if not exists group_chat_messages_reply_to_idx
+  on public.group_chat_messages (reply_to_id)
+  where reply_to_id is not null;
+
+-- Odgovor mora upućivati na poruku iz iste grupe; nakon slanja cilj ne može se mijenjati.
+create or replace function public.guard_group_chat_message_changes()
+returns trigger
+language plpgsql
+set search_path = public, pg_temp
+as $$
+begin
+  if new.id is distinct from old.id
+     or new.group_id is distinct from old.group_id
+     or new.sender_id is distinct from old.sender_id
+     or new.created_at is distinct from old.created_at
+     or new.reply_to_id is distinct from old.reply_to_id then
+    raise exception 'Group message identity and reply target cannot be changed';
+  end if;
+  if new.reply_to_id is not null and not exists (
+    select 1 from public.group_chat_messages replied
+    where replied.id = new.reply_to_id and replied.group_id = new.group_id
+  ) then
+    raise exception 'Reply target must belong to the same group';
+  end if;
+  return new;
+end;
+$$;
+
 commit;
 
 -- Verification after manually applying to the test project:
