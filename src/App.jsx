@@ -122,6 +122,7 @@ function App() {
   const [groupMessages, setGroupMessages] = useState([]);
   const [groupMessageReactions, setGroupMessageReactions] = useState([]);
   const [groupMessageReads, setGroupMessageReads] = useState([]);
+  const [groupUnreadCounts, setGroupUnreadCounts] = useState({});
   const [groupReactionBusy, setGroupReactionBusy] = useState("");
   const [groupDraftName, setGroupDraftName] = useState("");
   const [groupSelectedMembers, setGroupSelectedMembers] = useState([]);
@@ -956,6 +957,19 @@ function App() {
 
   useEffect(() => {
     let cancelled = false;
+    async function loadGroupUnreadCounts() {
+      if (!supabase || !session?.user?.id || activeNav !== "Poruke") { setGroupUnreadCounts({}); return; }
+      const { data, error } = await supabase.rpc("get_group_unread_counts");
+      if (cancelled) return;
+      if (error) { setGroupUnreadCounts({}); return; }
+      setGroupUnreadCounts(Object.fromEntries((data || []).map((row) => [row.group_id, Number(row.unread_count) || 0])));
+    }
+    loadGroupUnreadCounts();
+    return () => { cancelled = true; };
+  }, [activeNav, groupChats, groupMessages, groupMessageReads, session?.user?.id]);
+
+  useEffect(() => {
+    let cancelled = false;
     async function loadGroupMessageReads() {
       if (!supabase || !session?.user?.id || !activeGroupId || activeNav !== "Poruke") { setGroupMessageReads([]); return; }
       const { data, error } = await supabase.from("group_chat_message_reads").select("message_id, group_id, user_id, read_at").eq("group_id", activeGroupId);
@@ -1781,7 +1795,7 @@ function App() {
                     </form>
                     {groupChats.length > 0 && <div className="message-conversation-list group-chat-list">
                       {groupChats.map((group) => <button type="button" key={group.id} className={activeGroupId === group.id ? "message-conversation selected" : "message-conversation"} onClick={() => setActiveGroupId(group.id)}>
-                        <Avatar initials="👥" /><span className="message-conversation-copy"><strong>{group.name}</strong><small>{group.members?.length || 0} članova</small></span>
+                        <Avatar initials="👥" /><span className="message-conversation-copy"><strong>{group.name}</strong><small>{group.members?.length || 0} članova</small></span>{(groupUnreadCounts[group.id] || 0) > 0 && <span className="group-unread-badge" aria-label={(groupUnreadCounts[group.id] || 0) + " nepročitanih poruka"}>{groupUnreadCounts[group.id] > 99 ? "99+" : groupUnreadCounts[group.id]}</span>}
                       </button>)}
                     </div>}
                     {activeGroupId && <div className="group-chat-thread">
