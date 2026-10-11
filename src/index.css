@@ -597,3 +597,15 @@ button { -webkit-tap-highlight-color: transparent; }
 .group-message-reply-quote small, .group-replying-banner small { display: block; font-size: 11px; font-weight: 700; color: #526d86; }
 .group-message-reply-quote p, .group-replying-banner p { margin: 3px 0 0; font-size: 12px; overflow-wrap: anywhere; }
 .group-replying-banner { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+
+/* Potvrde čitanja grupnih poruka */
+.group-message-read-status {
+  margin: 2px 0 5px auto;
+  max-width: 100%;
+  color: var(--muted, #64748b);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
