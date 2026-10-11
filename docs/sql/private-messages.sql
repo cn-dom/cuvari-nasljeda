@@ -107,4 +107,21 @@ $;
 drop trigger if exists private_messages_set_updated_at on public.private_messages;
 create trigger private_messages_set_updated_at before update of body on public.private_messages
 for each row execute function public.set_private_message_updated_at();
+
+-- Prevent changing the sender, recipient, or reply target after a message is created.
+create or replace function public.guard_private_message_identity()
+returns trigger language plpgsql set search_path = public, pg_temp as $
+begin
+  if new.sender_id <> old.sender_id
+    or new.recipient_id <> old.recipient_id
+    or new.reply_to_id is distinct from old.reply_to_id
+    or new.created_at <> old.created_at then
+    raise exception 'Message participants and reply target cannot be changed';
+  end if;
+  return new;
+end;
+$;
+drop trigger if exists private_messages_guard_identity on public.private_messages;
+create trigger private_messages_guard_identity before update on public.private_messages
+for each row execute function public.guard_private_message_identity();
 commit;
