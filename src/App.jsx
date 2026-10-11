@@ -717,6 +717,18 @@ function App() {
         event: "INSERT", schema: "public", table: "private_messages", filter: "sender_id=eq." + userId,
       }, (payload) => mergeMessage(payload.new))
       .on("postgres_changes", {
+        event: "UPDATE", schema: "public", table: "private_messages", filter: "recipient_id=eq." + userId,
+      }, (payload) => mergeMessage(payload.new))
+      .on("postgres_changes", {
+        event: "UPDATE", schema: "public", table: "private_messages", filter: "sender_id=eq." + userId,
+      }, (payload) => mergeMessage(payload.new))
+      .on("postgres_changes", {
+        event: "DELETE", schema: "public", table: "private_messages", filter: "recipient_id=eq." + userId,
+      }, (payload) => { if (payload.old?.id) setMessages((current) => current.filter((message) => message.id !== payload.old.id)); })
+      .on("postgres_changes", {
+        event: "DELETE", schema: "public", table: "private_messages", filter: "sender_id=eq." + userId,
+      }, (payload) => { if (payload.old?.id) setMessages((current) => current.filter((message) => message.id !== payload.old.id)); })
+      .on("postgres_changes", {
         event: "INSERT", schema: "public", table: "notifications", filter: "recipient_id=eq." + userId,
       }, (payload) => mergeNotification(payload.new))
       .on("postgres_changes", {
