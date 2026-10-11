@@ -123,6 +123,9 @@ function App() {
   const [groupDraftName, setGroupDraftName] = useState("");
   const [groupSelectedMembers, setGroupSelectedMembers] = useState([]);
   const [groupMessageDraft, setGroupMessageDraft] = useState("");
+  const [groupEditingMessageId, setGroupEditingMessageId] = useState(null);
+  const [groupMessageEditDraft, setGroupMessageEditDraft] = useState("");
+  const [groupMessageActionBusyId, setGroupMessageActionBusyId] = useState(null);
   const [groupBusy, setGroupBusy] = useState(false);
   const [groupNameDraft, setGroupNameDraft] = useState("");
   const [groupMemberToAdd, setGroupMemberToAdd] = useState("");
@@ -865,6 +868,44 @@ function App() {
       setNotice("Grupa „" + group.name + "” i njezine poruke trajno su izbrisane.");
     }
     setGroupBusy(false);
+  }
+
+  async function saveGroupMessageEdit(event) {
+    event.preventDefault();
+    const message = groupMessages.find((item) => item.id === groupEditingMessageId);
+    const body = groupMessageEditDraft.trim();
+    if (!supabase || !session?.user?.id || !message || message.sender_id !== session.user.id || !body) return;
+    if (body.length > 2000) { setNotice("Poruka grupe može imati najviše 2000 znakova."); return; }
+    setGroupMessageActionBusyId(message.id);
+    const { data, error } = await supabase.from("group_chat_messages").update({ body })
+      .eq("id", message.id).eq("sender_id", session.user.id)
+      .select("id, group_id, sender_id, body, created_at").single();
+    if (error) setNotice("Uređivanje poruke nije uspjelo. Provjeri SQL/RLS pravila grupnih razgovora.");
+    else {
+      setGroupMessages((current) => current.map((item) => item.id === data.id ? data : item));
+      setGroupEditingMessageId(null);
+      setGroupMessageEditDraft("");
+      setNotice("Grupna poruka je uređena.");
+    }
+    setGroupMessageActionBusyId(null);
+  }
+
+  async function deleteGroupMessage(message) {
+    if (!supabase || !session?.user?.id || !message || message.sender_id !== session.user.id) return;
+    if (!window.confirm("Izbrisati ovu poruku iz grupnog razgovora?")) return;
+    setGroupMessageActionBusyId(message.id);
+    const { error } = await supabase.from("group_chat_messages").delete()
+      .eq("id", message.id).eq("sender_id", session.user.id);
+    if (error) setNotice("Brisanje poruke nije uspjelo. Provjeri SQL/RLS pravila grupnih razgovora.");
+    else {
+      setGroupMessages((current) => current.filter((item) => item.id !== message.id));
+      if (groupEditingMessageId === message.id) {
+        setGroupEditingMessageId(null);
+        setGroupMessageEditDraft("");
+      }
+      setNotice("Grupna poruka je izbrisana.");
+    }
+    setGroupMessageActionBusyId(null);
   }
 
   async function sendGroupMessage(event) {
@@ -1696,9 +1737,16 @@ function App() {
                       <div className="group-chat-messages">{groupMessages.map((message) => {
                         const sender = memberDirectory.find((member) => member.id === message.sender_id);
                         const outgoing = message.sender_id === session.user.id;
+                        const editing = groupEditingMessageId === message.id;
                         return <article key={message.id} className={outgoing ? "group-chat-message outgoing" : "group-chat-message"}>
                           <strong>{outgoing ? "Ti" : (sender?.display_name || sender?.username || "Čuvar nasljeđa")}</strong>
-                          <p>{message.body}</p><small>{new Date(message.created_at).toLocaleString("hr-HR", { dateStyle: "short", timeStyle: "short" })}</small>
+                          {editing ? <form className="group-message-edit-form" onSubmit={saveGroupMessageEdit}>
+                            <textarea value={groupMessageEditDraft} onChange={(event) => setGroupMessageEditDraft(event.target.value)} maxLength={2000} rows="3" required />
+                            <div><button type="submit" className="post-menu-button" disabled={groupMessageActionBusyId === message.id || !groupMessageEditDraft.trim()}>Spremi</button><button type="button" className="post-menu-button" disabled={groupMessageActionBusyId === message.id} onClick={() => { setGroupEditingMessageId(null); setGroupMessageEditDraft(""); }}>Odustani</button></div>
+                          </form> : <p>{message.body}</p>}
+                          <div className="group-message-meta"><small>{new Date(message.created_at).toLocaleString("hr-HR", { dateStyle: "short", timeStyle: "short" })}</small>
+                            {outgoing && !editing && <span className="group-message-actions"><button type="button" className="post-menu-button" disabled={groupMessageActionBusyId === message.id} onClick={() => { setGroupEditingMessageId(message.id); setGroupMessageEditDraft(message.body); }}>Uredi</button><button type="button" className="post-menu-button danger" disabled={groupMessageActionBusyId === message.id} onClick={() => deleteGroupMessage(message)}>Izbriši</button></span>}
+                          </div>
                         </article>;
                       })}{!groupMessages.length && <p className="directory-empty">Ovo je početak grupnog razgovora. Pošalji prvu poruku.</p>}</div>
                       <form className="group-chat-compose" onSubmit={sendGroupMessage}>
