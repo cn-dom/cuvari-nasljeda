@@ -465,3 +465,14 @@ button { -webkit-tap-highlight-color: transparent; }
 .message-conversation-copy strong { color: var(--navy); font-size: 12px; }
 .message-conversation-copy small { margin-top: 4px; overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .message-conversation time { flex-shrink: 0; color: var(--muted); font-size: 10px; }
+
+
+/* Uređivanje i brisanje vlastitih privatnih poruka */
+.private-message-actions-inline { display: inline-flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end; }
+.private-message-reply-button:disabled { opacity: .55; cursor: wait; }
+.private-message-reply-button.danger { color: #a22d3d; border-color: #e9c9ce; }
+.private-message-edit-form { display: grid; gap: 8px; margin-top: 8px; }
+.private-message-edit-form textarea { width: 100%; min-height: 70px; resize: vertical; border: 1px solid #cfd9e2; border-radius: 8px; padding: 9px 10px; color: var(--ink); background: #fff; font: inherit; font-size: 12px; line-height: 1.5; }
+.private-message-edit-form .private-message-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.private-message-edit-form .private-message-footer > span { display: inline-flex; gap: 5px; }
+@media (max-width: 520px) { .private-message-actions-inline { justify-content: flex-start; } .private-message-footer { align-items: flex-start; flex-direction: column; } }
