@@ -184,7 +184,7 @@ function App() {
         const username = profile.username || "clan";
         return {
           id: row.id,
-          initials: name.split(/\\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
+          initials: name.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
           author: name,
           handle: "@" + username,
           time: new Date(row.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" }),
@@ -302,7 +302,7 @@ function App() {
     const username = profile.username || "clan";
     setPosts((current) => [{
       id: data.id,
-      initials: author.split(/\\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
+      initials: author.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
       author,
       handle: "@" + username,
       time: new Date(data.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" }),
