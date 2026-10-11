@@ -535,3 +535,15 @@ button { -webkit-tap-highlight-color: transparent; }
   .group-chat-thread { padding: 10px; }
   .group-chat-message { max-width: 100%; }
 }
+
+
+/* Status aktivnosti članova i privatnost */
+.member-presence-preferences { display: grid; gap: 5px; margin: 12px 0 14px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: #f8fafc; }
+.member-presence-preferences label { display: flex; align-items: flex-start; gap: 8px; color: var(--navy); font-size: 11px; font-weight: 800; cursor: pointer; }
+.member-presence-preferences input { flex: 0 0 auto; margin-top: 2px; accent-color: var(--blue); }
+.member-presence-preferences small { padding-left: 23px; color: var(--muted); font-size: 10px; line-height: 1.45; }
+.member-presence-status { display: inline-flex !important; align-items: center; gap: 5px; margin-top: 5px; font-size: 10px !important; font-weight: 700; }
+.member-presence-status i { display: inline-block; width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: #9aa5b1; }
+.member-presence-status.online i { background: #21945b; box-shadow: 0 0 0 2px #dff3e8; }
+.member-presence-status.recent i { background: #d39a25; }
+.member-presence-status.offline i { background: #9aa5b1; }
