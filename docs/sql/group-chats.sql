@@ -195,6 +195,42 @@ create policy group_chat_messages_select_members on public.group_chat_messages
 for select to authenticated
 using (public.is_group_chat_member(group_id));
 
+-- Keep message identity fields immutable while allowing authors to edit text.
+create or replace function public.guard_group_chat_message_changes()
+returns trigger
+language plpgsql
+set search_path = public, pg_temp
+as $
+begin
+  if new.id is distinct from old.id
+     or new.group_id is distinct from old.group_id
+     or new.sender_id is distinct from old.sender_id
+     or new.created_at is distinct from old.created_at then
+    raise exception 'Group message identity fields cannot be changed';
+  end if;
+  return new;
+end;
+$;
+
+drop trigger if exists guard_group_chat_message_changes on public.group_chat_messages;
+create trigger guard_group_chat_message_changes before update on public.group_chat_messages
+for each row execute function public.guard_group_chat_message_changes();
+
+drop policy if exists group_chat_messages_update_own on public.group_chat_messages;
+create policy group_chat_messages_update_own on public.group_chat_messages
+for update to authenticated
+using (sender_id = auth.uid() and public.is_group_chat_member(group_id))
+with check (
+  sender_id = auth.uid()
+  and public.is_group_chat_member(group_id)
+  and char_length(trim(body)) between 1 and 2000
+);
+
+drop policy if exists group_chat_messages_delete_own on public.group_chat_messages;
+create policy group_chat_messages_delete_own on public.group_chat_messages
+for delete to authenticated
+using (sender_id = auth.uid() and public.is_group_chat_member(group_id));
+
 drop policy if exists group_chat_messages_insert_members on public.group_chat_messages;
 create policy group_chat_messages_insert_members on public.group_chat_messages
 for insert to authenticated
