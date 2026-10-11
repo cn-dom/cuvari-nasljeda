@@ -209,6 +209,27 @@ function App() {
       setPosts(rows);
       if (rows.length) {
         const postIds = rows.map((post) => post.id);
+        const { data: reactionRows, error: reactionsError } = await supabase
+          .from("post_reactions")
+          .select("post_id, user_id, reaction")
+          .in("post_id", postIds);
+        if (cancelled) return;
+        if (!reactionsError) {
+          const reactionCounts = {};
+          const ownReactions = {};
+          (reactionRows || []).forEach((row) => {
+            if (!reactionCounts[row.post_id]) reactionCounts[row.post_id] = 0;
+            if (row.reaction === "like") reactionCounts[row.post_id] += 1;
+            if (row.user_id === session.user.id) {
+              ownReactions[row.post_id] = ({ like: "❤️", patriotism: "🇭🇷", gratitude: "🙏", support: "👏" })[row.reaction] || "";
+            }
+          });
+          setPosts((current) => current.map((post) => ({ ...post, likes: reactionCounts[post.id] || 0 })));
+          setLiked(Object.keys(ownReactions).filter((postId) => ownReactions[postId] === "❤️"));
+          setReactionsByPost(ownReactions);
+        } else {
+          setNotice("Objave su učitane, ali reakcije nisu dostupne. Provjeri tablicu post_reactions i njezina RLS pravila.");
+        }
         const { data: commentRows, error: commentsError } = await supabase
           .from("comments")
           .select("id, post_id, author_id, body, created_at, profiles(display_name, username)")
@@ -380,17 +401,41 @@ function App() {
     setNotice("Objava je spremljena u bazu zajednice.");
   }
 
-  function toggleLike(id) {
-    setLiked((current) => current.includes(id)
-      ? current.filter((item) => item !== id)
-      : [...current, id]);
+  async function toggleLike(id) {
+    await toggleReaction(id, "❤️");
   }
 
-  function toggleReaction(id, reaction) {
-    setReactionsByPost((current) => {
-      const selected = current[id] || "";
-      return { ...current, [id]: selected === reaction ? "" : reaction };
-    });
+  async function toggleReaction(id, reaction) {
+    if (!supabase || !session?.user?.id) {
+      setNotice("Za spremanje reakcije potrebno je prijaviti se.");
+      return;
+    }
+    const reactionToDb = { "❤️": "like", "🇭🇷": "patriotism", "🙏": "gratitude", "👏": "support" };
+    const dbReaction = reactionToDb[reaction];
+    if (!dbReaction) return;
+    const currentReaction = reactionsByPost[id] || "";
+    const { error } = currentReaction === reaction
+      ? await supabase.from("post_reactions").delete().eq("post_id", id).eq("user_id", session.user.id)
+      : await supabase.from("post_reactions").upsert(
+          { post_id: id, user_id: session.user.id, reaction: dbReaction },
+          { onConflict: "post_id,user_id" }
+        );
+    if (error) {
+      setNotice("Reakcija nije spremljena. Provjeri tablicu post_reactions i RLS pravila.");
+      return;
+    }
+    const nextReaction = currentReaction === reaction ? "" : reaction;
+    setReactionsByPost((current) => ({ ...current, [id]: nextReaction }));
+    setLiked((current) => nextReaction === "❤️"
+      ? (current.includes(id) ? current : [...current, id])
+      : current.filter((item) => item !== id));
+    setPosts((current) => current.map((post) => {
+      if (post.id !== id) return post;
+      const wasLike = currentReaction === "❤️";
+      const isLike = nextReaction === "❤️";
+      return { ...post, likes: Math.max(0, post.likes + (isLike ? 1 : 0) - (wasLike ? 1 : 0)) };
+    }));
+    setNotice("Reakcija je spremljena.");
   }
 
   function toggleComments(id) {
