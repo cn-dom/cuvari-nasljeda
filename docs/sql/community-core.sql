@@ -122,4 +122,48 @@ create trigger on_auth_user_created_profile
   after insert on auth.users
   for each row execute procedure public.handle_new_auth_user();
 
+
+-- Private image bucket for community posts.
+-- Existing bucket settings are intentionally not overwritten by this draft.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'community-images',
+  'community-images',
+  false,
+  5242880,
+  array['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+)
+on conflict (id) do nothing;
+
+-- Signed-in members may view community images through authenticated Storage requests.
+create policy "community_images_read_authenticated"
+  on storage.objects for select to authenticated
+  using (bucket_id = 'community-images');
+
+-- Each member may upload only into their own first-level folder: <auth.uid()>/<filename>.
+create policy "community_images_insert_own_folder"
+  on storage.objects for insert to authenticated
+  with check (
+    bucket_id = 'community-images'
+    and (storage.foldername(name))[1] = (select auth.uid())::text
+  );
+
+create policy "community_images_update_own_folder"
+  on storage.objects for update to authenticated
+  using (
+    bucket_id = 'community-images'
+    and (storage.foldername(name))[1] = (select auth.uid())::text
+  )
+  with check (
+    bucket_id = 'community-images'
+    and (storage.foldername(name))[1] = (select auth.uid())::text
+  );
+
+create policy "community_images_delete_own_folder"
+  on storage.objects for delete to authenticated
+  using (
+    bucket_id = 'community-images'
+    and (storage.foldername(name))[1] = (select auth.uid())::text
+  );
+
 commit;
