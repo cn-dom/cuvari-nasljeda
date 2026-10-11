@@ -108,6 +108,10 @@ function App() {
   const [memberDirectoryBusy, setMemberDirectoryBusy] = useState(false);
   const [mentionMembers, setMentionMembers] = useState([]);
   const [mentionBusy, setMentionBusy] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [messageRecipient, setMessageRecipient] = useState("");
+  const [messageDraft, setMessageDraft] = useState("");
+  const [messagesBusy, setMessagesBusy] = useState(false);
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -454,6 +458,57 @@ function App() {
     loadMentionMembers();
     return () => { cancelled = true; };
   }, [memberPickerOpen, session?.user?.id, blockedMembers]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadMessages() {
+      if (activeNav !== "Poruke" || !supabase || !session?.user?.id) return;
+      setMessagesBusy(true);
+      const { data, error } = await supabase
+        .from("private_messages")
+        .select("id, sender_id, recipient_id, body, created_at")
+        .or("sender_id.eq." + session.user.id + ",recipient_id.eq." + session.user.id)
+        .order("created_at", { ascending: true })
+        .limit(200);
+      if (cancelled) return;
+      if (error) {
+        setMessages([]);
+        setNotice("Privatne poruke još nisu dostupne. Potrebno je pregledati i primijeniti SQL nacrt u testnoj bazi.");
+      } else {
+        setMessages(data || []);
+      }
+      setMessagesBusy(false);
+    }
+    loadMessages();
+    return () => { cancelled = true; };
+  }, [activeNav, session?.user?.id]);
+
+  async function sendPrivateMessage(event) {
+    event.preventDefault();
+    const body = messageDraft.trim();
+    if (!supabase || !session?.user?.id) {
+      setAuthOpen(true);
+      setAuthMessage("Prijavi se za slanje privatnih poruka.");
+      return;
+    }
+    if (!messageRecipient || messageRecipient === session.user.id || !body) return;
+    if (body.length > 2000) {
+      setNotice("Poruka može imati najviše 2000 znakova.");
+      return;
+    }
+    const { data, error } = await supabase.from("private_messages").insert({
+      sender_id: session.user.id,
+      recipient_id: messageRecipient,
+      body,
+    }).select("id, sender_id, recipient_id, body, created_at").single();
+    if (error) {
+      setNotice("Poruka nije poslana. Provjeri postoji li tablica private_messages i jesu li RLS pravila primijenjena.");
+      return;
+    }
+    setMessages((current) => [...current, data]);
+    setMessageDraft("");
+    setNotice("Privatna poruka je poslana.");
+  }
 
   async function submitReport(event) {
     event.preventDefault();
@@ -916,6 +971,43 @@ function App() {
                 </button>
               </p>
               <p className="auth-footnote">Koristi samo testni račun dok ne provjerimo postavke i pravila pristupa.</p>
+            </section>
+          )}
+
+          {activeNav === "Poruke" && (
+            <section className="private-messages card" aria-labelledby="private-messages-title">
+              <div className="member-directory-heading">
+                <div><span className="eyebrow">RAZGOVORI ČLANOVA</span><h2 id="private-messages-title">Privatne poruke</h2><p>Poruke su vidljive samo pošiljatelju i primatelju kada su sigurnosna pravila baze pravilno primijenjena.</p></div>
+              </div>
+              {!session?.user?.id ? (
+                <div className="directory-empty"><p>Prijavi se za privatne razgovore.</p><button className="primary-button" onClick={() => { setAuthOpen(true); setAuthMessage(""); }}>Prijava / Registracija</button></div>
+              ) : (
+                <>
+                  <form className="private-message-compose" onSubmit={sendPrivateMessage}>
+                    <label htmlFor="message-recipient">Primatelj</label>
+                    <select id="message-recipient" value={messageRecipient} onChange={(event) => setMessageRecipient(event.target.value)} required>
+                      <option value="">Odaberi člana…</option>
+                      {memberDirectory.filter((member) => !blockedMembers.some((blocked) => blocked.id === member.id)).map((member) => <option key={member.id} value={member.id}>{member.display_name || member.username || "Čuvar nasljeđa"}{member.username ? " · @" + member.username : ""}</option>)}
+                    </select>
+                    <label htmlFor="private-message-draft">Poruka</label>
+                    <textarea id="private-message-draft" value={messageDraft} onChange={(event) => setMessageDraft(event.target.value)} maxLength={2000} rows="3" placeholder="Napiši privatnu poruku…" required />
+                    <div className="private-message-actions"><small>{messageDraft.length}/2000 znakova</small><button className="primary-button" type="submit">Pošalji poruku ↗</button></div>
+                  </form>
+                  <div className="private-message-list">
+                    <h3>Poruke</h3>
+                    {messagesBusy ? <p className="directory-empty">Učitavam poruke…</p> : messages.length ? messages.slice().reverse().map((message) => {
+                      const outgoing = message.sender_id === session.user.id;
+                      const otherId = outgoing ? message.recipient_id : message.sender_id;
+                      const member = memberDirectory.find((item) => item.id === otherId);
+                      return <article className={outgoing ? "private-message outgoing" : "private-message"} key={message.id}>
+                        <strong>{outgoing ? "Ti" : (member?.display_name || member?.username || "Čuvar nasljeđa")}</strong>
+                        <p>{message.body}</p>
+                        <small>{new Date(message.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" })}</small>
+                      </article>;
+                    }) : <p className="directory-empty">Još nema poruka ili tablica nije dostupna.</p>}
+                  </div>
+                </>
+              )}
             </section>
           )}
 
