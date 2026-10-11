@@ -83,6 +83,7 @@ function App() {
   const [editDraft, setEditDraft] = useState("");
   const [memberPickerOpen, setMemberPickerOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
+  const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState("login");
   const [authEmail, setAuthEmail] = useState("");
@@ -178,10 +179,17 @@ function App() {
         setPosts(initialPosts);
         return;
       }
-      const rows = (data || []).map((row) => {
+      const rows = await Promise.all((data || []).map(async (row) => {
         const profile = row.profiles || {};
         const name = profile.display_name || "Čuvar nasljeđa";
         const username = profile.username || "clan";
+        let imageUrl = "";
+        if (row.image_path) {
+          const { data: signedImage } = await supabase.storage
+            .from("community-images")
+            .createSignedUrl(row.image_path, 60 * 60);
+          imageUrl = signedImage?.signedUrl || "";
+        }
         return {
           id: row.id,
           initials: name.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
@@ -190,14 +198,14 @@ function App() {
           time: new Date(row.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" }),
           tag: "ZAJEDNICA",
           text: row.body || "",
-          imageUrl: "",
+          imageUrl,
           imagePath: row.image_path || "",
           likes: 0,
           comments: 0,
           icon: "💬",
           owner: row.author_id === session.user.id,
         };
-      });
+      }));
       setPosts(rows);
       if (rows.length) {
         const postIds = rows.map((post) => post.id);
@@ -315,18 +323,37 @@ function App() {
       setNotice("Za objavu koja se trajno sprema potrebno je prijaviti se. Trenutačni ogledni zid ne sprema sadržaj na poslužitelj.");
       return;
     }
-    if (selectedImage) {
-      setNotice("Trajno učitavanje fotografija još nije povezano. Ukloni fotografiju ili pričekaj sljedeću fazu; tekst nije objavljen.");
-      return;
+    let imagePath = "";
+    if (selectedImageFile) {
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+      if (!allowedTypes.includes(selectedImageFile.type) || selectedImageFile.size > 5 * 1024 * 1024) {
+        setNotice("Fotografija mora biti JPG, PNG, WebP ili GIF i ne smije biti veća od 5 MB.");
+        return;
+      }
+      const extensionByType = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
+      imagePath = session.user.id + "/" + crypto.randomUUID() + "." + extensionByType[selectedImageFile.type];
+      const { error: uploadError } = await supabase.storage
+        .from("community-images")
+        .upload(imagePath, selectedImageFile, { contentType: selectedImageFile.type, upsert: false });
+      if (uploadError) {
+        setNotice("Fotografija nije učitana. Provjeri je li privatni spremnik community-images postavljen i jesu li njegova RLS pravila primijenjena.");
+        return;
+      }
     }
     const { data, error } = await supabase
       .from("posts")
-      .insert({ author_id: session.user.id, body: text })
+      .insert({ author_id: session.user.id, body: text, image_path: imagePath || null })
       .select("id, author_id, body, image_path, created_at, profiles(display_name, username)")
       .single();
     if (error) {
+      if (imagePath) await supabase.storage.from("community-images").remove([imagePath]);
       setNotice("Objava nije spremljena: " + (error.message || "provjeri tablicu posts i RLS pravila."));
       return;
+    }
+    let uploadedImageUrl = "";
+    if (imagePath) {
+      const { data: signedImage } = await supabase.storage.from("community-images").createSignedUrl(imagePath, 60 * 60);
+      uploadedImageUrl = signedImage?.signedUrl || "";
     }
     const profile = data.profiles || {};
     const author = profile.display_name || session.user.email || "Čuvar nasljeđa";
@@ -339,7 +366,7 @@ function App() {
       time: new Date(data.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" }),
       tag: "ZAJEDNICA",
       text: data.body || "",
-      imageUrl: "",
+      imageUrl: uploadedImageUrl,
       imagePath: data.image_path || "",
       likes: 0,
       comments: 0,
@@ -348,6 +375,7 @@ function App() {
     }, ...current]);
     setDraft("");
     setSelectedImage("");
+    setSelectedImageFile(null);
     setMemberPickerOpen(false);
     setNotice("Objava je spremljena u bazu zajednice.");
   }
@@ -651,8 +679,8 @@ function App() {
             {selectedImage && (
               <div className="composer-image-preview">
                 <img src={selectedImage} alt="Pregled odabrane fotografije" />
-                <button type="button" onClick={() => setSelectedImage("")}>Ukloni fotografiju</button>
-                <small>Privremeni pregled samo u ovom pregledniku · najviše 5 MB</small>
+                <button type="button" onClick={() => { setSelectedImage(""); setSelectedImageFile(null); }}>Ukloni fotografiju</button>
+                <small>Privatna fotografija · najviše 5 MB · učitat će se tek nakon slanja objave</small>
               </div>
             )}
             <div className="composer-bottom">
@@ -667,9 +695,12 @@ function App() {
                       if (!file) return;
                       if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) {
                         setNotice("Odaberi sliku do 5 MB (JPG, PNG, WebP ili GIF).");
+                        setSelectedImageFile(null);
+                        setSelectedImage("");
                         event.target.value = "";
                         return;
                       }
+                      setSelectedImageFile(file);
                       const reader = new FileReader();
                       reader.onload = () => setSelectedImage(typeof reader.result === "string" ? reader.result : "");
                       reader.onerror = () => setNotice("Fotografiju nije bilo moguće učitati u pregled.");
