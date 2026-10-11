@@ -106,6 +106,8 @@ function App() {
   const [memberDirectory, setMemberDirectory] = useState([]);
   const [memberDirectoryQuery, setMemberDirectoryQuery] = useState("");
   const [memberDirectoryBusy, setMemberDirectoryBusy] = useState(false);
+  const [mentionMembers, setMentionMembers] = useState([]);
+  const [mentionBusy, setMentionBusy] = useState(false);
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -424,6 +426,34 @@ function App() {
     loadMemberDirectory();
     return () => { cancelled = true; };
   }, [activeNav, session?.user?.id, blockedMembers]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadMentionMembers() {
+      if (!memberPickerOpen) return;
+      if (!supabase || !session?.user?.id) {
+        setMentionMembers([]);
+        return;
+      }
+      setMentionBusy(true);
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, display_name, username")
+        .neq("id", session.user.id)
+        .order("display_name", { ascending: true })
+        .limit(100);
+      if (cancelled) return;
+      if (error) {
+        setMentionMembers([]);
+        setNotice("Popis članova za označavanje nije dostupan. Provjeri tablicu profiles i RLS pravila.");
+      } else {
+        setMentionMembers((data || []).filter((member) => !blockedMembers.some((blocked) => blocked.id === member.id)));
+      }
+      setMentionBusy(false);
+    }
+    loadMentionMembers();
+    return () => { cancelled = true; };
+  }, [memberPickerOpen, session?.user?.id, blockedMembers]);
 
   async function submitReport(event) {
     event.preventDefault();
@@ -976,21 +1006,29 @@ function App() {
                 <div className="mention-tool-wrap">
                   <button type="button" aria-expanded={memberPickerOpen} onClick={() => setMemberPickerOpen((open) => !open)}>@ <span>Označi člana</span></button>
                   {memberPickerOpen && (
-                    <div className="mention-picker" aria-label="Probni izbor članova">
+                    <div className="mention-picker" aria-label="Izbor članova za označavanje">
                       <strong>Označi člana</strong>
-                      <p>Primjer izgleda · profili još nisu povezani</p>
-                      {[
-                        { name: "Marija K.", handle: "@marija_prica" },
-                        { name: "Ivan P.", handle: "@ivan_povijest" },
-                        { name: "Čuvari nasljeđa", handle: "@cuvari_nasljeda" },
-                      ].map((member) => (
-                        <button type="button" key={member.handle} onClick={() => {
-                          setDraft((value) => value + (value && !value.endsWith(" ") ? " " : "") + member.handle + " ");
-                          setMemberPickerOpen(false);
-                        }}>
-                          <span>{member.name}</span><small>{member.handle}</small>
-                        </button>
-                      ))}
+                      {!session?.user?.id ? (
+                        <p>Prijavi se kako bi mogao/la označiti stvarnog člana zajednice.</p>
+                      ) : mentionBusy ? (
+                        <p>Učitavam članove…</p>
+                      ) : mentionMembers.length ? (
+                        mentionMembers.map((member) => {
+                          const name = member.display_name || member.username || "Čuvar nasljeđa";
+                          const handle = "@" + (member.username || "clan");
+                          return (
+                            <button type="button" key={member.id} onClick={() => {
+                              setDraft((value) => value + (value && !value.endsWith(" ") ? " " : "") + handle + " ");
+                              setMemberPickerOpen(false);
+                            }}>
+                              <span>{name}</span><small>{handle}</small>
+                            </button>
+                          );
+                        })
+                      ) : (
+                        <p>Nema dostupnih članova za označavanje. Provjeri jesu li profili spremljeni i dostupni.</p>
+                      )}
+                      <small className="mention-note">Oznaka umeće korisničko ime u tekst objave; obavijesti označenom članu još nisu povezane.</small>
                     </div>
                   )}
                 </div>
