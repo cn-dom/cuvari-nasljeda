@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 
 const initialPosts = [
   {
@@ -82,6 +83,70 @@ function App() {
   const [editDraft, setEditDraft] = useState("");
   const [memberPickerOpen, setMemberPickerOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState("login");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authMessage, setAuthMessage] = useState("");
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    if (!supabase) return undefined;
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (error) setAuthMessage("Sesiju nije moguće učitati. Pokušaj ponovno.");
+      setSession(data?.session ?? null);
+    });
+    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+    });
+    return () => data.subscription.unsubscribe();
+  }, []);
+
+  async function submitAuth(event) {
+    event.preventDefault();
+    if (!supabase || !isSupabaseConfigured) {
+      setAuthMessage("Prijava još nije aktivna. Najprije treba postaviti zasebni testni Supabase projekt.");
+      return;
+    }
+    if (authPassword.length < 8) {
+      setAuthMessage("Lozinka mora imati najmanje 8 znakova.");
+      return;
+    }
+    setAuthBusy(true);
+    setAuthMessage("");
+    try {
+      if (authMode === "register") {
+        const { data, error } = await supabase.auth.signUp({
+          email: authEmail.trim(),
+          password: authPassword,
+          options: { emailRedirectTo: window.location.origin },
+        });
+        if (error) throw error;
+        setAuthMessage(data.session
+          ? "Registracija je uspješna. Sada si prijavljen/a."
+          : "Registracija je zaprimljena. Ako je potvrda e-pošte uključena, otvori poruku za potvrdu računa.");
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: authEmail.trim(),
+          password: authPassword,
+        });
+        if (error) throw error;
+        setAuthMessage("Uspješna prijava.");
+      }
+    } catch (error) {
+      setAuthMessage(error?.message || "Prijava nije uspjela. Provjeri podatke i pokušaj ponovno.");
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+
+  async function signOut() {
+    if (!supabase) return;
+    const { error } = await supabase.auth.signOut();
+    setAuthMessage(error ? "Odjava nije uspjela. Pokušaj ponovno." : "Uspješno si odjavljen/a.");
+    if (!error) setAuthOpen(false);
+  }
 
   const postCount = useMemo(() => posts.length, [posts]);
   const visiblePosts = useMemo(() => posts.filter((post) => {
@@ -207,7 +272,14 @@ function App() {
         </nav>
         <div className="top-actions">
           <button className="icon-button" aria-label="Pretraživanje" onClick={() => setNotice("Pretraživanje će biti povezano u sljedećoj fazi.")}>⌕</button>
-          <button className="login-button" onClick={() => setNotice("Prijava i registracija bit će dodane nakon postavljanja Supabase testnog okruženja.")}>Prijava</button>
+          {session ? (
+            <div className="auth-session-actions">
+              <span className="auth-user-label" title={session.user?.email || ""}>{session.user?.email || "Prijavljeni član"}</span>
+              <button className="login-button" onClick={signOut}>Odjava</button>
+            </div>
+          ) : (
+            <button className="login-button" onClick={() => { setAuthOpen(true); setAuthMessage(""); }}>Prijava / Registracija</button>
+          )}
         </div>
       </header>
 
@@ -268,6 +340,39 @@ function App() {
               <span>{notice}</span>
               <button aria-label="Zatvori obavijest" onClick={() => setNotice("")}>×</button>
             </div>
+          )}
+
+          {authOpen && (
+            <section className="auth-panel card" aria-labelledby="auth-title">
+              <div className="auth-panel-heading">
+                <div>
+                  <span className="eyebrow">ČUVARI NASLJEĐA</span>
+                  <h2 id="auth-title">{authMode === "register" ? "Izradi račun" : "Dobro došao natrag"}</h2>
+                </div>
+                <button type="button" className="auth-close" aria-label="Zatvori prijavu" onClick={() => setAuthOpen(false)}>×</button>
+              </div>
+              {!isSupabaseConfigured && (
+                <div className="auth-config-notice" role="status">
+                  <strong>Testna veza još nije postavljena.</strong>
+                  <span>Obrazac je pripremljen, ali prijava neće slati podatke dok se ne postave VITE_SUPABASE_URL i VITE_SUPABASE_PUBLISHABLE_KEY za zasebni testni projekt.</span>
+                </div>
+              )}
+              <form className="auth-form" onSubmit={submitAuth}>
+                <label htmlFor="auth-email">E-pošta</label>
+                <input id="auth-email" type="email" autoComplete="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} required placeholder="ime@primjer.hr" />
+                <label htmlFor="auth-password">Lozinka</label>
+                <input id="auth-password" type="password" autoComplete={authMode === "register" ? "new-password" : "current-password"} value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} required minLength={8} placeholder="Najmanje 8 znakova" />
+                <button className="auth-submit" type="submit" disabled={!isSupabaseConfigured || authBusy}>{authBusy ? "Molimo pričekaj…" : authMode === "register" ? "Registriraj se" : "Prijavi se"}</button>
+              </form>
+              {authMessage && <p className="auth-message" role="status">{authMessage}</p>}
+              <p className="auth-switch">
+                {authMode === "register" ? "Već imaš račun?" : "Nemaš račun?"}{" "}
+                <button type="button" onClick={() => { setAuthMode(authMode === "register" ? "login" : "register"); setAuthMessage(""); }}>
+                  {authMode === "register" ? "Prijava" : "Registracija"}
+                </button>
+              </p>
+              <p className="auth-footnote">Koristi samo testni račun dok ne provjerimo postavke i pravila pristupa.</p>
+            </section>
           )}
 
           <section className="composer card">
