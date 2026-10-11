@@ -87,6 +87,10 @@ Pripremljen je zaseban SQL nacrt u [docs/sql/community-core.sql](./sql/community
 - Pri brisanju objave očistiti pripadajući objekt uz provjeru vlasništva; baza i Storage nisu jedna atomska transakcija.
 - Nikad ne stavljati service_role ili tajni ključ u VITE_ varijable ili preglednik.
 
+## Testni kontrolni popis
+
+Kontrolni popis za provjeru RLS-a, vlasništva nad objavama i sigurnosti fotografija nalazi se u [docs/TESTNI-PLAN-SIGURNOSTI.md](./TESTNI-PLAN-SIGURNOSTI.md). To je plan za buduće testiranje, ne dokaz da su testovi već provedeni.
+
 ## Plan povezivanja bez rizika
 
 1. Potvrditi točan testni Supabase projekt — ne pogađati projekt ID.
