@@ -352,3 +352,13 @@ button { -webkit-tap-highlight-color: transparent; }
 .report-panel .auth-submit { width: auto; margin-top: 0; }
 .report-panel select { width: 100%; border: 1px solid #dfe5eb; border-radius: 9px; background: #fff; color: var(--ink); padding: 11px 12px; font: inherit; font-size: 12px; }
 @media (max-width: 760px) { .report-panel { padding: 16px; } .report-panel .inline-form-actions > button { flex: 1; } }
+
+
+/* Kontrole blokiranja članova */
+.post-menu-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
+.post-menu-button:disabled { opacity: .55; cursor: wait; }
+.blocked-members-section { border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+.blocked-member-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.blocked-member-row:last-child { border-bottom: 0; }
+.blocked-member-row span { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 11px; color: var(--ink); }
+.blocked-member-row button { flex-shrink: 0; border: 1px solid var(--line); border-radius: 7px; background: #fff; color: var(--navy); padding: 6px 8px; font-size: 10px; font-weight: 700; }
