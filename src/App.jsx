@@ -70,6 +70,8 @@ function App() {
   const [draft, setDraft] = useState("");
   const [activeNav, setActiveNav] = useState("Zid zajednice");
   const [liked, setLiked] = useState([]);
+  const [reactionsByPost, setReactionsByPost] = useState({});
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [feedFilter, setFeedFilter] = useState("Sve objave");
   const [feedSearch, setFeedSearch] = useState("");
@@ -117,6 +119,13 @@ function App() {
     setLiked((current) => current.includes(id)
       ? current.filter((item) => item !== id)
       : [...current, id]);
+  }
+
+  function toggleReaction(id, reaction) {
+    setReactionsByPost((current) => {
+      const selected = current[id] || "";
+      return { ...current, [id]: selected === reaction ? "" : reaction };
+    });
   }
 
   function toggleComments(id) {
