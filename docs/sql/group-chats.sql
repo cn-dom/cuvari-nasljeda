@@ -141,8 +141,7 @@ drop policy if exists group_chat_members_insert_creator on public.group_chat_mem
 create policy group_chat_members_insert_creator on public.group_chat_members
 for insert to authenticated
 with check (
-  (public.is_group_chat_creator(group_id) and
-    ((role = 'admin' and user_id = auth.uid()) or role = 'member'))
+  (public.is_group_chat_creator(group_id) and role = 'admin' and user_id = auth.uid())
   or (public.is_group_chat_admin(group_id) and role = 'member')
 );
 
