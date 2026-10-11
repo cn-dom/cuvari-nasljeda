@@ -343,3 +343,12 @@ button { -webkit-tap-highlight-color: transparent; }
   .profile-open-label { display: none; }
   .profile-panel { padding: 16px; }
 }
+
+
+/* Povjerljive prijave sadržaja */
+.report-panel { margin: 16px 0; padding: 22px; }
+.report-target { margin: 0 0 14px; color: #526171; font-size: 12px; line-height: 1.6; }
+.report-panel .inline-form-actions { display: flex; align-items: center; justify-content: flex-end; gap: 9px; flex-wrap: wrap; }
+.report-panel .auth-submit { width: auto; margin-top: 0; }
+.report-panel select { width: 100%; border: 1px solid #dfe5eb; border-radius: 9px; background: #fff; color: var(--ink); padding: 11px 12px; font: inherit; font-size: 12px; }
+@media (max-width: 760px) { .report-panel { padding: 16px; } .report-panel .inline-form-actions > button { flex: 1; } }
