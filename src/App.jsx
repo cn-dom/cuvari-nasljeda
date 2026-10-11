@@ -2168,11 +2168,18 @@ function App() {
           </section>
 
           <section className="right-card card">
-            <div className="right-card-title"><h3>PRIDRUŽI SE RAZGOVORU</h3><span>↗</span></div>
-            <div className="group-row"><span className="group-icon">🏰</span><span><strong>Ljubitelji hrvatske povijesti</strong><small>Grupa zajednice · u pripremi</small></span></div>
-            <div className="group-row"><span className="group-icon">🌿</span><span><strong>Običaji i tradicija</strong><small>Grupa zajednice · u pripremi</small></span></div>
-            <div className="group-row"><span className="group-icon">📷</span><span><strong>Stare fotografije Hrvatske</strong><small>Grupa zajednice · u pripremi</small></span></div>
-            <button className="outline-button full-width" onClick={() => setActiveNav("Grupe")}>Istraži grupe <span>→</span></button>
+            <div className="right-card-title"><h3>ČLANOVI NA MREŽI</h3><span>{memberPresence.filter((item) => item.show_activity !== false && Date.now() - new Date(item.last_seen_at).getTime() <= 120000).length}</span></div>
+            {(() => {
+              const online = memberDirectory.filter((member) => memberPresence.some((presence) => presence.user_id === member.id && presence.show_activity !== false && Date.now() - new Date(presence.last_seen_at).getTime() <= 120000)).slice(0, 5);
+              return online.length ? <div className="online-member-list">{online.map((member) => <button type="button" className="online-member" key={member.id} onClick={() => { setMemberDirectoryQuery(member.display_name || member.username || ""); setActiveNav("Čuvari nasljeđa"); }}><span className="online-avatar">{(member.display_name || member.username || "Č").split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr")}</span><span className="online-member-copy"><strong>{member.display_name || member.username || "Čuvar nasljeđa"}</strong><small><i /> Na mreži</small></span></button>)}</div> : <p className="sidebar-empty">{isSupabaseConfigured ? "Prikaz članova pojavit će se kada se učita imenik i njihova aktivnost." : "Poveži testni Supabase za prikaz stvarnih članova na mreži."}</p>;
+            })()}
+            <button className="outline-button full-width" onClick={() => setActiveNav("Čuvari nasljeđa")}>Prikaži članove <span>→</span></button>
+          </section>
+
+          <section className="right-card card">
+            <div className="right-card-title"><h3>GRUPE ZAJEDNICE</h3><span>{groupChats.length}</span></div>
+            {groupChats.length ? <div className="sidebar-group-list">{groupChats.slice(0, 4).map((group) => <button type="button" className="sidebar-group-row" key={group.id} onClick={() => { setActiveNav("Grupe"); setActiveGroupId(group.id); }}><span className="group-icon">♧</span><span><strong>{group.name}</strong><small>{group.members?.length || 0} članova</small></span>{(groupUnreadCounts[group.id] || 0) > 0 && <b className="group-unread-badge">{groupUnreadCounts[group.id] > 99 ? "99+" : groupUnreadCounts[group.id]}</b>}</button>)}</div> : <p className="sidebar-empty">Ovdje će se prikazati tvoji grupni razgovori nakon što budu učitani.</p>}
+            <button className="outline-button full-width" onClick={() => setActiveNav("Grupe")}>Otvori grupe <span>→</span></button>
           </section>
 
           <section className="principle-card">
