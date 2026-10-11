@@ -219,7 +219,7 @@ function App() {
             grouped[row.post_id].push({
               id: row.id,
               author,
-              initials: author.split(/\\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
+              initials: author.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
               text: row.body || "",
               owner: row.author_id === session.user.id,
             });
@@ -397,7 +397,7 @@ function App() {
       [id]: [...(current[id] || []), {
         id: data.id,
         author,
-        initials: author.split(/\\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
+        initials: author.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
         text: data.body || "",
         owner: data.author_id === session.user.id,
       }],
@@ -601,7 +601,7 @@ function App() {
 
           <section className="composer card">
             <div className="composer-top">
-              <Avatar initials={comment.initials || comment.author.split(/\\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN"} variant={comment.owner ? "avatar-you" : ""} />
+              <Avatar initials={comment.initials || comment.author.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN"} variant={comment.owner ? "avatar-you" : ""} />
               <label className="sr-only" htmlFor="post-draft">Napiši objavu</label>
               <textarea
                 id="post-draft"
