@@ -116,6 +116,9 @@ function App() {
   const [messageRecipient, setMessageRecipient] = useState("");
   const [messageDraft, setMessageDraft] = useState("");
   const [replyingToMessage, setReplyingToMessage] = useState(null);
+  const [editingMessageId, setEditingMessageId] = useState(null);
+  const [messageEditDraft, setMessageEditDraft] = useState("");
+  const [messageActionBusyId, setMessageActionBusyId] = useState(null);
   const [messagesBusy, setMessagesBusy] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [notificationsBusy, setNotificationsBusy] = useState(false);
@@ -499,7 +502,7 @@ function App() {
       setMessagesBusy(true);
       const { data, error } = await supabase
         .from("private_messages")
-        .select("id, sender_id, recipient_id, body, created_at, reply_to_id")
+        .select("id, sender_id, recipient_id, body, created_at, updated_at, reply_to_id")
         .or("sender_id.eq." + session.user.id + ",recipient_id.eq." + session.user.id)
         .order("created_at", { ascending: true })
         .limit(200);
@@ -586,7 +589,7 @@ function App() {
       recipient_id: messageRecipient,
       body,
       reply_to_id: replyingToMessage?.id || null,
-    }).select("id, sender_id, recipient_id, body, created_at, reply_to_id").single();
+    }).select("id, sender_id, recipient_id, body, created_at, updated_at, reply_to_id").single();
     if (error) {
       setNotice("Poruka nije poslana. Provjeri postoji li tablica private_messages i jesu li RLS pravila primijenjena.");
       return;
@@ -595,6 +598,55 @@ function App() {
     setMessageDraft("");
     setReplyingToMessage(null);
     setNotice("Privatna poruka je poslana.");
+  }
+
+  function beginEditPrivateMessage(message) {
+    setEditingMessageId(message.id);
+    setMessageEditDraft(message.body || "");
+    setNotice("");
+  }
+
+  async function savePrivateMessageEdit(message) {
+    const body = messageEditDraft.trim();
+    if (!supabase || !session?.user?.id || message.sender_id !== session.user.id) return;
+    if (!body || body.length > 2000) {
+      setNotice("Uređena poruka mora sadržavati 1–2000 znakova.");
+      return;
+    }
+    setMessageActionBusyId(message.id);
+    const { data, error } = await supabase.from("private_messages")
+      .update({ body, updated_at: new Date().toISOString() })
+      .eq("id", message.id).eq("sender_id", session.user.id)
+      .select("id, sender_id, recipient_id, body, created_at, updated_at, reply_to_id").maybeSingle();
+    if (error || !data) {
+      setNotice("Poruka nije uređena. Provjeri SQL nacrt i dopuštenja vlasnika poruke.");
+    } else {
+      setMessages((current) => current.map((item) => item.id === data.id ? data : item));
+      setEditingMessageId(null);
+      setMessageEditDraft("");
+      setNotice("Poruka je uređena.");
+    }
+    setMessageActionBusyId(null);
+  }
+
+  async function deletePrivateMessage(message) {
+    if (!supabase || !session?.user?.id || message.sender_id !== session.user.id) return;
+    if (!window.confirm("Želiš li trajno izbrisati ovu poruku iz razgovora?")) return;
+    setMessageActionBusyId(message.id);
+    const { error } = await supabase.from("private_messages")
+      .delete().eq("id", message.id).eq("sender_id", session.user.id);
+    if (error) {
+      setNotice("Poruka nije izbrisana. Provjeri SQL nacrt i dopuštenja vlasnika poruke.");
+    } else {
+      setMessages((current) => current.filter((item) => item.id !== message.id));
+      if (replyingToMessage?.id === message.id) setReplyingToMessage(null);
+      if (editingMessageId === message.id) {
+        setEditingMessageId(null);
+        setMessageEditDraft("");
+      }
+      setNotice("Poruka je izbrisana.");
+    }
+    setMessageActionBusyId(null);
   }
 
   async function submitReport(event) {
@@ -1203,8 +1255,17 @@ function App() {
                       return <article className={outgoing ? "private-message outgoing" : "private-message"} key={message.id}>
                         <strong>{outgoing ? "Ti" : (member?.display_name || member?.username || "Čuvar nasljeđa")}</strong>
                         {message.reply_to_id && <div className="private-message-reply-quote"><small>Odgovor na poruku</small><p>{repliedMessage?.body || "Izvorna poruka nije dostupna u učitanom razgovoru."}</p></div>}
-                        <p>{message.body}</p>
-                        <div className="private-message-footer"><small>{new Date(message.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" })}</small><button type="button" className="private-message-reply-button" onClick={() => { setReplyingToMessage(message); setMessageRecipient(otherId); }}>Odgovori</button></div>
+                        {editingMessageId === message.id ? (
+                          <div className="private-message-edit-form">
+                            <textarea value={messageEditDraft} onChange={(event) => setMessageEditDraft(event.target.value)} maxLength={2000} rows="3" aria-label="Uredi privatnu poruku" />
+                            <div className="private-message-footer"><small>{messageEditDraft.length}/2000</small><span><button type="button" className="private-message-reply-button" disabled={messageActionBusyId === message.id} onClick={() => savePrivateMessageEdit(message)}>Spremi</button><button type="button" className="private-message-reply-button" onClick={() => { setEditingMessageId(null); setMessageEditDraft(""); }}>Odustani</button></span></div>
+                          </div>
+                        ) : (
+                          <>
+                            <p>{message.body}</p>
+                            <div className="private-message-footer"><small>{new Date(message.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" })}{message.updated_at && new Date(message.updated_at).getTime() > new Date(message.created_at).getTime() + 1000 ? " · uređeno" : ""}</small><span className="private-message-actions-inline"><button type="button" className="private-message-reply-button" onClick={() => { setReplyingToMessage(message); setMessageRecipient(otherId); setEditingMessageId(null); }}>Odgovori</button>{outgoing && <><button type="button" className="private-message-reply-button" disabled={messageActionBusyId === message.id} onClick={() => beginEditPrivateMessage(message)}>Uredi</button><button type="button" className="private-message-reply-button danger" disabled={messageActionBusyId === message.id} onClick={() => deletePrivateMessage(message)}>Izbriši</button></>}</span></div>
+                          </>
+                        )}
                       </article>;
                     }) : <p className="directory-empty">Još nema poruka u ovom razgovoru.</p>}
                   </div>
