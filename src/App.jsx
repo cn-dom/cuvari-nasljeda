@@ -629,6 +629,51 @@ function App() {
     }
   }
 
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (!supabase || !userId) return undefined;
+
+    const mergeMessage = (incoming) => {
+      if (!incoming?.id || (incoming.sender_id !== userId && incoming.recipient_id !== userId)) return;
+      setMessages((current) => {
+        const exists = current.some((message) => message.id === incoming.id);
+        const next = exists
+          ? current.map((message) => message.id === incoming.id ? incoming : message)
+          : [...current, incoming];
+        return next.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      });
+    };
+    const mergeNotification = (incoming) => {
+      if (!incoming?.id || incoming.recipient_id !== userId) return;
+      setNotifications((current) => {
+        const exists = current.some((notification) => notification.id === incoming.id);
+        const next = exists
+          ? current.map((notification) => notification.id === incoming.id ? incoming : notification)
+          : [incoming, ...current];
+        return next.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 100);
+      });
+    };
+
+    const channel = supabase.channel("patriasoul-live-" + userId)
+      .on("postgres_changes", {
+        event: "INSERT", schema: "public", table: "private_messages", filter: "recipient_id=eq." + userId,
+      }, (payload) => mergeMessage(payload.new))
+      .on("postgres_changes", {
+        event: "INSERT", schema: "public", table: "private_messages", filter: "sender_id=eq." + userId,
+      }, (payload) => mergeMessage(payload.new))
+      .on("postgres_changes", {
+        event: "INSERT", schema: "public", table: "notifications", filter: "recipient_id=eq." + userId,
+      }, (payload) => mergeNotification(payload.new))
+      .on("postgres_changes", {
+        event: "UPDATE", schema: "public", table: "notifications", filter: "recipient_id=eq." + userId,
+      }, (payload) => mergeNotification(payload.new))
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [session?.user?.id]);
+
   const messageConversations = useMemo(() => {
     if (!session?.user?.id) return [];
     const latestByMember = new Map();
