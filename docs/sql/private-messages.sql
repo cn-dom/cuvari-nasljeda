@@ -10,11 +10,13 @@ create table if not exists public.private_messages (
   body text not null check (char_length(trim(body)) between 1 and 2000),
   reply_to_id uuid references public.private_messages(id) on delete set null,
   created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
   constraint private_messages_no_self_message check (sender_id <> recipient_id)
 );
 
 alter table public.private_messages
-  add column if not exists reply_to_id uuid references public.private_messages(id) on delete set null;
+  add column if not exists reply_to_id uuid references public.private_messages(id) on delete set null,
+  add column if not exists updated_at timestamptz not null default now();
 
 create index if not exists private_messages_sender_created_idx
   on public.private_messages (sender_id, created_at desc);
@@ -78,5 +80,31 @@ create trigger private_messages_validate_reply
   on public.private_messages
   for each row execute function public.validate_private_message_reply();
 
--- No UPDATE or DELETE policy is granted to ordinary members.
+-- Members may update/delete only messages they sent; recipients cannot alter the sender's message.
+drop policy if exists private_messages_update_sender on public.private_messages;
+create policy private_messages_update_sender
+  on public.private_messages for update to authenticated
+  using (sender_id = (select auth.uid()))
+  with check (
+    sender_id = (select auth.uid())
+    and recipient_id <> (select auth.uid())
+    and char_length(trim(body)) between 1 and 2000
+  );
+
+drop policy if exists private_messages_delete_sender on public.private_messages;
+create policy private_messages_delete_sender
+  on public.private_messages for delete to authenticated
+  using (sender_id = (select auth.uid()));
+
+-- Keep updated_at controlled by the database whenever a message body changes.
+create or replace function public.set_private_message_updated_at()
+returns trigger language plpgsql set search_path = public, pg_temp as $
+begin
+  new.updated_at = now();
+  return new;
+end;
+$;
+drop trigger if exists private_messages_set_updated_at on public.private_messages;
+create trigger private_messages_set_updated_at before update of body on public.private_messages
+for each row execute function public.set_private_message_updated_at();
 commit;
