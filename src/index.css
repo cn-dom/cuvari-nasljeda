@@ -449,3 +449,7 @@ button { -webkit-tap-highlight-color: transparent; }
   }
   .emoji-picker-host em-emoji-picker { max-height: min(68vh, 500px); }
 }
+
+/* Radnje uz obavijesti */
+.notification-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px; flex-shrink: 0; }
+@media (max-width: 760px) { .notification-actions { margin-left: 46px; justify-content: flex-start; } }
