@@ -113,6 +113,7 @@ function App() {
   const [mentionMembers, setMentionMembers] = useState([]);
   const [mentionBusy, setMentionBusy] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [messageReactions, setMessageReactions] = useState([]);
   const [messageRecipient, setMessageRecipient] = useState("");
   const [messageSearch, setMessageSearch] = useState("");
   const [messageDraft, setMessageDraft] = useState("");
@@ -512,7 +513,23 @@ function App() {
         setMessages([]);
         setNotice("Privatne poruke još nisu dostupne. Potrebno je pregledati i primijeniti SQL nacrt u testnoj bazi.");
       } else {
-        setMessages(data || []);
+        const loadedMessages = data || [];
+        setMessages(loadedMessages);
+        if (loadedMessages.length) {
+          const { data: reactionRows, error: reactionError } = await supabase
+            .from("private_message_reactions")
+            .select("id, message_id, user_id, emoji, created_at")
+            .in("message_id", loadedMessages.map((message) => message.id));
+          if (cancelled) return;
+          if (reactionError) {
+            setMessageReactions([]);
+            setNotice("Poruke su učitane, ali emoji reakcije još nisu dostupne. Pregledaj SQL nacrt private-message-reactions.sql.");
+          } else {
+            setMessageReactions(reactionRows || []);
+          }
+        } else {
+          setMessageReactions([]);
+        }
       }
       setMessagesBusy(false);
     }
@@ -599,6 +616,31 @@ function App() {
     setMessageDraft("");
     setReplyingToMessage(null);
     setNotice("Privatna poruka je poslana.");
+  }
+
+  async function togglePrivateMessageReaction(message, emoji) {
+    if (!supabase || !session?.user?.id || !message?.id) return;
+    const existing = messageReactions.find((reaction) =>
+      reaction.message_id === message.id && reaction.user_id === session.user.id && reaction.emoji === emoji
+    );
+    if (existing) {
+      const { error } = await supabase.from("private_message_reactions").delete()
+        .eq("id", existing.id).eq("user_id", session.user.id);
+      if (error) {
+        setNotice("Reakcija nije uklonjena. Provjeri SQL nacrt i RLS pravila za reakcije.");
+        return;
+      }
+      setMessageReactions((current) => current.filter((reaction) => reaction.id !== existing.id));
+      return;
+    }
+    const { data, error } = await supabase.from("private_message_reactions").insert({
+      message_id: message.id, user_id: session.user.id, emoji,
+    }).select("id, message_id, user_id, emoji, created_at").single();
+    if (error) {
+      setNotice("Reakcija nije spremljena. Provjeri postoji li tablica private_message_reactions i jesu li RLS pravila primijenjena.");
+      return;
+    }
+    setMessageReactions((current) => current.some((reaction) => reaction.id === data.id) ? current : [...current, data]);
   }
 
   function beginEditPrivateMessage(message) {
@@ -699,6 +741,13 @@ function App() {
         return next.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
       });
     };
+    const mergeMessageReaction = (incoming) => {
+      if (!incoming?.id || !incoming.message_id) return;
+      setMessageReactions((current) => current.some((reaction) => reaction.id === incoming.id) ? current : [...current, incoming]);
+    };
+    const removeMessageReaction = (oldReaction) => {
+      if (oldReaction?.id) setMessageReactions((current) => current.filter((reaction) => reaction.id !== oldReaction.id));
+    };
     const mergeNotification = (incoming) => {
       if (!incoming?.id || incoming.recipient_id !== userId) return;
       setNotifications((current) => {
@@ -729,6 +778,12 @@ function App() {
       .on("postgres_changes", {
         event: "DELETE", schema: "public", table: "private_messages", filter: "sender_id=eq." + userId,
       }, (payload) => { if (payload.old?.id) setMessages((current) => current.filter((message) => message.id !== payload.old.id)); })
+      .on("postgres_changes", {
+        event: "INSERT", schema: "public", table: "private_message_reactions",
+      }, (payload) => mergeMessageReaction(payload.new))
+      .on("postgres_changes", {
+        event: "DELETE", schema: "public", table: "private_message_reactions",
+      }, (payload) => removeMessageReaction(payload.old))
       .on("postgres_changes", {
         event: "INSERT", schema: "public", table: "notifications", filter: "recipient_id=eq." + userId,
       }, (payload) => mergeNotification(payload.new))
@@ -1304,6 +1359,23 @@ function App() {
                         ) : (
                           <>
                             <p>{message.body}</p>
+                            {(() => {
+                              const reactionsForMessage = messageReactions.filter((reaction) => reaction.message_id === message.id);
+                              const counts = new Map();
+                              reactionsForMessage.forEach((reaction) => counts.set(reaction.emoji, (counts.get(reaction.emoji) || 0) + 1));
+                              const commonEmojis = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
+                              return <div className="private-message-reactions" aria-label="Emoji reakcije">
+                                <div className="private-message-reaction-summary">
+                                  {[...counts.entries()].map(([emoji, count]) => {
+                                    const own = reactionsForMessage.some((reaction) => reaction.user_id === session.user.id && reaction.emoji === emoji);
+                                    return <button type="button" key={emoji} className={own ? "message-reaction-chip selected" : "message-reaction-chip"} aria-label={`${emoji}, ${count} reakcija${own ? ", tvoja reakcija" : ""}`} aria-pressed={own} onClick={() => togglePrivateMessageReaction(message, emoji)}>{emoji}<small>{count}</small></button>;
+                                  })}
+                                </div>
+                                <div className="private-message-reaction-quick">
+                                  {commonEmojis.map((emoji) => <button type="button" key={emoji} className={reactionsForMessage.some((reaction) => reaction.user_id === session.user.id && reaction.emoji === emoji) ? "message-reaction-quick selected" : "message-reaction-quick"} aria-label={`Reagiraj s ${emoji}`} aria-pressed={reactionsForMessage.some((reaction) => reaction.user_id === session.user.id && reaction.emoji === emoji)} onClick={() => togglePrivateMessageReaction(message, emoji)}>{emoji}</button>)}
+                                </div>
+                              </div>;
+                            })()}
                             <div className="private-message-footer"><small>{new Date(message.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" })}{message.updated_at && new Date(message.updated_at).getTime() > new Date(message.created_at).getTime() + 1000 ? " · uređeno" : ""}</small><span className="private-message-actions-inline"><button type="button" className="private-message-reply-button" onClick={() => { setReplyingToMessage(message); setMessageRecipient(otherId); setEditingMessageId(null); }}>Odgovori</button>{outgoing && <><button type="button" className="private-message-reply-button" disabled={messageActionBusyId === message.id} onClick={() => beginEditPrivateMessage(message)}>Uredi</button><button type="button" className="private-message-reply-button danger" disabled={messageActionBusyId === message.id} onClick={() => deletePrivateMessage(message)}>Izbriši</button></>}</span></div>
                           </>
                         )}
