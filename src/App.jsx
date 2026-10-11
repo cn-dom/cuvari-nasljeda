@@ -540,7 +540,7 @@ function App() {
   }, [activeNav, session?.user?.id]);
 
   async function markNotificationRead(notification) {
-    if (!supabase || !session?.user?.id || !notification?.id || notification.read_at) return;
+    if (!supabase || !session?.user?.id || !notification?.id || notification.read_at) return false;
     const readAt = new Date().toISOString();
     const { error } = await supabase.from("notifications")
       .update({ read_at: readAt })
@@ -548,9 +548,23 @@ function App() {
       .eq("recipient_id", session.user.id);
     if (error) {
       setNotice("Obavijest nije označena kao pročitana. Provjeri RLS pravila.");
-      return;
+      return false;
     }
     setNotifications((current) => current.map((item) => item.id === notification.id ? { ...item, read_at: readAt } : item));
+    return true;
+  }
+
+  async function openNotification(notification) {
+    if (notification?.type === "private_message") {
+      if (!notification.read_at) await markNotificationRead(notification);
+      if (notification.actor_id && notification.actor_id !== session?.user?.id) {
+        setMessageRecipient(notification.actor_id);
+      }
+      setActiveNav("Poruke");
+      setNotice("Otvorene su privatne poruke. Odabran je pošiljatelj obavijesti ako je još dostupan u imeniku.");
+      return;
+    }
+    if (!notification?.read_at) await markNotificationRead(notification);
   }
 
   async function sendPrivateMessage(event) {
@@ -1063,7 +1077,10 @@ function App() {
                         <p>{notification.body || "Imaš novu aktivnost u zajednici."}</p>
                         <small>{new Date(notification.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" })}</small>
                       </div>
-                      {!notification.read_at && <button type="button" className="post-menu-button" onClick={() => markNotificationRead(notification)}>Označi pročitano</button>}
+                      <div className="notification-actions">
+                        {notification.type === "private_message" && <button type="button" className="post-menu-button" onClick={() => openNotification(notification)}>Otvori poruke</button>}
+                        {!notification.read_at && <button type="button" className="post-menu-button" onClick={() => markNotificationRead(notification)}>Označi pročitano</button>}
+                      </div>
                     </article>
                   ))}
                 </div>
