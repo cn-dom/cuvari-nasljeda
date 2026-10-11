@@ -453,3 +453,15 @@ button { -webkit-tap-highlight-color: transparent; }
 /* Radnje uz obavijesti */
 .notification-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px; flex-shrink: 0; }
 @media (max-width: 760px) { .notification-actions { margin-left: 46px; justify-content: flex-start; } }
+
+/* Razgovori — pregled po članu */
+.message-conversations { margin-top: 18px; }
+.message-conversations h3, .private-message-list h3 { margin-bottom: 10px; }
+.message-conversation-list { display: grid; gap: 7px; }
+.message-conversation { display: flex; align-items: center; gap: 10px; width: 100%; min-width: 0; padding: 10px; text-align: left; border: 1px solid var(--line); border-radius: 11px; background: #fff; color: var(--ink); cursor: pointer; }
+.message-conversation:hover, .message-conversation.selected { border-color: #b8cce0; background: #f0f5fa; }
+.message-conversation-copy { display: block; flex: 1; min-width: 0; }
+.message-conversation-copy strong, .message-conversation-copy small { display: block; }
+.message-conversation-copy strong { color: var(--navy); font-size: 12px; }
+.message-conversation-copy small { margin-top: 4px; overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.message-conversation time { flex-shrink: 0; color: var(--muted); font-size: 10px; }
