@@ -71,6 +71,12 @@ RLS mora biti uključen na svakoj tablici u izloženoj shemi.
 
 To su pravila dizajna, ne gotove politike za slijepo kopiranje. Prije implementacije treba provjeriti točan model privatnosti, blokiranja i moderiranja.
 
+## Pregledni SQL nacrt
+
+Pripremljen je zaseban SQL nacrt u [docs/sql/community-core.sql](./sql/community-core.sql). Sadrži tablice profila, objava, komentara i reakcija, indekse, osnovna ograničenja, RLS politike i okidač za stvaranje početnog profila nakon registracije.
+
+**Nacrt nije primijenjen ni na jedan Supabase projekt.** Prije primjene potrebno je provjeriti politike s anonimnim korisnikom i s dva različita računa, uključujući pokušaje izmjene i brisanja tuđih zapisa.
+
 ## Supabase Storage — fotografije
 
 - Privatni bucket community-images za početnu verziju; fotografije poslužiti putem kratkotrajnih potpisanih URL-ova ili kontroliranog pristupa.
