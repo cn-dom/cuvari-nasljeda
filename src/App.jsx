@@ -162,6 +162,51 @@ function App() {
 
   useEffect(() => {
     let cancelled = false;
+    async function loadCommunityFeed() {
+      if (!supabase || !session?.user?.id) {
+        setPosts(initialPosts);
+        return;
+      }
+      const { data, error } = await supabase
+        .from("posts")
+        .select("id, author_id, body, image_path, created_at, profiles(display_name, username)")
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (cancelled) return;
+      if (error) {
+        setNotice("Zid nije učitan iz baze. Provjeri postoji li tablica posts i jesu li RLS pravila primijenjena. Prikazuju se samo ogledne objave.");
+        setPosts(initialPosts);
+        return;
+      }
+      const rows = (data || []).map((row) => {
+        const profile = row.profiles || {};
+        const name = profile.display_name || "Čuvar nasljeđa";
+        const username = profile.username || "clan";
+        return {
+          id: row.id,
+          initials: name.split(/\\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
+          author: name,
+          handle: "@" + username,
+          time: new Date(row.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" }),
+          tag: "ZAJEDNICA",
+          text: row.body || "",
+          imageUrl: "",
+          imagePath: row.image_path || "",
+          likes: 0,
+          comments: 0,
+          icon: "💬",
+          owner: row.author_id === session.user.id,
+        };
+      });
+      setPosts(rows);
+      setNotice("");
+    }
+    loadCommunityFeed();
+    return () => { cancelled = true; };
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    let cancelled = false;
     async function loadProfile() {
       const metadata = session?.user?.user_metadata || {};
       setProfileName(metadata.display_name || "");
@@ -229,33 +274,51 @@ function App() {
     return matchesFilter && matchesSearch;
   }), [posts, feedFilter, feedSearch]);
 
-  function publishPost() {
+  async function publishPost() {
     const text = draft.trim();
     if (!text && !selectedImage) {
       setNotice("Napiši nekoliko riječi prije objave.");
       return;
     }
-    setPosts((current) => [
-      {
-        id: Date.now(),
-        initials: "TI",
-        author: "Ti — probni profil",
-        handle: "@probni_clan",
-        time: "Upravo sada",
-        tag: "NOVA OBJAVA",
-        text,
-        imageUrl: selectedImage,
-        likes: 0,
-        comments: 0,
-        icon: "💬",
-        owner: true,
-      },
-      ...current,
-    ]);
+    if (!supabase || !session?.user?.id) {
+      setNotice("Za objavu koja se trajno sprema potrebno je prijaviti se. Trenutačni ogledni zid ne sprema sadržaj na poslužitelj.");
+      return;
+    }
+    if (selectedImage) {
+      setNotice("Trajno učitavanje fotografija još nije povezano. Ukloni fotografiju ili pričekaj sljedeću fazu; tekst nije objavljen.");
+      return;
+    }
+    const { data, error } = await supabase
+      .from("posts")
+      .insert({ author_id: session.user.id, body: text })
+      .select("id, author_id, body, image_path, created_at, profiles(display_name, username)")
+      .single();
+    if (error) {
+      setNotice("Objava nije spremljena: " + (error.message || "provjeri tablicu posts i RLS pravila."));
+      return;
+    }
+    const profile = data.profiles || {};
+    const author = profile.display_name || session.user.email || "Čuvar nasljeđa";
+    const username = profile.username || "clan";
+    setPosts((current) => [{
+      id: data.id,
+      initials: author.split(/\\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
+      author,
+      handle: "@" + username,
+      time: new Date(data.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" }),
+      tag: "ZAJEDNICA",
+      text: data.body || "",
+      imageUrl: "",
+      imagePath: data.image_path || "",
+      likes: 0,
+      comments: 0,
+      icon: "💬",
+      owner: data.author_id === session.user.id,
+    }, ...current]);
     setDraft("");
     setSelectedImage("");
     setMemberPickerOpen(false);
-    setNotice("Objava je dodana samo u ovaj lokalni prikaz. Trajno spremanje zida bit će aktivirano nakon povezivanja baze.");
+    setNotice("Objava je spremljena u bazu zajednice.");
   }
 
   function toggleLike(id) {
