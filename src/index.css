@@ -380,3 +380,20 @@ button { -webkit-tap-highlight-color: transparent; }
 .member-directory-card > button { flex-shrink: 0; }
 .directory-empty { padding: 18px 0; color: var(--muted); font-size: 12px; }
 @media (max-width: 760px) { .member-directory { padding: 14px; } .member-directory-grid { grid-template-columns: minmax(0, 1fr); } .member-directory-card { flex-wrap: wrap; } .member-directory-card > button { margin-left: auto; } }
+
+
+/* Privatne poruke */
+.private-messages { padding: 20px; margin-bottom: 16px; }
+.private-message-compose { display: grid; gap: 8px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: #fbfcfd; }
+.private-message-compose label { color: var(--navy); font-size: 12px; font-weight: 800; }
+.private-message-compose select, .private-message-compose textarea { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: #fff; color: var(--ink); font: inherit; }
+.private-message-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.private-message-actions small { color: var(--muted); font-size: 11px; }
+.private-message-list { margin-top: 18px; }
+.private-message-list h3 { color: var(--navy); font-size: 14px; }
+.private-message { max-width: 88%; margin: 10px 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px 12px 12px 3px; background: #f7f9fb; overflow-wrap: anywhere; }
+.private-message.outgoing { margin-left: auto; border-color: #d7e3f2; background: #eef4fb; border-radius: 12px 12px 3px 12px; }
+.private-message strong { color: var(--navy); font-size: 12px; }
+.private-message p { margin: 6px 0; color: var(--ink); font-size: 13px; line-height: 1.55; white-space: pre-wrap; }
+.private-message small { color: var(--muted); font-size: 10px; }
+@media (max-width: 760px) { .private-messages { padding: 14px; } .private-message { max-width: 100%; } .private-message-actions { align-items: flex-start; flex-direction: column; } }
