@@ -121,6 +121,7 @@ function App() {
   const [activeGroupId, setActiveGroupId] = useState("");
   const [groupMessages, setGroupMessages] = useState([]);
   const [groupMessageReactions, setGroupMessageReactions] = useState([]);
+  const [groupMessageReads, setGroupMessageReads] = useState([]);
   const [groupReactionBusy, setGroupReactionBusy] = useState("");
   const [groupDraftName, setGroupDraftName] = useState("");
   const [groupSelectedMembers, setGroupSelectedMembers] = useState([]);
@@ -953,6 +954,27 @@ function App() {
     setGroupReactionBusy("");
   }
 
+  useEffect(() => {
+    let cancelled = false;
+    async function loadGroupMessageReads() {
+      if (!supabase || !session?.user?.id || !activeGroupId || activeNav !== "Poruke") { setGroupMessageReads([]); return; }
+      const { data, error } = await supabase.from("group_chat_message_reads").select("message_id, group_id, user_id, read_at").eq("group_id", activeGroupId);
+      if (cancelled) return;
+      if (error) { setGroupMessageReads([]); return; }
+      setGroupMessageReads(data || []);
+    }
+    loadGroupMessageReads();
+    return () => { cancelled = true; };
+  }, [activeGroupId, activeNav, session?.user?.id]);
+
+  useEffect(() => {
+    if (!supabase || !session?.user?.id || !activeGroupId || activeNav !== "Poruke") return;
+    const unreadIds = groupMessages.filter((message) => message.sender_id !== session.user.id).map((message) => message.id);
+    if (!unreadIds.length) return;
+    supabase.rpc("mark_group_messages_read", { target_group_id: activeGroupId, target_message_ids: unreadIds })
+      .then(({ error }) => { if (error) console.warn("Grupne poruke nisu označene kao pročitane."); });
+  }, [activeGroupId, activeNav, groupMessages, session?.user?.id]);
+
   async function sendGroupMessage(event) {
     event.preventDefault();
     const body = groupMessageDraft.trim();
@@ -1171,6 +1193,12 @@ function App() {
           if (current.some((message) => message.id === incoming.id)) return current;
           return incoming.group_id === activeGroupId ? [...current, incoming].sort((x, y) => new Date(x.created_at) - new Date(y.created_at)) : current;
         });
+      })
+      .on("postgres_changes", {
+        event: "INSERT", schema: "public", table: "group_chat_message_reads", filter: "group_id=eq." + activeGroupId,
+      }, (payload) => {
+        const incoming = payload.new;
+        if (incoming?.message_id && incoming.group_id === activeGroupId) setGroupMessageReads((current) => current.some((item) => item.message_id === incoming.message_id && item.user_id === incoming.user_id) ? current : [...current, incoming]);
       })
       .on("postgres_changes", {
         event: "INSERT", schema: "public", table: "group_chat_message_reactions",
@@ -1809,6 +1837,7 @@ function App() {
                               return <button key={emoji} type="button" className={selected ? "group-reaction selected" : "group-reaction"} aria-pressed={selected} title={matching.length + " reakcija"} disabled={groupReactionBusy === message.id + ":" + emoji} onClick={() => toggleGroupMessageReaction(message, emoji)}>{emoji}<span>{matching.length || ""}</span></button>;
                             })}
                           </div>
+                          {outgoing && (() => { const readers = groupMessageReads.filter((read) => read.message_id === message.id && read.user_id !== session.user.id); const names = readers.map((read) => { const member = memberDirectory.find((item) => item.id === read.user_id); return member?.display_name || member?.username; }).filter(Boolean); return readers.length ? <div className="group-message-read-status" title={names.join(", ")}>Pročitano{names.length ? ": " + names.join(", ") : " · " + readers.length + (readers.length === 1 ? " član" : " članova")}</div> : null; })()}
                           <div className="group-message-meta"><small>{new Date(message.created_at).toLocaleString("hr-HR", { dateStyle: "short", timeStyle: "short" })}</small>
                             <span className="group-message-actions"><button type="button" className="post-menu-button" onClick={() => setReplyingToGroupMessage({ id: message.id, body: message.body, sender: outgoing ? "Ti" : (sender?.display_name || sender?.username || "Čuvar nasljeđa") })}>Odgovori</button>{outgoing && !editing && <><button type="button" className="post-menu-button" disabled={groupMessageActionBusyId === message.id} onClick={() => { setGroupEditingMessageId(message.id); setGroupMessageEditDraft(message.body); }}>Uredi</button><button type="button" className="post-menu-button danger" disabled={groupMessageActionBusyId === message.id} onClick={() => deleteGroupMessage(message)}>Izbriši</button></>}</span>
                           </div>
