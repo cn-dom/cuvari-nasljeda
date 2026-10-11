@@ -75,6 +75,31 @@ $$;
 revoke all on function public.mark_group_messages_read(uuid, uuid[]) from public;
 grant execute on function public.mark_group_messages_read(uuid, uuid[]) to authenticated;
 
+-- Broj nepročitanih poruka po grupi za prijavljenog člana.
+create or replace function public.get_group_unread_counts()
+returns table (group_id uuid, unread_count bigint)
+language sql
+security definer
+set search_path = public, pg_temp
+set row_security = off
+as $
+  select membership.group_id, count(message.id)::bigint as unread_count
+  from public.group_chat_members membership
+  left join public.group_chat_messages message
+    on message.group_id = membership.group_id
+   and message.sender_id <> auth.uid()
+   and not exists (
+     select 1 from public.group_chat_message_reads message_read
+     where message_read.message_id = message.id
+       and message_read.user_id = auth.uid()
+   )
+  where membership.user_id = auth.uid()
+  group by membership.group_id;
+$;
+
+revoke all on function public.get_group_unread_counts() from public;
+grant execute on function public.get_group_unread_counts() to authenticated;
+
 -- Omogući realtime događaje ako tablica još nije uključena u publikaciju.
 do $$
 begin
