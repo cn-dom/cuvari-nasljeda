@@ -11,6 +11,7 @@ Ovaj dokument je nacrt za razvojno/testno okruženje. **Ne izvršava SQL, ne mij
 5. Označavanje člana u objavi.
 6. Brisanje vlastitih objava i komentara.
 7. Prijava sadržaja i administratorsko moderiranje u zasebnoj fazi.
+8. Blokiranje članova uz skrivanje njihovih objava na vlastitom zidu.
 
 ## Predloženi model podataka
 
@@ -52,6 +53,13 @@ Vlasnik komentara smije urediti ili izbrisati samo svoj komentar. Brisanje objav
 - created_at timestamptz not null default now()
 - Primarni ključ: (post_id, user_id) — jedna odabrana reakcija po članu i objavi.
 
+### blocked_users
+- blocker_id uuid not null references profiles(id) on delete cascade
+- blocked_id uuid not null references profiles(id) on delete cascade
+- Primarni ključ: (blocker_id, blocked_id); zabranjeno je blokirati samoga sebe.
+- Član smije čitati i uklanjati samo vlastite blokade te stvarati blokade u svoje ime.
+- Filtriranje zida po blokiranim članovima treba provoditi u upitu aplikacije i, prije produkcije, dodatno razmotriti poslužiteljski model privatnosti.
+
 ### post_mentions
 - post_id uuid not null references posts(id) on delete cascade
 - mentioned_user_id uuid not null references profiles(id) on delete cascade
@@ -75,7 +83,7 @@ To su pravila dizajna, ne gotove politike za slijepo kopiranje. Prije implementa
 
 Pripremljen je zaseban SQL nacrt u [docs/sql/community-core.sql](./sql/community-core.sql). Sadrži tablice profila, objava, komentara i reakcija, indekse, osnovna ograničenja, RLS politike, okidač za stvaranje početnog profila te nacrt privatnog Storage bucketa `community-images` s ograničenjem veličine/tipova i pravilima čitanja/pisanja po vlasniku.
 
-**Nacrt nije primijenjen ni na jedan Supabase projekt.** Prije primjene potrebno je provjeriti politike s anonimnim korisnikom i s dva različita računa, uključujući pokušaje izmjene i brisanja tuđih zapisa.
+**Nacrt nije primijenjen ni na jedan Supabase projekt. Tablica `blocked_users` i njezine RLS politike također su samo nacrt dok se ne primijene na zasebni testni projekt.** Prije primjene potrebno je provjeriti politike s anonimnim korisnikom i s dva različita računa, uključujući pokušaje izmjene i brisanja tuđih zapisa.
 
 ## Supabase Storage — fotografije
 
