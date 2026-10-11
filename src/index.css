@@ -853,3 +853,87 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
   .topnav-link { min-width: 30px; height: 34px; font-size: 19px; }
   .top-actions { margin-left: auto; }
 }
+
+
+/* Naslovni banner: ilustrirani hrvatski krajolik i istaknut poziv na objavu */
+.welcome-panel {
+  position: relative; isolation: isolate; overflow: hidden; min-height: 230px;
+  display: flex; align-items: center; border-radius: 15px;
+  background: linear-gradient(100deg, #061526 0%, #0a2740 45%, #123f60 100%);
+}
+.welcome-photo-layer { position: absolute; z-index: -1; inset: 0; overflow: hidden; }
+.welcome-photo-layer::before {
+  content: ""; position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, #061526 0%, #061526ed 27%, #0615269c 52%, #06152620 100%),
+    linear-gradient(0deg, #061526a8, transparent 52%),
+    radial-gradient(ellipse at 72% 16%, #ffc178 0%, #c77761 13%, #285b79 38%, #0b233a 70%);
+}
+.welcome-photo-layer::after {
+  content: ""; position: absolute; left: 43%; right: -4%; bottom: -10%;
+  height: 48%; border-radius: 50% 50% 0 0;
+  background: linear-gradient(180deg, #174f6b, #071b2d 80%);
+  transform: rotate(-5deg); box-shadow: 0 -18px 45px #f4b46a18;
+}
+.welcome-landscape-sun {
+  position: absolute; width: 72px; height: 72px; right: 25%; top: 19%;
+  border-radius: 50%; background: #ffcc88; opacity: .8;
+  box-shadow: 0 0 42px 20px #ffb16a40;
+}
+.welcome-fortress {
+  position: absolute; right: 17%; bottom: 29%; width: 160px; height: 65px;
+  border-bottom: 9px solid #142f3c; filter: drop-shadow(0 8px 4px #0005);
+}
+.welcome-fortress::before {
+  content: ""; position: absolute; left: 12px; right: 6px; bottom: 0; height: 46px;
+  background: linear-gradient(90deg, #c29b75, #6c6254);
+  clip-path: polygon(0 100%, 0 45%, 12% 45%, 12% 20%, 24% 20%, 24% 45%, 41% 45%, 41% 0, 55% 0, 55% 45%, 70% 45%, 70% 24%, 83% 24%, 83% 45%, 100% 45%, 100% 100%);
+}
+.welcome-fortress span { position: absolute; bottom: 5px; width: 10px; height: 21px; background: #263a41; border-radius: 7px 7px 0 0; z-index: 1; }
+.welcome-fortress span:nth-child(1) { left: 40px; }
+.welcome-fortress span:nth-child(2) { left: 76px; height: 26px; }
+.welcome-fortress span:nth-child(3) { right: 25px; }
+.welcome-flag {
+  position: absolute; right: 7%; top: 14%; width: 70px; height: 92px;
+  display: flex; flex-direction: column; overflow: hidden; border-radius: 2px 7px 7px 2px;
+  transform: perspective(120px) rotateY(-14deg) rotateZ(3deg);
+  box-shadow: 4px 8px 18px #0006;
+}
+.welcome-flag i { flex: 1; }
+.welcome-flag i:nth-child(1) { background: #e5394d; }
+.welcome-flag i:nth-child(2) { background: #f7f4ed; }
+.welcome-flag i:nth-child(3) { background: #1872c9; }
+.welcome-flag b { position: absolute; top: 30%; left: 25%; width: 50%; height: 42%; display: grid; place-items: center; color: #fff; background: repeating-conic-gradient(#fff 0 25%, #d92f43 0 50%) 50% / 18px 18px; border: 1px solid #e5eaf1; font-size: 12px; text-shadow: 0 1px 3px #000; }
+.welcome-copy { position: relative; z-index: 2; max-width: 66%; }
+.welcome-copy h1 { font-size: clamp(30px, 3vw, 42px); line-height: 1.08; font-weight: 600; letter-spacing: -.025em; }
+.welcome-copy h1 em { color: #ffdaa4; font-weight: 500; }
+.welcome-copy p { max-width: 440px; margin-top: 12px; }
+.welcome-cta {
+  display: inline-flex; align-items: center; gap: 12px; margin-top: 14px;
+  padding: 10px 14px; border: 1px solid #78bfff66; border-radius: 9px;
+  background: #087df5; color: #fff; font-weight: 700; cursor: pointer;
+  box-shadow: 0 5px 18px #087df533;
+}
+.welcome-cta:hover { background: #258fff; }
+.composer-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.composer-heading-mark {
+  display: grid; place-items: center; width: 37px; height: 37px; border-radius: 10px;
+  background: linear-gradient(145deg, #087df5, #0754a5); color: #fff; font-size: 22px;
+}
+.composer-heading strong { display: block; color: #eff7ff; font-size: 13px; }
+.composer-heading small { display: block; margin-top: 3px; color: #89a8c5; font-size: 11px; }
+.composer-top textarea { border: 1px solid #244863; background: #061829; border-radius: 10px; }
+.composer-bottom { margin-top: 12px; padding-top: 10px; }
+.composer-file-button, .composer-tools button { border-radius: 8px; }
+.composer-tools button:hover, .composer-file-button:hover { background: #10304a; }
+@media (max-width: 720px) {
+  .welcome-panel { min-height: 255px; align-items: flex-start; }
+  .welcome-copy { max-width: 90%; }
+  .welcome-copy h1 { font-size: clamp(27px, 8vw, 35px); }
+  .welcome-copy p { max-width: 75%; font-size: 12px; }
+  .welcome-flag { right: 4%; top: 10%; width: 42px; height: 60px; opacity: .75; }
+  .welcome-fortress { right: 2%; width: 115px; transform: scale(.8); transform-origin: bottom right; }
+  .welcome-landscape-sun { right: 15%; width: 45px; height: 45px; }
+  .welcome-symbol { display: none; }
+  .composer-heading { margin-bottom: 9px; }
+}
