@@ -54,17 +54,33 @@ returns boolean
 language sql stable security definer
 set search_path = public, pg_temp
 set row_security = off
-as $$
+as $
   select exists (
     select 1 from public.group_chats gc
     where gc.id = target_group_id and gc.created_by = auth.uid()
   );
-$$;
+$;
+
+create or replace function public.is_group_chat_admin(target_group_id uuid)
+returns boolean
+language sql stable security definer
+set search_path = public, pg_temp
+set row_security = off
+as $
+  select exists (
+    select 1 from public.group_chat_members gcm
+    where gcm.group_id = target_group_id
+      and gcm.user_id = auth.uid()
+      and gcm.role = 'admin'
+  );
+$;
 
 revoke all on function public.is_group_chat_member(uuid) from public;
 grant execute on function public.is_group_chat_member(uuid) to authenticated;
 revoke all on function public.is_group_chat_creator(uuid) from public;
 grant execute on function public.is_group_chat_creator(uuid) to authenticated;
+revoke all on function public.is_group_chat_admin(uuid) from public;
+grant execute on function public.is_group_chat_admin(uuid) to authenticated;
 
 drop policy if exists group_chats_select_members on public.group_chats;
 create policy group_chats_select_members on public.group_chats
@@ -76,8 +92,14 @@ create policy group_chats_insert_creator on public.group_chats
 for insert to authenticated
 with check (created_by = auth.uid() and char_length(trim(name)) between 2 and 60);
 
--- No ordinary member can change a group's name, creator, or delete the group in this first version.
+drop policy if exists group_chats_update_admin on public.group_chats;
+create policy group_chats_update_admin on public.group_chats
+for update to authenticated
+using (public.is_group_chat_admin(id))
+with check (public.is_group_chat_admin(id) and created_by = created_by);
 
+-- Group membership management is reserved for admins. Creator check remains
+-- solely to allow the initial admin/member rows during group creation.
 drop policy if exists group_chat_members_select_members on public.group_chat_members;
 create policy group_chat_members_select_members on public.group_chat_members
 for select to authenticated
@@ -87,14 +109,54 @@ drop policy if exists group_chat_members_insert_creator on public.group_chat_mem
 create policy group_chat_members_insert_creator on public.group_chat_members
 for insert to authenticated
 with check (
-  public.is_group_chat_creator(group_id)
-  and (
-    (role = 'admin' and user_id = auth.uid())
-    or role = 'member'
-  )
+  (public.is_group_chat_creator(group_id) and
+    ((role = 'admin' and user_id = auth.uid()) or role = 'member'))
+  or (public.is_group_chat_admin(group_id) and role = 'member')
 );
 
--- Leave member removal and role changes disabled until a separate admin workflow exists.
+drop policy if exists group_chat_members_delete_admin on public.group_chat_members;
+create policy group_chat_members_delete_admin on public.group_chat_members
+for delete to authenticated
+using (public.is_group_chat_admin(group_id) and role <> 'admin');
+
+drop policy if exists group_chat_members_update_admin on public.group_chat_members;
+create policy group_chat_members_update_admin on public.group_chat_members
+for update to authenticated
+using (public.is_group_chat_admin(group_id))
+with check (public.is_group_chat_admin(group_id));
+
+-- Atomic admin transfer: transfer to an existing member, then demote the
+-- previous admin in one transaction.
+create or replace function public.transfer_group_chat_admin(target_group_id uuid, new_admin_user_id uuid)
+returns void
+language plpgsql security definer
+set search_path = public, pg_temp
+set row_security = off
+as $
+begin
+  if not public.is_group_chat_admin(target_group_id) then
+    raise exception 'Only a group admin can transfer admin rights';
+  end if;
+  if new_admin_user_id = auth.uid() then
+    raise exception 'Choose another group member';
+  end if;
+  if not exists (
+    select 1 from public.group_chat_members
+    where group_id = target_group_id and user_id = new_admin_user_id
+  ) then
+    raise exception 'Target must already be a group member';
+  end if;
+  update public.group_chat_members
+    set role = 'member'
+    where group_id = target_group_id and user_id = auth.uid() and role = 'admin';
+  update public.group_chat_members
+    set role = 'admin'
+    where group_id = target_group_id and user_id = new_admin_user_id;
+end;
+$;
+
+revoke all on function public.transfer_group_chat_admin(uuid, uuid) from public;
+grant execute on function public.transfer_group_chat_admin(uuid, uuid) to authenticated;
 
 drop policy if exists group_chat_messages_select_members on public.group_chat_messages;
 create policy group_chat_messages_select_members on public.group_chat_messages
