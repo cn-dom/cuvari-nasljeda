@@ -547,3 +547,24 @@ button { -webkit-tap-highlight-color: transparent; }
 .member-presence-status.online i { background: #21945b; box-shadow: 0 0 0 2px #dff3e8; }
 .member-presence-status.recent i { background: #d39a25; }
 .member-presence-status.offline i { background: #9aa5b1; }
+
+
+/* Administracija grupnih razgovora */
+.group-chat-admin-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.group-chat-admin-heading h4 { margin: 0; }
+.group-chat-admin-heading > span { flex-shrink: 0; border-radius: 999px; padding: 5px 8px; background: #edf3f8; color: var(--navy); font-size: 10px; font-weight: 800; }
+.group-chat-admin-form { display: grid; gap: 7px; margin: 10px 0; padding: 11px; border: 1px solid var(--line); border-radius: 10px; background: #fbfcfd; }
+.group-chat-admin-form > label { color: var(--navy); font-size: 11px; font-weight: 800; }
+.group-chat-admin-form > div:not(.group-chat-member-admin-list) { display: flex; align-items: center; gap: 7px; }
+.group-chat-admin-form input, .group-chat-admin-form select { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px; background: #fff; color: var(--ink); font: inherit; font-size: 11px; }
+.group-chat-member-admin-list { display: grid; gap: 7px; }
+.group-chat-member-admin { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.group-chat-member-admin:last-child { border-bottom: 0; }
+.group-chat-member-admin > span:first-child { display: grid; gap: 3px; min-width: 0; color: var(--ink); font-size: 11px; overflow-wrap: anywhere; }
+.group-chat-member-admin small { color: var(--muted); font-size: 10px; }
+.group-chat-member-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; flex-shrink: 0; }
+@media (max-width: 560px) {
+  .group-chat-member-admin { align-items: flex-start; flex-direction: column; }
+  .group-chat-member-actions { justify-content: flex-start; }
+  .group-chat-admin-form > div:not(.group-chat-member-admin-list) { align-items: stretch; flex-direction: column; }
+}
