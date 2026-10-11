@@ -280,7 +280,16 @@ function App() {
             <div className="composer-bottom">
               <div className="composer-tools" aria-label="Opcije objave">
                 <button onClick={() => setNotice("Dodavanje fotografija povezujemo sa Supabase Storageom u sljedećoj fazi.")}>▧ <span>Fotografija</span></button>
-                <button onClick={() => setDraft((value) => value + (value ? " " : "") + "🇭🇷")}>⚑ <span>Emoji</span></button>
+                <div className="emoji-tool-wrap">
+                  <button type="button" aria-expanded={emojiPickerOpen} onClick={() => setEmojiPickerOpen((open) => !open)}>☺ <span>Emoji</span></button>
+                  {emojiPickerOpen && (
+                    <div className="emoji-picker" aria-label="Odaberi emoji">
+                      {["🇭🇷", "❤️", "🙏", "👏", "😊", "🌿", "🏛️", "📜", "🕯️", "🌊", "🌞", "🕊️"].map((emoji) => (
+                        <button type="button" key={emoji} aria-label={"Dodaj emoji " + emoji} onClick={() => { setDraft((value) => value + emoji); setEmojiPickerOpen(false); }}>{emoji}</button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <button onClick={() => setNotice("Označavanje članova bit će dostupno nakon uvođenja profila.")}>@ <span>Označi člana</span></button>
               </div>
               <button className="primary-button" onClick={publishPost}>Objavi <span>↗</span></button>
@@ -346,6 +355,18 @@ function App() {
               <div className="post-metrics">
                 <span>♥ {post.likes + (liked.includes(post.id) ? 1 : 0)} podrške</span>
                 <span>{post.comments + (commentsByPost[post.id] || []).length} komentara</span>
+              </div>
+              <div className="post-reactions" aria-label="Reakcije na objavu">
+                {[
+                  { emoji: "❤️", label: "Sviđa mi se" },
+                  { emoji: "🇭🇷", label: "Domoljublje" },
+                  { emoji: "🙏", label: "Zahvalnost" },
+                  { emoji: "👏", label: "Podrška" },
+                ].map((reaction) => (
+                  <button key={reaction.emoji} type="button" className={reactionsByPost[post.id] === reaction.emoji ? "reaction-chip selected" : "reaction-chip"} aria-pressed={reactionsByPost[post.id] === reaction.emoji} aria-label={reaction.label} onClick={() => toggleReaction(post.id, reaction.emoji)}>
+                    <span>{reaction.emoji}</span><small>{reaction.label}</small>
+                  </button>
+                ))}
               </div>
               <div className="post-actions">
                 <button className={liked.includes(post.id) ? "post-action liked" : "post-action"} onClick={() => toggleLike(post.id)}>
