@@ -907,7 +907,7 @@ function App() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [session?.user?.id]);
+  }, [session?.user?.id, activeGroupId]);
 
   const messageConversations = useMemo(() => {
     if (!session?.user?.id) return [];
