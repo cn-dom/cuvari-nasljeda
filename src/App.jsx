@@ -887,6 +887,16 @@ function App() {
         event: "DELETE", schema: "public", table: "private_message_reactions",
       }, (payload) => removeMessageReaction(payload.old))
       .on("postgres_changes", {
+        event: "INSERT", schema: "public", table: "group_chat_messages",
+      }, (payload) => {
+        const incoming = payload.new;
+        if (!incoming?.id || !incoming.group_id) return;
+        setGroupMessages((current) => {
+          if (current.some((message) => message.id === incoming.id)) return current;
+          return incoming.group_id === activeGroupId ? [...current, incoming].sort((x, y) => new Date(x.created_at) - new Date(y.created_at)) : current;
+        });
+      })
+      .on("postgres_changes", {
         event: "INSERT", schema: "public", table: "notifications", filter: "recipient_id=eq." + userId,
       }, (payload) => mergeNotification(payload.new))
       .on("postgres_changes", {
