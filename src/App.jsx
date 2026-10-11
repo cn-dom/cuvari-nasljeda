@@ -90,6 +90,12 @@ function App() {
   const [authBusy, setAuthBusy] = useState(false);
   const [authMessage, setAuthMessage] = useState("");
   const [session, setSession] = useState(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [profileName, setProfileName] = useState("");
+  const [profileUsername, setProfileUsername] = useState("");
+  const [profileBio, setProfileBio] = useState("");
+  const [profileBusy, setProfileBusy] = useState(false);
+  const [profileMessage, setProfileMessage] = useState("");
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -146,6 +152,45 @@ function App() {
     const { error } = await supabase.auth.signOut();
     setAuthMessage(error ? "Odjava nije uspjela. Pokušaj ponovno." : "Uspješno si odjavljen/a.");
     if (!error) setAuthOpen(false);
+  }
+
+  useEffect(() => {
+    const metadata = session?.user?.user_metadata || {};
+    setProfileName(metadata.display_name || "");
+    setProfileUsername(metadata.username || "");
+    setProfileBio(metadata.bio || "");
+  }, [session?.user?.id, session?.user?.user_metadata?.display_name, session?.user?.user_metadata?.username, session?.user?.user_metadata?.bio]);
+
+  async function saveProfile(event) {
+    event.preventDefault();
+    if (!supabase || !session?.user) return;
+    const cleanUsername = profileUsername.trim().replace(/^@/, "");
+    if (cleanUsername && !/^[a-zA-Z0-9_.-]{3,24}$/.test(cleanUsername)) {
+      setProfileMessage("Korisničko ime mora imati 3–24 znaka: slova, brojeve, točku, crticu ili podvlaku.");
+      return;
+    }
+    if (profileName.trim().length > 60 || profileBio.trim().length > 240) {
+      setProfileMessage("Ime može imati do 60, a opis do 240 znakova.");
+      return;
+    }
+    setProfileBusy(true);
+    setProfileMessage("");
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        data: {
+          display_name: profileName.trim(),
+          username: cleanUsername,
+          bio: profileBio.trim(),
+        },
+      });
+      if (error) throw error;
+      setSession((current) => current ? { ...current, user: data.user } : current);
+      setProfileMessage("Profil je spremljen u podatke računa.");
+    } catch (error) {
+      setProfileMessage(error?.message || "Profil nije spremljen. Pokušaj ponovno.");
+    } finally {
+      setProfileBusy(false);
+    }
   }
 
   const postCount = useMemo(() => posts.length, [posts]);
@@ -274,7 +319,7 @@ function App() {
           <button className="icon-button" aria-label="Pretraživanje" onClick={() => setNotice("Pretraživanje će biti povezano u sljedećoj fazi.")}>⌕</button>
           {session ? (
             <div className="auth-session-actions">
-              <span className="auth-user-label" title={session.user?.email || ""}>{session.user?.email || "Prijavljeni član"}</span>
+              <button className="profile-open-button" onClick={() => { setProfileOpen(true); setProfileMessage(""); }}><span className="profile-mini-avatar">{(session.user?.user_metadata?.display_name || session.user?.email || "Č").slice(0, 1).toLocaleUpperCase("hr")}</span><span className="auth-user-label">{session.user?.user_metadata?.display_name || session.user?.email || "Moj profil"}</span><span className="profile-open-label">Moj profil</span></button>
               <button className="login-button" onClick={signOut}>Odjava</button>
             </div>
           ) : (
@@ -340,6 +385,32 @@ function App() {
               <span>{notice}</span>
               <button aria-label="Zatvori obavijest" onClick={() => setNotice("")}>×</button>
             </div>
+          )}
+
+          {profileOpen && session && (
+            <section className="profile-panel card" aria-labelledby="profile-title">
+              <div className="auth-panel-heading">
+                <div>
+                  <span className="eyebrow">MOJ RAČUN</span>
+                  <h2 id="profile-title">Korisnički profil</h2>
+                  <p className="profile-email">{session.user?.email}</p>
+                </div>
+                <button type="button" className="auth-close" aria-label="Zatvori profil" onClick={() => setProfileOpen(false)}>×</button>
+              </div>
+              <form className="auth-form" onSubmit={saveProfile}>
+                <label htmlFor="profile-name">Ime za prikaz</label>
+                <input id="profile-name" value={profileName} onChange={(event) => setProfileName(event.target.value)} maxLength={60} placeholder="Kako da te zajednica oslovljava?" />
+                <label htmlFor="profile-username">Korisničko ime</label>
+                <input id="profile-username" value={profileUsername} onChange={(event) => setProfileUsername(event.target.value)} maxLength={24} autoComplete="username" placeholder="npr. cuvar_bastine" />
+                <small className="profile-hint">3–24 znaka; slova, brojevi, točka, crtica ili podvlaka.</small>
+                <label htmlFor="profile-bio">O meni</label>
+                <textarea id="profile-bio" className="profile-bio-input" value={profileBio} onChange={(event) => setProfileBio(event.target.value)} maxLength={240} rows={3} placeholder="Napiši nekoliko riječi o svojim interesima…" />
+                <small className="profile-hint">{profileBio.length}/240 znakova</small>
+                <button className="auth-submit" type="submit" disabled={profileBusy}>{profileBusy ? "Spremanje…" : "Spremi profil"}</button>
+              </form>
+              {profileMessage && <p className="auth-message" role="status">{profileMessage}</p>}
+              <p className="auth-footnote">Ovi podaci služe za prikaz profila. Korisnički metapodaci nisu dokaz ovlasti; prava pristupa moraju se provoditi pravilima baze.</p>
+            </section>
           )}
 
           {authOpen && (
