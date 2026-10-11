@@ -139,6 +139,30 @@ set file_size_limit = excluded.file_size_limit,
 
 -- Content reports are private submissions. No SELECT/UPDATE policy is granted here:
 -- ordinary members cannot read reports or change their moderation status.
+create table if not exists public.blocked_users (
+  blocker_id uuid not null references public.profiles(id) on delete cascade,
+  blocked_id uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (blocker_id, blocked_id),
+  constraint blocked_users_no_self_block check (blocker_id <> blocked_id)
+);
+
+create index if not exists blocked_users_blocked_id_idx
+  on public.blocked_users (blocked_id, blocker_id);
+
+alter table public.blocked_users enable row level security;
+
+-- A member can view only their own block list, add blocks, and remove their own blocks.
+create policy "blocked_users_select_own" on public.blocked_users
+  for select to authenticated using (blocker_id = (select auth.uid()));
+create policy "blocked_users_insert_own" on public.blocked_users
+  for insert to authenticated with check (
+    blocker_id = (select auth.uid())
+    and blocked_id <> (select auth.uid())
+  );
+create policy "blocked_users_delete_own" on public.blocked_users
+  for delete to authenticated using (blocker_id = (select auth.uid()));
+
 create table if not exists public.content_reports (
   id uuid primary key default gen_random_uuid(),
   reporter_id uuid not null references public.profiles(id) on delete cascade,
