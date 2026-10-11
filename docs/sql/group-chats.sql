@@ -128,7 +128,7 @@ drop policy if exists group_chats_update_admin on public.group_chats;
 create policy group_chats_update_admin on public.group_chats
 for update to authenticated
 using (public.is_group_chat_admin(id))
-with check (public.is_group_chat_admin(id) and created_by = created_by);
+with check (public.is_group_chat_admin(id));
 
 -- Group membership management is reserved for admins. Creator check remains
 -- solely to allow the initial admin/member rows during group creation.
@@ -218,6 +218,60 @@ begin
   end if;
 end
 $$;
+
+-- Members can leave; the last admin must transfer admin rights first.
+create or replace function public.leave_group_chat(target_group_id uuid)
+returns void
+language plpgsql security definer
+set search_path = public, pg_temp
+set row_security = off
+as $
+declare
+  caller_role text;
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+  select role into caller_role
+    from public.group_chat_members
+    where group_id = target_group_id and user_id = auth.uid();
+  if caller_role is null then
+    raise exception 'You are not a member of this group';
+  end if;
+  if caller_role = 'admin' and not exists (
+    select 1 from public.group_chat_members
+    where group_id = target_group_id and role = 'admin' and user_id <> auth.uid()
+  ) then
+    raise exception 'Cannot leave as the last admin';
+  end if;
+  delete from public.group_chat_members
+    where group_id = target_group_id and user_id = auth.uid();
+end;
+$;
+
+revoke all on function public.leave_group_chat(uuid) from public;
+grant execute on function public.leave_group_chat(uuid) to authenticated;
+
+-- Only a current group admin may permanently delete the group and its content.
+create or replace function public.delete_group_chat(target_group_id uuid)
+returns void
+language plpgsql security definer
+set search_path = public, pg_temp
+set row_security = off
+as $
+begin
+  if auth.uid() is null or not public.is_group_chat_admin(target_group_id) then
+    raise exception 'Only a group admin can delete this group';
+  end if;
+  delete from public.group_chats where id = target_group_id;
+  if not found then
+    raise exception 'Group not found';
+  end if;
+end;
+$;
+
+revoke all on function public.delete_group_chat(uuid) from public;
+grant execute on function public.delete_group_chat(uuid) to authenticated;
 
 commit;
 
