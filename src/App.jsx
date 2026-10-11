@@ -1168,7 +1168,7 @@ function App() {
                 <>
                   <form className="private-message-compose" onSubmit={sendPrivateMessage}>
                     <label htmlFor="message-recipient">Primatelj</label>
-                    <select id="message-recipient" value={messageRecipient} onChange={(event) => setMessageRecipient(event.target.value)} required>
+                    <select id="message-recipient" value={messageRecipient} onChange={(event) => { setMessageRecipient(event.target.value); setReplyingToMessage(null); }} required>
                       <option value="">Odaberi člana…</option>
                       {memberDirectory.filter((member) => !blockedMembers.some((blocked) => blocked.id === member.id)).map((member) => <option key={member.id} value={member.id}>{member.display_name || member.username || "Čuvar nasljeđa"}{member.username ? " · @" + member.username : ""}</option>)}
                     </select>
