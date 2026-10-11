@@ -583,3 +583,12 @@ button { -webkit-tap-highlight-color: transparent; }
 .group-message-edit-form { display: grid; gap: 7px; margin: 8px 0; }
 .group-message-edit-form textarea { width: 100%; resize: vertical; border: 1px solid var(--border, #d8dce2); border-radius: 8px; padding: 9px; font: inherit; }
 .group-message-edit-form > div { display: flex; gap: 6px; flex-wrap: wrap; }
+
+
+/* Reakcije na poruke u grupnim razgovorima */
+.group-message-reactions { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0 2px; }
+.group-reaction { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: 31px; min-height: 27px; padding: 3px 7px; border: 1px solid #e2e7ec; border-radius: 999px; background: #fff; color: #536170; font-size: 12px; cursor: pointer; }
+.group-reaction span { font-size: 10px; font-weight: 700; }
+.group-reaction:hover { border-color: #c5d0db; background: #f6f8fa; }
+.group-reaction.selected { border-color: #b8c9da; background: #eaf1f7; color: #183b5b; }
+.group-reaction:disabled { opacity: .55; cursor: wait; }
