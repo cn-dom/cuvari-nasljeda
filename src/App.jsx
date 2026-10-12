@@ -2107,7 +2107,7 @@ function App() {
               <div><strong>Što želiš podijeliti?</strong><small>Tvoja priča može sačuvati dio nasljeđa.</small></div>
             </div>
             <div className="composer-top">
-              <Avatar initials={comment.initials || comment.author.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN"} variant={comment.owner ? "avatar-you" : ""} />
+              <Avatar initials={(profileName || session?.user?.email?.split("@")[0] || "Čuvar nasljeđa").split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN"} variant="avatar-you" />
               <label className="sr-only" htmlFor="post-draft">Napiši objavu</label>
               <textarea
                 id="post-draft"
