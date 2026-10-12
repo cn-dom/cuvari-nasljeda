@@ -55,14 +55,7 @@ const navItems = [
 ];
 
 function BrandMark() {
-  return (
-    <div className="brand-mark" aria-hidden="true">
-      <span className="brand-red" />
-      <span className="brand-white" />
-      <span className="brand-blue" />
-      <span className="brand-checker">▦</span>
-    </div>
-  );
+  return <img className="brand-mark" src="/assets/images/patriasoul-logo.jpg" alt="" aria-hidden="true" />;
 }
 
 function Avatar({ initials, variant = "" }) {
