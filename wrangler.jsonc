@@ -1,6 +1,9 @@
+
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "patriasoul-cuvari-nasljeda-preview",
+  "name": "cuvari-nasljeda",
   "compatibility_date": "2026-10-11",
-  "pages_build_output_dir": "./dist"
+  "assets": {
+    "directory": "./dist"
+  }
 }
