@@ -331,7 +331,7 @@ export default function App() {
     const baseUrl = import.meta.env.BASE_URL || "/";
     const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
     if (isLocal) return new URL(baseUrl, window.location.origin).toString();
-    return "https://patriasoul-portal-v2.patriasoul.workers.dev/kviz/";
+    return new URL(baseUrl, window.location.origin).toString();
   };
 
   const validateAuth = () => {
@@ -996,7 +996,16 @@ export default function App() {
       : `${mainCount.toLocaleString("hr-HR")} pitanja u glavnoj bazi · 10 pitanja po rundi`;
 
   return <div className="min-h-screen text-foreground">
-    {!isStandalone && <div className="patria-install-bar"><div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-2.5 sm:px-6"><div className="flex min-w-0 items-center gap-3"><img src="https://raw.githubusercontent.com/Patriasoul/patriasoul/main/images/file_0000000082ec81f4a6fc17bdbd959622_114540.png" alt="" className="patria-install-logo" /><div className="min-w-0"><p className="truncate text-sm font-bold text-white">Instaliraj PatriaSoul</p><p className="hidden text-xs text-white/55 sm:block">Pokreni kviz kao aplikaciju na računalu ili telefonu.</p></div></div><button onClick={installPatriaSoul} className="patria-install-button" aria-label="Instaliraj PatriaSoul">Instaliraj</button></div></div>}
+    <div className="relative z-20 border-b border-white/10 bg-[#071426] text-white shadow-lg">
+      <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <a href="/" className="flex min-w-0 items-center gap-3 rounded-xl outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-amber-300" aria-label="Povratak na Čuvare nasljeđa">
+          <img src="/assets/images/patriasoul-logo.jpg" alt="PatriaSoul" className="h-10 w-10 shrink-0 rounded-xl object-cover ring-1 ring-white/15" />
+          <span className="min-w-0"><span className="block text-[10px] font-extrabold uppercase tracking-[.2em] text-amber-300">PatriaSoul</span><span className="block truncate text-sm font-bold sm:text-base">Čuvari nasljeđa <span className="font-medium text-white/55">/ Kviz</span></span></span>
+        </a>
+        <a href="/" className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/15 bg-white/[.06] px-3 py-2 text-xs font-bold transition hover:border-amber-300/60 hover:bg-white/10 sm:px-4 sm:text-sm"><ArrowLeft className="h-4 w-4" /><span className="hidden sm:inline">Natrag na mrežu</span><span className="sm:hidden">Mreža</span></a>
+      </div>
+    </div>
+    {!isStandalone && <div className="patria-install-bar"><div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-2.5 sm:px-6"><div className="flex min-w-0 items-center gap-3"><img src="/assets/images/patriasoul-logo.jpg" alt="" className="patria-install-logo" /><div className="min-w-0"><p className="truncate text-sm font-bold text-white">Instaliraj PatriaSoul</p><p className="hidden text-xs text-white/55 sm:block">Pokreni kviz kao aplikaciju na računalu ili telefonu.</p></div></div><button onClick={installPatriaSoul} className="patria-install-button" aria-label="Instaliraj PatriaSoul">Instaliraj</button></div></div>}
     {installHelp && !isStandalone && <div className="mx-auto max-w-[1400px] px-4 pt-3 sm:px-6"><div className="patria-install-help"><strong>Instalacija nije dostupna automatski u ovom pregledniku.</strong> Na računalu potraži opciju <b>Instaliraj PatriaSoul</b> u izborniku preglednika. Na iPhoneu/iPadu odaberi <b>Dijeli → Dodaj na početni zaslon</b>.</div></div>}
     {authOpen && <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/60 px-4 py-4 sm:items-center sm:py-8" onClick={() => !authLoading && setAuthOpen(false)}>
       <div className="my-auto max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-2xl sm:max-h-[calc(100vh-4rem)]" onClick={(e) => e.stopPropagation()}>
