@@ -54,6 +54,8 @@ const navItems = [
   { icon: "♧", label: "Obavijesti" },
 ];
 
+const OWNER_EMAIL = "patriasoul@protonmail.com";
+
 function BrandMark() {
   return <img className="brand-mark" src="/assets/images/patriasoul-logo.jpg" alt="" aria-hidden="true" />;
 }
@@ -191,6 +193,10 @@ function App() {
   const [messagesBusy, setMessagesBusy] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [notificationsBusy, setNotificationsBusy] = useState(false);
+  const [adminReports, setAdminReports] = useState([]);
+  const [adminBusy, setAdminBusy] = useState(false);
+  const [adminError, setAdminError] = useState("");
+  const isOwner = (session?.user?.email || "").trim().toLowerCase() === OWNER_EMAIL;
 
   useEffect(() => {
     if (!emojiPickerOpen || !emojiPickerHost.current) return undefined;
@@ -697,6 +703,44 @@ function App() {
     loadNotifications();
     return () => { cancelled = true; };
   }, [activeNav, session?.user?.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadAdminReports() {
+      if (activeNav !== "Administracija" || !isOwner || !supabase) { setAdminReports([]); setAdminError(""); return; }
+      setAdminBusy(true);
+      const { data, error } = await supabase.from("content_reports")
+        .select("id, reporter_id, post_id, reason, details, status, created_at")
+        .order("created_at", { ascending: false }).limit(100);
+      if (cancelled) return;
+      if (error) {
+        setAdminReports([]);
+        setAdminError("Prijave se ne mogu učitati. Potrebno je pregledati i primijeniti docs/sql/owner-admin-policies.sql u potvrđenoj testnoj bazi.");
+      } else { setAdminReports(data || []); setAdminError(""); }
+      setAdminBusy(false);
+    }
+    loadAdminReports();
+    return () => { cancelled = true; };
+  }, [activeNav, isOwner]);
+
+  async function updateReportStatus(report, status) {
+    if (!isOwner || !supabase || !report?.id) return;
+    const { data, error } = await supabase.from("content_reports").update({ status })
+      .eq("id", report.id).select("id, status").maybeSingle();
+    if (error || !data) { setNotice("Status prijave nije promijenjen. Provjeri vlasničke RLS politike."); return; }
+    setAdminReports((current) => current.map((item) => item.id === report.id ? { ...item, status: data.status } : item));
+    setNotice("Status prijave je ažuriran.");
+  }
+
+  async function removeReportedPost(report) {
+    if (!isOwner || !supabase || !report?.post_id) return;
+    if (!window.confirm("Kao vlasnik mreže, želiš li ukloniti prijavljenu objavu? Ova radnja je trajna.")) return;
+    const { error } = await supabase.from("posts").delete().eq("id", report.post_id);
+    if (error) { setNotice("Objavu nije moguće ukloniti. Provjeri vlasničke RLS politike i povezane tablice."); return; }
+    const { data: updated, error: statusError } = await supabase.from("content_reports").update({ status: "actioned" }).eq("id", report.id).select("id, status").maybeSingle();
+    setAdminReports((current) => current.map((item) => item.id === report.id ? { ...item, status: updated?.status || (statusError ? item.status : "actioned") } : item));
+    setNotice(statusError ? "Objava je uklonjena, ali status prijave nije ažuriran." : "Objava je uklonjena, a prijava označena kao obrađena.");
+  }
 
   async function markNotificationRead(notification) {
     if (!supabase || !session?.user?.id || !notification?.id || notification.read_at) return false;
@@ -1646,6 +1690,8 @@ function App() {
             {navItems.filter((item) => item.label === "Događaji").map((item) => <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => setActiveNav(item.label)}><span className="side-icon">{item.icon}</span><span className="side-link-label">{item.label}</span><span className="side-count">Uskoro</span></button>)}
           </section>
 
+          {isOwner && <section className="side-section sidebar-nav-section owner-admin-nav"><h3>VLASNIK MREŽE</h3><button type="button" className={activeNav === "Administracija" ? "side-link selected" : "side-link"} onClick={() => setActiveNav("Administracija")}><span className="side-icon">⚙</span><span className="side-link-label">Administracija</span><span className="owner-admin-badge">VLASNIK</span></button></section>}
+
           {session && blockedMembers.length > 0 && (
             <section className="side-section blocked-members-section">
               <h3>BLOKIRANI ČLANOVI</h3>
@@ -1707,6 +1753,22 @@ function App() {
               <button aria-label="Zatvori obavijest" onClick={() => setNotice("")}>×</button>
             </div>
           )}
+
+          {activeNav === "Administracija" && (isOwner ? (
+            <section className="owner-admin-panel card" aria-labelledby="owner-admin-title">
+              <div className="auth-panel-heading"><div><span className="eyebrow">PATRiASOUL · SIGURNOST</span><h2 id="owner-admin-title">Administracija mreže</h2><p className="profile-email">Prijavljen vlasnik: {session?.user?.email}</p></div><span className="owner-admin-badge">VLASNIK</span></div>
+              <div className="owner-admin-notice"><strong>Pristup vlasnika</strong><p>Ovaj izbornik prikazuje se samo kada je prijavljen račun s adresom vlasnika. Baza mora zasebno provoditi ista prava pristupa.</p></div>
+              <div className="owner-admin-summary"><div><strong>{adminReports.filter((item) => item.status === "pending").length}</strong><span>otvorenih prijava</span></div><div><strong>{adminReports.length}</strong><span>učitanih prijava</span></div></div>
+              {adminError && <p className="auth-message" role="alert">{adminError}</p>}
+              {adminBusy ? <p className="directory-empty">Učitavam prijave…</p> : adminReports.length ? <div className="owner-report-list">{adminReports.map((report) => <article className="owner-report-card" key={report.id}>
+                <div className="owner-report-heading"><strong>Prijava · {report.reason}</strong><span className={"report-status status-" + report.status}>{({pending:"Na čekanju", reviewed:"Pregledano", dismissed:"Odbijeno", actioned:"Obrađeno"})[report.status] || report.status}</span></div>
+                <p><strong>ID objave:</strong> <code>{report.post_id}</code></p>{report.details && <p><strong>Objašnjenje:</strong> {report.details}</p>}
+                <small>{new Date(report.created_at).toLocaleString("hr-HR", {dateStyle:"medium",timeStyle:"short"})} · ID prijave: {report.id}</small>
+                <div className="inline-form-actions"><button type="button" className="outline-button" disabled={report.status === "reviewed"} onClick={() => updateReportStatus(report,"reviewed")}>Označi pregledano</button><button type="button" className="outline-button" disabled={report.status === "dismissed"} onClick={() => updateReportStatus(report,"dismissed")}>Odbaci prijavu</button><button type="button" className="primary-button" disabled={report.status === "actioned"} onClick={() => removeReportedPost(report)}>Ukloni objavu</button></div>
+              </article>)}</div> : <p className="directory-empty">Nema prijava za prikaz ili tablica prijava još nije dostupna.</p>}
+              <div className="owner-admin-links"><a href="/pravila-koristenja.html">Pravila korištenja</a><a href="/pravila-zajednice.html">Pravila zajednice</a><a href="/privatnost.html">Privatnost i sigurnost</a></div>
+            </section>
+          ) : <section className="owner-admin-panel card"><h2>Pristup odbijen</h2><p>Administracija je dostupna samo vlasniku mreže.</p></section>)}
 
           {reportPost && (
             <section className="report-panel card" aria-labelledby="report-title">
@@ -2283,7 +2345,7 @@ function App() {
           </section>
 
           <footer className="right-footer">
-            <span>O PatriaSoulu</span><span>Pravila zajednice</span><span>Privatnost</span>
+            <a href="/pravila-koristenja.html">Pravila korištenja</a><a href="/pravila-zajednice.html">Pravila zajednice</a><a href="/privatnost.html">Privatnost i sigurnost</a>
             <p>© PatriaSoul – Čuvari nasljeđa</p>
           </footer>
         </aside>
