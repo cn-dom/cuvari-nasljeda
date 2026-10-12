@@ -27,7 +27,13 @@ select
   r.object_name,
   r.object_kind,
   case
-    when r.object_kind = 'function' and to_regprocedure(r.object_name) is not null then 'FOUND'
+    when r.object_kind = 'function' and exists (
+      select 1
+      from pg_proc p
+      join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = split_part(r.object_name, '.', 1)
+        and p.proname = split_part(r.object_name, '.', 2)
+    ) then 'FOUND'
     when r.object_kind <> 'function' and to_regclass(r.object_name) is not null then 'FOUND'
     else 'MISSING'
   end as status
