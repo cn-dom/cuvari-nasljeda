@@ -73,7 +73,9 @@ end;
 $$;
 
 revoke all on function public.mark_group_messages_read(uuid, uuid[]) from public;
+revoke all on function public.mark_group_messages_read(uuid, uuid[]) from anon;
 revoke all on function public.mark_group_messages_read(uuid, uuid[]) from public;
+revoke all on function public.mark_group_messages_read(uuid, uuid[]) from anon;
 grant execute on function public.mark_group_messages_read(uuid, uuid[]) to authenticated;
 
 -- Broj nepročitanih poruka po grupi za prijavljenog člana.
@@ -99,7 +101,9 @@ as $
 $;
 
 revoke all on function public.get_group_unread_counts() from public;
+revoke all on function public.get_group_unread_counts() from anon;
 revoke all on function public.get_group_unread_counts() from public;
+revoke all on function public.get_group_unread_counts() from anon;
 grant execute on function public.get_group_unread_counts() to authenticated;
 
 -- Omogući realtime događaje ako tablica još nije uključena u publikaciju.
