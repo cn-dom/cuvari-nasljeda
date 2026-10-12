@@ -92,6 +92,30 @@ function WeatherSidebar() {
   </section>;
 }
 
+function FaithSidebar() {
+  const dailyWords = [
+    { verse: "Bog je ljubav.", reference: "1 Iv 4, 8", reflection: "Ljubav se vidi u strpljenju, pažnji i djelima kojima drugome olakšamo dan." },
+    { verse: "Gospodin je pastir moj: ni u čem ja ne oskudijevam.", reference: "Ps 23, 1", reflection: "Kad ne znamo kojim putem krenuti, zastanimo, pomolimo se i učinimo sljedeći dobar korak." },
+    { verse: "Blago mirotvorcima: oni će se sinovima Božjim zvati.", reference: "Mt 5, 9", reflection: "Mir počinje u načinu na koji slušamo, govorimo i rješavamo nesporazume." },
+    { verse: "Ne boj se, jer ja sam s tobom.", reference: "Iz 41, 10", reflection: "Hrabrost ne znači da nemamo straha, nego da u teškoći ne odustanemo od dobra." },
+    { verse: "Sve mogu u Onome koji me jača.", reference: "Fil 4, 13", reflection: "Snagu tražimo za vjernost, strpljivost i ljubav, čak i kad okolnosti nisu lake." },
+    { verse: "Budite jedni drugima dobrostivi, milosrdni.", reference: "Ef 4, 32", reflection: "Dobrota se često sastoji od malih djela koja nitko ne vidi, ali nekome mnogo znače." },
+    { verse: "Uvijek se radujte! Bez prestanka molite!", reference: "1 Sol 5, 16–17", reflection: "Kratka molitva usred svakodnevnih obveza može nas vratiti zahvalnosti i miru." },
+  ];
+  const today = new Date();
+  const dayNumber = Math.floor(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) / 86400000);
+  const word = dailyWords[((dayNumber % dailyWords.length) + dailyWords.length) % dailyWords.length];
+  return <section className="right-card card faith-sidebar-card">
+    <div className="right-card-title"><h3>VJERA HRVATA</h3><span aria-hidden="true">✦</span></div>
+    <div className="faith-sidebar-date">{today.toLocaleDateString("hr-HR", { weekday: "long", day: "numeric", month: "long" })}</div>
+    <div className="faith-sidebar-verse">„{word.verse}”</div>
+    <div className="faith-sidebar-reference">{word.reference}</div>
+    <p className="faith-sidebar-reflection">{word.reflection}</p>
+    <a className="faith-sidebar-link" href="/vjera-hrvata.html">Dnevna vjera i molitve <span aria-hidden="true">→</span></a>
+    <small className="faith-sidebar-source">Biblijska misao i razmatranje; liturgijska čitanja provjeri u izvorima.</small>
+  </section>;
+}
+
 function App() {
   const [posts, setPosts] = useState(initialPosts);
   const [draft, setDraft] = useState("");
@@ -2234,6 +2258,7 @@ function App() {
           </section>
 
           <WeatherSidebar />
+          <FaithSidebar />
 
           <section className="right-card card">
             <div className="right-card-title"><h3>ČLANOVI NA MREŽI</h3><span>{memberPresence.filter((item) => item.show_activity !== false && Date.now() - new Date(item.last_seen_at).getTime() <= 120000).length}</span></div>
