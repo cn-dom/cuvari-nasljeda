@@ -88,4 +88,8 @@ create trigger private_message_notification
 after insert on public.private_messages
 for each row execute function public.notify_private_message_recipient();
 
+revoke execute on function public.notify_private_message_recipient() from public;
+revoke execute on function public.notify_private_message_recipient() from anon;
+revoke execute on function public.notify_private_message_recipient() from authenticated;
+
 commit;
