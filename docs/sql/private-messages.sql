@@ -124,4 +124,8 @@ $;
 drop trigger if exists private_messages_guard_identity on public.private_messages;
 create trigger private_messages_guard_identity before update on public.private_messages
 for each row execute function public.guard_private_message_identity();
+revoke execute on function public.validate_private_message_reply() from public;
+revoke execute on function public.validate_private_message_reply() from anon;
+revoke execute on function public.validate_private_message_reply() from authenticated;
+
 commit;
