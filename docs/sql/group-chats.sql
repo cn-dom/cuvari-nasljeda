@@ -76,13 +76,19 @@ as $
 $;
 
 revoke all on function public.is_group_chat_member(uuid) from public;
+revoke all on function public.is_group_chat_member(uuid) from anon;
 revoke all on function public.is_group_chat_member(uuid) from public;
+revoke all on function public.is_group_chat_member(uuid) from anon;
 grant execute on function public.is_group_chat_member(uuid) to authenticated;
 revoke all on function public.is_group_chat_creator(uuid) from public;
+revoke all on function public.is_group_chat_creator(uuid) from anon;
 revoke all on function public.is_group_chat_creator(uuid) from public;
+revoke all on function public.is_group_chat_creator(uuid) from anon;
 grant execute on function public.is_group_chat_creator(uuid) to authenticated;
 revoke all on function public.is_group_chat_admin(uuid) from public;
+revoke all on function public.is_group_chat_admin(uuid) from anon;
 revoke all on function public.is_group_chat_admin(uuid) from public;
+revoke all on function public.is_group_chat_admin(uuid) from anon;
 grant execute on function public.is_group_chat_admin(uuid) to authenticated;
 
 drop policy if exists group_chats_select_members on public.group_chats;
@@ -191,7 +197,9 @@ end;
 $;
 
 revoke all on function public.transfer_group_chat_admin(uuid, uuid) from public;
+revoke all on function public.transfer_group_chat_admin(uuid, uuid) from anon;
 revoke all on function public.transfer_group_chat_admin(uuid, uuid) from public;
+revoke all on function public.transfer_group_chat_admin(uuid, uuid) from anon;
 grant execute on function public.transfer_group_chat_admin(uuid, uuid) to authenticated;
 
 drop policy if exists group_chat_messages_select_members on public.group_chat_messages;
@@ -290,7 +298,9 @@ end;
 $;
 
 revoke all on function public.leave_group_chat(uuid) from public;
+revoke all on function public.leave_group_chat(uuid) from anon;
 revoke all on function public.leave_group_chat(uuid) from public;
+revoke all on function public.leave_group_chat(uuid) from anon;
 grant execute on function public.leave_group_chat(uuid) to authenticated;
 
 -- Only a current group admin may permanently delete the group and its content.
@@ -312,7 +322,9 @@ end;
 $;
 
 revoke all on function public.delete_group_chat(uuid) from public;
+revoke all on function public.delete_group_chat(uuid) from anon;
 revoke all on function public.delete_group_chat(uuid) from public;
+revoke all on function public.delete_group_chat(uuid) from anon;
 grant execute on function public.delete_group_chat(uuid) to authenticated;
 
 
