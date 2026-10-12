@@ -793,4 +793,13 @@ $$;
 alter table public.private_messages replica identity full;
 alter table public.group_chat_messages replica identity full;
 
+-- Supabase default ACLs may grant EXECUTE to anon explicitly; revoke it too.
+revoke all on function public.delete_group_chat(uuid) from anon;
+revoke all on function public.get_group_unread_counts() from anon;
+revoke all on function public.is_group_chat_admin(uuid) from anon;
+revoke all on function public.is_group_chat_creator(uuid) from anon;
+revoke all on function public.is_group_chat_member(uuid) from anon;
+revoke all on function public.leave_group_chat(uuid) from anon;
+revoke all on function public.mark_group_messages_read(uuid, uuid[]) from anon;
+revoke all on function public.transfer_group_chat_admin(uuid, uuid) from anon;
 commit;
