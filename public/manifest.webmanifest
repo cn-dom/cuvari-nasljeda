@@ -1,0 +1,17 @@
+{
+  "id": "/",
+  "name": "PatriaSoul — Čuvari nasljeđa",
+  "short_name": "PatriaSoul",
+  "description": "Društvena mreža hrvatskog zajedništva. Poveži se, dijeli priče i čuvaj nasljeđe.",
+  "lang": "hr-HR",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#071426",
+  "theme_color": "#172c46",
+  "categories": ["social", "lifestyle", "education"],
+  "icons": [
+    { "src": "/assets/images/patriasoul-app-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

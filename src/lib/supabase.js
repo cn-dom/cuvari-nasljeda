@@ -1,0 +1,23 @@
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+export const isSupabaseConfigured = Boolean(
+  supabaseUrl &&
+  supabasePublishableKey &&
+  !supabaseUrl.includes("YOUR-TEST-PROJECT") &&
+  !supabasePublishableKey.includes("YOUR_TEST_PUBLISHABLE_KEY")
+);
+
+// The app remains usable as a visual prototype until a separate test project
+// is configured. Never put a service_role/secret key in VITE_* variables.
+export const supabase = isSupabaseConfigured
+  ? createClient(supabaseUrl, supabasePublishableKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    })
+  : null;

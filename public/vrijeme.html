@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Vrijeme u Hrvatskoj — aktualne temperature, interaktivna karta, prognoza po gradovima i regijama, satna i višednevna prognoza.">
+<title>Vrijeme u Hrvatskoj · PatriaSoul</title>
+<link rel="stylesheet" href="./weather-page.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>.ps-weather-back{display:inline-flex;align-items:center;gap:9px;margin:4px 0 12px;padding:10px 14px;border:1px solid rgba(241,208,120,.45);border-radius:10px;background:rgba(255,255,255,.05);color:#f1d078;text-decoration:none;font-weight:800;font-size:.9rem}.ps-weather-back:hover{background:rgba(241,208,120,.12);color:#fff}.ps-weather-page{position:relative;z-index:1}</style>
+</head>
+<body>
+<main class="ps-weather-page"><a class="ps-weather-back" href="/#pocetna" aria-label="Natrag na zid zajednice">← Natrag na zid</a>
+<section class="ps-weather-hero">
+<div>
+<span class="ps-weather-eyebrow">DOMOVINA · VRIJEME HRVATSKE</span>
+<h1>Vrijeme u Hrvatskoj</h1>
+<p>Aktualne temperature, stanje vremena, interaktivna karta Hrvatske, prognoza po gradovima i regionalni pregled — na jednom mjestu.</p>
+<div class="ps-weather-actions"><button id="weather-refresh" class="ps-weather-button" type="button">↻ Osvježi podatke</button></div>
+</div>
+<aside class="ps-weather-source-card">
+<strong>PatriaSoul vremenski pregled</strong>
+<p>Prognozu dohvaćamo iz Open-Meteo, a sigurnosne informacije i dostupne službene meteorološke podatke DHMZ-a automatski uključujemo u ovaj pregled.</p>
+</aside>
+</section>
+
+<div class="ps-weather-status"><strong>VRIJEME UŽIVO</strong><span id="weather-live-status">Podaci se dohvaćaju…</span><span id="weather-updated"></span></div>
+
+<section class="ps-weather-section">
+<div class="ps-weather-heading">
+<div><span class="ps-weather-eyebrow">HRVATSKA NA KARTI</span><h2>Temperature po Hrvatskoj</h2><p>Klikni na grad ili regiju za detaljnu prognozu. Karta se automatski ažurira iz Open-Meteo podataka.</p></div>
+<div class="ps-weather-map-controls" role="group" aria-label="Sloj karte">
+<button type="button" class="is-active" data-map-mode="temperature">Temperatura</button>
+<button type="button" data-map-mode="wind">Vjetar</button>
+<button type="button" data-map-mode="precipitation">Oborine</button>
+</div>
+</div>
+<div id="weather-map" class="ps-weather-map" aria-label="Interaktivna karta vremena u Hrvatskoj"></div>
+<p class="ps-weather-map-note">Karta: OpenStreetMap · vremenski podaci: Open-Meteo.</p>
+</section>
+
+<section class="ps-weather-section">
+<div class="ps-weather-heading"><div><span class="ps-weather-eyebrow">REGIONALNI PREGLED</span><h2>Vrijeme po hrvatskim regijama</h2><p>Brzi pregled trenutnih temperatura na reprezentativnim lokacijama.</p></div></div>
+<div id="weather-region-grid" class="ps-weather-region-grid"></div>
+</section>
+
+<section class="ps-weather-section ps-weather-selector-section">
+<div class="ps-weather-heading"><div><span class="ps-weather-eyebrow">DETALJNA PROGNOZA</span><h2>Odaberi grad</h2></div></div>
+<label class="ps-weather-select"><span>Grad ili područje</span><select id="weather-city-select"></select></label>
+<div id="weather-detail" class="ps-weather-detail-card"></div>
+<div id="weather-hourly" class="ps-weather-hourly"></div>
+<div id="weather-daily" class="ps-weather-daily"></div>
+</section>
+
+<section class="ps-weather-section">
+<div class="ps-weather-heading"><div><span class="ps-weather-eyebrow">ZRAK I JADRAN</span><h2>Podaci na jednom mjestu</h2><p>Kvaliteta zraka i stanje mora prikazani su izravno na PatriaSoulu.</p></div></div>
+<div class="ps-weather-inside-grid">
+<article class="ps-weather-inside-card">
+<div class="ps-weather-card-head"><div><span class="ps-weather-eyebrow">KVALITETA ZRAKA</span><h3 id="air-city">Zagreb</h3></div><span id="air-aqi-badge" class="ps-weather-badge">—</span></div>
+<label class="ps-weather-mini-select"><span>Grad</span><select id="air-city-select" aria-label="Odaberi grad za kvalitetu zraka"></select></label>
+<div id="air-quality" class="ps-weather-quality"><div class="ps-weather-loading">Učitavanje kvalitete zraka…</div></div>
+</article>
+<article class="ps-weather-inside-card">
+<div class="ps-weather-card-head"><div><span class="ps-weather-eyebrow">JADRAN</span><h3 id="marine-city">Split</h3></div><span id="marine-wave-badge" class="ps-weather-badge">—</span></div>
+<label class="ps-weather-mini-select"><span>Obalni grad</span><select id="marine-city-select" aria-label="Odaberi obalni grad"></select></label>
+<div id="marine-weather" class="ps-weather-quality"><div class="ps-weather-loading">Učitavanje stanja mora…</div></div>
+</article>
+</div>
+</section>
+
+<section class="ps-weather-section">
+<div class="ps-weather-heading"><div><span class="ps-weather-eyebrow">DODATNI PODACI</span><h2>Vrijeme i sigurnost</h2></div></div>
+<div class="ps-weather-panels">
+<article><h3>Upozorenja</h3><div id="weather-safety-warning">Dnevni sigurnosni pregled učitava se automatski.</div></article>
+<article><h3>Jadran i more</h3><div id="weather-safety-sea">Dnevni pregled Jadrana učitava se automatski.</div></article>
+</div>
+</section>
+
+<div class="ps-weather-note"><strong>Izvori:</strong> DHMZ za službene meteorološke podatke i upozorenja koja PatriaSoul automatski dohvaća i prikazuje tekstualno; Open-Meteo za vremenske podatke i prognozu; OpenStreetMap za kartografsku podlogu.</div>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="./weather-page.js"></script>
+<script src="./dhmz-weather.js"></script>
+</body>
+</html>

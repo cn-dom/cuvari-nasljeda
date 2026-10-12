@@ -1,12 +1,13 @@
-# Tehnička provjera izvornog projekta
+# Pregled kandidatskog projekta: OpenSourceCommunity
 
 Datum provjere: 11. listopada 2026.
 
-## Izvor
+## Status kandidata
 
 - Repozitorij: https://github.com/JonJLevesque/OpenSourceCommunity
-- Izvorna licenca: OpenSourceCommunity Non-Commercial License, Version 1.0 (2025).
-- Izvorni projekt ima monorepo strukturu s 429 stavki u Git stablu u trenutku provjere.
+- Status: **kandidat za pojedine funkcije, nije odabran kao temelj cijele aplikacije**.
+- U izvornom Git stablu zabilježeno je 429 stavki u trenutku pregleda.
+- Aplikacijski kod iz tog repozitorija nije uvezen u PatriaSoul.
 
 ## Uočena tehnologija
 
@@ -17,11 +18,23 @@ Datum provjere: 11. listopada 2026.
 - Prijava, pohrana i realtime mogućnosti oslanjaju se na Supabase.
 - Izvorna konfiguracija navodi Node.js 22+ i pnpm 9+.
 
-## Licenca — obavezno ograničenje
+Ove tehnologije ne znače da je svaka funkcija dovršena ili da se može izravno prenijeti. Svaki potencijalni modul mora se pregledati i testirati zasebno.
 
-Licenca dopušta osobnu i organizacijsku uporabu, kopiranje i izmjene uz očuvanje obavijesti o autorskim pravima i navođenje izmjena. Izričito zabranjuje komercijalnu uporabu, naplatni hosting/SaaS i uporabu u uslugama koje ostvaruju prihod bez zasebnog pisanog dopuštenja nositelja prava.
+## Licenca kandidata
 
-Prije javnog pokretanja treba odlučiti može li PatriaSoul ostati nekomercijalan. Ako se planira prihod, oglasi ili naplatne funkcije, potrebno je prije nastavka dobiti pravno pojašnjenje i/ili pisano dopuštenje autora. Ovaj zapis nije pravni savjet.
+Izvorni projekt sadrži **OpenSourceCommunity Non-Commercial License, Version 1.0 (2025)**. Ona dopušta kopiranje i izmjene pod uvjetima licence, ali ograničava komercijalnu uporabu, naplatni hosting/SaaS i usluge koje ostvaruju prihod bez pisanog dopuštenja nositelja prava.
+
+Tekst licence sačuvan je u `licenses/OPEN-SOURCE-COMMUNITY-NON-COMMERCIAL-LICENSE.txt` samo kao evidencija razmatranog kandidata. Nije odabrana kao licenca cijelog PatriaSoul projekta. Ako se kasnije odlučimo preuzeti kod iz tog izvora, prije integracije treba provjeriti konkretne obveze i zadržati propisane obavijesti. Ovaj zapis nije pravni savjet.
+
+## Odabrani smjer razvoja
+
+PatriaSoul će biti vlastita aplikacija u repozitoriju `cn-dom/cuvari-nasljeda`:
+
+- vizualni uzor i dizajnerske elemente prilagoditi iz vlastitog repozitorija https://github.com/cn-dom/ps;
+- hosting i poslužiteljsku logiku prilagoditi Cloudflare Pages/Workers;
+- autentikaciju i podatke povezati sa Supabaseom;
+- funkcije drugih projekata uzimati pojedinačno, samo nakon provjere licence, ovisnosti, sigurnosti i kompatibilnosti;
+- zabilježiti izvor, verziju/commit, licencu i izmjene svake preuzete komponente.
 
 ## Sigurnosne napomene
 
@@ -31,18 +44,6 @@ Prije javnog pokretanja treba odlučiti može li PatriaSoul ostati nekomercijala
 - Prije deploya provjeriti sve varijable, CORS, autentikaciju, RLS politike i upload pravila.
 - Provjeriti izvorne funkcije i njihove stvarne implementacije prije obećavanja da su spremne za produkciju.
 
-## Funkcije za provjeru i prilagodbu
-
-1. Hrvatsko sučelje i PatriaSoul vizualni identitet.
-2. Profili i privatnost.
-3. Zid objava: tekst, fotografije, komentari, reakcije i označavanje.
-4. Grupe, stranice, događaji i kalendar.
-5. Dijeljenje kvizova i rezultata.
-6. Privatne poruke i obavijesti.
-7. Prijava sadržaja, blokiranje i administratorsko moderiranje.
-8. Brisanje vlastitih objava, fotografija i komentara.
-9. Pristupačnost, mobilni prikaz i automatizirani QA.
-
 ## Trenutačni status
 
-Ovo je samo početna provjera izvora. Aplikacijski kod još nije uvezen u ovaj repozitorij, nije pokrenut lokalno i nije deployan. Sljedeći tehnički korak je uvoz cijelog izvornog repozitorija uz očuvanje povijesti/licence ili dokumentirano kopiranje, zatim pokretanje izoliranog testnog okruženja.
+Ovo je pregled jednog kandidatskog projekta, ne uvoz aplikacije. PatriaSoul aplikacijski kod još nije implementiran, pokrenut lokalno ni deployan. Sljedeći praktični korak je izrada vlastitog sučelja i strukture u razvojnoj grani, koristeći provjerene vizualne uzorke iz `cn-dom/ps`.
