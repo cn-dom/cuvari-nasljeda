@@ -57,7 +57,7 @@ const navItems = [
 const OWNER_EMAIL = "patriasoul@protonmail.com";
 
 function BrandMark() {
-  return <img className="brand-mark" src="/assets/images/patriasoul-logo.jpg" alt="" aria-hidden="true" />;
+  return <img className="brand-mark" src="/assets/images/1000000982.png" alt="" aria-hidden="true" />;
 }
 
 function Avatar({ initials, variant = "" }) {
@@ -1659,7 +1659,7 @@ function App() {
           </section>
 
           <a className="quiz-sidebar-link" href="/kviz/" aria-label="Otvori PatriaSoul kviz">
-            <span className="quiz-sidebar-mark"><img src="/assets/images/patriasoul-logo.jpg" alt="" /></span>
+            <span className="quiz-sidebar-mark"><img src="/assets/images/1000000982.png" alt="" /></span>
             <span className="quiz-sidebar-copy"><strong>PatriaSoul kviz</strong><small>Znanje · Ponos · Nasljeđe</small></span>
             <span className="quiz-sidebar-arrow">↗</span>
           </a>
