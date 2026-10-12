@@ -32,7 +32,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #d9b86d; box-shadow: 0 0 0 3px #ffffff15; }
 .topbar { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 0 max(24px, calc((100vw - 1420px) / 2)); background: #fff; border-bottom: 1px solid var(--line); }
 .brand { display: inline-flex; align-items: center; gap: 12px; flex-shrink: 0; }
-.brand-mark { width: 42px; height: 42px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; position: relative; overflow: hidden; border-radius: 10px; border: 1px solid #e0e5e9; background: #fff; box-shadow: 0 3px 8px #152c4612; }
+.brand-mark { display: block; width: 42px; height: 42px; flex: 0 0 42px; object-fit: contain; object-position: center; position: relative; overflow: hidden; border-radius: 10px; border: 1px solid #e0e5e9; background: #fff; box-shadow: 0 3px 8px #152c4612; }
 .brand-mark span:not(.brand-checker) { display: block; }
 .brand-red { background: #b51224; }
 .brand-white { background: #fff; }
