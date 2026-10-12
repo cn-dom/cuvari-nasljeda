@@ -122,6 +122,11 @@ create trigger on_auth_user_created_profile
   after insert on auth.users
   for each row execute procedure public.handle_new_auth_user();
 
+-- The trigger can invoke this function, but API clients must not call it directly.
+revoke execute on function public.handle_new_auth_user() from public;
+revoke execute on function public.handle_new_auth_user() from anon;
+revoke execute on function public.handle_new_auth_user() from authenticated;
+
 
 -- Private image bucket for community posts.
 -- Keep the private image bucket aligned with the 10 MB application upload limit.
