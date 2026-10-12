@@ -1614,7 +1614,7 @@ function App() {
             </div>
             <h3>Koliko poznaješ Hrvatsku?</h3>
             <p>Provjeri znanje o povijesti, gradovima i hrvatskoj baštini.</p>
-            <a className="quiz-promo-action" href="https://patriasoul.github.io/kviz/" target="_blank" rel="noopener noreferrer">
+            <a className="quiz-promo-action" href="/kviz/">
               <span>Pokreni kviz</span><span aria-hidden="true">↗</span>
             </a>
             <span className="quiz-promo-note">Znanje. Ponos. Nasljeđe.</span>
