@@ -1552,32 +1552,46 @@ function App() {
 
       <main className="page-layout" id="pocetna">
         <aside className="left-sidebar">
-          <div className="community-card">
-            <div className="community-banner"><span>HRVATSKA · POVIJEST · ZAJEDNIŠTVO</span></div>
+          <section className="community-card community-profile-card">
+            <div className="community-banner"><span>HRVATSKA · POVIJEST · ZAJEDNIŠTVO</span><span className="community-status"><i /> ZAJEDNICA</span></div>
             <div className="community-body">
               <div className="community-emblem"><BrandMark /></div>
-              <h2>Čuvari nasljeđa</h2>
-              <p>Mjesto za ljude koji čuvaju priče, običaje i uspomene.</p>
+              <div className="community-profile-title"><h2>Čuvari nasljeđa</h2><span className="community-verified" title="Službena zajednica PatriaSoul" aria-label="Službena zajednica">✓</span></div>
+              <p>Mjesto za ljude koji čuvaju priče, običaje i uspomene — i prenose ih novim naraštajima.</p>
+              <div className="community-topic-tags"><span>Baština</span><span>Povijest</span><span>Zajedništvo</span></div>
               <div className="community-stats">
-                <div><strong>—</strong><span>članova</span></div>
-                <div><strong>{postCount}</strong><span>objava na zidu</span></div>
+                <div><strong>{postCount}</strong><span>objava</span></div>
+                <div><strong>{groupChats.length}</strong><span>grupa</span></div>
               </div>
+              <button type="button" className="community-profile-action" onClick={() => { setActiveNav("Zid zajednice"); document.getElementById("post-draft")?.focus(); }}>＋ Podijeli priču</button>
             </div>
-          </div>
+          </section>
 
-          <section className="side-section">
-            <h3>ZAJEDNICA</h3>
-            {navItems.map((item) => (
-              <button
-                key={item.label}
-                className={activeNav === item.label ? "side-link selected" : "side-link"}
-                onClick={() => setActiveNav(item.label)}
-              >
-                <span className="side-icon">{item.icon}</span>{item.label}
-                {item.label === "Poruke" && <span className="side-count">✉</span>}
-                {item.label === "Obavijesti" && <span className="side-count">{notifications.filter((notification) => !notification.read_at).length || ""}</span>}
+          <section className="side-section sidebar-nav-section">
+            <h3>MOJA ZAJEDNICA</h3>
+            {navItems.filter((item) => ["Zid zajednice", "Čuvari nasljeđa", "Grupe"].includes(item.label)).map((item) => (
+              <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => setActiveNav(item.label)}>
+                <span className="side-icon">{item.icon}</span><span className="side-link-label">{item.label}</span>
+                {item.label === "Čuvari nasljeđa" && <span className="side-count">{memberDirectory.length || ""}</span>}
+                {item.label === "Grupe" && <span className="side-count">{groupChats.length || ""}</span>}
               </button>
             ))}
+          </section>
+          <section className="side-section sidebar-nav-section">
+            <h3>RAZGOVORI</h3>
+            {navItems.filter((item) => ["Poruke", "Obavijesti"].includes(item.label)).map((item) => {
+              const unreadNotifications = notifications.filter((notification) => !notification.read_at);
+              const unreadMessages = unreadNotifications.filter((notification) => notification.type === "private_message").length;
+              const unreadGroups = Object.values(groupUnreadCounts).reduce((sum, count) => sum + (Number(count) || 0), 0);
+              const badgeCount = item.label === "Poruke" ? unreadMessages : unreadNotifications.length;
+              const badgeLabel = item.label === "Poruke" ? "nepročitanih obavijesti o porukama" : "nepročitanih obavijesti";
+              return <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => setActiveNav(item.label)}>
+                <span className="side-icon">{item.icon}</span><span className="side-link-label">{item.label}</span>
+                {item.label === "Poruke" && unreadGroups > 0 && <span className="side-count group-side-count" title={unreadGroups + " nepročitanih grupnih poruka"}>＋{unreadGroups > 99 ? "99+" : unreadGroups}</span>}
+                {badgeCount > 0 && <span className="side-count side-count-badge" aria-label={badgeCount + " " + badgeLabel}>{badgeCount > 99 ? "99+" : badgeCount}</span>}
+              </button>;
+            })}
+            {navItems.filter((item) => item.label === "Događaji").map((item) => <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => setActiveNav(item.label)}><span className="side-icon">{item.icon}</span><span className="side-link-label">{item.label}</span><span className="side-count">Uskoro</span></button>)}
           </section>
 
           {session && blockedMembers.length > 0 && (
