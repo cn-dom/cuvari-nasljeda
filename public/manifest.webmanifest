@@ -12,6 +12,6 @@
   "theme_color": "#172c46",
   "categories": ["social", "lifestyle", "education"],
   "icons": [
-    { "src": "/assets/images/patriasoul-app-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    { "src": "/assets/images/patriasoul-logo.jpg", "sizes": "512x512", "type": "image/jpeg", "purpose": "any" }
   ]
 }
