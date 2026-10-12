@@ -1083,3 +1083,19 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
   .sidebar-nav-section .side-link.selected { background: #104064; }
   .sidebar-nav-section .side-count { display: inline-flex; }
 }
+
+
+/* PatriaSoul quiz cross-promotion */
+.quiz-promo-card { position: relative; overflow: hidden; margin: 18px 0 12px; padding: 15px; border: 1px solid #24577b; border-radius: 14px; background: radial-gradient(circle at 100% 0%, #164b77 0, transparent 42%), linear-gradient(145deg, #0d2944, #081a2c 78%); box-shadow: 0 10px 28px #0002; }
+.quiz-promo-card::after { content: ""; position: absolute; width: 100px; height: 100px; right: -42px; bottom: -55px; border: 1px solid #4b9bd455; border-radius: 50%; box-shadow: 0 0 0 12px #4b9bd40c, 0 0 0 25px #4b9bd409; pointer-events: none; }
+.quiz-promo-top { display: flex; align-items: center; gap: 8px; }
+.quiz-promo-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: #174b75; font-size: 19px; }
+.quiz-promo-kicker { color: #83c9f5; font-size: 9px; font-weight: 900; letter-spacing: .12em; }
+.quiz-promo-flag { margin-left: auto; font-size: 18px; }
+.quiz-promo-card h3 { margin: 13px 0 7px; color: #f0f8ff; font-size: 15px; line-height: 1.35; }
+.quiz-promo-card p { margin: 0; color: #a8c1d7; font-size: 11px; line-height: 1.6; }
+.quiz-promo-action { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 13px; padding: 10px 11px; border: 1px solid #3489c1; border-radius: 9px; background: linear-gradient(100deg, #14649a, #10446e); color: #f5fbff; font-size: 11px; font-weight: 850; text-decoration: none; transition: background .18s ease, transform .18s ease; }
+.quiz-promo-action:hover { background: linear-gradient(100deg, #197bb8, #145784); transform: translateY(-1px); }
+.quiz-promo-action:focus-visible { outline: 2px solid #a4dcff; outline-offset: 3px; }
+.quiz-promo-note { display: block; margin-top: 9px; color: #7197b7; font-size: 9px; letter-spacing: .04em; }
+@media (max-width: 760px) { .quiz-promo-card { margin: 12px 0; padding: 12px; } .quiz-promo-card h3 { font-size: 13px; } }
