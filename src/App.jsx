@@ -1606,6 +1606,20 @@ function App() {
             </section>
           )}
 
+          <section className="quiz-promo-card" aria-label="PatriaSoul kviz">
+            <div className="quiz-promo-top">
+              <span className="quiz-promo-icon" aria-hidden="true">🧠</span>
+              <span className="quiz-promo-kicker">PATRIASOUL KVIZ</span>
+              <span className="quiz-promo-flag" aria-hidden="true">🇭🇷</span>
+            </div>
+            <h3>Koliko poznaješ Hrvatsku?</h3>
+            <p>Provjeri znanje o povijesti, gradovima i hrvatskoj baštini.</p>
+            <a className="quiz-promo-action" href="https://patriasoul.github.io/kviz/" target="_blank" rel="noopener noreferrer">
+              <span>Pokreni kviz</span><span aria-hidden="true">↗</span>
+            </a>
+            <span className="quiz-promo-note">Znanje. Ponos. Nasljeđe.</span>
+          </section>
+
           <section className="side-section values-card">
             <h3>NAŠA TRI TEMELJA</h3>
             <p><span>✦</span> Vjera</p>
