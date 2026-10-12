@@ -62,6 +62,36 @@ function Avatar({ initials, variant = "" }) {
   return <div className={`avatar ${variant}`}>{initials}</div>;
 }
 
+function WeatherSidebar() {
+  const [weather, setWeather] = useState({ loading: true, temp: null, code: null, city: "Zagreb" });
+  useEffect(() => {
+    let cancelled = false;
+    async function loadWeather() {
+      try {
+        const response = await fetch("https://api.open-meteo.com/v1/forecast?latitude=45.815&longitude=15.982&current=temperature_2m,weather_code&timezone=Europe%2FZagreb", { cache: "no-store" });
+        if (!response.ok) throw new Error("Weather request failed");
+        const data = await response.json();
+        if (!cancelled) setWeather({ loading: false, temp: Math.round(data.current.temperature_2m), code: data.current.weather_code, city: "Zagreb" });
+      } catch {
+        if (!cancelled) setWeather({ loading: false, temp: null, code: null, city: "Zagreb" });
+      }
+    }
+    loadWeather();
+    return () => { cancelled = true; };
+  }, []);
+  const descriptions = {0:"Vedro",1:"Pretežno vedro",2:"Djelomično oblačno",3:"Oblačno",45:"Magla",48:"Magla",51:"Rosulja",53:"Rosulja",55:"Jaka rosulja",61:"Slaba kiša",63:"Kiša",65:"Jaka kiša",71:"Slab snijeg",73:"Snijeg",75:"Jak snijeg",80:"Pljuskovi",81:"Pljuskovi",82:"Jaki pljuskovi",95:"Grmljavina",96:"Grmljavina i tuča",99:"Jaka grmljavina i tuča"};
+  const symbols = {0:"☀️",1:"🌤️",2:"⛅",3:"☁️",45:"🌫️",48:"🌫️",51:"🌦️",53:"🌦️",55:"🌧️",61:"🌦️",63:"🌧️",65:"🌧️",71:"🌨️",73:"❄️",75:"❄️",80:"🌦️",81:"🌧️",82:"⛈️",95:"⛈️",96:"⛈️",99:"⛈️"};
+  return <section className="right-card card weather-sidebar-card">
+    <div className="right-card-title"><h3>VRIJEME U HRVATSKOJ</h3><span>☀</span></div>
+    <div className="weather-sidebar-main">
+      <span className="weather-sidebar-symbol" aria-hidden="true">{weather.loading ? "…" : (symbols[weather.code] || "🌦️")}</span>
+      <div><strong>{weather.temp === null ? (weather.loading ? "Učitavanje…" : "Podaci nedostupni") : `${weather.temp}°C`}</strong><small>{weather.city} · {weather.loading ? "Dohvaćam prognozu" : (descriptions[weather.code] || "Trenutačni uvjeti")}</small></div>
+    </div>
+    <a className="weather-sidebar-link" href="/vrijeme.html">Cijela prognoza <span aria-hidden="true">→</span></a>
+    <small className="weather-sidebar-source">Podaci: Open-Meteo</small>
+  </section>;
+}
+
 function App() {
   const [posts, setPosts] = useState(initialPosts);
   const [draft, setDraft] = useState("");
@@ -2202,6 +2232,8 @@ function App() {
               <span className="focus-icon gold">✥</span><span><strong>Naši krajevi</strong><small>Mjesta, običaji i ljudi</small></span><b>›</b>
             </a>
           </section>
+
+          <WeatherSidebar />
 
           <section className="right-card card">
             <div className="right-card-title"><h3>ČLANOVI NA MREŽI</h3><span>{memberPresence.filter((item) => item.show_activity !== false && Date.now() - new Date(item.last_seen_at).getTime() <= 120000).length}</span></div>
