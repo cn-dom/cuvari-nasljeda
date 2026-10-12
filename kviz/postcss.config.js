@@ -1,6 +1,6 @@
 export default {
   plugins: {
-    tailwindcss: {},
+    tailwindcss: { config: "./kviz/tailwind.config.js" },
     autoprefixer: {},
   },
 };
