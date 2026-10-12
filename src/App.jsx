@@ -1560,6 +1560,11 @@ function App() {
             </div>
           </section>
 
+          <a className="quiz-sidebar-link" href="/kviz/" aria-label="Otvori PatriaSoul kviz">
+            <span className="quiz-sidebar-mark"><img src="/assets/images/patriasoul-logo.jpg" alt="" /></span>
+            <span className="quiz-sidebar-copy"><strong>PatriaSoul kviz</strong><small>Znanje · Ponos · Nasljeđe</small></span>
+            <span className="quiz-sidebar-arrow">↗</span>
+          </a>
           <section className="side-section sidebar-nav-section">
             <h3>MOJA ZAJEDNICA</h3>
             {navItems.filter((item) => ["Zid zajednice", "Čuvari nasljeđa", "Grupe"].includes(item.label)).map((item) => (

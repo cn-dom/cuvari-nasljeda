@@ -1099,3 +1099,14 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
 .quiz-promo-action:focus-visible { outline: 2px solid #a4dcff; outline-offset: 3px; }
 .quiz-promo-note { display: block; margin-top: 9px; color: #7197b7; font-size: 9px; letter-spacing: .04em; }
 @media (max-width: 760px) { .quiz-promo-card { margin: 12px 0; padding: 12px; } .quiz-promo-card h3 { font-size: 13px; } }
+
+
+/* Integrated PatriaSoul quiz shortcut */
+.quiz-sidebar-link{display:flex;align-items:center;gap:11px;margin:0 0 16px;padding:12px;border:1px solid rgba(92,169,225,.26);border-radius:14px;background:linear-gradient(135deg,rgba(37,99,150,.2),rgba(10,31,51,.72));color:inherit;text-decoration:none;transition:border-color .18s ease,transform .18s ease,background .18s ease}
+.quiz-sidebar-link:hover{border-color:rgba(105,190,248,.7);background:linear-gradient(135deg,rgba(37,99,150,.32),rgba(10,31,51,.88));transform:translateY(-1px)}
+.quiz-sidebar-mark{display:grid;place-items:center;width:40px;height:40px;flex:0 0 40px;overflow:hidden;border-radius:11px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.22)}
+.quiz-sidebar-mark img{display:block;width:100%;height:100%;object-fit:cover}
+.quiz-sidebar-copy{display:flex;min-width:0;flex:1;flex-direction:column;gap:3px}
+.quiz-sidebar-copy strong{font-size:13px;font-weight:800;letter-spacing:.01em}
+.quiz-sidebar-copy small{color:#9eb8cf;font-size:10px;line-height:1.35}
+.quiz-sidebar-arrow{color:#8ac9f7;font-size:18px;font-weight:800}
