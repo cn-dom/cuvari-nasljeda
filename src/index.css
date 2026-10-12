@@ -1043,3 +1043,43 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
   .reaction-chip small { font-size: 8px; }
   .heritage-art { min-height: 180px; padding: 18px; }
 }
+
+
+/* Lijevi izbornik i profil zajednice — preglednije grupe i stvarni brojači */
+.community-profile-card { border-color: #1c3c56; background: linear-gradient(160deg, #0b2236, #071827); box-shadow: 0 10px 28px #0003; }
+.community-profile-card .community-banner { min-height: 94px; display: flex; flex-wrap: wrap; align-content: space-between; justify-content: space-between; gap: 10px; background: linear-gradient(125deg, #0b2b43, #14517a 62%, #762637); }
+.community-status { display: inline-flex; align-items: center; gap: 6px; color: #a7d8fa; font-size: 8px; letter-spacing: .1em; }
+.community-status i { width: 6px; height: 6px; border-radius: 50%; background: #43d49a; box-shadow: 0 0 9px #43d49a88; }
+.community-profile-card .community-emblem { background: #0b2032; border: 1px solid #2c5776; box-shadow: 0 6px 16px #0004; }
+.community-profile-card .community-body h2 { margin: 0; color: #f0f7ff; font-size: 19px; }
+.community-profile-card .community-body p { margin-top: 9px; color: #91abc1; font-size: 11px; }
+.community-profile-title { display: flex; align-items: center; gap: 7px; margin-top: 12px; }
+.community-profile-title h2 { margin: 0 !important; }
+.community-verified { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: #1874b5; color: #fff; font-size: 10px; font-weight: 900; }
+.community-topic-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
+.community-topic-tags span { border: 1px solid #244863; border-radius: 999px; padding: 4px 7px; color: #9bc9ec; background: #0b2a41; font-size: 8px; font-weight: 750; }
+.community-profile-card .community-stats { gap: 0; justify-content: flex-start; margin-top: 14px; border-top-color: #1c3b54; }
+.community-profile-card .community-stats > div { min-width: 72px; padding-right: 18px; }
+.community-profile-card .community-stats strong { color: #edf7ff; font-size: 16px; }
+.community-profile-card .community-stats span { color: #7f9db7; font-size: 9px; }
+.community-profile-action { width: 100%; margin-top: 15px; padding: 10px 12px; border: 1px solid #2b79ad; border-radius: 9px; background: linear-gradient(110deg, #105080, #0c3c60); color: #eaf7ff; font-size: 10px; font-weight: 800; cursor: pointer; }
+.community-profile-action:hover { background: #155f91; border-color: #55a7e1; }
+.sidebar-nav-section { padding: 17px 0 8px; }
+.sidebar-nav-section h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; color: #7193b0; }
+.sidebar-nav-section h3::after { content: ""; height: 1px; flex: 1; background: #18364e; }
+.sidebar-nav-section .side-link { gap: 10px; margin: 3px 0; padding: 10px 11px; color: #9ab2c8; border: 1px solid transparent; background: transparent; }
+.sidebar-nav-section .side-link:hover { background: #0b2b43; color: #eaf6ff; border-color: #173e5b; }
+.sidebar-nav-section .side-link.selected { background: linear-gradient(100deg, #103a59, #0b2941); color: #eff8ff; border-color: #245779; box-shadow: inset 3px 0 #3da2e8, 0 4px 12px #0002; }
+.sidebar-nav-section .side-icon { color: #7fc7f5; }
+.side-link-label { min-width: 0; flex: 1; }
+.sidebar-nav-section .side-count { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; color: #86a9c5; font-size: 9px; }
+.sidebar-nav-section .side-count-badge { min-width: 20px; padding: 3px 6px; border-radius: 999px; background: #c23b50; color: #fff; font-size: 9px; font-weight: 850; }
+.sidebar-nav-section .group-side-count { color: #83c8f5; }
+@media (max-width: 760px) {
+  .community-profile-card { display: none; }
+  .sidebar-nav-section { padding: 0 0 4px; }
+  .sidebar-nav-section h3 { display: none; }
+  .sidebar-nav-section .side-link { background: #091f31; border-color: #1a3c56; }
+  .sidebar-nav-section .side-link.selected { background: #104064; }
+  .sidebar-nav-section .side-count { display: inline-flex; }
+}
