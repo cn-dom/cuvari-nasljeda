@@ -38,7 +38,7 @@ body::before {
   width: min(620px,72vw);
   height: min(620px,72vw);
   transform: translateX(-50%);
-  background-image: url("https://raw.githubusercontent.com/Patriasoul/patriasoul/main/images/PATRIA_SOUL_ORIGINAL_ISPRAVLJEN_GRB.png");
+  background-image: url("/assets/images/patriasoul-logo.jpg");
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
