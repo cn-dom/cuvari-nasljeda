@@ -121,9 +121,53 @@ export default function Admin() {
       <section className="admin-workspace">
         <div className="admin-page-heading"><div><span className="admin-eyebrow">{current.group}</span><h1>{current.title}</h1><p>{current.description}</p></div><button type="button" className="admin-button secondary" onClick={() => { setActiveModule("overview"); setQuery(""); }}>Pregled sustava</button></div>
         {notice && <div className="admin-notice" role="status">{notice}<button type="button" onClick={() => setNotice("")} aria-label="Zatvori poruku">×</button></div>}
-        {activeModule === "overview" ? <section className="admin-table-card"><div className="admin-table-heading"><div><h2>Stanje mreže</h2><p>Sažetak se učitava iz Supabase baze.</p></div><span className="admin-live-mark">● POVEZANO</span></div>{busy ? <p className="admin-empty">Učitavam podatke…</p> : <table className="admin-table"><thead><tr><th>Područje</th><th>Vrijednost</th><th>Napomena</th></tr></thead><tbody>{rows.map(row => <tr key={row.id}><td><strong>{row.title}</strong></td><td className="admin-count-cell">{row.value}</td><td>{row.detail}</td></tr>)}</tbody></table></section>
-        : ["members","posts","reports"].includes(activeModule) ? <section className="admin-table-card"><div className="admin-table-heading"><div><h2>{current.title}</h2><p>{rows.length} zapisa učitano · najviše 200 prikazanih</p></div><label className="admin-search"><span>⌕</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Pretraži tablicu…" /></label></div>{error ? <p className="admin-error">{error}</p> : busy ? <p className="admin-empty">Učitavam podatke…</p> : filteredRows.length ? <div className="admin-table-scroll"><table className="admin-table"><thead><tr>{activeModule === "members" ? <><th>Član</th><th>Korisničko ime</th><th>ID računa</th><th>Registriran</th></> : activeModule === "posts" ? <><th>Objava</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : <><th>Razlog</th><th>Status</th><th>ID objave</th><th>Zaprimljeno</th><th>Radnje</th></>}</tr></thead><tbody>{filteredRows.map(row => <tr key={row.id}>{activeModule === "members" ? <><td><strong>{row.display_name || "Čuvar nasljeđa"}</strong></td><td>{row.username ? "@"+row.username : "—"}</td><td><code>{row.id}</code></td><td>{dateLabel(row.created_at)}</td></> : activeModule === "posts" ? <><td className="admin-post-body">{row.body || "Objava bez teksta"}</td><td><code>{row.author_id}</code></td><td>{dateLabel(row.created_at)}</td><td><button className="admin-row-action danger" type="button" onClick={() => deletePost(row)}>Ukloni</button></td></> : <><td><strong>{row.reason || "Drugi razlog"}</strong>{row.details && <p className="admin-report-details">{row.details}</p>}</td><td><span className={"admin-status status-"+row.status}>{({pending:"Na čekanju",reviewed:"Pregledano",dismissed:"Odbijeno",actioned:"Obrađeno"})[row.status] || row.status}</span></td><td><code>{row.post_id || "—"}</code></td><td>{dateLabel(row.created_at)}</td><td><div className="admin-row-actions"><button className="admin-row-action" type="button" onClick={() => setReportStatus(row,"reviewed")}>Pregledano</button><button className="admin-row-action" type="button" onClick={() => setReportStatus(row,"dismissed")}>Odbaci</button>{row.post_id && <button className="admin-row-action danger" type="button" onClick={() => deletePost({id:row.post_id})}>Ukloni objavu</button>}</div></td></>}</tr>)}</tbody></table></div> : <p className="admin-empty">{error ? "" : "Nema zapisa za prikaz u ovoj tablici."}</p>}</section>
-        : <section className="admin-table-card admin-module-placeholder"><span className="admin-placeholder-icon">{current.icon}</span><h2>Modul je predviđen, ali još nije aktiviran</h2><p>Ovaj dio ostaje u istoj administracijskoj strukturi. Prije uključivanja povezujemo ga s odgovarajućim tablicama i pravilima pristupa kako bi svaka radnja bila stvarna i sigurna.</p><div className="admin-placeholder-meta"><span>STATUS</span><strong>U pripremi</strong></div><button type="button" className="admin-button secondary" onClick={() => setActiveModule("overview")}>← Natrag na pregled</button></section>}
+        {activeModule === "overview" ? (
+          <section className="admin-table-card">
+            <div className="admin-table-heading">
+              <div><h2>Stanje mreže</h2><p>Sažetak se učitava iz Supabase baze.</p></div>
+              <span className="admin-live-mark">● POVEZANO</span>
+            </div>
+            {busy ? <p className="admin-empty">Učitavam podatke…</p> : (
+              <table className="admin-table">
+                <thead><tr><th>Područje</th><th>Vrijednost</th><th>Napomena</th></tr></thead>
+                <tbody>{rows.map(row => <tr key={row.id}><td><strong>{row.title}</strong></td><td className="admin-count-cell">{row.value}</td><td>{row.detail}</td></tr>)}</tbody>
+              </table>
+            )}
+          </section>
+        ) : ["members", "posts", "reports"].includes(activeModule) ? (
+          <section className="admin-table-card">
+            <div className="admin-table-heading">
+              <div><h2>{current.title}</h2><p>{rows.length} zapisa učitano · najviše 200 prikazanih</p></div>
+              <label className="admin-search"><span>⌕</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Pretraži tablicu…" /></label>
+            </div>
+            {error ? <p className="admin-error">{error}</p> : busy ? <p className="admin-empty">Učitavam podatke…</p> : filteredRows.length ? (
+              <div className="admin-table-scroll">
+                <table className="admin-table">
+                  <thead><tr>{activeModule === "members" ? <><th>Član</th><th>Korisničko ime</th><th>ID računa</th><th>Registriran</th></> : activeModule === "posts" ? <><th>Objava</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : <><th>Razlog</th><th>Status</th><th>ID objave</th><th>Zaprimljeno</th><th>Radnje</th></>}</tr></thead>
+                  <tbody>
+                    {filteredRows.map(row => <tr key={row.id}>
+                      {activeModule === "members" ? (
+                        <><td><strong>{row.display_name || "Čuvar nasljeđa"}</strong></td><td>{row.username ? "@" + row.username : "—"}</td><td><code>{row.id}</code></td><td>{dateLabel(row.created_at)}</td></>
+                      ) : activeModule === "posts" ? (
+                        <><td className="admin-post-body">{row.body || "Objava bez teksta"}</td><td><code>{row.author_id}</code></td><td>{dateLabel(row.created_at)}</td><td><button className="admin-row-action danger" type="button" onClick={() => deletePost(row)}>Ukloni</button></td></>
+                      ) : (
+                        <><td><strong>{row.reason || "Drugi razlog"}</strong>{row.details && <p className="admin-report-details">{row.details}</p>}</td><td><span className={"admin-status status-" + row.status}>{({ pending: "Na čekanju", reviewed: "Pregledano", dismissed: "Odbijeno", actioned: "Obrađeno" })[row.status] || row.status}</span></td><td><code>{row.post_id || "—"}</code></td><td>{dateLabel(row.created_at)}</td><td><div className="admin-row-actions"><button className="admin-row-action" type="button" onClick={() => setReportStatus(row, "reviewed")}>Pregledano</button><button className="admin-row-action" type="button" onClick={() => setReportStatus(row, "dismissed")}>Odbaci</button>{row.post_id && <button className="admin-row-action danger" type="button" onClick={() => deletePost({ id: row.post_id })}>Ukloni objavu</button>}</div></td></>
+                      )}
+                    </tr>)}
+                  </tbody>
+                </table>
+              </div>
+            ) : <p className="admin-empty">Nema zapisa za prikaz u ovoj tablici.</p>}
+          </section>
+        ) : (
+          <section className="admin-table-card admin-module-placeholder">
+            <span className="admin-placeholder-icon">{current.icon}</span>
+            <h2>Modul je predviđen, ali još nije aktiviran</h2>
+            <p>Ovaj dio ostaje u istoj administracijskoj strukturi. Prije uključivanja povezujemo ga s odgovarajućim tablicama i pravilima pristupa kako bi svaka radnja bila stvarna i sigurna.</p>
+            <div className="admin-placeholder-meta"><span>STATUS</span><strong>U pripremi</strong></div>
+            <button type="button" className="admin-button secondary" onClick={() => setActiveModule("overview")}>← Natrag na pregled</button>
+          </section>
+        )}
         <footer className="admin-workspace-footer"><span>PatriaSoul · Čuvari nasljeđa</span><span>Vlasnički pristup · Aktivna sesija</span></footer>
       </section>
     </div>
