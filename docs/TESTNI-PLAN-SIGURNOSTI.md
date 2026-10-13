@@ -14,7 +14,7 @@ Ovo je kontrolni popis za odvojeni razvojni/testni Supabase projekt. **Ne predst
 
 | Test | Očekivani rezultat |
 | --- | --- |
-| Neprijavljeni korisnik čita javne profile, objave, komentare i broj reakcija | Čitanje je dopušteno; anonimni korisnik ne smije umetati, mijenjati ni brisati sadržaj. |
+| Neprijavljeni korisnik čita javne profile, objave i komentare; ne može čitati popis reakcija ni identitete članova koji su reagirali | Čitanje je dopušteno; anonimni korisnik ne smije umetati, mijenjati ni brisati sadržaj. |
 | Član A stvara profil/objavu/komentar/reakciju s vlastitim ID-jem | Dopušteno uz ispravne podatke i postojeći profil. |
 | Član A šalje tuđi ID kao `author_id` ili `user_id` | Odbijeno pravilima RLS. |
 | Član A pokušava urediti ili obrisati objavu/komentar člana B | Odbijeno; zapis člana B ostaje nepromijenjen. |
