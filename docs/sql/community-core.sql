@@ -89,8 +89,8 @@ create policy "comments_update_own" on public.comments
 create policy "comments_delete_own" on public.comments
   for delete to authenticated using (author_id = (select auth.uid()));
 
-create policy "post_reactions_select_public" on public.post_reactions
-  for select to anon, authenticated using (true);
+create policy "post_reactions_select_authenticated" on public.post_reactions
+  for select to authenticated using (true);
 create policy "post_reactions_insert_own" on public.post_reactions
   for insert to authenticated with check (user_id = (select auth.uid()));
 create policy "post_reactions_update_own" on public.post_reactions
