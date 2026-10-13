@@ -25,6 +25,8 @@ Ovaj popis služi za završnu provjeru testne verzije. Označi stavku tek nakon 
 - [ ] Stranice: pregled, stvaranje stranice i objava na stranici.
 - [ ] Događaji: pregled, stvaranje budućeg događaja i potvrda/poništenje dolaska.
 - [ ] Privatne poruke i grupni razgovori rade između dvaju testnih računa.
+- [ ] Vlasnik u administraciji vidi grupne razgovore, broj članova i broj poruka bez prikaza sadržaja privatnih poruka.
+- [ ] Račun koji nije vlasnik ne može pozvati administratorsku funkciju za pregled grupa.
 
 ## Administracija i sigurnost
 - [ ] Samo vlasnički račun može otvoriti administraciju.
