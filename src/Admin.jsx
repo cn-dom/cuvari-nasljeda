@@ -1,0 +1,128 @@
+import { useEffect, useState } from "react";
+import { supabase, isSupabaseConfigured } from "./lib/supabase.js";
+
+const OWNER_EMAIL = "patriasoul@protonmail.com";
+
+const modules = [
+  { id: "overview", title: "Pregled sustava", group: "NADZOR", description: "Sažetak stanja mreže i najvažnijih aktivnosti.", icon: "▦", status: "Dostupno" },
+  { id: "members", title: "Članovi mreže", group: "ZAJEDNICA", description: "Pregled registriranih članova i osnovnih podataka profila.", icon: "♙", status: "Pregled" },
+  { id: "posts", title: "Objave na zidu", group: "SADRŽAJ", description: "Pretraživanje objava i uklanjanje sadržaja koji krši pravila.", icon: "▤", status: "Pregled i moderacija" },
+  { id: "reports", title: "Prijave sadržaja", group: "MODERACIJA", description: "Pregled prijava članova, odluke i praćenje obrade.", icon: "⚑", status: "Moderacija" },
+  { id: "comments", title: "Komentari", group: "SADRŽAJ", description: "Kontrola komentara i postupanje po prijavama.", icon: "☷", status: "Sljedeća faza" },
+  { id: "groups", title: "Grupe i zajednice", group: "ZAJEDNICA", description: "Pregled grupa, članstva i upravljanja zajednicama.", icon: "♧", status: "Sljedeća faza" },
+  { id: "events", title: "Događaji", group: "ZAJEDNICA", description: "Pregled događaja i upravljanje prijavama sudionika.", icon: "▣", status: "Sljedeća faza" },
+  { id: "security", title: "Sigurnost i pravila", group: "SUSTAV", description: "Pravila zajednice, privatnost i provjera pristupa.", icon: "⬡", status: "Pregled" },
+];
+
+function dateLabel(value) {
+  if (!value) return "—";
+  return new Date(value).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" });
+}
+
+export default function Admin() {
+  const [session, setSession] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [activeModule, setActiveModule] = useState("overview");
+  const [rows, setRows] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [query, setQuery] = useState("");
+  const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    if (!supabase) { setAuthReady(true); return undefined; }
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data?.session ?? null);
+      setAuthReady(true);
+    });
+    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => setSession(nextSession));
+    return () => data.subscription.unsubscribe();
+  }, []);
+
+  const isOwner = (session?.user?.email || "").trim().toLowerCase() === OWNER_EMAIL;
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadModule() {
+      setRows([]);
+      setError("");
+      setNotice("");
+      if (!isOwner || !supabase) return;
+      if (activeModule === "overview") {
+        setBusy(true);
+        const results = await Promise.all([
+          supabase.from("profiles").select("id", { count: "exact", head: true }),
+          supabase.from("posts").select("id", { count: "exact", head: true }),
+          supabase.from("content_reports").select("id, status", { count: "exact" }),
+        ]);
+        if (!cancelled) {
+          setRows([
+            { id: "members-count", title: "Članovi profila", value: results[0].count ?? "—", detail: results[0].error ? "Tablica ili prava nisu dostupni" : "Ukupno profila" },
+            { id: "posts-count", title: "Objave", value: results[1].count ?? "—", detail: results[1].error ? "Tablica ili prava nisu dostupni" : "Ukupno objava" },
+            { id: "reports-count", title: "Prijave sadržaja", value: results[2].count ?? "—", detail: results[2].error ? "Tablica ili prava nisu dostupni" : "Zaprimljene prijave" },
+          ]);
+          setBusy(false);
+        }
+        return;
+      }
+      const configs = {
+        members: { table: "profiles", select: "id, display_name, username, created_at", order: "created_at" },
+        posts: { table: "posts", select: "id, author_id, body, created_at", order: "created_at" },
+        reports: { table: "content_reports", select: "id, reporter_id, post_id, reason, details, status, created_at", order: "created_at" },
+      };
+      const config = configs[activeModule];
+      if (!config) return;
+      setBusy(true);
+      const { data, error: loadError } = await supabase.from(config.table).select(config.select).order(config.order, { ascending: false }).limit(200);
+      if (cancelled) return;
+      if (loadError) {
+        setError("Podaci se ne mogu učitati. Provjeri postoji li tablica i jesu li za vlasnika postavljena odgovarajuća RLS pravila.");
+        setBusy(false);
+        return;
+      }
+      setRows(data || []);
+      setBusy(false);
+    }
+    loadModule();
+    return () => { cancelled = true; };
+  }, [activeModule, isOwner]);
+
+  async function setReportStatus(row, status) {
+    const { data, error: updateError } = await supabase.from("content_reports").update({ status }).eq("id", row.id).select("id,status").maybeSingle();
+    if (updateError || !data) { setNotice("Promjena nije spremljena. Provjeri vlasnička pravila baze."); return; }
+    setRows(current => current.map(item => item.id === row.id ? { ...item, status: data.status } : item));
+    setNotice("Status prijave je spremljen.");
+  }
+
+  async function deletePost(row) {
+    if (!window.confirm("Trajno ukloniti ovu objavu? Ova radnja se ne može poništiti.")) return;
+    const { error: deleteError } = await supabase.from("posts").delete().eq("id", row.id);
+    if (deleteError) { setNotice("Objava nije uklonjena. Provjeri vlasnička pravila i povezane tablice."); return; }
+    setRows(current => current.filter(item => item.id !== row.id));
+    setNotice("Objava je uklonjena.");
+  }
+
+  const current = modules.find(item => item.id === activeModule) || modules[0];
+  const filteredRows = rows.filter(row => JSON.stringify(row).toLowerCase().includes(query.toLowerCase()));
+
+  if (!authReady) return <main className="admin-page"><div className="admin-loading">Provjeravam pristup vlasnika…</div></main>;
+  if (!isOwner) return <main className="admin-page"><section className="admin-access-denied"><span className="admin-eyebrow">PATRiASOUL · SIGURNOST</span><h1>Pristup odbijen</h1><p>Ova stranica dostupna je samo vlasniku mreže.</p><a className="admin-button" href="/">Povratak na mrežu</a></section></main>;
+
+  return <main className="admin-page">
+    <header className="admin-topbar">
+      <a className="admin-brand" href="/" aria-label="Povratak na Čuvare nasljeđa"><img src="/assets/images/1000000982.png" alt="" /><span><strong>PatriaSoul</strong><small>ČUVARI NASLJEĐA · ADMINISTRACIJA</small></span></a>
+      <div className="admin-top-actions"><span className="admin-owner-pill">✓ VLASNIK</span><span className="admin-owner-email">{session?.user?.email}</span><a href="/" className="admin-back-link">← Povratak na mrežu</a></div>
+    </header>
+    <div className="admin-layout">
+      <aside className="admin-sidebar"><span className="admin-eyebrow">UPRAVLJANJE MREŽOM</span><h2>Administracija</h2><p>Odaberi jednu stavku. Detalji se otvaraju u radnom prostoru, bez gomilanja sadržaja na jednoj stranici.</p><div className="admin-side-nav">{modules.map(item => <button key={item.id} type="button" onClick={() => { setActiveModule(item.id); setQuery(""); }} className={activeModule === item.id ? "selected" : ""}><span>{item.icon}</span><span>{item.title}</span><small>{item.status === "Sljedeća faza" ? "U pripremi" : "Otvori"}</small></button>)}</div><div className="admin-sidebar-foot">Prijavljen vlasnik<br/><strong>{session?.user?.email}</strong></div></aside>
+      <section className="admin-workspace">
+        <div className="admin-page-heading"><div><span className="admin-eyebrow">{current.group}</span><h1>{current.title}</h1><p>{current.description}</p></div><button type="button" className="admin-button secondary" onClick={() => { setActiveModule("overview"); setQuery(""); }}>Pregled sustava</button></div>
+        {notice && <div className="admin-notice" role="status">{notice}<button type="button" onClick={() => setNotice("")} aria-label="Zatvori poruku">×</button></div>}
+        {activeModule === "overview" ? <section className="admin-table-card"><div className="admin-table-heading"><div><h2>Stanje mreže</h2><p>Sažetak se učitava iz Supabase baze.</p></div><span className="admin-live-mark">● POVEZANO</span></div>{busy ? <p className="admin-empty">Učitavam podatke…</p> : <table className="admin-table"><thead><tr><th>Područje</th><th>Vrijednost</th><th>Napomena</th></tr></thead><tbody>{rows.map(row => <tr key={row.id}><td><strong>{row.title}</strong></td><td className="admin-count-cell">{row.value}</td><td>{row.detail}</td></tr>)}</tbody></table></section>
+        : ["members","posts","reports"].includes(activeModule) ? <section className="admin-table-card"><div className="admin-table-heading"><div><h2>{current.title}</h2><p>{rows.length} zapisa učitano · najviše 200 prikazanih</p></div><label className="admin-search"><span>⌕</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Pretraži tablicu…" /></label></div>{error ? <p className="admin-error">{error}</p> : busy ? <p className="admin-empty">Učitavam podatke…</p> : filteredRows.length ? <div className="admin-table-scroll"><table className="admin-table"><thead><tr>{activeModule === "members" ? <><th>Član</th><th>Korisničko ime</th><th>ID računa</th><th>Registriran</th></> : activeModule === "posts" ? <><th>Objava</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : <><th>Razlog</th><th>Status</th><th>ID objave</th><th>Zaprimljeno</th><th>Radnje</th></>}</tr></thead><tbody>{filteredRows.map(row => <tr key={row.id}>{activeModule === "members" ? <><td><strong>{row.display_name || "Čuvar nasljeđa"}</strong></td><td>{row.username ? "@"+row.username : "—"}</td><td><code>{row.id}</code></td><td>{dateLabel(row.created_at)}</td></> : activeModule === "posts" ? <><td className="admin-post-body">{row.body || "Objava bez teksta"}</td><td><code>{row.author_id}</code></td><td>{dateLabel(row.created_at)}</td><td><button className="admin-row-action danger" type="button" onClick={() => deletePost(row)}>Ukloni</button></td></> : <><td><strong>{row.reason || "Drugi razlog"}</strong>{row.details && <p className="admin-report-details">{row.details}</p>}</td><td><span className={"admin-status status-"+row.status}>{({pending:"Na čekanju",reviewed:"Pregledano",dismissed:"Odbijeno",actioned:"Obrađeno"})[row.status] || row.status}</span></td><td><code>{row.post_id || "—"}</code></td><td>{dateLabel(row.created_at)}</td><td><div className="admin-row-actions"><button className="admin-row-action" type="button" onClick={() => setReportStatus(row,"reviewed")}>Pregledano</button><button className="admin-row-action" type="button" onClick={() => setReportStatus(row,"dismissed")}>Odbaci</button>{row.post_id && <button className="admin-row-action danger" type="button" onClick={() => deletePost({id:row.post_id})}>Ukloni objavu</button>}</div></td></>}</tr>)}</tbody></table></div> : <p className="admin-empty">{error ? "" : "Nema zapisa za prikaz u ovoj tablici."}</p>}</section>
+        : <section className="admin-table-card admin-module-placeholder"><span className="admin-placeholder-icon">{current.icon}</span><h2>Modul je predviđen, ali još nije aktiviran</h2><p>Ovaj dio ostaje u istoj administracijskoj strukturi. Prije uključivanja povezujemo ga s odgovarajućim tablicama i pravilima pristupa kako bi svaka radnja bila stvarna i sigurna.</p><div className="admin-placeholder-meta"><span>STATUS</span><strong>U pripremi</strong></div><button type="button" className="admin-button secondary" onClick={() => setActiveModule("overview")}>← Natrag na pregled</button></section>}
+        <footer className="admin-workspace-footer"><span>PatriaSoul · Čuvari nasljeđa</span><span>Vlasnički pristup · Aktivna sesija</span></footer>
+      </section>
+    </div>
+  </main>;
+}
