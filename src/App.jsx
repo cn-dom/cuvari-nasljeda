@@ -291,23 +291,28 @@ function App() {
   useEffect(() => {
     let cancelled = false;
     async function loadCommunityFeed() {
-      if (!supabase || !session?.user?.id) {
+      if (!supabase) {
         setPosts(initialPosts);
         return;
       }
-      const { data: blockRows, error: blockError } = await supabase
-        .from("blocked_users")
-        .select("blocked_id")
-        .eq("blocker_id", session.user.id);
-      if (cancelled) return;
-      const blockedIds = !blockError ? (blockRows || []).map((row) => row.blocked_id) : [];
-      setBlockedMembers(blockedIds.map((id) => ({ id, name: id })));
-      if (blockedIds.length) {
-        const { data: blockedProfiles } = await supabase.from("profiles").select("id, display_name, username").in("id", blockedIds);
-        if (!cancelled && blockedProfiles) {
-          const byId = Object.fromEntries(blockedProfiles.map((profile) => [profile.id, profile]));
-          setBlockedMembers(blockedIds.map((id) => ({ id, name: byId[id]?.display_name || byId[id]?.username || id, username: byId[id]?.username || "" })));
+      let blockedIds = [];
+      if (session?.user?.id) {
+        const { data: blockRows, error: blockError } = await supabase
+          .from("blocked_users")
+          .select("blocked_id")
+          .eq("blocker_id", session.user.id);
+        if (cancelled) return;
+        blockedIds = !blockError ? (blockRows || []).map((row) => row.blocked_id) : [];
+        setBlockedMembers(blockedIds.map((id) => ({ id, name: id })));
+        if (blockedIds.length) {
+          const { data: blockedProfiles } = await supabase.from("profiles").select("id, display_name, username").in("id", blockedIds);
+          if (!cancelled && blockedProfiles) {
+            const byId = Object.fromEntries(blockedProfiles.map((profile) => [profile.id, profile]));
+            setBlockedMembers(blockedIds.map((id) => ({ id, name: byId[id]?.display_name || byId[id]?.username || id, username: byId[id]?.username || "" })));
+          }
         }
+      } else {
+        setBlockedMembers([]);
       }
       const { data, error } = await supabase
         .from("posts")
@@ -345,7 +350,7 @@ function App() {
           likes: 0,
           comments: 0,
           icon: "💬",
-          owner: row.author_id === session.user.id,
+          owner: Boolean(session?.user?.id && row.author_id === session.user.id),
         };
       }));
       setPosts(rows);
