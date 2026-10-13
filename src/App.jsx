@@ -1730,9 +1730,12 @@ function App() {
         <section className="feed-column" aria-label="Zid zajednice">
           <section className="welcome-panel" aria-label="Dobrodošlica u PatriaSoul">
             <div className="welcome-photo-layer" aria-hidden="true">
-              <div className="welcome-landscape-sun" />
-              <div className="welcome-fortress"><span /><span /><span /></div>
-              <div className="welcome-flag"><i /><i /><i /><b>✚</b></div>
+              <img
+                className="welcome-hero-image"
+                src="/assets/images/hrvatska-sahovnica%20domovina%20hero.jpg"
+                alt=""
+                fetchPriority="high"
+              />
             </div>
             <div className="welcome-copy">
               <span className="eyebrow">VJERA · OBITELJ · DOMOVINA</span>
