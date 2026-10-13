@@ -1359,3 +1359,8 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
 .admin-filter-label select{max-width:160px;border:1px solid #d9e1e8;border-radius:8px;padding:10px 11px;background:#fff;color:#24384c;font:inherit;font-size:11px;text-transform:none;letter-spacing:normal}
 .admin-row-action:disabled{opacity:.45;cursor:not-allowed;background:#f3f5f7}
 @media(max-width:560px){.admin-heading-actions{width:100%}.admin-heading-actions .admin-button{flex:1}.admin-table-tools{width:100%;align-items:stretch}.admin-filter-label{width:100%;justify-content:space-between}.admin-filter-label select{flex:1;max-width:none}.admin-table-tools .admin-search{min-width:0}}
+
+.admin-modal-backdrop{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(3,9,20,.78);backdrop-filter:blur(5px)}
+.admin-group-members-modal{width:min(100%,1100px);max-height:min(85vh,760px);overflow:auto;box-shadow:0 24px 80px rgba(0,0,0,.45)}
+.admin-group-members-modal .admin-table-heading{position:sticky;top:0;z-index:2;background:var(--admin-panel,#101b2b);padding-bottom:14px}
+@media(max-width:640px){.admin-modal-backdrop{padding:8px;align-items:flex-end}.admin-group-members-modal{max-height:90vh;border-radius:16px 16px 0 0}.admin-group-members-modal .admin-table-heading{gap:10px;align-items:flex-start}}
