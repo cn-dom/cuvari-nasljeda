@@ -15,6 +15,7 @@ const modules = [
   { id: "forum", title: "Domoljubni forum", group: "RAZGOVORI", description: "Pregled tema i početnih poruka na forumu.", icon: "▤", status: "Pregled" },
   { id: "pages", title: "Stranice zajednice", group: "ZAJEDNICA", description: "Pregled javnih tematskih stranica.", icon: "▣", status: "Pregled" },
   { id: "security", title: "Sigurnost i pravila", group: "SUSTAV", description: "Pravila zajednice, privatnost i provjera pristupa.", icon: "⬡", status: "Pregled" },
+  { id: "audit", title: "Zapisnik administracije", group: "SUSTAV", description: "Vremenski zapis važnih moderatorskih radnji.", icon: "◷", status: "Pregled" },
 ];
 
 function dateLabel(value) {
@@ -106,6 +107,7 @@ export default function Admin() {
         comments: { table: "comments", select: "id, post_id, author_id, body, created_at", order: "created_at" },
         events: { table: "community_events", select: "id, title, description, location, starts_at, ends_at, created_by, status, created_at", order: "starts_at" },
         reports: { table: "content_reports", select: "id, reporter_id, post_id, reason, details, status, created_at", order: "created_at" },
+        audit: { table: "admin_audit_log", select: "id, actor_id, action, entity_type, entity_id, summary, created_at", order: "created_at" },
         forum: { table: "forum_topics", select: "id, title, body, user_id, category_id, status, created_at", order: "created_at" },
         pages: { table: "community_pages", select: "id, name, slug, description, category, created_by, created_at", order: "created_at" },
       };
@@ -127,6 +129,13 @@ export default function Admin() {
     loadModule();
     return () => { cancelled = true; };
   }, [activeModule, isOwner, refreshKey]);
+
+  async function recordAdminAction(action, entityType, entityId, summary) {
+    const { error: auditError } = await supabase.rpc("admin_log_event", {
+      p_action: action, p_entity_type: entityType, p_entity_id: String(entityId), p_summary: summary,
+    });
+    return !auditError;
+  }
 
   async function viewGroupMembers(row) {
     setSelectedGroup(row);
@@ -162,14 +171,16 @@ export default function Admin() {
       ? { ...item, member_count: Math.max(0, Number(item.member_count || 0) - 1) }
       : item));
     setSelectedGroup(current => current ? { ...current, member_count: Math.max(0, Number(current.member_count || 0) - 1) } : current);
-    setNotice("Član je uklonjen iz grupe.");
+    const logged = await recordAdminAction("group_member_removed", "group_member", member.user_id, "Uklonjen član iz grupe: " + selectedGroup.name);
+    setNotice("Član je uklonjen iz grupe." + (logged ? "" : " Napomena: zapisnik radnje nije spremljen."));
   }
 
   async function setReportStatus(row, status) {
     const { data, error: updateError } = await supabase.from("content_reports").update({ status }).eq("id", row.id).select("id,status").maybeSingle();
     if (updateError || !data) { setNotice("Promjena nije spremljena. Provjeri vlasnička pravila baze."); return; }
     setRows(current => current.map(item => item.id === row.id ? { ...item, status: data.status } : item));
-    setNotice("Status prijave je spremljen.");
+    const logged = await recordAdminAction("report_status_changed", "report", row.id, "Status prijave promijenjen u: " + data.status);
+    setNotice("Status prijave je spremljen." + (logged ? "" : " Napomena: zapisnik radnje nije spremljen."));
   }
 
   async function deletePost(row) {
@@ -177,7 +188,8 @@ export default function Admin() {
     const { error: deleteError } = await supabase.from("posts").delete().eq("id", row.id);
     if (deleteError) { setNotice("Objava nije uklonjena. Provjeri vlasnička pravila i povezane tablice."); return; }
     setRows(current => current.filter(item => item.id !== row.id));
-    setNotice("Objava je uklonjena.");
+    const logged = await recordAdminAction("post_deleted", "post", row.id, "Vlasnik je uklonio objavu.");
+    setNotice("Objava je uklonjena." + (logged ? "" : " Napomena: zapisnik radnje nije spremljen."));
   }
 
   async function cancelEvent(row) {
@@ -186,7 +198,8 @@ export default function Admin() {
     const { data, error: updateError } = await supabase.from("community_events").update({ status: "cancelled" }).eq("id", row.id).select("id,status").maybeSingle();
     if (updateError || !data) { setNotice("Događaj nije otkazan. Provjeri vlasničku RLS politiku za događaje."); return; }
     setRows(current => current.map(item => item.id === row.id ? { ...item, status: "cancelled" } : item));
-    setNotice("Događaj je otkazan i više se neće prikazivati članovima.");
+    const logged = await recordAdminAction("event_cancelled", "event", row.id, "Otkazan događaj: " + row.title);
+    setNotice("Događaj je otkazan i više se neće prikazivati članovima." + (logged ? "" : " Napomena: zapisnik radnje nije spremljen."));
   }
 
   async function deleteComment(row) {
@@ -194,7 +207,8 @@ export default function Admin() {
     const { data, error: deleteError } = await supabase.from("comments").delete().eq("id", row.id).select("id").maybeSingle();
     if (deleteError || !data) { setNotice("Komentar nije uklonjen. Provjeri vlasničku RLS politiku za komentare."); return; }
     setRows(current => current.filter(item => item.id !== row.id));
-    setNotice("Komentar je uklonjen iz zajednice.");
+    const logged = await recordAdminAction("comment_deleted", "comment", row.id, "Vlasnik je uklonio komentar.");
+    setNotice("Komentar je uklonjen iz zajednice." + (logged ? "" : " Napomena: zapisnik radnje nije spremljen."));
   }
 
   async function deleteReportedPost(report) {
@@ -208,7 +222,8 @@ export default function Admin() {
       return;
     }
     setRows(current => current.map(item => item.id === report.id ? { ...item, status: "actioned" } : item));
-    setNotice("Objava je uklonjena, a prijava označena kao obrađena.");
+    const logged = await recordAdminAction("reported_post_deleted", "report", report.id, "Uklonjena prijavljena objava; prijava označena obrađenom.");
+    setNotice("Objava je uklonjena, a prijava označena kao obrađena." + (logged ? "" : " Napomena: zapisnik radnje nije spremljen."));
   }
 
   const current = modules.find(item => item.id === activeModule) || modules[0];
@@ -245,7 +260,7 @@ export default function Admin() {
               </table>
             )}
           </section>
-        ) : ["members", "posts", "reports", "comments", "events", "forum", "pages", "groups"].includes(activeModule) ? (
+        ) : ["members", "posts", "reports", "comments", "events", "forum", "pages", "groups", "audit"].includes(activeModule) ? (
           <section className="admin-table-card">
             <div className="admin-table-heading">
               <div><h2>{current.title}</h2><p>{rows.length} zapisa učitano · najviše 200 prikazanih</p></div>
@@ -257,7 +272,7 @@ export default function Admin() {
             {error ? <p className="admin-error">{error}</p> : busy ? <p className="admin-empty">Učitavam podatke…</p> : filteredRows.length ? (
               <div className="admin-table-scroll">
                 <table className="admin-table">
-                  <thead><tr>{activeModule === "members" ? <><th>Član</th><th>Korisničko ime</th><th>ID računa</th><th>Registriran</th></> : activeModule === "posts" ? <><th>Objava</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : activeModule === "comments" ? <><th>Komentar</th><th>ID objave</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : activeModule === "events" ? <><th>Događaj</th><th>Mjesto</th><th>Početak</th><th>Status</th><th>Radnja</th></> : activeModule === "groups" ? <><th>Grupa</th><th>Osnivač ID</th><th>Članovi</th><th>Poruke</th><th>Osnovana</th><th>Radnje</th></> : activeModule === "reports" ? <><th>Razlog</th><th>Status</th><th>ID objave</th><th>ID prijavitelja</th><th>Zaprimljeno</th><th>Radnje</th></> : activeModule === "forum" ? <><th>Naslov teme</th><th>Početna poruka</th><th>ID autora</th><th>Status</th><th>Datum</th></> : <><th>Stranica</th><th>Kategorija</th><th>Opis</th><th>ID osnivača</th><th>Datum</th></>}</tr></thead>
+                  <thead><tr>{activeModule === "members" ? <><th>Član</th><th>Korisničko ime</th><th>ID računa</th><th>Registriran</th></> : activeModule === "posts" ? <><th>Objava</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : activeModule === "comments" ? <><th>Komentar</th><th>ID objave</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : activeModule === "events" ? <><th>Događaj</th><th>Mjesto</th><th>Početak</th><th>Status</th><th>Radnja</th></> : activeModule === "groups" ? <><th>Grupa</th><th>Osnivač ID</th><th>Članovi</th><th>Poruke</th><th>Osnovana</th><th>Radnje</th></> : activeModule === "reports" ? <><th>Razlog</th><th>Status</th><th>ID objave</th><th>ID prijavitelja</th><th>Zaprimljeno</th><th>Radnje</th></> : activeModule === "audit" ? <><th>Vrijeme</th><th>Radnja</th><th>Vrsta</th><th>ID zapisa</th><th>Sažetak</th><th>Vlasnik</th></> : activeModule === "forum" ? <><th>Naslov teme</th><th>Početna poruka</th><th>ID autora</th><th>Status</th><th>Datum</th></> : <><th>Stranica</th><th>Kategorija</th><th>Opis</th><th>ID osnivača</th><th>Datum</th></>}</tr></thead>
                   <tbody>
                     {filteredRows.map(row => <tr key={row.id}>
                       {activeModule === "members" ? (
@@ -270,6 +285,8 @@ export default function Admin() {
                         <><td><strong>{row.title}</strong>{row.description && <p className="admin-report-details">{row.description}</p>}</td><td>{row.location || "—"}</td><td>{dateLabel(row.starts_at)}</td><td><span className={"admin-status status-" + row.status}>{row.status === "published" ? "Objavljeno" : "Otkazano"}</span></td><td>{row.status === "published" ? <button className="admin-row-action danger" type="button" onClick={() => cancelEvent(row)}>Otkazati</button> : "—"}</td></>
                       ) : activeModule === "groups" ? (
                         <><td><strong>{row.name}</strong><small className="admin-report-details">{row.id}</small></td><td><code>{row.created_by || "—"}</code></td><td className="admin-count-cell">{row.member_count ?? 0}</td><td className="admin-count-cell">{row.message_count ?? 0}</td><td>{dateLabel(row.created_at)}</td></>
+                      ) : activeModule === "audit" ? (
+                        <><td>{dateLabel(row.created_at)}</td><td><span className="admin-status">{({ post_deleted: "Objava uklonjena", comment_deleted: "Komentar uklonjen", event_cancelled: "Događaj otkazan", report_status_changed: "Status prijave", reported_post_deleted: "Obrada prijave", group_member_removed: "Uklonjen član grupe" })[row.action] || row.action}</span></td><td>{row.entity_type}</td><td><code>{row.entity_id}</code></td><td className="admin-post-body">{row.summary}</td><td><code>{row.actor_id || "—"}</code></td></>
                       ) : activeModule === "reports" ? (
                         <><td><strong>{row.reason || "Drugi razlog"}</strong>{row.details && <p className="admin-report-details">{row.details}</p>}</td><td><span className={"admin-status status-" + row.status}>{({ pending: "Na čekanju", reviewed: "Pregledano", dismissed: "Odbijeno", actioned: "Obrađeno" })[row.status] || row.status}</span></td><td><code>{row.post_id || "—"}</code></td><td><code>{row.reporter_id || "—"}</code></td><td>{dateLabel(row.created_at)}</td><td><div className="admin-row-actions"><button className="admin-row-action" type="button" disabled={row.status === "reviewed" || row.status === "actioned"} onClick={() => setReportStatus(row, "reviewed")}>Pregledano</button><button className="admin-row-action" type="button" disabled={row.status === "dismissed" || row.status === "actioned"} onClick={() => setReportStatus(row, "dismissed")}>Odbaci</button>{row.post_id && <button className="admin-row-action danger" type="button" onClick={() => deleteReportedPost(row)}>Ukloni objavu</button>}</div></td></>
                       ) : activeModule === "forum" ? (
