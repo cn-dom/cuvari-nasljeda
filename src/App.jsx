@@ -117,6 +117,7 @@ function App() {
   const [reportDetails, setReportDetails] = useState("");
   const [reportBusy, setReportBusy] = useState(false);
   const [blockedMembers, setBlockedMembers] = useState([]);
+  const [feedRefreshKey, setFeedRefreshKey] = useState(0);
   const [blockBusyId, setBlockBusyId] = useState(null);
   const [memberDirectory, setMemberDirectory] = useState([]);
   const [memberDirectoryQuery, setMemberDirectoryQuery] = useState("");
@@ -380,7 +381,7 @@ function App() {
     }
     loadCommunityFeed();
     return () => { cancelled = true; };
-  }, [session?.user?.id]);
+  }, [session?.user?.id, feedRefreshKey]);
 
   useEffect(() => {
     let cancelled = false;
@@ -465,7 +466,8 @@ function App() {
       if (result.error) throw result.error;
       if (existing) {
         setBlockedMembers((current) => current.filter((member) => member.id !== memberId));
-        setNotice("Član je odblokiran. Osvježi zid kako bi se njegove objave ponovno učitale.");
+        setFeedRefreshKey((current) => current + 1);
+        setNotice("Član je odblokiran. Zid se ponovno učitava.");
       } else {
         setBlockedMembers((current) => [...current, { id: memberId, name: post.author, username: post.handle }]);
         setPosts((current) => current.filter((item) => item.authorId !== memberId));
@@ -489,7 +491,8 @@ function App() {
       setNotice("Člana nije moguće odblokirati. Provjeri tablicu blocked_users i RLS pravila.");
     } else {
       setBlockedMembers((current) => current.filter((item) => item.id !== member.id));
-      setNotice("Član je odblokiran. Osvježi zid kako bi se njegove objave ponovno učitale.");
+      setFeedRefreshKey((current) => current + 1);
+      setNotice("Član je odblokiran. Zid se ponovno učitava.");
     }
     setBlockBusyId(null);
   }
