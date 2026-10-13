@@ -6,7 +6,8 @@
 - Kviz uvozi isti Supabase klijent iz `src/lib/supabase.js` kao društvena mreža. Time se dijele URL projekta, autentifikacijska sesija, pohrana tokena i stanje prijave.
 - OAuth i e-mail povratak iz prijave kviza vode na trenutni origin i putanju kviza, a ne na stari portal.
 - Službeni logo mreže i kviza nalazi se u `public/assets/images/1000000982.png`.
-- Kviz zadržava postojeće funkcije, ali njegove tablice/RPC-ovi moraju postojati u odabranom Supabase projektu.
+- Kviz zadržava postojeće funkcije; osnovne tablice, sigurni prikazi pitanja i RPC funkcije sada su postavljeni u povezanom Supabase projektu.
+- Pitanja i gradovi nisu automatski izmišljeni ni uvezeni: tablice `quiz_questions`, `city_questions` i `cities` trenutačno su prazne, pa kviz neće nuditi pitanja dok se ne uveze provjereni sadržaj.
 
 ## Potrebne postavke za Cloudflare Worker i GitHub Actions
 
@@ -19,12 +20,14 @@ Ne koristiti `service_role` ni secret ključ u `VITE_*` varijablama. Prijava, Go
 
 ## Provjere baze prije puštanja
 
-Kviz koristi sljedeće tablice/poglede i RPC funkcije; ovo je inventar iz klijentskog koda, a ne potvrda da objekti već postoje:
+Kviz koristi sljedeće tablice/poglede i RPC funkcije. Osnovni objekti su sada kreirani u testnoj bazi, ali potrebno je uvesti provjereni sadržaj pitanja i ručno testirati tokove:
 
 ### Tablice i pogledi
 
 - `profiles`
 - `player_progress`
+- `quiz_attempts`
+- `city_questions`
 - `quiz_results`
 - `quiz_questions`
 - `quiz_questions_public`
@@ -52,4 +55,4 @@ Kviz koristi sljedeće tablice/poglede i RPC funkcije; ovo je inventar iz klijen
 - Točni odgovori ne smiju biti dostupni kroz javni prikaz pitanja.
 - RLS mora ograničiti rezultate, napredak, profilne izmjene i komentare na ovlaštene korisnike.
 - Baza pitanja i gradova te njezini izvori moraju se prenijeti ili ponovno uvesti zasebno; njihovi podaci nisu sadržani u samom React kodu.
-- Nijedna migracija nije automatski izvršena. Prije SQL promjena odabrati i potvrditi zaseban testni Supabase projekt.
+- Migracije za profilne fotografije, status aktivnosti, reakcije grupnih poruka i osnovni ugovor kviza primijenjene su na povezani Supabase projekt. Pitanja/gradovi nisu uvezeni; provjeri ih prije objave. Prije daljnjih SQL promjena potvrdi da je odabran pravi projekt.
