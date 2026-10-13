@@ -259,7 +259,7 @@ export default function Admin() {
               <span className="admin-security-icon">!</span><div><h2>Zaključavanje računa</h2><p>Zaključavanje i brisanje korisničkih računa još nisu aktivirani. Nećemo ih simulirati samo skrivanjem sadržaja u pregledniku; potrebna je sigurna poslužiteljska procedura i provjera pravila svih tablica.</p><span className="admin-security-status pending">Nije aktivirano</span></div>
             </article>
             <article className="admin-security-card warning">
-              <span className="admin-security-icon">!</span><div><h2>Povezivanje kviza</h2><p>Administracija kviza, pitanja, rezultata i prijava igrača još nije povezana s ovim modulom.</p><button type="button" className="admin-button secondary" onClick={() => setActiveModule("quiz")}>Pogledaj status kviza →</button></div>
+              <span className="admin-security-icon">!</span><div><h2>Povezivanje kviza</h2><p>Kviz je uključen u aplikaciju i koristi zajednički Supabase klijent, ali testna baza trenutačno nema tablice za pitanja i rezultate ni administratorske RPC funkcije kviza. Zato ovdje još ne prikazujemo brojke niti nudimo brisanje rezultata.</p><button type="button" className="admin-button secondary" onClick={() => setActiveModule("quiz")}>Pogledaj status kviza →</button></div>
             </article>
             <article className="admin-security-card">
               <span className="admin-security-icon">i</span><div><h2>Obvezna završna provjera</h2><p>GitHub Actions provjerava izgradnju koda. Prijavu, RLS pravila, moderaciju i pristup s drugim računom potrebno je ručno testirati.</p><a className="admin-button secondary" href="https://github.com/cn-dom/cuvari-nasljeda/blob/main/docs/TESTIRANJE.md" target="_blank" rel="noreferrer">Otvori kontrolni popis →</a></div>
@@ -269,8 +269,13 @@ export default function Admin() {
         {activeModule === "quiz" && (
           <section className="admin-table-card admin-module-status-card">
             <div className="admin-table-heading"><div><h2>PatriaSoul kviz</h2><p>Modul je pripremljen kao administracijska stavka, ali nije još povezan s podacima kviza.</p></div><span className="admin-live-mark admin-connection-warning">● ČEKA POVEZIVANJE</span></div>
-            <p className="admin-empty">Ne prikazujemo izmišljene rezultate. Sljedeći korak je pregledati postojeću kviz bazu i potvrditi koje tablice i ovlasti se mogu sigurno povezati.</p>
-            <a className="admin-button secondary" href="https://github.com/Patriasoul/kviz" target="_blank" rel="noreferrer">Otvori repozitorij kviza →</a>
+            <div className="admin-security-grid">
+              <article className="admin-security-card"><span className="admin-security-icon">✓</span><div><h2>Kviz sučelje</h2><p>Ugrađeni kviz nalazi se u mapi <code>/kviz/</code> i dijeli Supabase klijent sa društvenom mrežom.</p><a className="admin-button secondary" href="/kviz/">Otvori kviz →</a></div></article>
+              <article className="admin-security-card warning"><span className="admin-security-icon">!</span><div><h2>Nedostaju podaci kviza</h2><p>U testnoj bazi nisu pronađene tablice <code>quiz_questions</code> i <code>quiz_results</code>, ni RPC funkcije <code>admin_dashboard_stats</code>, <code>admin_list_users</code> i <code>admin_list_quiz_results</code>.</p><span className="admin-security-status pending">Potrebna provjera baze</span></div></article>
+              <article className="admin-security-card warning"><span className="admin-security-icon">!</span><div><h2>Kompatibilnost profila</h2><p>Kvizni kod očekuje polja profila poput <code>role</code> i <code>avatar_url</code>, dok društvena shema koristi drugačija polja. Prije spajanja treba uskladiti prikaz imena i ovlasti bez slabljenja RLS zaštite.</p><span className="admin-security-status pending">Nije usklađeno</span></div></article>
+              <article className="admin-security-card"><span className="admin-security-icon">i</span><div><h2>Sljedeći siguran korak</h2><p>Uskladiti SQL shemu i administratorske funkcije s postojećim kviznim kodom, zatim provjeriti da samo vlasnik može pregledavati i brisati rezultate.</p><a className="admin-button secondary" href="https://github.com/cn-dom/cuvari-nasljeda/tree/main/kviz/src/lib" target="_blank" rel="noreferrer">Pregledati kvizne funkcije →</a></div></article>
+            </div>
+            <a className="admin-button secondary" href="https://github.com/Patriasoul/kviz" target="_blank" rel="noreferrer">Otvori izvorni repozitorij kviza →</a>
           </section>
         )}
         {activeModule === "overview" ? (
