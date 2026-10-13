@@ -1477,7 +1477,7 @@ function App() {
     }
     const profile = data.profiles || {};
     const author = profile.display_name || session.user.email || "Čuvar nasljeđa";
-    const username = profile.username || "clan";
+    const username = normalizeUsername(profile.username) || "clan";
     setPosts((current) => [{
       id: data.id,
       initials: author.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
@@ -2056,7 +2056,7 @@ function App() {
                       <div className="message-conversation-list">
                         {searchedConversations.map(({ memberId, latest }) => {
                           const member = memberDirectory.find((item) => item.id === memberId);
-                          const displayName = member?.display_name || member?.username || "Čuvar nasljeđa";
+                          const displayName = member?.display_name || normalizeUsername(member?.username) || "Čuvar nasljeđa";
                           return <button type="button" key={memberId} className={messageRecipient === memberId ? "message-conversation selected" : "message-conversation"} onClick={() => setMessageRecipient(memberId)}>
                             <Avatar initials={displayName.split(/\\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN"} />
                             <span className="message-conversation-copy"><strong>{displayName}</strong><small>{latest.sender_id === session.user.id ? "Ti: " : ""}{latest.body}</small></span>
@@ -2065,7 +2065,7 @@ function App() {
                         })}
                       </div>
                     ) : <p className="directory-empty">{messageSearch.trim() ? "Nema razgovora koji odgovaraju pretrazi." : "Razgovori će se pojaviti ovdje nakon prve poslane ili primljene poruke."}</p>}
-                    {messageSearch.trim() && searchedMessages.length > 0 && <div className="message-search-results"><h3>Pronađene poruke</h3>{searchedMessages.slice(0, 30).map((message) => { const otherId = message.sender_id === session.user.id ? message.recipient_id : message.sender_id; const member = memberDirectory.find((item) => item.id === otherId); const displayName = member?.display_name || member?.username || "Čuvar nasljeđa"; return <button type="button" className="message-search-result" key={message.id} onClick={() => { setMessageRecipient(otherId); setMessageSearch(""); setNotice("Otvoren razgovor s " + displayName + "."); }}><strong>{displayName}</strong><small>{new Date(message.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" })}</small><p>{message.body}</p></button>; })}{searchedMessages.length > 30 && <small className="message-search-limit">Prikazano je prvih 30 rezultata. Suzi pretragu za preciznije rezultate.</small>}</div>}
+                    {messageSearch.trim() && searchedMessages.length > 0 && <div className="message-search-results"><h3>Pronađene poruke</h3>{searchedMessages.slice(0, 30).map((message) => { const otherId = message.sender_id === session.user.id ? message.recipient_id : message.sender_id; const member = memberDirectory.find((item) => item.id === otherId); const displayName = member?.display_name || normalizeUsername(member?.username) || "Čuvar nasljeđa"; return <button type="button" className="message-search-result" key={message.id} onClick={() => { setMessageRecipient(otherId); setMessageSearch(""); setNotice("Otvoren razgovor s " + displayName + "."); }}><strong>{displayName}</strong><small>{new Date(message.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" })}</small><p>{message.body}</p></button>; })}{searchedMessages.length > 30 && <small className="message-search-limit">Prikazano je prvih 30 rezultata. Suzi pretragu za preciznije rezultate.</small>}</div>}
                   </div>
                   <section className="group-chat-panel" aria-labelledby="group-chat-title">
                     <div className="message-search-heading"><h3 id="group-chat-title">Grupni razgovori</h3><span>{groupChats.length} grupa</span></div>
@@ -2074,7 +2074,7 @@ function App() {
                       <input id="group-chat-name" value={groupDraftName} onChange={(event) => setGroupDraftName(event.target.value)} maxLength={60} placeholder="Npr. Čuvari povijesti Dalmacije" required />
                       <label htmlFor="group-chat-members">Dodaj članove (odaberi jednog ili više)</label>
                       <select id="group-chat-members" multiple value={groupSelectedMembers} onChange={(event) => setGroupSelectedMembers(Array.from(event.target.selectedOptions, (option) => option.value))} size={Math.min(5, Math.max(3, memberDirectory.length))}>
-                        {memberDirectory.filter((member) => member.id !== session.user.id && !blockedMembers.some((blocked) => blocked.id === member.id)).map((member) => <option key={member.id} value={member.id}>{member.display_name || member.username || "Čuvar nasljeđa"}{member.username ? " · @" + member.username : ""}</option>)}
+                        {memberDirectory.filter((member) => member.id !== session.user.id && !blockedMembers.some((blocked) => blocked.id === member.id)).map((member) => <option key={member.id} value={member.id}>{member.display_name || normalizeUsername(member.username) || "Čuvar nasljeđa"}{member.username ? " · @" + normalizeUsername(member.username) : ""}</option>)}
                       </select>
                       <div className="private-message-actions"><small>{groupSelectedMembers.length} odabranih članova</small><button className="primary-button" type="submit" disabled={groupBusy}>{groupBusy ? "Stvaram grupu…" : "＋ Stvori grupu"}</button></div>
                     </form>
@@ -2103,7 +2103,7 @@ function App() {
                             <div className="group-chat-admin-form"><label>Upravljanje članovima</label>
                               <div className="group-chat-member-admin-list">{(selectedGroup?.members || []).map((member) => {
                                 const profile = memberDirectory.find((item) => item.id === member.user_id);
-                                const memberName = member.user_id === session.user.id ? "Ti" : (profile?.display_name || profile?.username || "Čuvar nasljeđa");
+                                const memberName = member.user_id === session.user.id ? "Ti" : (profile?.display_name || normalizeUsername(profile?.username) || "Čuvar nasljeđa");
                                 return <div className="group-chat-member-admin" key={member.user_id}><span>{memberName}<small>{member.role === "admin" ? "Administrator" : "Član"}</small></span>{member.user_id !== session.user.id && <span className="group-chat-member-actions">{member.role !== "admin" && <button type="button" className="post-menu-button" disabled={groupBusy} onClick={() => transferGroupAdmin(member)}>Postavi admina</button>}<button type="button" className="post-menu-button danger" disabled={groupBusy || member.role === "admin"} onClick={() => removeGroupMember(member)}>Ukloni</button></span>}</div>;
                               })}</div>
                             </div>
@@ -2220,7 +2220,7 @@ function App() {
                       return <article className="member-directory-card" key={member.id}>
                         <Avatar initials={initials} src={member.avatar_url} />
                         <div className="member-directory-info"><strong>{displayName}</strong><span>@{normalizeUsername(member.username) || "clan"}</span><span className={"member-presence-status " + getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).state}><i aria-hidden="true" />{getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).label}</span><p>{member.bio || "Ovaj član još nije dodao opis profila."}</p></div>
-                        <button type="button" className="post-menu-button danger" disabled={blockBusyId === member.id} onClick={() => toggleBlockMember({ authorId: member.id, author: displayName, handle: "@" + (member.username || "clan") })}>{blockedMembers.some((blocked) => blocked.id === member.id) ? "Odblokiraj" : "Blokiraj"}</button>
+                        <button type="button" className="post-menu-button danger" disabled={blockBusyId === member.id} onClick={() => toggleBlockMember({ authorId: member.id, author: displayName, handle: "@" + (normalizeUsername(member.username) || "clan") })}>{blockedMembers.some((blocked) => blocked.id === member.id) ? "Odblokiraj" : "Blokiraj"}</button>
                       </article>;
                     })}</div> : <p className="directory-empty">Nema članova koji odgovaraju pretrazi.</p>;
                   })()}
@@ -2295,7 +2295,7 @@ function App() {
                         <p>Učitavam članove…</p>
                       ) : mentionMembers.length ? (
                         mentionMembers.map((member) => {
-                          const name = member.display_name || member.username || "Čuvar nasljeđa";
+                          const name = member.display_name || normalizeUsername(member.username) || "Čuvar nasljeđa";
                           const handle = "@" + (normalizeUsername(member.username) || "clan");
                           return (
                             <button type="button" key={member.id} onClick={() => {
