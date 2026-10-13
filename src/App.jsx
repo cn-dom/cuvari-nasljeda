@@ -1676,7 +1676,7 @@ function App() {
         <div className="top-actions">
           {session ? (
             <div className="auth-session-actions">
-              <button className="profile-open-button" onClick={() => { setProfileOpen(true); setProfileMessage(""); }}><span className="profile-mini-avatar">{(session.user?.user_metadata?.display_name || session.user?.email || "Č").slice(0, 1).toLocaleUpperCase("hr")}</span><span className="auth-user-label">{session.user?.user_metadata?.display_name || session.user?.email || "Moj profil"}</span><span className="profile-open-label">Moj profil</span></button>
+              <button className="profile-open-button" onClick={() => { setProfileOpen(true); setProfileMessage(""); }}><span className="profile-mini-avatar">{profileAvatarUrl ? <img src={profileAvatarUrl} alt="" /> : (session.user?.user_metadata?.display_name || session.user?.email || "Č").slice(0, 1).toLocaleUpperCase("hr")}</span><span className="auth-user-label">{session.user?.user_metadata?.display_name || session.user?.email || "Moj profil"}</span><span className="profile-open-label">Moj profil</span></button>
               <button className="login-button" onClick={signOut}>Odjava</button>
             </div>
           ) : (
