@@ -307,6 +307,7 @@ function App() {
           id: row.id,
           authorId: row.author_id,
           initials: name.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
+          avatarUrl: profile.avatar_url || "",
           author: name,
           handle: "@" + username,
           time: new Date(row.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" }),
@@ -365,6 +366,7 @@ function App() {
               id: row.id,
               author,
               initials: author.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
+              avatarUrl: profile.avatar_url || "",
               text: row.body || "",
               owner: Boolean(session?.user?.id && row.author_id === session.user.id),
             });
@@ -1534,6 +1536,7 @@ function App() {
         id: data.id,
         author,
         initials: author.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
+        avatarUrl: profile.avatar_url || "",
         text: data.body || "",
         owner: data.author_id === session.user.id,
       }],
@@ -2183,7 +2186,7 @@ function App() {
               <div><strong>Što želiš podijeliti?</strong><small>Tvoja priča može sačuvati dio nasljeđa.</small></div>
             </div>
             <div className="composer-top">
-              <Avatar initials={(profileName || session?.user?.email?.split("@")[0] || "Čuvar nasljeđa").split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN"} variant="avatar-you" />
+              <Avatar initials={(profileName || session?.user?.email?.split("@")[0] || "Čuvar nasljeđa").split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN"} src={profileAvatarUrl} variant="avatar-you" />
               <label className="sr-only" htmlFor="post-draft">Napiši objavu</label>
               <textarea
                 id="post-draft"
