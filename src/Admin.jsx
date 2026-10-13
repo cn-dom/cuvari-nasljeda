@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase, isSupabaseConfigured } from "./lib/supabase.js";
 
 const OWNER_EMAIL = "patriasoul@protonmail.com";
+const normalizeUsername = (value) => String(value || "").trim().replace(/^@/, "").toLowerCase();
 
 const modules = [
   { id: "overview", title: "Pregled sustava", group: "NADZOR", description: "Sažetak stanja mreže i najvažnijih aktivnosti.", icon: "▦", status: "Dostupno" },
@@ -310,7 +311,7 @@ export default function Admin() {
                   <tbody>
                     {filteredRows.map(row => <tr key={row.id}>
                       {activeModule === "members" ? (
-                        <><td><strong>{row.display_name || "Čuvar nasljeđa"}</strong></td><td>{row.username ? "@" + row.username : "—"}</td><td><code>{row.id}</code></td><td>{dateLabel(row.created_at)}</td></>
+                        <><td><strong>{row.display_name || "Čuvar nasljeđa"}</strong></td><td>{row.username ? "@" + normalizeUsername(row.username) : "—"}</td><td><code>{row.id}</code></td><td>{dateLabel(row.created_at)}</td></>
                       ) : activeModule === "posts" ? (
                         <><td className="admin-post-body">{row.body || "Objava bez teksta"}</td><td><code>{row.author_id}</code></td><td>{dateLabel(row.created_at)}</td><td><button className="admin-row-action danger" type="button" onClick={() => deletePost(row)}>Ukloni</button></td></>
                       ) : activeModule === "comments" ? (
@@ -352,7 +353,7 @@ export default function Admin() {
               </div>
               {groupMembersBusy ? <p className="admin-empty">Učitavam članove…</p> : groupMembersError ? <p className="admin-error">{groupMembersError}</p> : groupMembers.length ? (
                 <div className="admin-table-scroll"><table className="admin-table"><thead><tr><th>Član</th><th>Korisničko ime</th><th>ID računa</th><th>Uloga</th><th>Pridružio se</th><th>Radnja</th></tr></thead><tbody>
-                  {groupMembers.map(member => <tr key={member.user_id}><td><strong>{member.display_name || "Čuvar nasljeđa"}</strong></td><td>{member.username ? "@" + member.username : "—"}</td><td><code>{member.user_id}</code></td><td><span className="admin-status">{member.role || "član"}</span></td><td>{dateLabel(member.joined_at)}</td><td>{member.role === "admin" || member.user_id === selectedGroup.created_by ? <span className="admin-report-details">Zaštićen račun</span> : <button className="admin-row-action danger" type="button" onClick={() => removeGroupMember(member)}>Ukloni iz grupe</button>}</td></tr>)}
+                  {groupMembers.map(member => <tr key={member.user_id}><td><strong>{member.display_name || "Čuvar nasljeđa"}</strong></td><td>{member.username ? "@" + normalizeUsername(member.username) : "—"}</td><td><code>{member.user_id}</code></td><td><span className="admin-status">{member.role || "član"}</span></td><td>{dateLabel(member.joined_at)}</td><td>{member.role === "admin" || member.user_id === selectedGroup.created_by ? <span className="admin-report-details">Zaštićen račun</span> : <button className="admin-row-action danger" type="button" onClick={() => removeGroupMember(member)}>Ukloni iz grupe</button>}</td></tr>)}
                 </tbody></table></div>
               ) : <p className="admin-empty">Ova grupa trenutačno nema članova.</p>}
             </section>
