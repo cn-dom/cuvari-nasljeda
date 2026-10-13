@@ -16,6 +16,8 @@ Ovaj popis služi za završnu provjeru testne verzije. Označi stavku tek nakon 
 - [ ] Reakcije se spremaju i nakon osvježavanja ostaju točne.
 - [ ] Autor može urediti i izbrisati vlastitu objavu.
 - [ ] Prijava sadržaja sprema se i pojavljuje u administraciji.
+- [ ] Isti član ne može stvoriti drugu prijavu iste objave dok je prva na čekanju.
+- [ ] Nakon što je prijava pregledana ili odbačena, provjeriti može li se prijava ponovno poslati.
 - [ ] Blokirani članovi ne pojavljuju se na zidu osobe koja ih je blokirala.
 
 ## Zajednica
@@ -26,6 +28,9 @@ Ovaj popis služi za završnu provjeru testne verzije. Označi stavku tek nakon 
 
 ## Administracija i sigurnost
 - [ ] Samo vlasnički račun može otvoriti administraciju.
+- [ ] Pregled sustava prikazuje broj članova, objava, komentara, otvorenih prijava, budućih događaja, tema foruma i stranica.
+- [ ] Osvježavanje administracije ponovno učitava podatke iz baze.
+- [ ] Prijave se mogu filtrirati po statusu i pretraživati.
 - [ ] Vlasnik može pregledati prijave i promijeniti njihov status.
 - [ ] Vlasnik može ukloniti objavu i komentar; provjeriti da običan član to ne može učiniti drugima.
 - [ ] Nakon uklanjanja sadržaja nema JavaScript pogrešaka ni pokvarenih prikaza.
