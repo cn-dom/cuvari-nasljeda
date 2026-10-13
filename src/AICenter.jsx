@@ -133,7 +133,7 @@ export default function AICenter() {
     event.preventDefault();
     const file = event.currentTarget.elements.namedItem("ai-audio-file")?.files?.[0];
     if (!file || busy) return;
-    if (!file.type.startsWith("audio/") && !/\\.(mp3|wav|m4a|webm|ogg)$/i.test(file.name)) {
+    if (!file.type.startsWith("audio/") && !/\.(mp3|wav|m4a|webm|ogg)$/i.test(file.name)) {
       setError("Odaberi podržanu audio datoteku (MP3, WAV, M4A, WebM ili OGG).");
       return;
     }
