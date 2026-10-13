@@ -10,6 +10,12 @@ alter table public.profiles
 alter table public.profiles
   add column if not exists role text not null default 'member';
 
+alter table public.profiles
+  add column if not exists avatar_path text;
+
+grant select (avatar_url) on table public.profiles to anon, authenticated;
+grant update (avatar_url) on table public.profiles to authenticated;
+
 -- Keep quiz admin privileges server-controlled. Members must not promote themselves.
 do $$
 begin
