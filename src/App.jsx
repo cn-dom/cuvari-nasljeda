@@ -445,7 +445,18 @@ function App() {
       if (error) throw error;
       setProfileMessage("Profil je spremljen u bazi zajednice.");
     } catch (error) {
-      setProfileMessage(error?.message || "Profil nije spremljen. Pokušaj ponovno.");
+      const constraint = String(error?.message || "") + " " + String(error?.details || "") + " " + String(error?.hint || "");
+      if (error?.code === "23505" || /profiles_(username|display_name)_unique_ci_idx/i.test(constraint)) {
+        if (/profiles_username_unique_ci_idx/i.test(constraint)) {
+          setProfileMessage("Ovo korisničko ime već se koristi. Odaberi drugo korisničko ime.");
+        } else if (/profiles_display_name_unique_ci_idx/i.test(constraint)) {
+          setProfileMessage("Ovo prikazno ime već se koristi. Odaberi drugo prikazno ime.");
+        } else {
+          setProfileMessage("Korisničko ime ili prikazno ime već se koristi. Odaberi drugo.");
+        }
+      } else {
+        setProfileMessage("Profil nije spremljen. Provjeri podatke i pokušaj ponovno.");
+      }
     } finally {
       setProfileBusy(false);
     }
