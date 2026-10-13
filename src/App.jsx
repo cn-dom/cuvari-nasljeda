@@ -1655,7 +1655,7 @@ function App() {
                 <div><strong>{postCount}</strong><span>objava</span></div>
                 <div><strong>{groupChats.length}</strong><span>grupa</span></div>
               </div>
-              <button type="button" className="community-profile-action" onClick={() => { setActiveNav("Zid zajednice"); document.getElementById("post-draft")?.focus(); }}>＋ Podijeli priču</button>
+              <button type="button" className="community-profile-action" onClick={() => { setActiveNav("Zid zajednice"); if (session?.user?.id) { document.getElementById("post-draft")?.focus(); } else { setAuthOpen(true); setAuthMode("login"); setAuthMessage("Prijavi se ili izradi račun kako bi podijelio/la svoju priču."); } }}>＋ Podijeli priču</button>
             </div>
           </section>
 
@@ -1742,7 +1742,7 @@ function App() {
               <span className="eyebrow">VJERA · OBITELJ · DOMOVINA</span>
               <h1>Zajedno čuvamo<br />našu povijest,<br /><em>naše nasljeđe.</em></h1>
               <p>Priče, fotografije i uspomene koje povezuju Hrvatsku i njezine ljude.</p>
-              <button type="button" className="welcome-cta" onClick={() => document.getElementById("post-draft")?.focus()}>Podijeli svoju priču <span aria-hidden="true">↗</span></button>
+              <button type="button" className="welcome-cta" onClick={() => { if (session?.user?.id) { document.getElementById("post-draft")?.focus(); } else { setAuthOpen(true); setAuthMode("login"); setAuthMessage("Prijavi se ili izradi račun kako bi podijelio/la svoju priču."); } }}>Podijeli svoju priču <span aria-hidden="true">↗</span></button>
             </div>
             <button
               type="button"
