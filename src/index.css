@@ -1195,3 +1195,15 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
   .image-viewer-dialog { max-width: 96vw; padding: 14px; }
   .image-viewer-dialog img { max-width: 88vw; max-height: 78vh; }
 }
+
+
+/* Poruke prijave i registracije: čitljive na tamnoj temi */
+.auth-message {
+  background: #0b2b43;
+  color: #eaf6ff;
+  border: 1px solid #2b6289;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  box-shadow: 0 3px 12px #0002;
+}
