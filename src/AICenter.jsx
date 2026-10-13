@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { puter } from "@heyputer/puter.js";
-import { ArrowLeft, BookOpen, BrainCircuit, Camera, CheckCircle2, ImagePlus, LoaderCircle, Send, ShieldCheck, Volume2, WandSparkles } from "lucide-react";
+import { ArrowLeft, BookOpen, BrainCircuit, Camera, CheckCircle2, Copy, ImagePlus, LoaderCircle, Send, ShieldCheck, Volume2, WandSparkles } from "lucide-react";
 import "./ai-center.css";
 
 const STARTER_QUESTIONS = [
@@ -91,6 +91,19 @@ export default function AICenter() {
     } catch (err) {
       setError("Čitanje naglas nije uspjelo. Dostupnost hrvatskog glasa ovisi o Puterovom modelu. " + (err?.message || ""));
     } finally { setBusy(false); }
+  }
+
+  async function copyLastAnswer() {
+    const last = [...messages].reverse().find((item) => item.role === "assistant");
+    if (!last) return;
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("Kopiranje nije podržano u ovom pregledniku.");
+      await navigator.clipboard.writeText(last.content);
+      setError("");
+      setStatus("Zadnji AI odgovor kopiran je u međuspremnik.");
+    } catch (err) {
+      setError("Kopiranje nije uspjelo. Označi tekst odgovora i kopiraj ga ručno. " + (err?.message || ""));
+    }
   }
 
   async function transcribeAudio(event) {
@@ -197,7 +210,7 @@ export default function AICenter() {
           </div>
           <form className="ai-prompt-form" onSubmit={handleSubmit}><textarea value={prompt} onChange={(event) => setPrompt(event.target.value)} rows={3} maxLength={3000} placeholder="Upiši pitanje na hrvatskom…" aria-label="Pitanje za AI" /><div className="ai-prompt-footer"><small>{prompt.length}/3000 · Ne dijeli osjetljive podatke.</small><button type="submit" disabled={busy || !prompt.trim()}><Send size={16} /> Pošalji pitanje</button></div></form>
           {mode === "voice" && <div className="ai-feature-card ai-voice-input-card"><form className="ai-form" onSubmit={transcribeAudio}><label htmlFor="ai-audio-file">Postavi pitanje glasom</label><input id="ai-audio-file" name="ai-audio-file" type="file" accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg" /><p className="ai-muted">Učitaj kratku snimku do 15 MB. AI će je pretvoriti u tekst, a ti možeš pregledati prijepis prije slanja pitanja. Ne učitavaj privatne razgovore drugih osoba bez dopuštenja.</p><button type="submit" disabled={busy}><Volume2 size={16} />{transcribing ? "Prepoznajem govor…" : "Pretvori govor u pitanje"}</button>{audioName && <small className="ai-muted">Zadnja uspješna snimka: {audioName}</small>}</form></div>}
-          <div className="ai-chat-actions"><button type="button" className="ai-secondary-button" onClick={readLastAnswer} disabled={busy || !messages.some((item) => item.role === "assistant")}><Volume2 size={16} /> Pročitaj zadnji odgovor</button><button type="button" className="ai-secondary-button" onClick={() => { setMessages([]); setError(""); setStatus(""); }} disabled={!messages.length || busy}>Novi razgovor</button></div>
+          <div className="ai-chat-actions"><button type="button" className="ai-secondary-button" onClick={readLastAnswer} disabled={busy || !messages.some((item) => item.role === "assistant")}><Volume2 size={16} /> Pročitaj zadnji odgovor</button><button type="button" className="ai-secondary-button" onClick={copyLastAnswer} disabled={busy || !messages.some((item) => item.role === "assistant")}><Copy size={16} /> Kopiraj zadnji odgovor</button><button type="button" className="ai-secondary-button" onClick={() => { setMessages([]); setError(""); setStatus(""); }} disabled={!messages.length || busy}>Novi razgovor</button></div>
         </>}
         {mode === "archive" && <div className="ai-feature-card"><form className="ai-form" onSubmit={readImage}><label htmlFor="ai-archive-image">Odaberi fotografiju ili skenirani dokument</label><input id="ai-archive-image" type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => { const file = event.target.files?.[0]; if (!file) return; if (file.size > 5 * 1024 * 1024) { setError("Slika mora biti manja od 5 MB."); return; } const reader = new FileReader(); reader.onload = () => { setImageData(String(reader.result || "")); setImageName(file.name); setError(""); setStatus(""); }; reader.onerror = () => setError("Datoteku nije moguće pročitati."); reader.readAsDataURL(file); }} />{imageData && <div className="ai-image-preview"><img src={imageData} alt="Pregled odabrane slike" /><span>{imageName}</span><button type="button" onClick={() => { setImageData(""); setImageName(""); }}>Ukloni</button></div>}<p className="ai-muted">Sliku obrađuje AI usluga. Ne učitavaj dokumente s adresama, osobnim identifikacijskim podacima ili povjerljivim sadržajem.</p><button type="submit" disabled={!imageData || busy}><Camera size={16} />{busy ? "Analiziram…" : "Analiziraj materijal"}</button></form></div>}
         {mode === "images" && <div className="ai-feature-card"><form className="ai-form" onSubmit={generateIllustration}><label htmlFor="ai-image-prompt">Opiši ilustraciju</label><textarea id="ai-image-prompt" rows={4} maxLength={500} value={imagePrompt} onChange={(event) => setImagePrompt(event.target.value)} placeholder="Primjer: ilustracija staroga hrvatskog obalnog grada, bez teksta, edukativni stil…" /><p className="ai-muted">Generirana slika je ilustracija, ne povijesni dokaz. Stvarno generiranje može koristiti kvotu Puter računa i traži potvrdu prije pokretanja.</p><button type="submit" disabled={busy || !imagePrompt.trim()}><WandSparkles size={16} />{busy ? "Izrađujem…" : "Izradi ilustraciju"}</button></form>{generatedImage && <div className="ai-generated-image"><img src={generatedImage} alt="AI-generirana ilustracija baštine" /><p>AI-generirana ilustracija · provjeri prava i uvjete prije objave.</p></div>}</div>}
