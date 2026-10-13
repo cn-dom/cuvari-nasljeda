@@ -1,6 +1,6 @@
 -- PatriaSoul – Čuvari nasljeđa
--- SQL NACRT: status aktivnosti članova s postavkom privatnosti.
--- Nije izvršen. Pregledati i primijeniti samo na zasebnoj testnoj Supabase bazi.
+-- Migracija je primijenjena na povezani Supabase projekt.
+-- Ponovno pokretanje je idempotentno: tablica i pravila se provjeravaju prije izmjene.
 
 begin;
 
