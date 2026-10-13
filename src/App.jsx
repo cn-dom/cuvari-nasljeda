@@ -1751,7 +1751,7 @@ function App() {
               aria-label="Otvori sliku znaka Čuvari nasljeđa"
               title="Otvori sliku"
             >
-              <img src="/assets/images/1000000982.png" alt="Znak Čuvari nasljeđa" />
+              <img src="/assets/images/PATRIA_SOUL_ORIGINAL_ISPRAVLJEN_GRB.png" alt="Izvorni ispravljeni grb PatriaSoul" />
               <span aria-hidden="true">Pogledaj sliku</span>
             </button>
           </section>
@@ -1760,7 +1760,7 @@ function App() {
             <div className="image-viewer-backdrop" role="presentation" onClick={() => setBrandImageOpen(false)}>
               <div className="image-viewer-dialog" role="dialog" aria-modal="true" aria-label="Slika znaka Čuvari nasljeđa" onClick={(event) => event.stopPropagation()}>
                 <button type="button" className="image-viewer-close" onClick={() => setBrandImageOpen(false)} aria-label="Zatvori sliku">×</button>
-                <img src="/assets/images/1000000982.png" alt="Znak Čuvari nasljeđa" />
+                <img src="/assets/images/PATRIA_SOUL_ORIGINAL_ISPRAVLJEN_GRB.png" alt="Izvorni ispravljeni grb PatriaSoul" />
               </div>
             </div>
           )}
