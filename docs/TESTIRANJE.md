@@ -12,6 +12,7 @@ Ovaj popis služi za završnu provjeru testne verzije. Označi stavku tek nakon 
 ## Zid zajednice
 - [ ] Objavljivanje teksta radi.
 - [ ] Učitavanje slike radi; provjeriti granicu od 10 MB i odbijanje prevelike datoteke.
+- [ ] Profilna fotografija prihvaća do 10 MB, odbija veće datoteke i ostaje vidljiva nakon ponovne prijave.
 - [ ] Komentari se prikazuju gostima, ali samo prijavljeni članovi mogu komentirati.
 - [ ] Reakcije se spremaju i nakon osvježavanja ostaju točne.
 - [ ] Autor može urediti i izbrisati vlastitu objavu.
