@@ -133,10 +133,15 @@ export default function AICenter() {
     event.preventDefault();
     const file = event.currentTarget.elements.namedItem("ai-audio-file")?.files?.[0];
     if (!file || busy) return;
+    if (!file.type.startsWith("audio/") && !/\\.(mp3|wav|m4a|webm|ogg)$/i.test(file.name)) {
+      setError("Odaberi podržanu audio datoteku (MP3, WAV, M4A, WebM ili OGG).");
+      return;
+    }
     if (file.size > 15 * 1024 * 1024) {
       setError("Audio datoteka mora biti manja od 15 MB.");
       return;
     }
+    if (!window.confirm("Audio snimka bit će poslana Puterovoj AI usluzi na pretvorbu u tekst. Učitaj samo snimku koju smiješ dijeliti i koja ne sadrži privatne razgovore ili tajne. Nastaviti?")) return;
     setBusy(true); setTranscribing(true); setError(""); setStatus("");
     try {
       const result = await puter.ai.speech2txt(file);
