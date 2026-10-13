@@ -1378,16 +1378,13 @@ function App() {
   }, [messageConversations, messageSearch, searchedMessages, session?.user?.id]);
 
 
-  const postCount = useMemo(() => session?.user?.id ? posts.length : 0, [posts, session?.user?.id]);
-  const visiblePosts = useMemo(() => {
-    if (!session?.user?.id) return [];
-    return posts.filter((post) => {
+  const postCount = useMemo(() => posts.length, [posts]);
+  const visiblePosts = useMemo(() => posts.filter((post) => {
     const matchesFilter = feedFilter === "Sve objave" || post.tag.toLocaleLowerCase("hr").includes(feedFilter.toLocaleLowerCase("hr"));
     const query = feedSearch.trim().toLocaleLowerCase("hr");
     const matchesSearch = !query || `${post.author} ${post.handle} ${post.tag} ${post.text}`.toLocaleLowerCase("hr").includes(query);
     return matchesFilter && matchesSearch;
-    });
-  }, [posts, feedFilter, feedSearch, session?.user?.id]);
+  }), [posts, feedFilter, feedSearch]);
 
   async function publishPost() {
     const text = draft.trim();
@@ -1461,8 +1458,14 @@ function App() {
   }
 
   async function toggleReaction(id, reaction) {
-    if (!supabase || !session?.user?.id) {
-      setNotice("Za spremanje reakcije potrebno je prijaviti se.");
+    if (!session?.user?.id) {
+      setAuthOpen(true);
+      setAuthMode("login");
+      setAuthMessage("Prijavi se ili izradi račun kako bi lajkao/la i reagirao/la na objave.");
+      return;
+    }
+    if (!supabase) {
+      setNotice("Reakcije će biti dostupne nakon povezivanja testne baze zajednice.");
       return;
     }
     const reactionToDb = { "❤️": "like", "🇭🇷": "patriotism", "🙏": "gratitude", "👏": "support" };
@@ -1494,6 +1497,12 @@ function App() {
   }
 
   function toggleComments(id) {
+    if (!session?.user?.id) {
+      setAuthOpen(true);
+      setAuthMode("login");
+      setAuthMessage("Prijavi se ili izradi račun kako bi komentirao/la objave.");
+      return;
+    }
     setOpenComments((current) => current.includes(id)
       ? current.filter((item) => item !== id)
       : [...current, id]);
@@ -1505,8 +1514,14 @@ function App() {
       setNotice("Napiši komentar prije slanja.");
       return;
     }
-    if (!supabase || !session?.user?.id) {
-      setNotice("Za slanje komentara koji se trajno sprema potrebno je prijaviti se.");
+    if (!session?.user?.id) {
+      setAuthOpen(true);
+      setAuthMode("login");
+      setAuthMessage("Prijavi se ili izradi račun kako bi komentirao/la objave.");
+      return;
+    }
+    if (!supabase) {
+      setNotice("Komentari će biti dostupni nakon povezivanja testne baze zajednice.");
       return;
     }
     const { data, error } = await supabase
@@ -2213,13 +2228,12 @@ function App() {
 
           </> : (
             <section className="composer card wall-login-prompt" aria-label="Prijava za zid zajednice">
-              <div className="composer-heading"><span className="composer-heading-mark" aria-hidden="true">✦</span><div><strong>Zid zajednice čeka na tebe</strong><small>Objave članova dostupne su nakon prijave.</small></div></div>
-              <p className="post-text">Prijavi se ili izradi račun kako bi čitao/la priče članova, reagirao/la na objave i podijelio/la vlastite uspomene.</p>
-              <button type="button" className="primary-button" onClick={() => { setAuthOpen(true); setAuthMode("login"); setAuthMessage("Prijavi se ili izradi račun za pristup zidu zajednice."); }}>Prijava / Registracija ↗</button>
+              <div className="composer-heading"><span className="composer-heading-mark" aria-hidden="true">✦</span><div><strong>Podijeli svoju priču</strong><small>Čitanje zida je javno; za objavu i interakcije trebaš račun.</small></div></div>
+              <p className="post-text">Prijavi se ili izradi račun kako bi objavljivao/la, komentirao/la i podržao/la priče drugih članova.</p>
+              <button type="button" className="primary-button" onClick={() => { setAuthOpen(true); setAuthMode("login"); setAuthMessage("Prijavi se ili izradi račun kako bi objavljivao/la, komentirao/la i reagirao/la na objave."); }}>Prijava / Registracija ↗</button>
             </section>
           )}
 
-          {session?.user?.id && <>
           <div className="feed-heading">
             <div>
               <span className="eyebrow">ŽIVOT ZAJEDNICE</span>
@@ -2338,7 +2352,6 @@ function App() {
             </article>
           )) : <div className="empty-feed card"><strong>Nema pronađenih objava.</strong><p>Pokušaj drugu riječ ili odaberi „Sve objave”.</p><button className="outline-button" onClick={() => { setFeedSearch(""); setFeedFilter("Sve objave"); }}>Poništi filtre</button></div>}
           <div className="end-of-feed"><span>✦</span><p>Svaka priča čuva dio našeg zajedničkog nasljeđa.</p></div>
-          </>}
         </section>
 
         <aside className="right-sidebar">
