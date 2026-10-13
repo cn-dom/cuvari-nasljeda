@@ -33,6 +33,7 @@ export default function Events() {
       .from("community_events")
       .select("id,title,description,location,starts_at,ends_at,created_by,created_at,status,profiles:profiles!community_events_created_by_fkey(display_name,username)")
       .eq("status", "published")
+      .gte("starts_at", new Date().toISOString())
       .order("starts_at", { ascending: true })
       .limit(100);
     if (loadError) {
