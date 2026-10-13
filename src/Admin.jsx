@@ -112,7 +112,10 @@ export default function Admin() {
         pages: { table: "community_pages", select: "id, name, slug, description, category, created_by, created_at", order: "created_at" },
       };
       const config = configs[activeModule];
-      if (!config) return;
+      if (!config) {
+        setBusy(false);
+        return;
+      }
       setBusy(true);
       const { data, error: loadError } = await supabase.from(config.table).select(config.select).order(config.order, { ascending: false }).limit(200);
       if (cancelled) return;
