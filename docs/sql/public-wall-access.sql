@@ -6,7 +6,9 @@ begin;
 
 revoke all privileges on table public.posts, public.comments, public.post_reactions, public.profiles from anon;
 grant select on table public.posts, public.comments to anon;
-grant select (id, display_name, username, avatar_path) on table public.profiles to anon;
+grant select (id, display_name, username, avatar_path, avatar_url) on table public.profiles to anon;
+grant select (avatar_url) on table public.profiles to authenticated;
+grant update (avatar_url) on table public.profiles to authenticated;
 
 drop policy if exists posts_select_authenticated on public.posts;
 drop policy if exists posts_select_public on public.posts;
