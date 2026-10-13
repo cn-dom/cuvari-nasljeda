@@ -2228,7 +2228,7 @@ function App() {
           {visiblePosts.length ? visiblePosts.map((post) => (
             <article className="post-card card" id={"objava-" + post.id} key={post.id}>
               <div className="post-header">
-                <Avatar initials={post.initials} variant={post.id === 1 ? "avatar-community" : ""} />
+                {post.id === 1 ? (\n                  <button type="button" className="avatar avatar-community avatar-community-image" onClick={() => setBrandImageOpen(true)} aria-label="Otvori grb PatriaSoul">\n                    <img src="/assets/images/PATRIA_SOUL_ORIGINAL_ISPRAVLJEN_GRB.png" alt="" />\n                  </button>\n                ) : <Avatar initials={post.initials} />}
                 <div className="post-author">
                   <strong>{post.author}</strong>
                   <span>{post.handle} <b>·</b> {post.time}</span>
