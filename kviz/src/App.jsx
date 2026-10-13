@@ -61,9 +61,6 @@ export default function App() {
   const [accountPage, setAccountPage] = useState(1);
   const [loadingAccount, setLoadingAccount] = useState(false);
   const accountPageSize = 20;
-  const [installPrompt, setInstallPrompt] = useState(null);
-  const [installHelp, setInstallHelp] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
   const [profile, setProfile] = useState(null);
   const [nicknameOpen, setNicknameOpen] = useState(false);
   const [nickname, setNickname] = useState("");
@@ -254,41 +251,6 @@ export default function App() {
     } finally {
       setSavingNickname(false);
     }
-  };
-
-  useEffect(() => {
-    const media = window.matchMedia("(display-mode: standalone)");
-    const standalone = media.matches || window.navigator.standalone === true;
-    setIsStandalone(standalone);
-
-    const handleInstallPrompt = (event) => {
-      event.preventDefault();
-      setInstallPrompt(event);
-    };
-    const handleInstalled = () => {
-      setInstallPrompt(null);
-      setInstallHelp(false);
-      setIsStandalone(true);
-    };
-
-    window.addEventListener("beforeinstallprompt", handleInstallPrompt);
-    window.addEventListener("appinstalled", handleInstalled);
-    return () => {
-      window.removeEventListener("beforeinstallprompt", handleInstallPrompt);
-      window.removeEventListener("appinstalled", handleInstalled);
-    };
-  }, []);
-
-  const installPatriaSoul = async () => {
-    if (installPrompt) {
-      installPrompt.prompt();
-      const choice = await installPrompt.userChoice;
-      if (choice?.outcome === "accepted") {
-        setInstallPrompt(null);
-      }
-      return;
-    }
-    setInstallHelp(true);
   };
 
   useEffect(() => {
@@ -1005,8 +967,6 @@ export default function App() {
         <a href="/" className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/15 bg-white/[.06] px-3 py-2 text-xs font-bold transition hover:border-amber-300/60 hover:bg-white/10 sm:px-4 sm:text-sm"><ArrowLeft className="h-4 w-4" /><span className="hidden sm:inline">Natrag na mrežu</span><span className="sm:hidden">Mreža</span></a>
       </div>
     </div>
-    {!isStandalone && <div className="patria-install-bar"><div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-2.5 sm:px-6"><div className="flex min-w-0 items-center gap-3"><img src="/assets/images/patriasoul-logo.jpg" alt="" className="patria-install-logo" /><div className="min-w-0"><p className="truncate text-sm font-bold text-white">Instaliraj PatriaSoul</p><p className="hidden text-xs text-white/55 sm:block">Pokreni kviz kao aplikaciju na računalu ili telefonu.</p></div></div><button onClick={installPatriaSoul} className="patria-install-button" aria-label="Instaliraj PatriaSoul">Instaliraj</button></div></div>}
-    {installHelp && !isStandalone && <div className="mx-auto max-w-[1400px] px-4 pt-3 sm:px-6"><div className="patria-install-help"><strong>Instalacija nije dostupna automatski u ovom pregledniku.</strong> Na računalu potraži opciju <b>Instaliraj PatriaSoul</b> u izborniku preglednika. Na iPhoneu/iPadu odaberi <b>Dijeli → Dodaj na početni zaslon</b>.</div></div>}
     {authOpen && <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/60 px-4 py-4 sm:items-center sm:py-8" onClick={() => !authLoading && setAuthOpen(false)}>
       <div className="my-auto max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-2xl sm:max-h-[calc(100vh-4rem)]" onClick={(e) => e.stopPropagation()}>
         <div className="mb-5">
