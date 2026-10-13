@@ -1468,12 +1468,6 @@ function App() {
   }
 
   function toggleComments(id) {
-    if (!session?.user?.id) {
-      setAuthOpen(true);
-      setAuthMode("login");
-      setAuthMessage("Prijavi se ili izradi račun kako bi komentirao/la objave.");
-      return;
-    }
     setOpenComments((current) => current.includes(id)
       ? current.filter((item) => item !== id)
       : [...current, id]);
@@ -2326,17 +2320,24 @@ function App() {
                   <div className="comments-list">
                     {(commentsByPost[post.id] || []).length ? (commentsByPost[post.id] || []).map((comment) => (
                       <div className="comment-item" key={comment.id}>
-                        <Avatar initials="TI" variant="avatar-you" />
+                        <Avatar initials={comment.initials} variant={comment.owner ? "avatar-you" : ""} />
                         <div className="comment-bubble"><strong>{comment.author}</strong><p>{comment.text}</p></div>
                       </div>
                     )) : <p className="comments-empty">Još nema komentara uz ovu objavu.</p>}
                   </div>
-                  <form className="comment-form" onSubmit={(event) => { event.preventDefault(); addComment(post.id); }}>
-                    <label className="sr-only" htmlFor={"comment-" + post.id}>Napiši komentar</label>
-                    <input id={"comment-" + post.id} value={commentDrafts[post.id] || ""} onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))} placeholder="Napiši komentar…" />
-                    <button className="primary-button" type="submit">Pošalji</button>
-                  </form>
-                  <p className="local-only-note">Komentari se spremaju u zajednicu nakon uspješnog slanja.</p>
+                  {session?.user?.id ? (
+                    <form className="comment-form" onSubmit={(event) => { event.preventDefault(); addComment(post.id); }}>
+                      <label className="sr-only" htmlFor={"comment-" + post.id}>Napiši komentar</label>
+                      <input id={"comment-" + post.id} value={commentDrafts[post.id] || ""} onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))} placeholder="Napiši komentar…" />
+                      <button className="primary-button" type="submit">Pošalji</button>
+                    </form>
+                  ) : (
+                    <div className="comment-form">
+                      <span className="comments-empty">Prijavi se kako bi dodao komentar.</span>
+                      <button className="primary-button" type="button" onClick={() => { setAuthMode("login"); setAuthMessage("Prijavi se ili izradi račun kako bi komentirao/la objave."); setAuthOpen(true); }}>Prijava</button>
+                    </div>
+                  )}
+                  <p className="local-only-note">Komentari su javno vidljivi; za pisanje komentara potrebna je prijava.</p>
                 </section>
               )}
             </article>
