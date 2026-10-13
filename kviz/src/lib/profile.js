@@ -44,7 +44,7 @@ export async function saveMyAvatar(file) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Moraš biti prijavljen.");
   if (!(file instanceof File)) throw new Error("Odaberi sliku.");
-  if (file.size > 2 * 1024 * 1024) throw new Error("Slika može imati najviše 2 MB.");
+  if (file.size > 10 * 1024 * 1024) throw new Error("Slika može imati najviše 10 MB.");
   if (!["image/png","image/jpeg","image/webp"].includes(file.type)) throw new Error("Dopuštene su PNG, JPG i WebP slike.");
   const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
   const path = user.id + "/" + crypto.randomUUID() + "." + ext;
