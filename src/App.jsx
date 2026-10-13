@@ -1800,7 +1800,7 @@ function App() {
           {activeNav === "Administracija" && (isOwner ? (
             <section className="owner-admin-panel card" aria-labelledby="owner-admin-title">
               <div className="auth-panel-heading"><div><span className="eyebrow">PATRiASOUL · SIGURNOST</span><h2 id="owner-admin-title">Administracija mreže</h2><p className="profile-email">Prijavljen vlasnik: {session?.user?.email}</p></div><span className="owner-admin-badge">VLASNIK</span></div>
-              <div className="owner-admin-notice"><strong>Pristup vlasnika</strong><p>Ovaj izbornik prikazuje se samo kada je prijavljen račun s adresom vlasnika. Baza mora zasebno provoditi ista prava pristupa.</p></div>
+              <div className="owner-admin-notice"><strong>Pristup vlasnika</strong><p>Račun vlasnika prepoznat je. Prijave sadržaja prikazuju se ovdje kada ih članovi pošalju; vlasničke ovlasti provode se i pravilima baze.</p></div>
               <div className="owner-admin-summary"><div><strong>{adminReports.filter((item) => item.status === "pending").length}</strong><span>otvorenih prijava</span></div><div><strong>{adminReports.length}</strong><span>učitanih prijava</span></div></div>
               {adminError && <p className="auth-message" role="alert">{adminError}</p>}
               {adminBusy ? <p className="directory-empty">Učitavam prijave…</p> : adminReports.length ? <div className="owner-report-list">{adminReports.map((report) => <article className="owner-report-card" key={report.id}>
@@ -1808,7 +1808,7 @@ function App() {
                 <p><strong>ID objave:</strong> <code>{report.post_id}</code></p>{report.details && <p><strong>Objašnjenje:</strong> {report.details}</p>}
                 <small>{new Date(report.created_at).toLocaleString("hr-HR", {dateStyle:"medium",timeStyle:"short"})} · ID prijave: {report.id}</small>
                 <div className="inline-form-actions"><button type="button" className="outline-button" disabled={report.status === "reviewed"} onClick={() => updateReportStatus(report,"reviewed")}>Označi pregledano</button><button type="button" className="outline-button" disabled={report.status === "dismissed"} onClick={() => updateReportStatus(report,"dismissed")}>Odbaci prijavu</button><button type="button" className="primary-button" disabled={report.status === "actioned"} onClick={() => removeReportedPost(report)}>Ukloni objavu</button></div>
-              </article>)}</div> : <p className="directory-empty">Nema prijava za prikaz ili tablica prijava još nije dostupna.</p>}
+              </article>)}</div> : <p className="directory-empty">Trenutačno nema prijava sadržaja. Kada član prijavi objavu, prijava će se pojaviti ovdje.</p>}
               <div className="owner-admin-links"><a href="/pravila-koristenja.html">Pravila korištenja</a><a href="/pravila-zajednice.html">Pravila zajednice</a><a href="/privatnost.html">Privatnost i sigurnost</a></div>
             </section>
           ) : <section className="owner-admin-panel card"><h2>Pristup odbijen</h2><p>Administracija je dostupna samo vlasniku mreže.</p></section>)}
