@@ -1364,3 +1364,18 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
 .admin-group-members-modal{width:min(100%,1100px);max-height:min(85vh,760px);overflow:auto;box-shadow:0 24px 80px rgba(0,0,0,.45)}
 .admin-group-members-modal .admin-table-heading{position:sticky;top:0;z-index:2;background:var(--admin-panel,#101b2b);padding-bottom:14px}
 @media(max-width:640px){.admin-modal-backdrop{padding:8px;align-items:flex-end}.admin-group-members-modal{max-height:90vh;border-radius:16px 16px 0 0}.admin-group-members-modal .admin-table-heading{gap:10px;align-items:flex-start}}
+
+
+/* Administration: explicit security posture and unfinished integrations */
+.admin-security-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:stretch}
+.admin-security-card{display:flex;gap:14px;align-items:flex-start;min-width:0;padding:20px;border:1px solid #dfe6ee;border-radius:14px;background:#fff;box-shadow:0 8px 24px rgba(16,36,60,.04)}
+.admin-security-card h2{margin:0 0 8px;color:#172a40;font-size:15px}
+.admin-security-card p{margin:0 0 13px;color:#617186;font-size:12px;line-height:1.65}
+.admin-security-icon{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;border-radius:11px;background:#e8f5ee;color:#23784d;font-size:19px;font-weight:800}
+.admin-security-card.warning{border-color:#f0dfbd;background:#fffdf8}
+.admin-security-card.warning .admin-security-icon{background:#fff0d4;color:#9a6511}
+.admin-security-status{display:inline-flex;padding:5px 8px;border-radius:999px;background:#e8f5ee;color:#23784d;font-size:10px;font-weight:800}
+.admin-security-status.pending{background:#fff0d4;color:#9a6511}
+.admin-module-status-card{display:grid;gap:12px}
+.admin-module-status-card>.admin-button{justify-self:start}
+@media(max-width:720px){.admin-security-grid{grid-template-columns:1fr}.admin-security-card{padding:16px}}
