@@ -27,7 +27,7 @@ Projekt je zamišljen kao besplatna i nekomercijalna usluga bez oglasa, pretplat
 - Prijava neprimjerenog sadržaja, blokiranje članova i administratorsko moderiranje.
 - Članovi mogu uređivati i brisati vlastite objave, fotografije i komentare.
 
-Navedeno su ciljevi prilagodbe, a ne tvrdnja da su funkcije već implementirane.
+Popis opisuje ciljnu funkcionalnost. Dio sučelja i klijentskih radnji već postoji, ali svaku funkciju treba zasebno provjeriti s testnom bazom i stvarnim računima prije nego što se smatra spremnom za produkciju.
 
 ## Licenciranje i autorstvo
 
@@ -52,4 +52,9 @@ Svaki vanjski projekt ili komponenta mora imati zasebno provjerenu licencu. Za p
 
 ## Status
 
-Trenutačno su pripremljeni dokumentacija i razvojna grana. Aplikacijski kod društvene mreže još nije implementiran, testiran ni objavljen.
+- **Sučelje:** React/Vite aplikacija postoji, uključujući početni zaslon, ogledni zid, obrazac objave, prijavu/registraciju, profile, komentare, reakcije, imenik članova, privatne i grupne poruke, obavijesti te dio moderatorskog sučelja.
+- **Automatska provjera:** GitHub Actions provodi produkcijsku izgradnju aplikacije i kviza. Rezultat zadnje provjere prati se u [GitHub Actions](https://github.com/cn-dom/cuvari-nasljeda/actions).
+- **Backend:** povezivanje s testnim Supabase projektom, primjena SQL nacrta, RLS politike, pohrana fotografija i stvarni tijekovi korisnika još zahtijevaju zasebnu provjeru.
+- **Objava:** uspješna izgradnja nije dokaz da su sve funkcije povezane s bazom ili spremne za produkciju.
+
+Ne pokretati migracije nad postojećom produkcijskom bazom. Prije testiranja treba potvrditi zaseban Supabase testni projekt i provjeriti politike pristupa.
