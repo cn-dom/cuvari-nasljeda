@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 import "./community-sections.css";
 
-const label = (profile) => profile?.display_name || profile?.username || "Čuvar nasljeđa";
+const normalizeUsername = (value) => String(value || "").trim().replace(/^@/, "").toLowerCase();
+const label = (profile) => profile?.display_name || normalizeUsername(profile?.username) || "Čuvar nasljeđa";
 const dateLabel = (value) => value ? new Date(value).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" }) : "";
 
 export default function Forum() {
