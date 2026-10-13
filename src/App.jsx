@@ -127,6 +127,7 @@ function App() {
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const emojiPickerHost = useRef(null);
   const [notice, setNotice] = useState("");
+  const [brandImageOpen, setBrandImageOpen] = useState(false);
   const [feedFilter, setFeedFilter] = useState("Sve objave");
   const [feedSearch, setFeedSearch] = useState("");
   const [openComments, setOpenComments] = useState([]);
@@ -1743,12 +1744,26 @@ function App() {
               <p>Priče, fotografije i uspomene koje povezuju Hrvatsku i njezine ljude.</p>
               <button type="button" className="welcome-cta" onClick={() => document.getElementById("post-draft")?.focus()}>Podijeli svoju priču <span aria-hidden="true">↗</span></button>
             </div>
-            <div className="welcome-symbol" aria-hidden="true">
-              <span className="symbol-sun">✦</span>
-              <span className="symbol-letters">PS</span>
-              <span className="symbol-caption">ČUVARI<br />NASLJEĐA</span>
-            </div>
+            <button
+              type="button"
+              className="welcome-image-trigger"
+              onClick={() => setBrandImageOpen(true)}
+              aria-label="Otvori sliku znaka Čuvari nasljeđa"
+              title="Otvori sliku"
+            >
+              <img src="/assets/images/1000000982.png" alt="Znak Čuvari nasljeđa" />
+              <span aria-hidden="true">Pogledaj sliku</span>
+            </button>
           </section>
+
+          {brandImageOpen && (
+            <div className="image-viewer-backdrop" role="presentation" onClick={() => setBrandImageOpen(false)}>
+              <div className="image-viewer-dialog" role="dialog" aria-modal="true" aria-label="Slika znaka Čuvari nasljeđa" onClick={(event) => event.stopPropagation()}>
+                <button type="button" className="image-viewer-close" onClick={() => setBrandImageOpen(false)} aria-label="Zatvori sliku">×</button>
+                <img src="/assets/images/1000000982.png" alt="Znak Čuvari nasljeđa" />
+              </div>
+            </div>
+          )}
 
           {notice && (
             <div className="notice" role="status">
