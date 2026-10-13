@@ -34,6 +34,10 @@ export default function Admin() {
   const [dbStatus, setDbStatus] = useState("provjera");
   const [refreshKey, setRefreshKey] = useState(0);
   const [reportStatusFilter, setReportStatusFilter] = useState("all");
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [groupMembers, setGroupMembers] = useState([]);
+  const [groupMembersBusy, setGroupMembersBusy] = useState(false);
+  const [groupMembersError, setGroupMembersError] = useState("");
 
   useEffect(() => {
     if (!supabase) { setAuthReady(true); return undefined; }
@@ -123,6 +127,20 @@ export default function Admin() {
     loadModule();
     return () => { cancelled = true; };
   }, [activeModule, isOwner, refreshKey]);
+
+  async function viewGroupMembers(row) {
+    setSelectedGroup(row);
+    setGroupMembers([]);
+    setGroupMembersError("");
+    setGroupMembersBusy(true);
+    const { data, error: loadError } = await supabase.rpc("admin_group_chat_members", { p_group_id: row.group_id || row.id });
+    if (loadError) {
+      setGroupMembersError("Članove nije moguće učitati. Provjeri je li SQL funkcija primijenjena u testnoj bazi.");
+    } else {
+      setGroupMembers(data || []);
+    }
+    setGroupMembersBusy(false);
+  }
 
   async function setReportStatus(row, status) {
     const { data, error: updateError } = await supabase.from("content_reports").update({ status }).eq("id", row.id).select("id,status").maybeSingle();
@@ -216,7 +234,7 @@ export default function Admin() {
             {error ? <p className="admin-error">{error}</p> : busy ? <p className="admin-empty">Učitavam podatke…</p> : filteredRows.length ? (
               <div className="admin-table-scroll">
                 <table className="admin-table">
-                  <thead><tr>{activeModule === "members" ? <><th>Član</th><th>Korisničko ime</th><th>ID računa</th><th>Registriran</th></> : activeModule === "posts" ? <><th>Objava</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : activeModule === "comments" ? <><th>Komentar</th><th>ID objave</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : activeModule === "events" ? <><th>Događaj</th><th>Mjesto</th><th>Početak</th><th>Status</th><th>Radnja</th></> : activeModule === "groups" ? <><th>Grupa</th><th>Osnivač ID</th><th>Članovi</th><th>Poruke</th><th>Osnovana</th></> : activeModule === "reports" ? <><th>Razlog</th><th>Status</th><th>ID objave</th><th>ID prijavitelja</th><th>Zaprimljeno</th><th>Radnje</th></> : activeModule === "forum" ? <><th>Naslov teme</th><th>Početna poruka</th><th>ID autora</th><th>Status</th><th>Datum</th></> : <><th>Stranica</th><th>Kategorija</th><th>Opis</th><th>ID osnivača</th><th>Datum</th></>}</tr></thead>
+                  <thead><tr>{activeModule === "members" ? <><th>Član</th><th>Korisničko ime</th><th>ID računa</th><th>Registriran</th></> : activeModule === "posts" ? <><th>Objava</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : activeModule === "comments" ? <><th>Komentar</th><th>ID objave</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : activeModule === "events" ? <><th>Događaj</th><th>Mjesto</th><th>Početak</th><th>Status</th><th>Radnja</th></> : activeModule === "groups" ? <><th>Grupa</th><th>Osnivač ID</th><th>Članovi</th><th>Poruke</th><th>Osnovana</th><th>Radnje</th></> : activeModule === "reports" ? <><th>Razlog</th><th>Status</th><th>ID objave</th><th>ID prijavitelja</th><th>Zaprimljeno</th><th>Radnje</th></> : activeModule === "forum" ? <><th>Naslov teme</th><th>Početna poruka</th><th>ID autora</th><th>Status</th><th>Datum</th></> : <><th>Stranica</th><th>Kategorija</th><th>Opis</th><th>ID osnivača</th><th>Datum</th></>}</tr></thead>
                   <tbody>
                     {filteredRows.map(row => <tr key={row.id}>
                       {activeModule === "members" ? (
@@ -250,6 +268,21 @@ export default function Admin() {
             <div className="admin-placeholder-meta"><span>STATUS</span><strong>U pripremi</strong></div>
             <button type="button" className="admin-button secondary" onClick={() => setActiveModule("overview")}>← Natrag na pregled</button>
           </section>
+        )}
+        {activeModule === "groups" && selectedGroup && (
+          <div className="admin-modal-backdrop" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) setSelectedGroup(null); }}>
+            <section className="admin-table-card admin-group-members-modal" role="dialog" aria-modal="true" aria-labelledby="admin-group-members-title">
+              <div className="admin-table-heading">
+                <div><h2 id="admin-group-members-title">Članovi grupe: {selectedGroup.name}</h2><p>{groupMembers.length} članova · uvid vlasnika</p></div>
+                <button className="admin-button secondary" type="button" onClick={() => setSelectedGroup(null)}>Zatvori</button>
+              </div>
+              {groupMembersBusy ? <p className="admin-empty">Učitavam članove…</p> : groupMembersError ? <p className="admin-error">{groupMembersError}</p> : groupMembers.length ? (
+                <div className="admin-table-scroll"><table className="admin-table"><thead><tr><th>Član</th><th>Korisničko ime</th><th>ID računa</th><th>Uloga</th><th>Pridružio se</th></tr></thead><tbody>
+                  {groupMembers.map(member => <tr key={member.user_id}><td><strong>{member.display_name || "Čuvar nasljeđa"}</strong></td><td>{member.username ? "@" + member.username : "—"}</td><td><code>{member.user_id}</code></td><td><span className="admin-status">{member.role || "član"}</span></td><td>{dateLabel(member.joined_at)}</td></tr>)}
+                </tbody></table></div>
+              ) : <p className="admin-empty">Ova grupa trenutačno nema članova.</p>}
+            </section>
+          </div>
         )}
         <footer className="admin-workspace-footer"><span>PatriaSoul · Čuvari nasljeđa</span><span>Vlasnički pristup · Aktivna sesija</span></footer>
       </section>
