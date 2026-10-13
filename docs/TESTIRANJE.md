@@ -26,6 +26,8 @@ Ovaj popis služi za završnu provjeru testne verzije. Označi stavku tek nakon 
 - [ ] Događaji: pregled, stvaranje budućeg događaja i potvrda/poništenje dolaska.
 - [ ] Privatne poruke i grupni razgovori rade između dvaju testnih računa.
 - [ ] Vlasnik u administraciji vidi grupne razgovore, broj članova i broj poruka bez prikaza sadržaja privatnih poruka.
+- [ ] Gumb Članovi otvara popis članova odabrane grupe s ulogom i datumom pridruživanja.
+- [ ] Nevlasnički račun ne može pozvati funkciju za pregled članova grupe.
 - [ ] Račun koji nije vlasnik ne može pozvati administratorsku funkciju za pregled grupa.
 
 ## Administracija i sigurnost
