@@ -21,6 +21,10 @@ Prije dodavanja nove funkcije pregledane su postojeće komponente src/App.jsx, s
 - Nova Supabase tablica, migracija ili spremanje učitanih fotografija.
 - Automatska provjera web-izvora: odgovori mogu biti netočni i moraju se neovisno provjeravati.
 
+## Detaljan sigurnosni plan
+
+Povezani plan zabrana, tehničkih mjera P0/P1/P2 i testnih slučajeva nalazi se u [AI-SIGURNOSNI-PLAN.md](./AI-SIGURNOSNI-PLAN.md). Taj dokument opisuje ciljanu zaštitu; ne znači da su sve provjere baze i produkcijskih postavki već provedene.
+
 ## Sigurnosne granice
 - Ne šalju se podaci Supabasea, privatne poruke, skriveni postovi ili administratorske prijave u AI.
 - Ne traže se ni pohranjuju lozinke, API ključevi ili tokeni.
