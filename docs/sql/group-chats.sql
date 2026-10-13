@@ -27,6 +27,17 @@ create table if not exists public.group_chat_messages (
   created_at timestamptz not null default now()
 );
 
+-- Emoji reactions used by the group chat UI.
+create table if not exists public.group_chat_message_reactions (
+  id uuid primary key default gen_random_uuid(),
+  message_id uuid not null references public.group_chat_messages(id) on delete cascade,
+  group_id uuid not null references public.group_chats(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  reaction text not null check (reaction in ('❤️', '👍', '😂', '🙏', '🇭🇷')),
+  created_at timestamptz not null default now(),
+  constraint group_chat_message_reactions_unique unique (message_id, user_id, reaction)
+);
+
 create index if not exists group_chat_members_user_idx
   on public.group_chat_members (user_id, group_id);
 create index if not exists group_chat_messages_group_created_idx
@@ -35,6 +46,7 @@ create index if not exists group_chat_messages_group_created_idx
 alter table public.group_chats enable row level security;
 alter table public.group_chat_members enable row level security;
 alter table public.group_chat_messages enable row level security;
+alter table public.group_chat_message_reactions enable row level security;
 
 -- SECURITY DEFINER helpers avoid recursive RLS checks on group_chat_members.
 create or replace function public.is_group_chat_member(target_group_id uuid)
@@ -252,8 +264,31 @@ with check (
   and char_length(trim(body)) between 1 and 2000
 );
 
+-- Reactions are visible only to group members; a member can add/remove only their own.
+drop policy if exists group_chat_message_reactions_select_members on public.group_chat_message_reactions;
+create policy group_chat_message_reactions_select_members on public.group_chat_message_reactions
+for select to authenticated
+using (public.is_group_chat_member(group_id));
+
+drop policy if exists group_chat_message_reactions_insert_own on public.group_chat_message_reactions;
+create policy group_chat_message_reactions_insert_own on public.group_chat_message_reactions
+for insert to authenticated
+with check (
+  user_id = auth.uid()
+  and public.is_group_chat_member(group_id)
+  and exists (
+    select 1 from public.group_chat_messages m
+    where m.id = message_id and m.group_id = group_chat_message_reactions.group_id
+  )
+);
+
+drop policy if exists group_chat_message_reactions_delete_own on public.group_chat_message_reactions;
+create policy group_chat_message_reactions_delete_own on public.group_chat_message_reactions
+for delete to authenticated
+using (user_id = auth.uid() and public.is_group_chat_member(group_id));
+
 -- Realtime publication for group messages, if available and not already configured.
-do $$
+do $
 begin
   if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
      and not exists (
@@ -265,7 +300,21 @@ begin
     alter publication supabase_realtime add table public.group_chat_messages;
   end if;
 end
-$$;
+$;
+
+do $
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
+     and not exists (
+       select 1 from pg_publication_tables
+       where pubname = 'supabase_realtime'
+         and schemaname = 'public'
+         and tablename = 'group_chat_message_reactions'
+     ) then
+    alter publication supabase_realtime add table public.group_chat_message_reactions;
+  end if;
+end
+$;
 
 -- Members can leave; the last admin must transfer admin rights first.
 create or replace function public.leave_group_chat(target_group_id uuid)
