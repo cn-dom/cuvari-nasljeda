@@ -34,10 +34,19 @@ returns trigger
 language plpgsql
 set search_path = ''
 as $$
+declare
+  v_privileged boolean := (
+    coalesce(current_setting('request.jwt.claim.role', true), '') = 'service_role'
+    or current_user in ('postgres', 'supabase_admin')
+  );
 begin
-  if new.role is distinct from old.role
-     and coalesce(current_setting('request.jwt.claim.role', true), '') <> 'service_role'
-     and current_user not in ('postgres', 'supabase_admin') then
+  if tg_op = 'INSERT' then
+    if new.role is distinct from 'member' and not v_privileged then
+      raise exception 'Administratorsku ulogu nije moguće dodijeliti kroz registraciju.';
+    end if;
+    return new;
+  end if;
+  if new.role is distinct from old.role and not v_privileged then
     raise exception 'Promjena administratorske uloge nije dopuštena.';
   end if;
   return new;
@@ -46,42 +55,11 @@ $$;
 
 drop trigger if exists profiles_guard_role_change on public.profiles;
 create trigger profiles_guard_role_change
-  before update on public.profiles
+  before insert or update of role on public.profiles
   for each row execute function public.guard_profile_role_change();
 
--- The quiz profile editor expects a public avatar URL. Public reads are limited to avatar files.
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values (
-  'avatars',
-  'avatars',
-  true,
-  10485760,
-  array['image/jpeg', 'image/png', 'image/webp']
-)
-on conflict (id) do update
-set public = true,
-    file_size_limit = 10485760,
-    allowed_mime_types = excluded.allowed_mime_types;
-
-drop policy if exists "quiz_avatars_read_public" on storage.objects;
-create policy "quiz_avatars_read_public"
-  on storage.objects for select to public
-  using (bucket_id = 'avatars');
-
-drop policy if exists "quiz_avatars_insert_own_folder" on storage.objects;
-create policy "quiz_avatars_insert_own_folder"
-  on storage.objects for insert to authenticated
-  with check (
-    bucket_id = 'avatars'
-    and (storage.foldername(name))[1] = (select auth.uid())::text
-  );
-
-drop policy if exists "quiz_avatars_delete_own_folder" on storage.objects;
-create policy "quiz_avatars_delete_own_folder"
-  on storage.objects for delete to authenticated
-  using (
-    bucket_id = 'avatars'
-    and (storage.foldername(name))[1] = (select auth.uid())::text
-  );
+revoke all on function public.guard_profile_role_change() from public;
+revoke all on function public.guard_profile_role_change() from anon;
+revoke all on function public.guard_profile_role_change() from authenticated;
 
 commit;
