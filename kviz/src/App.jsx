@@ -961,7 +961,7 @@ export default function App() {
     <header className="relative z-20 border-b border-white/10 bg-[#071426] text-white shadow-lg">
       <div className="mx-auto flex max-w-[1400px] flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
         <a href="/kviz/" className="flex items-center gap-3 self-start rounded-xl outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-amber-300" aria-label="PatriaSoul — početna kviza">
-          <img src="/assets/images/patriasoul-logo.jpg" alt="PatriaSoul" className="h-10 w-10 shrink-0 rounded-xl object-contain ring-1 ring-white/15" />
+          <img src="/assets/images/1000000982.png" alt="PatriaSoul" className="h-10 w-10 shrink-0 rounded-xl object-contain ring-1 ring-white/15" />
           <span className="text-lg font-extrabold tracking-wide">PatriaSoul</span>
         </a>
         <nav aria-label="Glavna navigacija kviza" className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-bold">
@@ -1524,13 +1524,13 @@ export default function App() {
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-3 lg:py-14">
         <section>
           <a href="/kviz/" className="inline-flex items-center gap-3 transition hover:opacity-90" aria-label="PatriaSoul — početna">
-            <img src="/assets/images/patriasoul-logo.jpg" alt="PatriaSoul" className="h-14 w-14 rounded-xl object-contain ring-1 ring-white/15" />
+            <img src="/assets/images/1000000982.png" alt="PatriaSoul" className="h-14 w-14 rounded-xl object-contain ring-1 ring-white/15" />
             <span className="text-xl font-extrabold">PatriaSoul</span>
           </a>
           <p className="mt-4 text-sm leading-6 text-white/70">Hrvatska · povijest · znanje · identitet.<br />Prostor za učenje, igru i čuvanje priča koje čine naše nasljeđe.</p>
           <p className="mt-4 font-bold text-amber-300">Znanje · Ponos · Nasljeđe</p>
           <p className="mt-2 text-sm font-semibold">PatriaSoul</p>
-          <a href="https://patriasoul-portal-v2.patriasoul.workers.dev/" className="mt-3 inline-block text-sm text-white/70 underline underline-offset-4 hover:text-white">Povratak na PatriaSoul portal</a>
+          <a href="/" className="mt-3 inline-block text-sm text-white/70 underline underline-offset-4 hover:text-white">Povratak na Čuvare nasljeđa</a>
         </section>
         <section>
           <h2 className="text-sm font-extrabold uppercase tracking-[.16em] text-amber-300">Brzi izbornik</h2>
