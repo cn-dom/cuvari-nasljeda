@@ -446,7 +446,7 @@ function App() {
         const { data: usernameMatches, error: usernameCheckError } = await supabase
           .from("profiles")
           .select("id")
-          .ilike("username", cleanUsername.replace(/[\\%_]/g, "\\.ilike("username", cleanUsername)"))
+          .ilike("username", cleanUsername.replace(/[\\%_]/g, (character) => "\\" + character))
           .neq("id", session.user.id)
           .limit(1);
         if (usernameCheckError) throw usernameCheckError;
@@ -458,7 +458,7 @@ function App() {
       const { data: nameMatches, error: nameCheckError } = await supabase
         .from("profiles")
         .select("id")
-        .ilike("display_name", cleanDisplayName.replace(/[\\%_]/g, "\\.ilike("display_name", cleanDisplayName)"))
+        .ilike("display_name", cleanDisplayName.replace(/[\\%_]/g, (character) => "\\" + character))
         .neq("id", session.user.id)
         .limit(1);
       if (nameCheckError) throw nameCheckError;
