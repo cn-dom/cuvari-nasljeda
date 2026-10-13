@@ -1329,6 +1329,7 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
   text-decoration: none; font: inherit; cursor: pointer; transition: border-color .18s ease, background .18s ease, transform .18s ease;
 }
 .community-hub-card:hover { border-color: rgba(112, 164, 235, .72); background: rgba(63, 111, 171, .13); transform: translateY(-1px); }
+.community-hub-card.ai-hub-card { grid-column: 1 / -1; background: linear-gradient(100deg, rgba(63, 111, 171, .18), rgba(255,255,255,.045)); border-color: rgba(112, 164, 235, .36); }
 .community-hub-icon { display: grid; place-items: center; flex: 0 0 42px; width: 42px; height: 42px; border-radius: 12px; background: rgba(79, 133, 202, .16); font-size: 1.35rem; }
 .community-hub-copy { display: grid; gap: 5px; flex: 1; min-width: 0; }
 .community-hub-copy strong { font-size: .92rem; line-height: 1.3; }
