@@ -423,26 +423,59 @@ function App() {
   async function saveProfile(event) {
     event.preventDefault();
     if (!supabase || !session?.user) return;
-    const cleanUsername = profileUsername.trim().replace(/^@/, "");
-    if (cleanUsername && !/^[a-zA-Z0-9_.-]{3,24}$/.test(cleanUsername)) {
+    const cleanUsername = profileUsername.trim().replace(/^@/, "").toLowerCase();
+    const cleanDisplayName = profileName.trim();
+    if (cleanUsername && !/^[a-z0-9_.-]{3,24}$/.test(cleanUsername)) {
       setProfileMessage("Korisničko ime mora imati 3–24 znaka: slova, brojeve, točku, crticu ili podvlaku.");
       return;
     }
-    if (profileName.trim().length > 60 || profileBio.trim().length > 240) {
+    if (!cleanDisplayName) {
+      setProfileMessage("Upiši prikazno ime koje će drugi članovi vidjeti.");
+      return;
+    }
+    if (cleanDisplayName.length > 60 || profileBio.trim().length > 240) {
       setProfileMessage("Ime može imati do 60, a opis do 240 znakova.");
       return;
     }
     setProfileBusy(true);
     setProfileMessage("");
     try {
+      // Brza provjera daje razumljivu poruku prije spremanja; jedinstveni indeksi u bazi ostaju konačna zaštita.
+      if (cleanUsername) {
+        const { data: usernameMatches, error: usernameCheckError } = await supabase
+          .from("profiles")
+          .select("id")
+          .ilike("username", cleanUsername)
+          .neq("id", session.user.id)
+          .limit(1);
+        if (usernameCheckError) throw usernameCheckError;
+        if (usernameMatches?.length) {
+          setProfileMessage("Ovo korisničko ime već se koristi. Odaberi drugo korisničko ime.");
+          return;
+        }
+      }
+      const { data: nameMatches, error: nameCheckError } = await supabase
+        .from("profiles")
+        .select("id")
+        .ilike("display_name", cleanDisplayName)
+        .neq("id", session.user.id)
+        .limit(1);
+      if (nameCheckError) throw nameCheckError;
+      if (nameMatches?.length) {
+        setProfileMessage("Ovo prikazno ime već se koristi. Odaberi drugo prikazno ime.");
+        return;
+      }
+
       const { error } = await supabase.from("profiles").upsert({
         id: session.user.id,
-        display_name: profileName.trim(),
+        display_name: cleanDisplayName,
         username: cleanUsername || null,
         bio: profileBio.trim(),
         updated_at: new Date().toISOString(),
       }, { onConflict: "id" });
       if (error) throw error;
+      setProfileUsername(cleanUsername);
+      setProfileName(cleanDisplayName);
       setProfileMessage("Profil je spremljen u bazi zajednice.");
     } catch (error) {
       const constraint = String(error?.message || "") + " " + String(error?.details || "") + " " + String(error?.hint || "");
