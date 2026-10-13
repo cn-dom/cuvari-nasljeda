@@ -1333,3 +1333,21 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
 .community-hub-copy small { color: #aab8cb; font-size: .78rem; line-height: 1.45; }
 .community-hub-arrow { color: #8cb9f3; font-size: 1.25rem; }
 @media (max-width: 900px) { .community-hub-grid { grid-template-columns: 1fr; } .community-hub-links { padding: 16px; } }
+
+
+.comment-delete-button {
+  display: inline-flex;
+  margin-top: 6px;
+  padding: 3px 0;
+  border: 0;
+  background: transparent;
+  color: #b9c9df;
+  font: inherit;
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+.comment-delete-button:hover,
+.comment-delete-button:focus-visible {
+  color: #ff9b9b;
+  text-decoration: underline;
+}
