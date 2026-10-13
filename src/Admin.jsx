@@ -8,7 +8,7 @@ const modules = [
   { id: "members", title: "Članovi mreže", group: "ZAJEDNICA", description: "Pregled registriranih članova i osnovnih podataka profila.", icon: "♙", status: "Pregled" },
   { id: "posts", title: "Objave na zidu", group: "SADRŽAJ", description: "Pretraživanje objava i uklanjanje sadržaja koji krši pravila.", icon: "▤", status: "Pregled i moderacija" },
   { id: "reports", title: "Prijave sadržaja", group: "MODERACIJA", description: "Pregled prijava članova, odluke i praćenje obrade.", icon: "⚑", status: "Moderacija" },
-  { id: "comments", title: "Komentari", group: "SADRŽAJ", description: "Kontrola komentara i postupanje po prijavama.", icon: "☷", status: "Sljedeća faza" },
+  { id: "comments", title: "Komentari", group: "SADRŽAJ", description: "Pregled komentara i uklanjanje sadržaja koji krši pravila.", icon: "☷", status: "Pregled i moderacija" },
   { id: "groups", title: "Grupe i zajednice", group: "ZAJEDNICA", description: "Pregled grupa, članstva i upravljanja zajednicama.", icon: "♧", status: "Sljedeća faza" },
   { id: "events", title: "Događaji", group: "ZAJEDNICA", description: "Pregled događaja i upravljanje prijavama sudionika.", icon: "▣", status: "Sljedeća faza" },
   { id: "quiz", title: "PatriaSoul kviz", group: "PATRiASOUL KVIZ", description: "Upravljanje kvizom, rezultatima, pitanjima i prijavama igrača.", icon: "🧠", status: "Povezivanje" },
@@ -74,6 +74,7 @@ export default function Admin() {
       const configs = {
         members: { table: "profiles", select: "id, display_name, username, created_at", order: "created_at" },
         posts: { table: "posts", select: "id, author_id, body, created_at", order: "created_at" },
+        comments: { table: "comments", select: "id, post_id, author_id, body, created_at", order: "created_at" },
         reports: { table: "content_reports", select: "id, reporter_id, post_id, reason, details, status, created_at", order: "created_at" },
         forum: { table: "forum_topics", select: "id, title, body, user_id, category_id, status, created_at", order: "created_at" },
         pages: { table: "community_pages", select: "id, name, slug, description, category, created_by, created_at", order: "created_at" },
@@ -110,6 +111,14 @@ export default function Admin() {
     if (deleteError) { setNotice("Objava nije uklonjena. Provjeri vlasnička pravila i povezane tablice."); return; }
     setRows(current => current.filter(item => item.id !== row.id));
     setNotice("Objava je uklonjena.");
+  }
+
+  async function deleteComment(row) {
+    if (!window.confirm("Trajno ukloniti ovaj komentar? Ova radnja se ne može poništiti.")) return;
+    const { data, error: deleteError } = await supabase.from("comments").delete().eq("id", row.id).select("id").maybeSingle();
+    if (deleteError || !data) { setNotice("Komentar nije uklonjen. Provjeri vlasničku RLS politiku za komentare."); return; }
+    setRows(current => current.filter(item => item.id !== row.id));
+    setNotice("Komentar je uklonjen iz zajednice.");
   }
 
   async function deleteReportedPost(report) {
@@ -155,7 +164,7 @@ export default function Admin() {
               </table>
             )}
           </section>
-        ) : ["members", "posts", "reports", "forum", "pages"].includes(activeModule) ? (
+        ) : ["members", "posts", "reports", "comments", "forum", "pages"].includes(activeModule) ? (
           <section className="admin-table-card">
             <div className="admin-table-heading">
               <div><h2>{current.title}</h2><p>{rows.length} zapisa učitano · najviše 200 prikazanih</p></div>
@@ -164,13 +173,15 @@ export default function Admin() {
             {error ? <p className="admin-error">{error}</p> : busy ? <p className="admin-empty">Učitavam podatke…</p> : filteredRows.length ? (
               <div className="admin-table-scroll">
                 <table className="admin-table">
-                  <thead><tr>{activeModule === "members" ? <><th>Član</th><th>Korisničko ime</th><th>ID računa</th><th>Registriran</th></> : activeModule === "posts" ? <><th>Objava</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : activeModule === "reports" ? <><th>Razlog</th><th>Status</th><th>ID objave</th><th>Zaprimljeno</th><th>Radnje</th></> : activeModule === "forum" ? <><th>Naslov teme</th><th>Početna poruka</th><th>ID autora</th><th>Status</th><th>Datum</th></> : <><th>Stranica</th><th>Kategorija</th><th>Opis</th><th>ID osnivača</th><th>Datum</th></>}</tr></thead>
+                  <thead><tr>{activeModule === "members" ? <><th>Član</th><th>Korisničko ime</th><th>ID računa</th><th>Registriran</th></> : activeModule === "posts" ? <><th>Objava</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : activeModule === "comments" ? <><th>Komentar</th><th>ID objave</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : activeModule === "reports" ? <><th>Razlog</th><th>Status</th><th>ID objave</th><th>Zaprimljeno</th><th>Radnje</th></> : activeModule === "forum" ? <><th>Naslov teme</th><th>Početna poruka</th><th>ID autora</th><th>Status</th><th>Datum</th></> : <><th>Stranica</th><th>Kategorija</th><th>Opis</th><th>ID osnivača</th><th>Datum</th></>}</tr></thead>
                   <tbody>
                     {filteredRows.map(row => <tr key={row.id}>
                       {activeModule === "members" ? (
                         <><td><strong>{row.display_name || "Čuvar nasljeđa"}</strong></td><td>{row.username ? "@" + row.username : "—"}</td><td><code>{row.id}</code></td><td>{dateLabel(row.created_at)}</td></>
                       ) : activeModule === "posts" ? (
                         <><td className="admin-post-body">{row.body || "Objava bez teksta"}</td><td><code>{row.author_id}</code></td><td>{dateLabel(row.created_at)}</td><td><button className="admin-row-action danger" type="button" onClick={() => deletePost(row)}>Ukloni</button></td></>
+                      ) : activeModule === "comments" ? (
+                        <><td className="admin-post-body">{row.body || "Komentar bez teksta"}</td><td><code>{row.post_id}</code></td><td><code>{row.author_id}</code></td><td>{dateLabel(row.created_at)}</td><td><button className="admin-row-action danger" type="button" onClick={() => deleteComment(row)}>Ukloni</button></td></>
                       ) : activeModule === "reports" ? (
                         <><td><strong>{row.reason || "Drugi razlog"}</strong>{row.details && <p className="admin-report-details">{row.details}</p>}</td><td><span className={"admin-status status-" + row.status}>{({ pending: "Na čekanju", reviewed: "Pregledano", dismissed: "Odbijeno", actioned: "Obrađeno" })[row.status] || row.status}</span></td><td><code>{row.post_id || "—"}</code></td><td>{dateLabel(row.created_at)}</td><td><div className="admin-row-actions"><button className="admin-row-action" type="button" onClick={() => setReportStatus(row, "reviewed")}>Pregledano</button><button className="admin-row-action" type="button" onClick={() => setReportStatus(row, "dismissed")}>Odbaci</button>{row.post_id && <button className="admin-row-action danger" type="button" onClick={() => deleteReportedPost(row)}>Ukloni objavu</button>}</div></td></>
                       ) : activeModule === "forum" ? (
