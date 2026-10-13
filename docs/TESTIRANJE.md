@@ -44,5 +44,13 @@ Ovaj popis služi za završnu provjeru testne verzije. Označi stavku tek nakon 
 - [ ] Nakon uklanjanja sadržaja nema JavaScript pogrešaka ni pokvarenih prikaza.
 - [ ] Testirati na mobitelu i računalu.
 
+## PatriaSoul kviz — preduvjeti povezivanja administracije
+- [ ] Otvoriti ugrađeni kviz na `/kviz/` i provjeriti prijavu/zajedničku sesiju.
+- [ ] U testnoj bazi potvrditi da postoje tablice `quiz_questions` i `quiz_results` te javni prikaz pitanja `quiz_questions_public`.
+- [ ] Provjeriti da su postavljene potrebne funkcije: `record_quiz_result`, `get_leaderboard`, `admin_dashboard_stats`, `admin_list_users`, `admin_list_quiz_results` i `admin_delete_quiz_result`.
+- [ ] Uskladiti polja profila koja očekuje kviz (`role`, `avatar_url`) s društvenom shemom bez otkrivanja privatnih podataka.
+- [ ] Potvrditi da su administratorske funkcije zaštićene na strani baze i odbijaju poziv običnog prijavljenog člana.
+- [ ] Tek nakon uspješnih testova uključiti stvarne statistike i moderaciju rezultata u administratorskom modulu.
+
 ## Važno
 Uspješan GitHub Actions build potvrđuje da se projekt izgradio, ali ne potvrđuje automatski sve tokove prijave, pohrane i RLS pravila. Za svaku stavku potrebno je stvarno testiranje u pregledniku s najmanje dva testna računa.
