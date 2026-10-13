@@ -80,7 +80,7 @@ function FaithSidebar() {
 }
 
 function App() {
-  const [posts, setPosts] = useState(initialPosts);
+  const [posts, setPosts] = useState([]);
   const [draft, setDraft] = useState("");
   const [activeNav, setActiveNav] = useState("Zid zajednice");
   const [liked, setLiked] = useState([]);
