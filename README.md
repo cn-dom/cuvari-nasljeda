@@ -2,54 +2,53 @@
 
 **Društvena mreža hrvatskog zajedništva — besplatna i nekomercijalna.**
 
-PatriaSoul – Čuvari nasljeđa zamišljena je kao mjesto za povezivanje ljudi kroz hrvatsku povijest, baštinu, kulturu, vjeru, znanje i zajedništvo.
+PatriaSoul – Čuvari nasljeđa mjesto je za povezivanje ljudi kroz hrvatsku povijest, baštinu, kulturu, vjeru, znanje i zajedništvo.
 
-## Smjer projekta
+## Tehnički temelj
 
-Gradimo vlastitu društvenu mrežu, ne preuzimamo jednu tuđu platformu kao cjelinu. Vizualni identitet i dizajnerske uzorke prilagođavamo iz vlastitog [PatriaSoul repozitorija](https://github.com/cn-dom/ps), a pojedine funkcije ili komponente biramo iz drugih projekata tek nakon provjere koda, licence, sigurnosti i kompatibilnosti.
+- **Frontend:** React + Vite; društveni zid i kviz grade se u istom repozitoriju.
+- **Hosting:** Cloudflare Workers / static assets iz `dist`.
+- **Prijava i podaci:** Supabase Auth, PostgreSQL i Storage.
+- **Vizualni identitet:** PatriaSoul boje, logo i hrvatski motivi, prilagođeni mobilnim uređajima.
+- **Emoji:** Emoji Mart.
 
-- **Frontend i vizualni identitet:** PatriaSoul dizajn, prilagođen za društvenu mrežu i mobilne uređaje.
-- **Hosting i aplikacijska logika:** Cloudflare Pages / Workers, ovisno o funkciji.
-- **Prijava i podaci:** Supabase Auth, PostgreSQL, Storage i Realtime gdje je potrebno.
-- **Razvoj:** postupno, na zasebnim granama i u odvojenom testnom okruženju.
+## Funkcije koje već imaju implementaciju u kodu
 
-Projekt je zamišljen kao besplatna i nekomercijalna usluga bez oglasa, pretplata, naplate članstva ili drugih izvora prihoda.
+Glavna aplikacija sadrži sučelje i logiku za više dijelova zajednice, uključujući:
 
-## Planirane funkcije
+- registraciju/prijavu i učitavanje sesije;
+- profil člana;
+- zid, objave, komentare i reakcije;
+- fotografije objava preko Supabase Storagea;
+- označavanje članova, pretraživanje i Emoji Mart;
+- blokiranje i prijavu objava;
+- privatne i grupne poruke te obavijesti;
+- vremenski pregled i dnevni vjerski sadržaj;
+- integrirani kviz pod putanjom `/kviz/`.
 
-- Registracija, prijava, profili članova i postavke privatnosti.
-- Zid zajednice: objave s tekstom i fotografijama, komentari i reakcije.
-- Emoji picker i označavanje članova u objavama i komentarima.
-- Grupe, stranice, događaji i kalendar.
-- Dijeljenje PatriaSoul kvizova i rezultata na zidu.
-- Privatne poruke i obavijesti.
-- Pretraživanje članova i sadržaja.
-- Prijava neprimjerenog sadržaja, blokiranje članova i administratorsko moderiranje.
-- Članovi mogu uređivati i brisati vlastite objave, fotografije i komentare.
+**Napomena:** postojanje koda nije dokaz da je svaka funkcija već ispravno povezana s produkcijskom bazom ili provjerena u stvarnom pregledniku. Za svaku se funkciju moraju potvrditi tablice, RLS, Storage i ponašanje nakon osvježavanja stranice.
 
-Navedeno su ciljevi prilagodbe, a ne tvrdnja da su funkcije već implementirane.
+## Prioritet prije daljnjeg razvoja
 
-## Licenciranje i autorstvo
+Društveni dio i kviz trenutačno se oslanjaju na isti Supabase klijent (`src/lib/supabase.js`), pa moraju koristiti isti Supabase projekt. Pregled dostupnih projekata pokazao je da su podaci kviza i društvene tablice raspoređeni između dvaju postojećih projekata. Prije spajanja ili promjene sheme treba odabrati kanonski projekt i napraviti plan koji čuva postojeće podatke. Detalji su u [tehničkoj provjeri](./docs/STATUS-TEHNICKE-PROVJERE.md).
 
-Svaki vanjski projekt ili komponenta mora imati zasebno provjerenu licencu. Za preuzete dijelove bilježit ćemo izvor, verziju, licencu, obvezne napomene i vlastite izmjene. Nećemo kopirati komponente ako njihovi uvjeti nisu jasni ili nisu kompatibilni s projektom.
+## Razvoj i sigurnost
 
-[OpenSourceCommunity Non-Commercial License](./licenses/OPEN-SOURCE-COMMUNITY-NON-COMMERCIAL-LICENSE.txt) spremljena je kao evidencija licence jednog ranije razmatranog kandidata; **nije odabrana kao licenca cijelog PatriaSoul projekta**. Kandidatski aplikacijski kod nije uvezen. Vlastitu licencu projekta odredit ćemo nakon što se razdvoje vlastiti dijelovi i licence stvarno odabranih ovisnosti.
-
-## Sigurnost
-
-- Za testiranje koristiti isključivo zaseban Supabase projekt.
-- Ne povezivati razvojnu aplikaciju s postojećim PatriaSoul bazama tijekom početnog razvoja.
-- Ne pokretati migracije, `db:push` ili seed nad postojećim bazama.
-- Ne spremati API ključeve, tokene ni druge tajne u repozitorij.
-- Provjeriti RLS, autentikaciju, uloge, CORS, pohranu fotografija i moderiranje.
-- U pregledniku koristiti samo javni/publishable Supabase ključ; tajne ostaju u sigurnim Cloudflare secrets.
+- Ne izlagati `service_role` ili tajne ključeve u pregledniku ili `VITE_*` varijablama.
+- Provjeriti RLS na svim tablicama koje aplikacija izlaže.
+- Provjeriti autorizaciju za administrativne RPC funkcije i grupne razgovore.
+- Ne pokretati migracije nad postojećom bazom bez potvrđenog ciljnog projekta i pregleda SQL-a.
+- Testirati s anonimnim korisnikom i najmanje dva različita računa.
+- Pokrenuti build i funkcionalne provjere prije svakog produkcijskog deploya.
 
 ## Dokumentacija
 
 - [Arhitektura i fazni plan](./docs/ARHITEKTURA-I-PLAN.md)
+- [Plan povezivanja kviza](./docs/INTEGRACIJA-KVIZA.md)
+- [Plan Supabase modela](./docs/PLAN-SUPABASE.md)
+- [Tehnička provjera aktualnog stanja](./docs/STATUS-TEHNICKE-PROVJERE.md)
 - [Pregled kandidatskog projekta OpenSourceCommunity](./docs/PROVJERA-IZVORA.md)
-- [Evidencija licence kandidata](./licenses/OPEN-SOURCE-COMMUNITY-NON-COMMERCIAL-LICENSE.txt)
 
-## Status
+## Trenutačni status
 
-Trenutačno su pripremljeni dokumentacija i razvojna grana. Aplikacijski kod društvene mreže još nije implementiran, testiran ni objavljen.
+GitHub Actions produkcijska izgradnja prošla je na commitu `1dc926c` (13. listopada 2026.). To potvrđuje da se frontend i kviz mogu izgraditi, ali ne potvrđuje da je aplikacija ispravno konfigurirana u Cloudflareu niti da sve Supabase funkcije rade. Sljedeći korak je uskladiti jedinstvenu bazu za kviz i društvenu mrežu, zatim testirati zid, profile, Storage, poruke i prava pristupa.
