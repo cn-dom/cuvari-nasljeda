@@ -142,6 +142,29 @@ export default function Admin() {
     setGroupMembersBusy(false);
   }
 
+  async function removeGroupMember(member) {
+    if (!selectedGroup) return;
+    if (member.role === "admin" || member.user_id === selectedGroup.created_by) {
+      setGroupMembersError("Administratori i osnivač zaštićeni su ovom radnjom.");
+      return;
+    }
+    if (!window.confirm("Ukloniti " + (member.display_name || "ovog člana") + " iz grupe „" + selectedGroup.name + "“? Povijest poruka neće se prikazivati ovdje.")) return;
+    const { data, error: removeError } = await supabase.rpc("admin_remove_group_chat_member", {
+      p_group_id: selectedGroup.group_id || selectedGroup.id,
+      p_user_id: member.user_id,
+    });
+    if (removeError || data !== true) {
+      setGroupMembersError("Člana nije moguće ukloniti. Provjeri ulogu i vlasnička pravila baze.");
+      return;
+    }
+    setGroupMembers(current => current.filter(item => item.user_id !== member.user_id));
+    setRows(current => current.map(item => item.id === (selectedGroup.group_id || selectedGroup.id)
+      ? { ...item, member_count: Math.max(0, Number(item.member_count || 0) - 1) }
+      : item));
+    setSelectedGroup(current => current ? { ...current, member_count: Math.max(0, Number(current.member_count || 0) - 1) } : current);
+    setNotice("Član je uklonjen iz grupe.");
+  }
+
   async function setReportStatus(row, status) {
     const { data, error: updateError } = await supabase.from("content_reports").update({ status }).eq("id", row.id).select("id,status").maybeSingle();
     if (updateError || !data) { setNotice("Promjena nije spremljena. Provjeri vlasnička pravila baze."); return; }
@@ -277,8 +300,8 @@ export default function Admin() {
                 <button className="admin-button secondary" type="button" onClick={() => setSelectedGroup(null)}>Zatvori</button>
               </div>
               {groupMembersBusy ? <p className="admin-empty">Učitavam članove…</p> : groupMembersError ? <p className="admin-error">{groupMembersError}</p> : groupMembers.length ? (
-                <div className="admin-table-scroll"><table className="admin-table"><thead><tr><th>Član</th><th>Korisničko ime</th><th>ID računa</th><th>Uloga</th><th>Pridružio se</th></tr></thead><tbody>
-                  {groupMembers.map(member => <tr key={member.user_id}><td><strong>{member.display_name || "Čuvar nasljeđa"}</strong></td><td>{member.username ? "@" + member.username : "—"}</td><td><code>{member.user_id}</code></td><td><span className="admin-status">{member.role || "član"}</span></td><td>{dateLabel(member.joined_at)}</td></tr>)}
+                <div className="admin-table-scroll"><table className="admin-table"><thead><tr><th>Član</th><th>Korisničko ime</th><th>ID računa</th><th>Uloga</th><th>Pridružio se</th><th>Radnja</th></tr></thead><tbody>
+                  {groupMembers.map(member => <tr key={member.user_id}><td><strong>{member.display_name || "Čuvar nasljeđa"}</strong></td><td>{member.username ? "@" + member.username : "—"}</td><td><code>{member.user_id}</code></td><td><span className="admin-status">{member.role || "član"}</span></td><td>{dateLabel(member.joined_at)}</td><td>{member.role === "admin" || member.user_id === selectedGroup.created_by ? <span className="admin-report-details">Zaštićen račun</span> : <button className="admin-row-action danger" type="button" onClick={() => removeGroupMember(member)}>Ukloni iz grupe</button>}</td></tr>)}
                 </tbody></table></div>
               ) : <p className="admin-empty">Ova grupa trenutačno nema članova.</p>}
             </section>
