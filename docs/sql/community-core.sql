@@ -59,43 +59,58 @@ alter table public.comments enable row level security;
 alter table public.post_reactions enable row level security;
 
 -- Public community profiles are readable; only the owner may create/update their own profile.
+drop policy if exists "profiles_select_public" on public.profiles;
 create policy "profiles_select_public" on public.profiles
   for select to anon, authenticated using (true);
+drop policy if exists "profiles_insert_own" on public.profiles;
 create policy "profiles_insert_own" on public.profiles
   for insert to authenticated with check (id = (select auth.uid()));
+drop policy if exists "profiles_update_own" on public.profiles;
 create policy "profiles_update_own" on public.profiles
   for update to authenticated using (id = (select auth.uid()))
   with check (id = (select auth.uid()));
 
--- Community posts can be read by signed-in members; only the author may write or delete.
+-- Community posts are publicly readable; only the author may write or delete.
+drop policy if exists "posts_select_public" on public.posts;
 create policy "posts_select_public" on public.posts
   for select to anon, authenticated using (true);
+drop policy if exists "posts_insert_own" on public.posts;
 create policy "posts_insert_own" on public.posts
   for insert to authenticated with check (author_id = (select auth.uid()));
+drop policy if exists "posts_update_own" on public.posts;
 create policy "posts_update_own" on public.posts
   for update to authenticated using (author_id = (select auth.uid()))
   with check (author_id = (select auth.uid()));
+drop policy if exists "posts_delete_own" on public.posts;
 create policy "posts_delete_own" on public.posts
   for delete to authenticated using (author_id = (select auth.uid()));
 
--- Comments are readable to members; insert/update/delete are restricted to the author.
+-- Comments are publicly readable; insert/update/delete are restricted to the author.
+drop policy if exists "comments_select_public" on public.comments;
 create policy "comments_select_public" on public.comments
   for select to anon, authenticated using (true);
+drop policy if exists "comments_insert_own" on public.comments;
 create policy "comments_insert_own" on public.comments
   for insert to authenticated with check (author_id = (select auth.uid()));
+drop policy if exists "comments_update_own" on public.comments;
 create policy "comments_update_own" on public.comments
   for update to authenticated using (author_id = (select auth.uid()))
   with check (author_id = (select auth.uid()));
+drop policy if exists "comments_delete_own" on public.comments;
 create policy "comments_delete_own" on public.comments
   for delete to authenticated using (author_id = (select auth.uid()));
 
+drop policy if exists "post_reactions_select_authenticated" on public.post_reactions;
 create policy "post_reactions_select_authenticated" on public.post_reactions
   for select to authenticated using (true);
+drop policy if exists "post_reactions_insert_own" on public.post_reactions;
 create policy "post_reactions_insert_own" on public.post_reactions
   for insert to authenticated with check (user_id = (select auth.uid()));
+drop policy if exists "post_reactions_update_own" on public.post_reactions;
 create policy "post_reactions_update_own" on public.post_reactions
   for update to authenticated using (user_id = (select auth.uid()))
   with check (user_id = (select auth.uid()));
+drop policy if exists "post_reactions_delete_own" on public.post_reactions;
 create policy "post_reactions_delete_own" on public.post_reactions
   for delete to authenticated using (user_id = (select auth.uid()));
 
@@ -159,13 +174,16 @@ create index if not exists blocked_users_blocked_id_idx
 alter table public.blocked_users enable row level security;
 
 -- A member can view only their own block list, add blocks, and remove their own blocks.
+drop policy if exists "blocked_users_select_own" on public.blocked_users;
 create policy "blocked_users_select_own" on public.blocked_users
   for select to authenticated using (blocker_id = (select auth.uid()));
+drop policy if exists "blocked_users_insert_own" on public.blocked_users;
 create policy "blocked_users_insert_own" on public.blocked_users
   for insert to authenticated with check (
     blocker_id = (select auth.uid())
     and blocked_id <> (select auth.uid())
   );
+drop policy if exists "blocked_users_delete_own" on public.blocked_users;
 create policy "blocked_users_delete_own" on public.blocked_users
   for delete to authenticated using (blocker_id = (select auth.uid()));
 
@@ -187,6 +205,7 @@ create index if not exists content_reports_post_idx
 
 alter table public.content_reports enable row level security;
 
+drop policy if exists "content_reports_insert_own" on public.content_reports;
 create policy "content_reports_insert_own" on public.content_reports
   for insert to authenticated
   with check (reporter_id = (select auth.uid()));
