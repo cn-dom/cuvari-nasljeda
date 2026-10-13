@@ -367,6 +367,10 @@ function App() {
             });
           });
           setCommentsByPost(grouped);
+          setPosts((current) => current.map((post) => ({
+            ...post,
+            comments: (grouped[post.id] || []).length,
+          })));
           setNotice("");
         }
       } else {
