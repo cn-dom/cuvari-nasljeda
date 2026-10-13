@@ -14,7 +14,7 @@ Ovo je kontrolni popis za odvojeni razvojni/testni Supabase projekt. **Ne predst
 
 | Test | Očekivani rezultat |
 | --- | --- |
-| Neprijavljeni korisnik čita profile/objave/komentare | Nema pristupa kroz politike za `authenticated`. |
+| Neprijavljeni korisnik čita javne profile, objave, komentare i broj reakcija | Čitanje je dopušteno; anonimni korisnik ne smije umetati, mijenjati ni brisati sadržaj. |
 | Član A stvara profil/objavu/komentar/reakciju s vlastitim ID-jem | Dopušteno uz ispravne podatke i postojeći profil. |
 | Član A šalje tuđi ID kao `author_id` ili `user_id` | Odbijeno pravilima RLS. |
 | Član A pokušava urediti ili obrisati objavu/komentar člana B | Odbijeno; zapis člana B ostaje nepromijenjen. |
@@ -29,7 +29,7 @@ Ovo je kontrolni popis za odvojeni razvojni/testni Supabase projekt. **Ne predst
 | Član A učitava dopuštenu sliku u `<A-UUID>/...` | Dopušteno ako je datoteka valjana. |
 | Član A učitava u mapu člana B | Odbijeno pravilom vlasništva. |
 | Član A mijenja ili briše objekt člana B | Odbijeno pravilom vlasništva. |
-| Neprijavljeni korisnik čita/učitava objekt privatnog bucketa | Odbijeno. |
+| Neprijavljeni korisnik traži potpisani URL za sliku javne objave | Dopušteno samo za namjenski bucket `community-images`; anonimni upload, izmjena i brisanje ostaju zabranjeni. Privatne slike ne smiju se pohranjivati u taj bucket. |
 | Datoteka je veća od 5 MB ili ima nepodržani MIME tip | Storage treba odbiti upload prema konfiguraciji bucketa. |
 | Datoteka ima lažnu ekstenziju ili MIME zaglavlje | Aplikacijska/poslužiteljska provjera mora je odbiti; MIME postavka sama po sebi nije dokaz stvarnog formata. |
 | Pokušaj zamjene objekta postojećim nazivom | Mora proći pravilo vlasništva i provjeru dopuštenih operacija; testirati ponašanje upsert-a zasebno. |
