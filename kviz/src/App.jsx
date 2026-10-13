@@ -961,7 +961,7 @@ export default function App() {
     <div className="relative z-20 border-b border-white/10 bg-[#071426] text-white shadow-lg">
       <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <a href="/" className="flex min-w-0 items-center gap-3 rounded-xl outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-amber-300" aria-label="Povratak na Čuvare nasljeđa">
-          <img src="/assets/images/patriasoul-logo.jpg" alt="PatriaSoul" className="h-10 w-10 shrink-0 rounded-xl object-cover ring-1 ring-white/15" />
+          <img src="/assets/images/1000000982.png" alt="PatriaSoul — Čuvari nasljeđa" className="h-10 w-10 shrink-0 rounded-xl object-contain ring-1 ring-white/15" />
           <span className="min-w-0"><span className="block text-[10px] font-extrabold uppercase tracking-[.2em] text-amber-300">PatriaSoul</span><span className="block truncate text-sm font-bold sm:text-base">Čuvari nasljeđa <span className="font-medium text-white/55">/ Kviz</span></span></span>
         </a>
         <a href="/" className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/15 bg-white/[.06] px-3 py-2 text-xs font-bold transition hover:border-amber-300/60 hover:bg-white/10 sm:px-4 sm:text-sm"><ArrowLeft className="h-4 w-4" /><span className="hidden sm:inline">Natrag na mrežu</span><span className="sm:hidden">Mreža</span></a>
@@ -1512,6 +1512,20 @@ export default function App() {
       {error && <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</div>}
       {loadingLeaderboard ? <div className="flex items-center justify-center gap-2 py-20 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" /> Učitavam rang-listu...</div> : leaderboard.length === 0 ? <div className="patria-card p-10 text-center"><Medal className="mx-auto h-10 w-10 text-accent" /><h2 className="mt-4 text-2xl font-bold">Još nema rezultata</h2><p className="mt-2 text-muted-foreground">Prvi spremljeni rezultati pojavit će se ovdje.</p></div> : <div className="overflow-hidden rounded-xl border border-border bg-card"><div className="grid grid-cols-[48px_1fr_90px_110px] gap-3 border-b border-border bg-secondary/60 px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground"><span>#</span><span>Igrač</span><span>Najbolje</span><span>Odigrano</span></div>{leaderboard.map((player, index) => <div key={`${player.display_name}-${index}`} className="grid grid-cols-[48px_1fr_90px_110px] items-center gap-3 border-b border-border px-4 py-4 last:border-0"><span className="font-bold text-muted-foreground">{index + 1}</span><div><p className="font-semibold">{player.display_name}</p><p className="text-xs text-muted-foreground">Prosjek {Number(player.average_percentage).toFixed(1)}%</p></div><span className="font-bold text-accent">{Number(player.best_percentage).toFixed(0)}%</span><span className="text-sm">{player.quizzes_played}</span></div>)}</div>}
     </main>}
+
+    <footer className="border-t border-white/10 bg-[#071426] text-white">
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row sm:px-6">
+        <a href="/" className="flex items-center gap-3 transition hover:opacity-90" aria-label="Čuvari nasljeđa — početna">
+          <img src="/assets/images/1000000982.png" alt="PatriaSoul" className="h-12 w-12 rounded-xl object-contain ring-1 ring-white/15" />
+          <span><span className="block text-sm font-extrabold tracking-wide">PATRiASOUL</span><span className="mt-1 block text-xs text-white/65">Čuvari nasljeđa · Znanje. Ponos. Nasljeđe.</span></span>
+        </a>
+        <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-white/65">
+          <a href="./about.html" className="hover:text-white">O PatriaSoul</a>
+          <a href="./contact.html" className="hover:text-white">Kontakt</a>
+          <a href="/" className="hover:text-white">Natrag na mrežu</a>
+        </div>
+      </div>
+    </footer>
 
   </div>;
 }
