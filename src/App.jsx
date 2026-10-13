@@ -1716,7 +1716,7 @@ function App() {
             {navItems.filter((item) => item.label === "Događaji").map((item) => <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => setActiveNav(item.label)}><span className="side-icon">{item.icon}</span><span className="side-link-label">{item.label}</span><span className="side-count">Uskoro</span></button>)}
           </section>
 
-          {isOwner && <section className="side-section sidebar-nav-section owner-admin-nav"><h3>VLASNIK MREŽE</h3><button type="button" className={activeNav === "Administracija" ? "side-link selected" : "side-link"} onClick={() => setActiveNav("Administracija")}><span className="side-icon">⚙</span><span className="side-link-label">Administracija</span><span className="owner-admin-badge">VLASNIK</span></button></section>}
+          {isOwner && <section className="side-section sidebar-nav-section owner-admin-nav"><h3>VLASNIK MREŽE</h3><button type="button" className={activeNav === "Administracija" ? "side-link selected" : "side-link"} onClick={() => { window.location.href = "/administracija.html"; }}><span className="side-icon">⚙</span><span className="side-link-label">Administracija</span><span className="owner-admin-badge">VLASNIK</span></button></section>}
 
           {session && blockedMembers.length > 0 && (
             <section className="side-section blocked-members-section">
