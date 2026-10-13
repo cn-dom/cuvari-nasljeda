@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 import "./community-sections.css";
 
-const displayName = (profile) => profile?.display_name || profile?.username || "Čuvar nasljeđa";
+const normalizeUsername = (value) => String(value || "").trim().replace(/^@/, "").toLowerCase();
+const displayName = (profile) => profile?.display_name || normalizeUsername(profile?.username) || "Čuvar nasljeđa";
 const dateLabel = (value) => value ? new Date(value).toLocaleString("hr-HR", { weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
 
 export default function Events() {
