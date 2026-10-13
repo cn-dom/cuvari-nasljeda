@@ -2348,13 +2348,13 @@ function App() {
         <aside className="right-sidebar">
           <section className="right-card card">
             <div className="right-card-title"><h3>U FOKUSU</h3><span>✦</span></div>
-            <a href="#nasljede" className="focus-link" onClick={(event) => { event.preventDefault(); setNotice("Tematske zbirke priča bit će dodane kao posebna funkcija."); }}>
+            <a href="/stranice.html" className="focus-link">
               <span className="focus-icon red">⌂</span><span><strong>Obiteljske priče</strong><small>Uspomene koje se prenose generacijama</small></span><b>›</b>
             </a>
-            <a href="#povijest" className="focus-link" onClick={(event) => { event.preventDefault(); setNotice("Povijesne teme bit će povezane s PatriaSoul člancima i kvizovima."); }}>
+            <a href="/kviz/" className="focus-link">
               <span className="focus-icon blue">▤</span><span><strong>Povijest i baština</strong><small>Znanje, izvori i lokalne priče</small></span><b>›</b>
             </a>
-            <a href="#domovina" className="focus-link" onClick={(event) => { event.preventDefault(); setNotice("Zbirke hrvatskih krajeva bit će dodane u daljnjoj fazi."); }}>
+            <a href="/forum.html" className="focus-link">
               <span className="focus-icon gold">✥</span><span><strong>Naši krajevi</strong><small>Mjesta, običaji i ljudi</small></span><b>›</b>
             </a>
           </section>
