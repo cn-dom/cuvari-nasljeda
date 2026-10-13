@@ -2315,7 +2315,7 @@ function App() {
               )}
               <div className="post-metrics">
                 <span>♥ {post.likes} podrške</span>
-                <span>{post.comments + (commentsByPost[post.id] || []).length} komentara</span>
+                <span>{post.comments || 0} komentara</span>
               </div>
               <div className="post-reactions" aria-label="Reakcije na objavu">
                 {[
