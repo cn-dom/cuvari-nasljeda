@@ -109,3 +109,21 @@ Zato se trenutačno **ne preporučuje automatski prijenos cijele baze niti promj
 - Nakon potvrde ciljnog projekta ažurirati varijable za build/deploy i testirati prijavu, kviz, objave, komentare, reakcije, fotografije, privatne i grupne poruke.
 
 Ova dodatna provjera bila je samo čitanje metapodataka i popisa migracija. Nije izvršena nijedna DDL/DML promjena u Supabaseu niti je promijenjena Cloudflare konfiguracija.
+
+
+### Usporedba profila i privatnih poruka
+
+Dodatno je potvrđeno da se razlike odnose i na stupce, ne samo na nazive tablica:
+
+- U `Patriasoul's Project`, `profiles` sadrži `username`, `display_name`, `bio` i `avatar_path`.
+- U projektu `kviz`, `profiles` sadrži `display_name`, `role` i `avatar_url`; ne sadrži iste profile stupce kao društvena jezgra.
+- U `Patriasoul's Project`, `private_messages` koristi `sender_id`, `recipient_id`, `body` i opcionalni `reply_to_id`.
+- U projektu `kviz`, `private_messages` koristi `conversation_id`, `sender_id` i `body`, a sudionici razgovora pohranjeni su u zasebnim tablicama.
+
+Zato migracija mora biti **prilagodba modela i aplikacijskih upita**, a ne puko kopiranje SQL datoteke. Ne smijemo pretpostaviti da su `profiles` ili privatne poruke kompatibilne samo zato što imaju isti naziv.
+
+URL-ovi dvaju projekata potvrđeni su iz Supabase upravljačkog sučelja:
+- `Patriasoul's Project`: `https://azerctpwfzdivydsxyex.supabase.co`
+- `kviz`: `https://ijimozjfdffejbczwyzb.supabase.co`
+
+To **ne potvrđuje** koji je od njih ugrađen u trenutačno objavljeni Cloudflare build; to se mora provjeriti zasebno prije prebacivanja prometa.
