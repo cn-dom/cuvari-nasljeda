@@ -32,6 +32,8 @@ export default function Admin() {
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
   const [dbStatus, setDbStatus] = useState("provjera");
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [reportStatusFilter, setReportStatusFilter] = useState("all");
 
   useEffect(() => {
     if (!supabase) { setAuthReady(true); return undefined; }
@@ -58,14 +60,22 @@ export default function Admin() {
         const results = await Promise.all([
           supabase.from("profiles").select("id", { count: "exact", head: true }),
           supabase.from("posts").select("id", { count: "exact", head: true }),
-          supabase.from("content_reports").select("id, status", { count: "exact" }),
+          supabase.from("comments").select("id", { count: "exact", head: true }),
+          supabase.from("content_reports").select("id", { count: "exact", head: true }).eq("status", "pending"),
+          supabase.from("community_events").select("id", { count: "exact", head: true }).eq("status", "published").gte("starts_at", new Date().toISOString()),
+          supabase.from("forum_topics").select("id", { count: "exact", head: true }),
+          supabase.from("community_pages").select("id", { count: "exact", head: true }),
         ]);
         if (!cancelled) {
           setDbStatus(results.some((result) => result.error) ? "greska" : "povezano");
           setRows([
-            { id: "members-count", title: "Članovi profila", value: results[0].count ?? "—", detail: results[0].error ? "Tablica ili prava nisu dostupni" : "Ukupno profila" },
-            { id: "posts-count", title: "Objave", value: results[1].count ?? "—", detail: results[1].error ? "Tablica ili prava nisu dostupni" : "Ukupno objava" },
-            { id: "reports-count", title: "Prijave sadržaja", value: results[2].count ?? "—", detail: results[2].error ? "Tablica ili prava nisu dostupni" : "Zaprimljene prijave" },
+            { id: "members-count", title: "Članovi mreže", value: results[0].count ?? "—", detail: results[0].error ? "Podaci ili prava nisu dostupni" : "Ukupno profila" },
+            { id: "posts-count", title: "Objave na zidu", value: results[1].count ?? "—", detail: results[1].error ? "Podaci ili prava nisu dostupni" : "Ukupno objava" },
+            { id: "comments-count", title: "Komentari", value: results[2].count ?? "—", detail: results[2].error ? "Podaci ili prava nisu dostupni" : "Ukupno komentara" },
+            { id: "reports-count", title: "Otvorene prijave", value: results[3].count ?? "—", detail: results[3].error ? "Podaci ili prava nisu dostupni" : "Čekaju pregled moderatora" },
+            { id: "events-count", title: "Budući događaji", value: results[4].count ?? "—", detail: results[4].error ? "Podaci ili prava nisu dostupni" : "Objavljeni događaji koji tek dolaze" },
+            { id: "forum-count", title: "Forum teme", value: results[5].count ?? "—", detail: results[5].error ? "Podaci ili prava nisu dostupni" : "Ukupno tema" },
+            { id: "pages-count", title: "Stranice zajednice", value: results[6].count ?? "—", detail: results[6].error ? "Podaci ili prava nisu dostupni" : "Ukupno stranica" },
           ]);
           setBusy(false);
         }
@@ -97,7 +107,7 @@ export default function Admin() {
     }
     loadModule();
     return () => { cancelled = true; };
-  }, [activeModule, isOwner]);
+  }, [activeModule, isOwner, refreshKey]);
 
   async function setReportStatus(row, status) {
     const { data, error: updateError } = await supabase.from("content_reports").update({ status }).eq("id", row.id).select("id,status").maybeSingle();
@@ -146,7 +156,11 @@ export default function Admin() {
   }
 
   const current = modules.find(item => item.id === activeModule) || modules[0];
-  const filteredRows = rows.filter(row => JSON.stringify(row).toLowerCase().includes(query.toLowerCase()));
+  const filteredRows = rows.filter(row => {
+    const matchesQuery = JSON.stringify(row).toLowerCase().includes(query.toLowerCase());
+    const matchesReportStatus = activeModule !== "reports" || reportStatusFilter === "all" || row.status === reportStatusFilter;
+    return matchesQuery && matchesReportStatus;
+  });
 
   if (!authReady) return <main className="admin-page"><div className="admin-loading">Provjeravam pristup vlasnika…</div></main>;
   if (!isOwner) return <main className="admin-page"><section className="admin-access-denied"><span className="admin-eyebrow">PATRiASOUL · SIGURNOST</span><h1>Pristup odbijen</h1><p>Ova stranica dostupna je samo vlasniku mreže.</p><a className="admin-button" href="/">Povratak na mrežu</a></section></main>;
@@ -157,9 +171,9 @@ export default function Admin() {
       <div className="admin-top-actions"><span className="admin-owner-pill">✓ VLASNIK</span><span className="admin-owner-email">{session?.user?.email}</span><a href="/" className="admin-back-link">← Povratak na mrežu</a></div>
     </header>
     <div className="admin-layout">
-      <aside className="admin-sidebar"><span className="admin-eyebrow">UPRAVLJANJE MREŽOM</span><h2>Administracija</h2><p>Odaberi jednu stavku. Detalji se otvaraju u radnom prostoru, bez gomilanja sadržaja na jednoj stranici.</p><div className="admin-side-nav">{modules.map(item => <button key={item.id} type="button" onClick={() => { setActiveModule(item.id); setQuery(""); }} className={activeModule === item.id ? "selected" : ""}><span>{item.icon}</span><span>{item.title}</span><small>{item.status === "Sljedeća faza" ? "U pripremi" : "Otvori"}</small></button>)}</div><div className="admin-sidebar-foot">Prijavljen vlasnik<br/><strong>{session?.user?.email}</strong></div></aside>
+      <aside className="admin-sidebar"><span className="admin-eyebrow">UPRAVLJANJE MREŽOM</span><h2>Administracija</h2><p>Odaberi jednu stavku. Detalji se otvaraju u radnom prostoru, bez gomilanja sadržaja na jednoj stranici.</p><div className="admin-side-nav">{modules.map(item => <button key={item.id} type="button" onClick={() => { setActiveModule(item.id); setQuery(""); setReportStatusFilter("all"); }} className={activeModule === item.id ? "selected" : ""}><span>{item.icon}</span><span>{item.title}</span><small>{item.status === "Sljedeća faza" ? "U pripremi" : "Otvori"}</small></button>)}</div><div className="admin-sidebar-foot">Prijavljen vlasnik<br/><strong>{session?.user?.email}</strong></div></aside>
       <section className="admin-workspace">
-        <div className="admin-page-heading"><div><span className="admin-eyebrow">{current.group}</span><h1>{current.title}</h1><p>{current.description}</p></div><button type="button" className="admin-button secondary" onClick={() => { setActiveModule("overview"); setQuery(""); }}>Pregled sustava</button></div>
+        <div className="admin-page-heading"><div><span className="admin-eyebrow">{current.group}</span><h1>{current.title}</h1><p>{current.description}</p></div><div className="admin-heading-actions"><button type="button" className="admin-button secondary" onClick={() => setRefreshKey(value => value + 1)}>↻ Osvježi</button><button type="button" className="admin-button secondary" onClick={() => { setActiveModule("overview"); setQuery(""); setReportStatusFilter("all"); }}>Pregled sustava</button></div></div>
         {notice && <div className="admin-notice" role="status">{notice}<button type="button" onClick={() => setNotice("")} aria-label="Zatvori poruku">×</button></div>}
         {activeModule === "members" && <div className="admin-notice" role="note">Ovaj modul trenutačno omogućuje siguran pregled i pretraživanje profila. Zaključavanje ili brisanje korisničkog računa nije aktivirano jer to mora prolaziti kroz provjereni poslužiteljski postupak, a ne samo kroz sučelje preglednika.</div>}
         {activeModule === "overview" ? (
@@ -179,7 +193,10 @@ export default function Admin() {
           <section className="admin-table-card">
             <div className="admin-table-heading">
               <div><h2>{current.title}</h2><p>{rows.length} zapisa učitano · najviše 200 prikazanih</p></div>
-              <label className="admin-search"><span>⌕</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Pretraži tablicu…" /></label>
+              <div className="admin-table-tools">
+                {activeModule === "reports" && <label className="admin-filter-label"><span>Status</span><select value={reportStatusFilter} onChange={event => setReportStatusFilter(event.target.value)}><option value="all">Svi statusi</option><option value="pending">Na čekanju</option><option value="reviewed">Pregledano</option><option value="dismissed">Odbačeno</option><option value="actioned">Obrađeno</option></select></label>}
+                <label className="admin-search"><span>⌕</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Pretraži tablicu…" /></label>
+              </div>
             </div>
             {error ? <p className="admin-error">{error}</p> : busy ? <p className="admin-empty">Učitavam podatke…</p> : filteredRows.length ? (
               <div className="admin-table-scroll">
@@ -196,7 +213,7 @@ export default function Admin() {
                       ) : activeModule === "events" ? (
                         <><td><strong>{row.title}</strong>{row.description && <p className="admin-report-details">{row.description}</p>}</td><td>{row.location || "—"}</td><td>{dateLabel(row.starts_at)}</td><td><span className={"admin-status status-" + row.status}>{row.status === "published" ? "Objavljeno" : "Otkazano"}</span></td><td>{row.status === "published" ? <button className="admin-row-action danger" type="button" onClick={() => cancelEvent(row)}>Otkazati</button> : "—"}</td></>
                       ) : activeModule === "reports" ? (
-                        <><td><strong>{row.reason || "Drugi razlog"}</strong>{row.details && <p className="admin-report-details">{row.details}</p>}</td><td><span className={"admin-status status-" + row.status}>{({ pending: "Na čekanju", reviewed: "Pregledano", dismissed: "Odbijeno", actioned: "Obrađeno" })[row.status] || row.status}</span></td><td><code>{row.post_id || "—"}</code></td><td><code>{row.reporter_id || "—"}</code></td><td>{dateLabel(row.created_at)}</td><td><div className="admin-row-actions"><button className="admin-row-action" type="button" onClick={() => setReportStatus(row, "reviewed")}>Pregledano</button><button className="admin-row-action" type="button" onClick={() => setReportStatus(row, "dismissed")}>Odbaci</button>{row.post_id && <button className="admin-row-action danger" type="button" onClick={() => deleteReportedPost(row)}>Ukloni objavu</button>}</div></td></>
+                        <><td><strong>{row.reason || "Drugi razlog"}</strong>{row.details && <p className="admin-report-details">{row.details}</p>}</td><td><span className={"admin-status status-" + row.status}>{({ pending: "Na čekanju", reviewed: "Pregledano", dismissed: "Odbijeno", actioned: "Obrađeno" })[row.status] || row.status}</span></td><td><code>{row.post_id || "—"}</code></td><td><code>{row.reporter_id || "—"}</code></td><td>{dateLabel(row.created_at)}</td><td><div className="admin-row-actions"><button className="admin-row-action" type="button" disabled={row.status === "reviewed" || row.status === "actioned"} onClick={() => setReportStatus(row, "reviewed")}>Pregledano</button><button className="admin-row-action" type="button" disabled={row.status === "dismissed" || row.status === "actioned"} onClick={() => setReportStatus(row, "dismissed")}>Odbaci</button>{row.post_id && <button className="admin-row-action danger" type="button" onClick={() => deleteReportedPost(row)}>Ukloni objavu</button>}</div></td></>
                       ) : activeModule === "forum" ? (
                         <><td><strong>{row.title}</strong></td><td className="admin-post-body">{row.body}</td><td><code>{row.user_id}</code></td><td><span className={"admin-status status-" + row.status}>{row.status === "published" ? "Objavljeno" : row.status}</span></td><td>{dateLabel(row.created_at)}</td></>
                       ) : (
