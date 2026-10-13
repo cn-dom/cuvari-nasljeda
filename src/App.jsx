@@ -2397,6 +2397,19 @@ function App() {
         </section>
 
         <aside className="right-sidebar">
+          <section className="right-card card patriasoul-promo-card">
+            <a className="patriasoul-promo-brand" href="/" aria-label="PatriaSoul — početna stranica">
+              <img src="/assets/images/1000000982.png" alt="PatriaSoul — Čuvari nasljeđa" />
+              <span><strong>PatriaSoul</strong><small>Čuvari nasljeđa</small></span>
+            </a>
+            <p className="patriasoul-promo-tagline">Hrvatska · povijest · znanje · identitet.</p>
+            <p className="patriasoul-promo-copy">Prostor za učenje, igru i čuvanje priča koje čine naše nasljeđe.</p>
+            <strong className="patriasoul-promo-motto">Znanje · Ponos · Nasljeđe</strong>
+            <div className="patriasoul-promo-links">
+              <a href="https://www.tiktok.com/@patriasoul" target="_blank" rel="noreferrer"><strong>Prati nas na TikToku</strong><span>Prati kratke priče, zanimljivosti i kvizove o Hrvatskoj. ↗</span></a>
+              <a href="https://www.tiktok.com/@hajdi331?lang=hr" target="_blank" rel="noreferrer"><strong>Vjera · Yeshua</strong><span>Vjera, nada i istina kroz priču o Yeshui — Isusu Kristu. ↗</span></a>
+            </div>
+          </section>
           <section className="right-card card">
             <div className="right-card-title"><h3>U FOKUSU</h3><span>✦</span></div>
             <a href="/stranice.html" className="focus-link">
@@ -2436,8 +2449,21 @@ function App() {
           </section>
 
           <footer className="right-footer">
-            <a href="/pravila-koristenja.html">Pravila korištenja</a><a href="/pravila-zajednice.html">Pravila zajednice</a><a href="/privatnost.html">Privatnost i sigurnost</a>
-            <p>© PatriaSoul – Čuvari nasljeđa</p>
+            <a href="/kviz/">Početna / PatriaSoul kviz</a>
+            <a href="/kviz/?mode=croatian">Hrvatski kviz</a>
+            <a href="/kviz/?mode=city">Brani svoj grad</a>
+            <a href="/kviz/?mode=daily">Dnevni kviz</a>
+            <a href="/kviz/?mode=leaderboard">Rang-lista</a>
+            <a href="/kviz/?mode=account">Prijava / Moj račun</a>
+            <a href="/pravila-koristenja.html">Pravila korištenja</a>
+            <a href="/pravila-zajednice.html">Pravila zajednice</a>
+            <a href="/kviz/rules.html">Pravilnik o igranju kviza</a>
+            <a href="/kviz/terms.html">Uvjeti korištenja</a>
+            <a href="/privatnost.html">Politika privatnosti</a>
+            <a href="/kviz/about.html">O PatriaSoul</a>
+            <a href="/kviz/contact.html">Kontakt</a>
+            <p>© 2026 PatriaSoul. Sva prava pridržana.</p>
+            <small>Hrvatska · Povijest · Znanje · Identitet</small>
           </footer>
         </aside>
       </main>
