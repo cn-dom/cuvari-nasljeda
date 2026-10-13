@@ -9,7 +9,7 @@ const modules = [
   { id: "posts", title: "Objave na zidu", group: "SADRŽAJ", description: "Pretraživanje objava i uklanjanje sadržaja koji krši pravila.", icon: "▤", status: "Pregled i moderacija" },
   { id: "reports", title: "Prijave sadržaja", group: "MODERACIJA", description: "Pregled prijava članova, odluke i praćenje obrade.", icon: "⚑", status: "Moderacija" },
   { id: "comments", title: "Komentari", group: "SADRŽAJ", description: "Pregled komentara i uklanjanje sadržaja koji krši pravila.", icon: "☷", status: "Pregled i moderacija" },
-  { id: "groups", title: "Grupe i zajednice", group: "ZAJEDNICA", description: "Pregled grupa, članstva i upravljanja zajednicama.", icon: "♧", status: "Sljedeća faza" },
+  { id: "groups", title: "Grupe i zajednice", group: "ZAJEDNICA", description: "Pregled grupnih razgovora, članstva i aktivnosti.", icon: "♧", status: "Pregled" },
   { id: "events", title: "Događaji", group: "ZAJEDNICA", description: "Pregled objavljenih događaja i otkazivanje sadržaja koji krši pravila.", icon: "▣", status: "Pregled i moderacija" },
   { id: "quiz", title: "PatriaSoul kviz", group: "PATRiASOUL KVIZ", description: "Upravljanje kvizom, rezultatima, pitanjima i prijavama igrača.", icon: "🧠", status: "Povezivanje" },
   { id: "forum", title: "Domoljubni forum", group: "RAZGOVORI", description: "Pregled tema i početnih poruka na forumu.", icon: "▤", status: "Pregled" },
@@ -79,6 +79,21 @@ export default function Admin() {
           ]);
           setBusy(false);
         }
+        return;
+      }
+      if (activeModule === "groups") {
+        setBusy(true);
+        const { data, error: loadError } = await supabase.rpc("admin_group_chat_overview");
+        if (cancelled) return;
+        if (loadError) {
+          setDbStatus("greska");
+          setError("Pregled grupa nije dostupan. Provjeri je li administratorska SQL funkcija postavljena u testnoj bazi.");
+          setBusy(false);
+          return;
+        }
+        setDbStatus("povezano");
+        setRows((data || []).map(row => ({ ...row, id: row.group_id })));
+        setBusy(false);
         return;
       }
       const configs = {
@@ -189,7 +204,7 @@ export default function Admin() {
               </table>
             )}
           </section>
-        ) : ["members", "posts", "reports", "comments", "events", "forum", "pages"].includes(activeModule) ? (
+        ) : ["members", "posts", "reports", "comments", "events", "forum", "pages", "groups"].includes(activeModule) ? (
           <section className="admin-table-card">
             <div className="admin-table-heading">
               <div><h2>{current.title}</h2><p>{rows.length} zapisa učitano · najviše 200 prikazanih</p></div>
@@ -201,7 +216,7 @@ export default function Admin() {
             {error ? <p className="admin-error">{error}</p> : busy ? <p className="admin-empty">Učitavam podatke…</p> : filteredRows.length ? (
               <div className="admin-table-scroll">
                 <table className="admin-table">
-                  <thead><tr>{activeModule === "members" ? <><th>Član</th><th>Korisničko ime</th><th>ID računa</th><th>Registriran</th></> : activeModule === "posts" ? <><th>Objava</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : activeModule === "comments" ? <><th>Komentar</th><th>ID objave</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : activeModule === "events" ? <><th>Događaj</th><th>Mjesto</th><th>Početak</th><th>Status</th><th>Radnja</th></> : activeModule === "reports" ? <><th>Razlog</th><th>Status</th><th>ID objave</th><th>ID prijavitelja</th><th>Zaprimljeno</th><th>Radnje</th></> : activeModule === "forum" ? <><th>Naslov teme</th><th>Početna poruka</th><th>ID autora</th><th>Status</th><th>Datum</th></> : <><th>Stranica</th><th>Kategorija</th><th>Opis</th><th>ID osnivača</th><th>Datum</th></>}</tr></thead>
+                  <thead><tr>{activeModule === "members" ? <><th>Član</th><th>Korisničko ime</th><th>ID računa</th><th>Registriran</th></> : activeModule === "posts" ? <><th>Objava</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : activeModule === "comments" ? <><th>Komentar</th><th>ID objave</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : activeModule === "events" ? <><th>Događaj</th><th>Mjesto</th><th>Početak</th><th>Status</th><th>Radnja</th></> : activeModule === "groups" ? <><th>Grupa</th><th>Osnivač ID</th><th>Članovi</th><th>Poruke</th><th>Osnovana</th></> : activeModule === "reports" ? <><th>Razlog</th><th>Status</th><th>ID objave</th><th>ID prijavitelja</th><th>Zaprimljeno</th><th>Radnje</th></> : activeModule === "forum" ? <><th>Naslov teme</th><th>Početna poruka</th><th>ID autora</th><th>Status</th><th>Datum</th></> : <><th>Stranica</th><th>Kategorija</th><th>Opis</th><th>ID osnivača</th><th>Datum</th></>}</tr></thead>
                   <tbody>
                     {filteredRows.map(row => <tr key={row.id}>
                       {activeModule === "members" ? (
@@ -212,6 +227,8 @@ export default function Admin() {
                         <><td className="admin-post-body">{row.body || "Komentar bez teksta"}</td><td><code>{row.post_id}</code></td><td><code>{row.author_id}</code></td><td>{dateLabel(row.created_at)}</td><td><button className="admin-row-action danger" type="button" onClick={() => deleteComment(row)}>Ukloni</button></td></>
                       ) : activeModule === "events" ? (
                         <><td><strong>{row.title}</strong>{row.description && <p className="admin-report-details">{row.description}</p>}</td><td>{row.location || "—"}</td><td>{dateLabel(row.starts_at)}</td><td><span className={"admin-status status-" + row.status}>{row.status === "published" ? "Objavljeno" : "Otkazano"}</span></td><td>{row.status === "published" ? <button className="admin-row-action danger" type="button" onClick={() => cancelEvent(row)}>Otkazati</button> : "—"}</td></>
+                      ) : activeModule === "groups" ? (
+                        <><td><strong>{row.name}</strong><small className="admin-report-details">{row.id}</small></td><td><code>{row.created_by || "—"}</code></td><td className="admin-count-cell">{row.member_count ?? 0}</td><td className="admin-count-cell">{row.message_count ?? 0}</td><td>{dateLabel(row.created_at)}</td></>
                       ) : activeModule === "reports" ? (
                         <><td><strong>{row.reason || "Drugi razlog"}</strong>{row.details && <p className="admin-report-details">{row.details}</p>}</td><td><span className={"admin-status status-" + row.status}>{({ pending: "Na čekanju", reviewed: "Pregledano", dismissed: "Odbijeno", actioned: "Obrađeno" })[row.status] || row.status}</span></td><td><code>{row.post_id || "—"}</code></td><td><code>{row.reporter_id || "—"}</code></td><td>{dateLabel(row.created_at)}</td><td><div className="admin-row-actions"><button className="admin-row-action" type="button" disabled={row.status === "reviewed" || row.status === "actioned"} onClick={() => setReportStatus(row, "reviewed")}>Pregledano</button><button className="admin-row-action" type="button" disabled={row.status === "dismissed" || row.status === "actioned"} onClick={() => setReportStatus(row, "dismissed")}>Odbaci</button>{row.post_id && <button className="admin-row-action danger" type="button" onClick={() => deleteReportedPost(row)}>Ukloni objavu</button>}</div></td></>
                       ) : activeModule === "forum" ? (
