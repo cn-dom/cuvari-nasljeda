@@ -31,6 +31,7 @@ export default function Admin() {
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
+  const [dbStatus, setDbStatus] = useState("provjera");
 
   useEffect(() => {
     if (!supabase) { setAuthReady(true); return undefined; }
@@ -50,7 +51,8 @@ export default function Admin() {
       setRows([]);
       setError("");
       setNotice("");
-      if (!isOwner || !supabase) return;
+      if (!isOwner || !supabase) { setDbStatus("nije"); return; }
+      setDbStatus("provjera");
       if (activeModule === "overview") {
         setBusy(true);
         const results = await Promise.all([
@@ -59,6 +61,7 @@ export default function Admin() {
           supabase.from("content_reports").select("id, status", { count: "exact" }),
         ]);
         if (!cancelled) {
+          setDbStatus(results.some((result) => result.error) ? "greska" : "povezano");
           setRows([
             { id: "members-count", title: "Članovi profila", value: results[0].count ?? "—", detail: results[0].error ? "Tablica ili prava nisu dostupni" : "Ukupno profila" },
             { id: "posts-count", title: "Objave", value: results[1].count ?? "—", detail: results[1].error ? "Tablica ili prava nisu dostupni" : "Ukupno objava" },
@@ -81,10 +84,12 @@ export default function Admin() {
       const { data, error: loadError } = await supabase.from(config.table).select(config.select).order(config.order, { ascending: false }).limit(200);
       if (cancelled) return;
       if (loadError) {
+        setDbStatus("greska");
         setError("Podaci se ne mogu učitati. Provjeri postoji li tablica i jesu li za vlasnika postavljena odgovarajuća RLS pravila.");
         setBusy(false);
         return;
       }
+      setDbStatus("povezano");
       setRows(data || []);
       setBusy(false);
     }
@@ -107,6 +112,20 @@ export default function Admin() {
     setNotice("Objava je uklonjena.");
   }
 
+  async function deleteReportedPost(report) {
+    if (!window.confirm("Trajno ukloniti prijavljenu objavu i označiti prijavu kao obrađenu?")) return;
+    const { error: deleteError } = await supabase.from("posts").delete().eq("id", report.post_id);
+    if (deleteError) { setNotice("Objava nije uklonjena. Provjeri vlasnička pravila i povezane tablice."); return; }
+    const { data, error: statusError } = await supabase.from("content_reports").update({ status: "actioned" }).eq("id", report.id).select("id,status").maybeSingle();
+    if (statusError || !data) {
+      setNotice("Objava je uklonjena, ali status prijave nije ažuriran.");
+      setRows(current => current.filter(item => item.id !== report.id));
+      return;
+    }
+    setRows(current => current.map(item => item.id === report.id ? { ...item, status: "actioned" } : item));
+    setNotice("Objava je uklonjena, a prijava označena kao obrađena.");
+  }
+
   const current = modules.find(item => item.id === activeModule) || modules[0];
   const filteredRows = rows.filter(row => JSON.stringify(row).toLowerCase().includes(query.toLowerCase()));
 
@@ -127,7 +146,7 @@ export default function Admin() {
           <section className="admin-table-card">
             <div className="admin-table-heading">
               <div><h2>Stanje mreže</h2><p>Sažetak se učitava iz Supabase baze.</p></div>
-              <span className="admin-live-mark">● POVEZANO</span>
+              <span className={"admin-live-mark " + (dbStatus === "povezano" ? "" : "admin-connection-warning")}>{dbStatus === "povezano" ? "● POVEZANO" : dbStatus === "greska" ? "● PROVJERI BAZU" : dbStatus === "nije" ? "● NIJE POVEZANO" : "● PROVJERAVAM"}</span>
             </div>
             {busy ? <p className="admin-empty">Učitavam podatke…</p> : (
               <table className="admin-table">
@@ -153,7 +172,7 @@ export default function Admin() {
                       ) : activeModule === "posts" ? (
                         <><td className="admin-post-body">{row.body || "Objava bez teksta"}</td><td><code>{row.author_id}</code></td><td>{dateLabel(row.created_at)}</td><td><button className="admin-row-action danger" type="button" onClick={() => deletePost(row)}>Ukloni</button></td></>
                       ) : activeModule === "reports" ? (
-                        <><td><strong>{row.reason || "Drugi razlog"}</strong>{row.details && <p className="admin-report-details">{row.details}</p>}</td><td><span className={"admin-status status-" + row.status}>{({ pending: "Na čekanju", reviewed: "Pregledano", dismissed: "Odbijeno", actioned: "Obrađeno" })[row.status] || row.status}</span></td><td><code>{row.post_id || "—"}</code></td><td>{dateLabel(row.created_at)}</td><td><div className="admin-row-actions"><button className="admin-row-action" type="button" onClick={() => setReportStatus(row, "reviewed")}>Pregledano</button><button className="admin-row-action" type="button" onClick={() => setReportStatus(row, "dismissed")}>Odbaci</button>{row.post_id && <button className="admin-row-action danger" type="button" onClick={() => deletePost({ id: row.post_id })}>Ukloni objavu</button>}</div></td></>
+                        <><td><strong>{row.reason || "Drugi razlog"}</strong>{row.details && <p className="admin-report-details">{row.details}</p>}</td><td><span className={"admin-status status-" + row.status}>{({ pending: "Na čekanju", reviewed: "Pregledano", dismissed: "Odbijeno", actioned: "Obrađeno" })[row.status] || row.status}</span></td><td><code>{row.post_id || "—"}</code></td><td>{dateLabel(row.created_at)}</td><td><div className="admin-row-actions"><button className="admin-row-action" type="button" onClick={() => setReportStatus(row, "reviewed")}>Pregledano</button><button className="admin-row-action" type="button" onClick={() => setReportStatus(row, "dismissed")}>Odbaci</button>{row.post_id && <button className="admin-row-action danger" type="button" onClick={() => deleteReportedPost(row)}>Ukloni objavu</button>}</div></td></>
                       ) : activeModule === "forum" ? (
                         <><td><strong>{row.title}</strong></td><td className="admin-post-body">{row.body}</td><td><code>{row.user_id}</code></td><td><span className={"admin-status status-" + row.status}>{row.status === "published" ? "Objavljeno" : row.status}</span></td><td>{dateLabel(row.created_at)}</td></>
                       ) : (
