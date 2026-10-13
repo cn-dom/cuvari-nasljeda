@@ -30,7 +30,8 @@ set search_path = ''
 as $$
 begin
   if new.role is distinct from old.role
-     and coalesce(auth.role(), '') <> 'service_role' then
+     and coalesce(current_setting('request.jwt.claim.role', true), '') <> 'service_role'
+     and current_user not in ('postgres', 'supabase_admin') then
     raise exception 'Promjena administratorske uloge nije dopuštena.';
   end if;
   return new;
