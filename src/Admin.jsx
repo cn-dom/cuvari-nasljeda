@@ -12,8 +12,8 @@ const modules = [
   { id: "groups", title: "Grupe i zajednice", group: "ZAJEDNICA", description: "Pregled grupa, članstva i upravljanja zajednicama.", icon: "♧", status: "Sljedeća faza" },
   { id: "events", title: "Događaji", group: "ZAJEDNICA", description: "Pregled događaja i upravljanje prijavama sudionika.", icon: "▣", status: "Sljedeća faza" },
   { id: "quiz", title: "PatriaSoul kviz", group: "PATRiASOUL KVIZ", description: "Upravljanje kvizom, rezultatima, pitanjima i prijavama igrača.", icon: "🧠", status: "Povezivanje" },
-  { id: "forum", title: "Domoljubni forum", group: "RAZGOVORI", description: "Moderacija rubrika, tema, odgovora i prijava na forumu.", icon: "▤", status: "Povezivanje" },
-  { id: "pages", title: "Stranice zajednice", group: "ZAJEDNICA", description: "Upravljanje tematskim stranicama, urednicima i objavama stranica.", icon: "▣", status: "Povezivanje" },
+  { id: "forum", title: "Domoljubni forum", group: "RAZGOVORI", description: "Pregled tema i početnih poruka na forumu.", icon: "▤", status: "Pregled" },
+  { id: "pages", title: "Stranice zajednice", group: "ZAJEDNICA", description: "Pregled javnih tematskih stranica.", icon: "▣", status: "Pregled" },
   { id: "security", title: "Sigurnost i pravila", group: "SUSTAV", description: "Pravila zajednice, privatnost i provjera pristupa.", icon: "⬡", status: "Pregled" },
 ];
 
@@ -72,6 +72,8 @@ export default function Admin() {
         members: { table: "profiles", select: "id, display_name, username, created_at", order: "created_at" },
         posts: { table: "posts", select: "id, author_id, body, created_at", order: "created_at" },
         reports: { table: "content_reports", select: "id, reporter_id, post_id, reason, details, status, created_at", order: "created_at" },
+        forum: { table: "forum_topics", select: "id, title, body, user_id, category_id, status, created_at", order: "created_at" },
+        pages: { table: "community_pages", select: "id, name, slug, description, category, created_by, created_at", order: "created_at" },
       };
       const config = configs[activeModule];
       if (!config) return;
@@ -134,7 +136,7 @@ export default function Admin() {
               </table>
             )}
           </section>
-        ) : ["members", "posts", "reports"].includes(activeModule) ? (
+        ) : ["members", "posts", "reports", "forum", "pages"].includes(activeModule) ? (
           <section className="admin-table-card">
             <div className="admin-table-heading">
               <div><h2>{current.title}</h2><p>{rows.length} zapisa učitano · najviše 200 prikazanih</p></div>
@@ -143,15 +145,19 @@ export default function Admin() {
             {error ? <p className="admin-error">{error}</p> : busy ? <p className="admin-empty">Učitavam podatke…</p> : filteredRows.length ? (
               <div className="admin-table-scroll">
                 <table className="admin-table">
-                  <thead><tr>{activeModule === "members" ? <><th>Član</th><th>Korisničko ime</th><th>ID računa</th><th>Registriran</th></> : activeModule === "posts" ? <><th>Objava</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : <><th>Razlog</th><th>Status</th><th>ID objave</th><th>Zaprimljeno</th><th>Radnje</th></>}</tr></thead>
+                  <thead><tr>{activeModule === "members" ? <><th>Član</th><th>Korisničko ime</th><th>ID računa</th><th>Registriran</th></> : activeModule === "posts" ? <><th>Objava</th><th>ID autora</th><th>Datum</th><th>Radnja</th></> : activeModule === "reports" ? <><th>Razlog</th><th>Status</th><th>ID objave</th><th>Zaprimljeno</th><th>Radnje</th></> : activeModule === "forum" ? <><th>Naslov teme</th><th>Početna poruka</th><th>ID autora</th><th>Status</th><th>Datum</th></> : <><th>Stranica</th><th>Kategorija</th><th>Opis</th><th>ID osnivača</th><th>Datum</th></>}</tr></thead>
                   <tbody>
                     {filteredRows.map(row => <tr key={row.id}>
                       {activeModule === "members" ? (
                         <><td><strong>{row.display_name || "Čuvar nasljeđa"}</strong></td><td>{row.username ? "@" + row.username : "—"}</td><td><code>{row.id}</code></td><td>{dateLabel(row.created_at)}</td></>
                       ) : activeModule === "posts" ? (
                         <><td className="admin-post-body">{row.body || "Objava bez teksta"}</td><td><code>{row.author_id}</code></td><td>{dateLabel(row.created_at)}</td><td><button className="admin-row-action danger" type="button" onClick={() => deletePost(row)}>Ukloni</button></td></>
-                      ) : (
+                      ) : activeModule === "reports" ? (
                         <><td><strong>{row.reason || "Drugi razlog"}</strong>{row.details && <p className="admin-report-details">{row.details}</p>}</td><td><span className={"admin-status status-" + row.status}>{({ pending: "Na čekanju", reviewed: "Pregledano", dismissed: "Odbijeno", actioned: "Obrađeno" })[row.status] || row.status}</span></td><td><code>{row.post_id || "—"}</code></td><td>{dateLabel(row.created_at)}</td><td><div className="admin-row-actions"><button className="admin-row-action" type="button" onClick={() => setReportStatus(row, "reviewed")}>Pregledano</button><button className="admin-row-action" type="button" onClick={() => setReportStatus(row, "dismissed")}>Odbaci</button>{row.post_id && <button className="admin-row-action danger" type="button" onClick={() => deletePost({ id: row.post_id })}>Ukloni objavu</button>}</div></td></>
+                      ) : activeModule === "forum" ? (
+                        <><td><strong>{row.title}</strong></td><td className="admin-post-body">{row.body}</td><td><code>{row.user_id}</code></td><td><span className={"admin-status status-" + row.status}>{row.status === "published" ? "Objavljeno" : row.status}</span></td><td>{dateLabel(row.created_at)}</td></>
+                      ) : (
+                        <><td><strong>{row.name}</strong><small className="admin-report-details">/{row.slug}</small></td><td>{row.category}</td><td className="admin-post-body">{row.description || "—"}</td><td><code>{row.created_by}</code></td><td>{dateLabel(row.created_at)}</td></>
                       )}
                     </tr>)}
                   </tbody>
