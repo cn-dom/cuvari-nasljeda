@@ -9,6 +9,7 @@ create table if not exists public.profiles (
   display_name text not null default '',
   bio text not null default '',
   avatar_path text,
+  avatar_url text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint profiles_username_format check (
@@ -17,6 +18,10 @@ create table if not exists public.profiles (
   constraint profiles_display_name_length check (char_length(display_name) <= 60),
   constraint profiles_bio_length check (char_length(bio) <= 240)
 );
+
+-- Additive compatibility for databases where profiles already existed.
+alter table public.profiles add column if not exists avatar_path text;
+alter table public.profiles add column if not exists avatar_url text;
 
 create table if not exists public.posts (
   id uuid primary key default gen_random_uuid(),
