@@ -1207,3 +1207,23 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
   overflow-wrap: anywhere;
   box-shadow: 0 3px 12px #0002;
 }
+
+
+/* Ispravak hover stanja gumba „Moj profil” na tamnoj temi */
+.profile-open-button:hover,
+.profile-open-button:focus-visible {
+  background: #0b2b43;
+  color: #f2f8ff;
+  border-color: #245779;
+  outline-offset: 2px;
+}
+.profile-open-button:hover .profile-open-label,
+.profile-open-button:focus-visible .profile-open-label {
+  color: #f2f8ff;
+}
+.profile-open-button:hover .profile-mini-avatar,
+.profile-open-button:focus-visible .profile-mini-avatar {
+  background: #12456b;
+  color: #ffffff;
+  border-color: #3b80ad;
+}
