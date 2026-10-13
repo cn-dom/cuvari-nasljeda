@@ -5,12 +5,12 @@
 - Kviz se gradi u istoj aplikaciji na putanji `/kviz/`.
 - Kviz uvozi isti Supabase klijent iz `src/lib/supabase.js` kao društvena mreža. Time se dijele URL projekta, autentifikacijska sesija, pohrana tokena i stanje prijave.
 - OAuth i e-mail povratak iz prijave kviza vode na trenutni origin i putanju kviza, a ne na stari portal.
-- Originalni logo nalazi se u `public/assets/images/patriasoul-logo.jpg` i koristi se u mreži i kvizu.
+- Službeni logo mreže i kviza nalazi se u `public/assets/images/1000000982.png`.
 - Kviz zadržava postojeće funkcije, ali njegove tablice/RPC-ovi moraju postojati u odabranom Supabase projektu.
 
-## Potrebne postavke za Cloudflare Pages
+## Potrebne postavke za Cloudflare Worker i GitHub Actions
 
-Postaviti iste varijable za build i runtime aplikacije:
+Vite ugrađuje ove vrijednosti tijekom izgradnje statičke aplikacije. Ako izgradnju pokreće GitHub Actions, vrijednosti moraju biti dostupne tom workflowu kao GitHub Actions secrets; samo postavljanje varijabli u Cloudflare Worker postavkama ne mijenja već izgrađeni JavaScript bundle.
 
 - `VITE_SUPABASE_URL`: URL odvojenog testnog Supabase projekta.
 - `VITE_SUPABASE_PUBLISHABLE_KEY`: javni/publishable ključ istog projekta.
