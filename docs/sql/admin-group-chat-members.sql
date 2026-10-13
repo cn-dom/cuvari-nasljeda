@@ -31,3 +31,5 @@ $$;
 revoke all on function public.admin_group_chat_members(uuid) from public;
 revoke all on function public.admin_group_chat_members(uuid) from anon;
 grant execute on function public.admin_group_chat_members(uuid) to authenticated;
+
+-- Member removal is documented separately in admin-remove-group-chat-member.sql.
