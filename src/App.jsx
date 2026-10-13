@@ -1191,6 +1191,21 @@ function App() {
     }
     setReportBusy(true);
     try {
+      const { data: existingReport, error: lookupError } = await supabase
+        .from("content_reports")
+        .select("id")
+        .eq("reporter_id", session.user.id)
+        .eq("post_id", reportPost.id)
+        .eq("status", "pending")
+        .limit(1)
+        .maybeSingle();
+      if (lookupError) throw lookupError;
+      if (existingReport) {
+        setReportPost(null);
+        setNotice("Već si prijavio/la ovu objavu. Prijava je na čekanju pregleda moderatora.");
+        return;
+      }
+
       const { error } = await supabase.from("content_reports").insert({
         reporter_id: session.user.id,
         post_id: reportPost.id,
@@ -1203,9 +1218,11 @@ function App() {
       setReportDetails("");
       setNotice("Prijava je poslana moderatorima. Hvala što pomažeš čuvati sigurnost zajednice.");
     } catch (error) {
-      setNotice(error?.code === "42P01" || error?.code === "PGRST205"
-        ? "Prijave još nisu aktivirane u testnoj bazi. Najprije treba pregledati i primijeniti ažurirani SQL nacrt."
-        : "Prijava nije spremljena. Provjeri postoji li tablica content_reports i jesu li RLS pravila primijenjena.");
+      setNotice(error?.code === "23505"
+        ? "Već postoji tvoja prijava ove objave na čekanju pregleda moderatora."
+        : error?.code === "42P01" || error?.code === "PGRST205"
+          ? "Prijave još nisu aktivirane u testnoj bazi. Najprije treba pregledati i primijeniti ažurirani SQL nacrt."
+          : "Prijava nije spremljena. Provjeri postoji li tablica content_reports i jesu li RLS pravila primijenjena.");
     } finally {
       setReportBusy(false);
     }
