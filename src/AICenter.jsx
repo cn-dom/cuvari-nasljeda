@@ -156,6 +156,7 @@ export default function AICenter() {
   async function readImage(event) {
     event.preventDefault();
     if (!imageData || busy) return;
+    if (!window.confirm("Fotografija ili dokument bit će poslan Puterovoj AI usluzi na analizu. Provjeri da ne sadrži lozinke, ključeve, privatne poruke ili osobne podatke. Nastaviti?")) return;
     setBusy(true); setError(""); setStatus("");
     try {
       const reply = await puter.ai.chat(
@@ -172,7 +173,9 @@ export default function AICenter() {
   async function generateIllustration(event) {
     event.preventDefault();
     if (!imagePrompt.trim() || busy) return;
-    if (!window.confirm("Pokrenuti stvarno generiranje slike? To može koristiti Puterovu kvotu računa koji je prijavljen u AI uslugu.")) return;
+    const safetyRefusal = getSafetyRefusal(imagePrompt);
+    if (safetyRefusal) { setError(safetyRefusal); return; }
+    if (!window.confirm("Pokrenuti stvarno generiranje slike? Opis će biti poslan Puterovoj AI usluzi i to može koristiti kvotu računa koji je prijavljen u AI uslugu. Ne uključuj privatne podatke. Nastaviti?")) return;
     setBusy(true); setError(""); setStatus(""); setGeneratedImage("");
     try {
       const result = await puter.ai.txt2img("Izradi edukativnu ilustraciju za hrvatsku kulturnu baštinu. Nemoj prikazivati izmišljenu sliku kao povijesnu fotografiju. Tema: " + imagePrompt.trim());
