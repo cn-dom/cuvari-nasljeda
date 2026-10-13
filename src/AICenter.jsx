@@ -190,13 +190,9 @@ export default function AICenter() {
     event.preventDefault();
     const clean = diagnosticText.trim();
     if (!clean || busy) return;
-    const secretPatterns = [
-      /(?:sb_secret_|sk_live_|sk_test_|gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,})/i,
-      /(?:service_role|secret[_ -]?key|access[_ -]?token|refresh[_ -]?token|password)\s*[:=]\s*\S+/i,
-      /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/
-    ];
-    if (secretPatterns.some((pattern) => pattern.test(clean))) {
-      setError("Tekst možda sadrži tajni ključ, token ili lozinku. Ukloni tajnu i zamijeni je oznakom [UKLONJENO] prije analize.");
+    const safetyRefusal = getSafetyRefusal(clean);
+    if (safetyRefusal) {
+      setError(safetyRefusal + " Za tehničku analizu zamijeni osjetljive vrijednosti oznakom [UKLONJENO].");
       return;
     }
     setBusy(true); setError(""); setDiagnosticResult("");
