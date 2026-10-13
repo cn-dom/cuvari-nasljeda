@@ -1514,6 +1514,9 @@ function App() {
         owner: data.author_id === session.user.id,
       }],
     }));
+    setPosts((current) => current.map((post) => (
+      post.id === id ? { ...post, comments: (post.comments || 0) + 1 } : post
+    )));
     setCommentDrafts((current) => ({ ...current, [id]: "" }));
     setNotice("Komentar je spremljen u bazu zajednice.");
   }
