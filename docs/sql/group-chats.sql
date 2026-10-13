@@ -54,26 +54,26 @@ returns boolean
 language sql stable security definer
 set search_path = public, pg_temp
 set row_security = off
-as $
+as $$
   select exists (
     select 1 from public.group_chats gc
     where gc.id = target_group_id and gc.created_by = auth.uid()
   );
-$;
+$$;
 
 create or replace function public.is_group_chat_admin(target_group_id uuid)
 returns boolean
 language sql stable security definer
 set search_path = public, pg_temp
 set row_security = off
-as $
+as $$
   select exists (
     select 1 from public.group_chat_members gcm
     where gcm.group_id = target_group_id
       and gcm.user_id = auth.uid()
       and gcm.role = 'admin'
   );
-$;
+$$;
 
 revoke all on function public.is_group_chat_member(uuid) from public;
 revoke all on function public.is_group_chat_member(uuid) from anon;
@@ -106,7 +106,7 @@ create or replace function public.guard_group_chat_admin_changes()
 returns trigger
 language plpgsql
 set search_path = public, pg_temp
-as $
+as $$
 begin
   if tg_table_name = 'group_chats' then
     if new.created_by is distinct from old.created_by then
@@ -123,7 +123,7 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 
 drop trigger if exists guard_group_chats_admin_changes on public.group_chats;
 create trigger guard_group_chats_admin_changes before update on public.group_chats
@@ -172,7 +172,7 @@ returns void
 language plpgsql security definer
 set search_path = public, pg_temp
 set row_security = off
-as $
+as $$
 begin
   if not public.is_group_chat_admin(target_group_id) then
     raise exception 'Only a group admin can transfer admin rights';
@@ -194,7 +194,7 @@ begin
     set role = 'admin'
     where group_id = target_group_id and user_id = new_admin_user_id;
 end;
-$;
+$$;
 
 revoke all on function public.transfer_group_chat_admin(uuid, uuid) from public;
 revoke all on function public.transfer_group_chat_admin(uuid, uuid) from anon;
@@ -212,7 +212,7 @@ create or replace function public.guard_group_chat_message_changes()
 returns trigger
 language plpgsql
 set search_path = public, pg_temp
-as $
+as $$
 begin
   if new.id is distinct from old.id
      or new.group_id is distinct from old.group_id
@@ -222,7 +222,7 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 
 drop trigger if exists guard_group_chat_message_changes on public.group_chat_messages;
 create trigger guard_group_chat_message_changes before update on public.group_chat_messages
@@ -273,7 +273,7 @@ returns void
 language plpgsql security definer
 set search_path = public, pg_temp
 set row_security = off
-as $
+as $$
 declare
   caller_role text;
 begin
@@ -295,7 +295,7 @@ begin
   delete from public.group_chat_members
     where group_id = target_group_id and user_id = auth.uid();
 end;
-$;
+$$;
 
 revoke all on function public.leave_group_chat(uuid) from public;
 revoke all on function public.leave_group_chat(uuid) from anon;
@@ -309,7 +309,7 @@ returns void
 language plpgsql security definer
 set search_path = public, pg_temp
 set row_security = off
-as $
+as $$
 begin
   if auth.uid() is null or not public.is_group_chat_admin(target_group_id) then
     raise exception 'Only a group admin can delete this group';
@@ -319,7 +319,7 @@ begin
     raise exception 'Group not found';
   end if;
 end;
-$;
+$$;
 
 revoke all on function public.delete_group_chat(uuid) from public;
 revoke all on function public.delete_group_chat(uuid) from anon;
