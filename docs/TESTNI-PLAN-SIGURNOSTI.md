@@ -30,7 +30,7 @@ Ovo je kontrolni popis za odvojeni razvojni/testni Supabase projekt. **Ne predst
 | Član A učitava u mapu člana B | Odbijeno pravilom vlasništva. |
 | Član A mijenja ili briše objekt člana B | Odbijeno pravilom vlasništva. |
 | Neprijavljeni korisnik traži potpisani URL za sliku javne objave | Dopušteno samo za namjenski bucket `community-images`; anonimni upload, izmjena i brisanje ostaju zabranjeni. Privatne slike ne smiju se pohranjivati u taj bucket. |
-| Datoteka je veća od 5 MB ili ima nepodržani MIME tip | Storage treba odbiti upload prema konfiguraciji bucketa. |
+| Datoteka je veća od 10 MB ili ima nepodržani MIME tip | Storage treba odbiti upload prema konfiguraciji bucketa. |
 | Datoteka ima lažnu ekstenziju ili MIME zaglavlje | Aplikacijska/poslužiteljska provjera mora je odbiti; MIME postavka sama po sebi nije dokaz stvarnog formata. |
 | Pokušaj zamjene objekta postojećim nazivom | Mora proći pravilo vlasništva i provjeru dopuštenih operacija; testirati ponašanje upsert-a zasebno. |
 
