@@ -958,15 +958,22 @@ export default function App() {
       : `${mainCount.toLocaleString("hr-HR")} pitanja u glavnoj bazi · 10 pitanja po rundi`;
 
   return <div className="min-h-screen text-foreground">
-    <div className="relative z-20 border-b border-white/10 bg-[#071426] text-white shadow-lg">
-      <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-3 sm:px-6">
-        <a href="/" className="flex min-w-0 items-center gap-3 rounded-xl outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-amber-300" aria-label="Povratak na Čuvare nasljeđa">
-          <img src="/assets/images/1000000982.png" alt="PatriaSoul — Čuvari nasljeđa" className="h-10 w-10 shrink-0 rounded-xl object-contain ring-1 ring-white/15" />
-          <span className="min-w-0"><span className="block text-[10px] font-extrabold uppercase tracking-[.2em] text-amber-300">PatriaSoul</span><span className="block truncate text-sm font-bold sm:text-base">Čuvari nasljeđa <span className="font-medium text-white/55">/ Kviz</span></span></span>
+    <header className="relative z-20 border-b border-white/10 bg-[#071426] text-white shadow-lg">
+      <div className="mx-auto flex max-w-[1400px] flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+        <a href="/kviz/" className="flex items-center gap-3 self-start rounded-xl outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-amber-300" aria-label="PatriaSoul — početna kviza">
+          <img src="/assets/images/patriasoul-logo.jpg" alt="PatriaSoul" className="h-10 w-10 shrink-0 rounded-xl object-contain ring-1 ring-white/15" />
+          <span className="text-lg font-extrabold tracking-wide">PatriaSoul</span>
         </a>
-        <a href="/" className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/15 bg-white/[.06] px-3 py-2 text-xs font-bold transition hover:border-amber-300/60 hover:bg-white/10 sm:px-4 sm:text-sm"><ArrowLeft className="h-4 w-4" /><span className="hidden sm:inline">Natrag na mrežu</span><span className="sm:hidden">Mreža</span></a>
+        <nav aria-label="Glavna navigacija kviza" className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-bold">
+          <a href="/kviz/" className="transition hover:text-amber-300">⌂ Početna</a>
+          <a href="/kviz/?mode=croatian" className="transition hover:text-amber-300">📖 Hrvatski kviz</a>
+          <a href="/kviz/?mode=city" className="transition hover:text-amber-300">📍 Brani svoj grad</a>
+          <a href="/kviz/?mode=daily" className="transition hover:text-amber-300">📅 Dnevni kviz</a>
+          <a href="/kviz/?mode=leaderboard" className="transition hover:text-amber-300">🏅 Rang-lista</a>
+          <a href="/kviz/?mode=account" className="transition hover:text-amber-300">👤 Prijava</a>
+        </nav>
       </div>
-    </div>
+    </header>
     {authOpen && <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/60 px-4 py-4 sm:items-center sm:py-8" onClick={() => !authLoading && setAuthOpen(false)}>
       <div className="my-auto max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-2xl sm:max-h-[calc(100vh-4rem)]" onClick={(e) => e.stopPropagation()}>
         <div className="mb-5">
@@ -1514,15 +1521,46 @@ export default function App() {
     </main>}
 
     <footer className="border-t border-white/10 bg-[#071426] text-white">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row sm:px-6">
-        <a href="/" className="flex items-center gap-3 transition hover:opacity-90" aria-label="Čuvari nasljeđa — početna">
-          <img src="/assets/images/1000000982.png" alt="PatriaSoul" className="h-12 w-12 rounded-xl object-contain ring-1 ring-white/15" />
-          <span><span className="block text-sm font-extrabold tracking-wide">PATRiASOUL</span><span className="mt-1 block text-xs text-white/65">Čuvari nasljeđa · Znanje. Ponos. Nasljeđe.</span></span>
-        </a>
-        <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-white/65">
-          <a href="./about.html" className="hover:text-white">O PatriaSoul</a>
-          <a href="./contact.html" className="hover:text-white">Kontakt</a>
-          <a href="/" className="hover:text-white">Natrag na mrežu</a>
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-3 lg:py-14">
+        <section>
+          <a href="/kviz/" className="inline-flex items-center gap-3 transition hover:opacity-90" aria-label="PatriaSoul — početna">
+            <img src="/assets/images/patriasoul-logo.jpg" alt="PatriaSoul" className="h-14 w-14 rounded-xl object-contain ring-1 ring-white/15" />
+            <span className="text-xl font-extrabold">PatriaSoul</span>
+          </a>
+          <p className="mt-4 text-sm leading-6 text-white/70">Hrvatska · povijest · znanje · identitet.<br />Prostor za učenje, igru i čuvanje priča koje čine naše nasljeđe.</p>
+          <p className="mt-4 font-bold text-amber-300">Znanje · Ponos · Nasljeđe</p>
+          <p className="mt-2 text-sm font-semibold">PatriaSoul</p>
+          <a href="https://patriasoul-portal-v2.patriasoul.workers.dev/" className="mt-3 inline-block text-sm text-white/70 underline underline-offset-4 hover:text-white">Povratak na PatriaSoul portal</a>
+        </section>
+        <section>
+          <h2 className="text-sm font-extrabold uppercase tracking-[.16em] text-amber-300">Brzi izbornik</h2>
+          <nav aria-label="Poveznice kviza" className="mt-4 flex flex-col items-start gap-3 text-sm text-white/75">
+            <a href="/kviz/" className="hover:text-white">Početna</a>
+            <a href="/kviz/?mode=croatian" className="hover:text-white">Hrvatski kviz</a>
+            <a href="/kviz/?mode=city" className="hover:text-white">Brani svoj grad</a>
+            <a href="/kviz/?mode=daily" className="hover:text-white">Dnevni kviz</a>
+            <a href="/kviz/?mode=leaderboard" className="hover:text-white">Rang-lista</a>
+            <a href="/kviz/?mode=account" className="hover:text-white">Prijava / Moj račun</a>
+          </nav>
+        </section>
+        <section>
+          <h2 className="text-sm font-extrabold uppercase tracking-[.16em] text-amber-300">Prati nas</h2>
+          <p className="mt-4 text-base font-bold">PatriaSoul</p>
+          <p className="mt-2 text-sm leading-6 text-white/70">Prati PatriaSoul na TikToku i budi uz nas dok kroz kratke priče, zanimljivosti i kvizove upoznajemo Hrvatsku.</p>
+          <a href="https://www.tiktok.com/@patriasoul" target="_blank" rel="noreferrer" className="mt-3 inline-block text-sm font-bold text-white underline underline-offset-4 hover:text-amber-300">Prati nas</a>
+          <p className="mt-6 text-base font-bold">Vjera · Yeshua</p>
+          <p className="mt-2 text-sm leading-6 text-white/70">Vjera, nada i istina kroz priču o Yeshui — Isusu Kristu. Sadržaj za one koji žele upoznati Njegovu riječ, život i poruku.</p>
+          <a href="https://www.tiktok.com/@hajdi331?lang=hr" target="_blank" rel="noreferrer" className="mt-3 inline-block text-sm font-bold text-white underline underline-offset-4 hover:text-amber-300">Prati vjerski kanal</a>
+        </section>
+        <div className="border-t border-white/10 pt-5 text-xs text-white/55 lg:col-span-3">
+          <nav aria-label="Pravne informacije" className="flex flex-wrap gap-x-5 gap-y-3">
+            <a href="/kviz/rules.html" className="hover:text-white">Pravilnik o igranju</a>
+            <a href="/kviz/terms.html" className="hover:text-white">Uvjeti korištenja</a>
+            <a href="/kviz/privacy.html" className="hover:text-white">Politika privatnosti</a>
+            <a href="/kviz/about.html" className="hover:text-white">O PatriaSoul</a>
+            <a href="/kviz/contact.html" className="hover:text-white">Kontakt</a>
+          </nav>
+          <p className="mt-5">© 2026 PatriaSoul. Sva prava pridržana. <span className="ml-1">Hrvatska · Povijest · Znanje · Identitet</span></p>
         </div>
       </div>
     </footer>
