@@ -27,6 +27,10 @@ Ovaj popis služi za završnu provjeru testne verzije. Označi stavku tek nakon 
 - [ ] Privatne poruke i grupni razgovori rade između dvaju testnih računa.
 - [ ] Vlasnik u administraciji vidi grupne razgovore, broj članova i broj poruka bez prikaza sadržaja privatnih poruka.
 - [ ] Gumb Članovi otvara popis članova odabrane grupe s ulogom i datumom pridruživanja.
+- [ ] Vlasnik može ukloniti običnog člana iz grupe uz potvrdu.
+- [ ] Osnivač i administratori grupe prikazuju se kao zaštićeni i ne mogu se ukloniti tom radnjom.
+- [ ] Nakon uklanjanja člana, popis i broj članova odmah se ažuriraju.
+- [ ] Nevlasnički račun ne može pozvati funkciju za uklanjanje člana.
 - [ ] Nevlasnički račun ne može pozvati funkciju za pregled članova grupe.
 - [ ] Račun koji nije vlasnik ne može pozvati administratorsku funkciju za pregled grupa.
 
