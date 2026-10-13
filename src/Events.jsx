@@ -104,7 +104,7 @@ export default function Events() {
       <span className="community-section-eyebrow">PATRiASOUL · SUSRETI</span>
       <h1>Događaji zajednice</h1>
       <p>Susreti, predavanja, izložbe, hodočašća i događaji koji povezuju čuvare hrvatske baštine.</p>
-      <a className="community-section-home" href="/">Povratak na zid</a>
+      <div className="community-section-actions"><a className="community-section-home" href="/">Povratak na zid</a><a className="community-section-home ai-community-link" href="/ai-centar.html">✦ AI centar</a></div>
     </header>
     {!isSupabaseConfigured && <div className="community-section-alert">Testna baza nije povezana. Događaji se trenutačno ne mogu spremati.</div>}
     {error && <div className="community-section-alert">{error}</div>}
