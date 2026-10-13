@@ -43,6 +43,9 @@ Ovaj popis služi za završnu provjeru testne verzije. Označi stavku tek nakon 
 - [ ] Vlasnik može pregledati prijave i promijeniti njihov status.
 - [ ] Vlasnik može ukloniti objavu i komentar; provjeriti da običan član to ne može učiniti drugima.
 - [ ] Nakon uklanjanja sadržaja nema JavaScript pogrešaka ni pokvarenih prikaza.
+- [ ] Podnožje mreže prikazuje službeni logo, brzi izbornik, TikTok kanale i pravne poveznice; provjeriti sve poveznice.
+- [ ] Profilna fotografija prikazuje se uz objavu, komentar, u imeniku članova i u polju za novu objavu.
+- [ ] Reakcije grupnih poruka rade između članova i ostaju nakon ponovnog učitavanja.
 - [ ] Testirati na mobitelu i računalu.
 
 ## PatriaSoul kviz — preduvjeti povezivanja administracije
