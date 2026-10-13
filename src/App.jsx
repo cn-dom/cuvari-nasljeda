@@ -1695,7 +1695,7 @@ function App() {
           <section className="side-section sidebar-nav-section">
             <h3>MOJA ZAJEDNICA</h3>
             {navItems.filter((item) => ["Zid zajednice", "Kviz", "Forum", "Stranice", "Čuvari nasljeđa", "Grupe"].includes(item.label)).map((item) => (
-              <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => item.label === "Kviz" ? (window.location.href = "/kviz/") : setActiveNav(item.label)}>
+              <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => item.label === "Kviz" ? (window.location.href = "/kviz/") : item.label === "Forum" ? (window.location.href = "/forum.html") : item.label === "Stranice" ? (window.location.href = "/stranice.html") : setActiveNav(item.label)}>
                 <span className="side-icon">{item.icon}</span><span className="side-link-label">{item.label}</span>
                 {item.label === "Čuvari nasljeđa" && <span className="side-count">{memberDirectory.length || ""}</span>}
                 {item.label === "Grupe" && <span className="side-count">{groupChats.length || ""}</span>}
@@ -1794,12 +1794,12 @@ function App() {
               <a className="community-hub-card quiz-hub-card" href="/kviz/">
                 <span className="community-hub-icon">🧠</span><span className="community-hub-copy"><strong>PatriaSoul kviz</strong><small>Provjeri znanje i podijeli svoj rezultat.</small></span><span className="community-hub-arrow">↗</span>
               </a>
-              <button className="community-hub-card" type="button" onClick={() => { setActiveNav("Forum"); setNotice("Forum je dodan u navigaciju. Sljedeći korak je sigurno povezivanje njegovih rubrika i tema s ovim Supabase projektom."); }}>
-                <span className="community-hub-icon">▤</span><span className="community-hub-copy"><strong>Domoljubni forum</strong><small>Teme, pitanja i razgovori o Hrvatskoj.</small></span><span className="community-hub-arrow">›</span>
-              </button>
-              <button className="community-hub-card" type="button" onClick={() => { setActiveNav("Stranice"); setNotice("Otvorene su Stranice zajednice. U sljedećem koraku povezujemo popis stranica i njihove objave s bazom."); }}>
-                <span className="community-hub-icon">▣</span><span className="community-hub-copy"><strong>Stranice zajednice</strong><small>Pronađi i prati tematske stranice.</small></span><span className="community-hub-arrow">›</span>
-              </button>
+              <a className="community-hub-card" href="/forum.html">
+                <span className="community-hub-icon">▤</span><span className="community-hub-copy"><strong>Domoljubni forum</strong><small>Rubrike, teme i odgovori na jednom mjestu.</small></span><span className="community-hub-arrow">↗</span>
+              </a>
+              <a className="community-hub-card" href="/stranice.html">
+                <span className="community-hub-icon">▣</span><span className="community-hub-copy"><strong>Stranice zajednice</strong><small>Otkrij stranice, pokreni svoju i objavljuj.</small></span><span className="community-hub-arrow">↗</span>
+              </a>
             </div>
           </section>
 
