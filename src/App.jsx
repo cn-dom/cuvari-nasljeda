@@ -2359,7 +2359,7 @@ function App() {
                   {session?.user?.id ? (
                     <form className="comment-form" onSubmit={(event) => { event.preventDefault(); addComment(post.id); }}>
                       <label className="sr-only" htmlFor={"comment-" + post.id}>Napiši komentar</label>
-                      <input id={"comment-" + post.id} value={commentDrafts[post.id] || ""} onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))} placeholder="Napiši komentar…" />
+                      <input id={"comment-" + post.id} value={commentDrafts[post.id] || ""} onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))} maxLength={5000} required placeholder="Napiši komentar…" />
                       <button className="primary-button" type="submit">Pošalji</button>
                     </form>
                   ) : (
