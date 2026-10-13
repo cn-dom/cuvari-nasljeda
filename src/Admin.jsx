@@ -247,6 +247,32 @@ export default function Admin() {
         <div className="admin-page-heading"><div><span className="admin-eyebrow">{current.group}</span><h1>{current.title}</h1><p>{current.description}</p></div><div className="admin-heading-actions"><button type="button" className="admin-button secondary" onClick={() => setRefreshKey(value => value + 1)}>↻ Osvježi</button><button type="button" className="admin-button secondary" onClick={() => { setActiveModule("overview"); setQuery(""); setReportStatusFilter("all"); }}>Pregled sustava</button></div></div>
         {notice && <div className="admin-notice" role="status">{notice}<button type="button" onClick={() => setNotice("")} aria-label="Zatvori poruku">×</button></div>}
         {activeModule === "members" && <div className="admin-notice" role="note">Ovaj modul trenutačno omogućuje siguran pregled i pretraživanje profila. Zaključavanje ili brisanje korisničkog računa nije aktivirano jer to mora prolaziti kroz provjereni poslužiteljski postupak, a ne samo kroz sučelje preglednika.</div>}
+        {activeModule === "security" && (
+          <section className="admin-security-grid">
+            <article className="admin-security-card">
+              <span className="admin-security-icon">✓</span><div><h2>Zaštita administracije</h2><p>Administracijska stranica provjerava vlasničku e-poštu, a osjetljive grupne i zapisničke operacije dodatno provjeravaju ovlasti u Supabaseu.</p><span className="admin-security-status">Zaštita na više razina</span></div>
+            </article>
+            <article className="admin-security-card">
+              <span className="admin-security-icon">✓</span><div><h2>Prijave i zapisnik</h2><p>Prijave su ograničene pravilima baze. Zapisnik bilježi podržane moderatorske radnje i dostupan je samo vlasniku.</p><button type="button" className="admin-button secondary" onClick={() => setActiveModule("audit")}>Otvori zapisnik →</button></div>
+            </article>
+            <article className="admin-security-card warning">
+              <span className="admin-security-icon">!</span><div><h2>Zaključavanje računa</h2><p>Zaključavanje i brisanje korisničkih računa još nisu aktivirani. Nećemo ih simulirati samo skrivanjem sadržaja u pregledniku; potrebna je sigurna poslužiteljska procedura i provjera pravila svih tablica.</p><span className="admin-security-status pending">Nije aktivirano</span></div>
+            </article>
+            <article className="admin-security-card warning">
+              <span className="admin-security-icon">!</span><div><h2>Povezivanje kviza</h2><p>Administracija kviza, pitanja, rezultata i prijava igrača još nije povezana s ovim modulom.</p><button type="button" className="admin-button secondary" onClick={() => setActiveModule("quiz")}>Pogledaj status kviza →</button></div>
+            </article>
+            <article className="admin-security-card">
+              <span className="admin-security-icon">i</span><div><h2>Obvezna završna provjera</h2><p>GitHub Actions provjerava izgradnju koda. Prijavu, RLS pravila, moderaciju i pristup s drugim računom potrebno je ručno testirati.</p><a className="admin-button secondary" href="https://github.com/cn-dom/cuvari-nasljeda/blob/main/docs/TESTIRANJE.md" target="_blank" rel="noreferrer">Otvori kontrolni popis →</a></div>
+            </article>
+          </section>
+        )}
+        {activeModule === "quiz" && (
+          <section className="admin-table-card admin-module-status-card">
+            <div className="admin-table-heading"><div><h2>PatriaSoul kviz</h2><p>Modul je pripremljen kao administracijska stavka, ali nije još povezan s podacima kviza.</p></div><span className="admin-live-mark admin-connection-warning">● ČEKA POVEZIVANJE</span></div>
+            <p className="admin-empty">Ne prikazujemo izmišljene rezultate. Sljedeći korak je pregledati postojeću kviz bazu i potvrditi koje tablice i ovlasti se mogu sigurno povezati.</p>
+            <a className="admin-button secondary" href="https://github.com/Patriasoul/kviz" target="_blank" rel="noreferrer">Otvori repozitorij kviza →</a>
+          </section>
+        )}
         {activeModule === "overview" ? (
           <section className="admin-table-card">
             <div className="admin-table-heading">
