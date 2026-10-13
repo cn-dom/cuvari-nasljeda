@@ -32,12 +32,14 @@ export default function AICenter() {
   const [practiceQuestions, setPracticeQuestions] = useState("");
   const [diagnosticText, setDiagnosticText] = useState("");
   const [diagnosticResult, setDiagnosticResult] = useState("");
+  const [audioName, setAudioName] = useState("");
+  const [transcribing, setTranscribing] = useState(false);
 
   const modes = useMemo(() => [
     { id: "guide", label: "AI vodič", icon: BookOpen, description: "Pitanja o Hrvatskoj, povijesti i baštini." },
     { id: "study", label: "Trener znanja", icon: BrainCircuit, description: "Vježbaj bez mijenjanja službenih rezultata kviza." },
     { id: "archive", label: "Fotografije i dokumenti", icon: Camera, description: "Očitaj i opiši materijal koji učitaš." },
-    { id: "voice", label: "Glasovni vodič", icon: Volume2, description: "Poslušaj AI odgovor naglas." },
+    { id: "voice", label: "Glasovni vodič", icon: Volume2, description: "Postavi pitanje glasom ili poslušaj odgovor." },
     { id: "images", label: "Ilustracije baštine", icon: ImagePlus, description: "Izradi ilustraciju označenu kao AI sadržaj." },
     { id: "quality", label: "Pomoć pri greškama", icon: ShieldCheck, description: "Protumači tehničku poruku i dobij prijedlog provjere." }
   ], []);
@@ -89,6 +91,30 @@ export default function AICenter() {
     } catch (err) {
       setError("Čitanje naglas nije uspjelo. Dostupnost hrvatskog glasa ovisi o Puterovom modelu. " + (err?.message || ""));
     } finally { setBusy(false); }
+  }
+
+  async function transcribeAudio(event) {
+    event.preventDefault();
+    const file = event.currentTarget.elements.namedItem("ai-audio-file")?.files?.[0];
+    if (!file || busy) return;
+    if (file.size > 15 * 1024 * 1024) {
+      setError("Audio datoteka mora biti manja od 15 MB.");
+      return;
+    }
+    setBusy(true); setTranscribing(true); setError(""); setStatus("");
+    try {
+      const result = await puter.ai.speech2txt(file);
+      const transcript = getText(result).trim();
+      if (!transcript || transcript === "[object Object]") {
+        setError("AI nije vratio čitljiv prijepis. Pokušaj s jasnijom ili kraćom snimkom.");
+      } else {
+        setPrompt(transcript.slice(0, 3000));
+        setAudioName(file.name);
+        setStatus("Prijepis je spreman u polju pitanja. Pregledaj ga i pritisni „Pošalji pitanje” kada želiš nastaviti.");
+      }
+    } catch (err) {
+      setError("Pretvaranje govora u tekst nije uspjelo. Provjeri format i pokušaj s kraćom snimkom. " + (err?.message || ""));
+    } finally { setBusy(false); setTranscribing(false); }
   }
 
   async function readImage(event) {
@@ -170,6 +196,7 @@ export default function AICenter() {
             {busy && <div className="ai-thinking"><LoaderCircle size={17} className="ai-spin" /> AI priprema odgovor…</div>}
           </div>
           <form className="ai-prompt-form" onSubmit={handleSubmit}><textarea value={prompt} onChange={(event) => setPrompt(event.target.value)} rows={3} maxLength={3000} placeholder="Upiši pitanje na hrvatskom…" aria-label="Pitanje za AI" /><div className="ai-prompt-footer"><small>{prompt.length}/3000 · Ne dijeli osjetljive podatke.</small><button type="submit" disabled={busy || !prompt.trim()}><Send size={16} /> Pošalji pitanje</button></div></form>
+          {mode === "voice" && <div className="ai-feature-card ai-voice-input-card"><form className="ai-form" onSubmit={transcribeAudio}><label htmlFor="ai-audio-file">Postavi pitanje glasom</label><input id="ai-audio-file" name="ai-audio-file" type="file" accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg" /><p className="ai-muted">Učitaj kratku snimku do 15 MB. AI će je pretvoriti u tekst, a ti možeš pregledati prijepis prije slanja pitanja. Ne učitavaj privatne razgovore drugih osoba bez dopuštenja.</p><button type="submit" disabled={busy}><Volume2 size={16} />{transcribing ? "Prepoznajem govor…" : "Pretvori govor u pitanje"}</button>{audioName && <small className="ai-muted">Zadnja uspješna snimka: {audioName}</small>}</form></div>}
           <div className="ai-chat-actions"><button type="button" className="ai-secondary-button" onClick={readLastAnswer} disabled={busy || !messages.some((item) => item.role === "assistant")}><Volume2 size={16} /> Pročitaj zadnji odgovor</button><button type="button" className="ai-secondary-button" onClick={() => { setMessages([]); setError(""); setStatus(""); }} disabled={!messages.length || busy}>Novi razgovor</button></div>
         </>}
         {mode === "archive" && <div className="ai-feature-card"><form className="ai-form" onSubmit={readImage}><label htmlFor="ai-archive-image">Odaberi fotografiju ili skenirani dokument</label><input id="ai-archive-image" type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => { const file = event.target.files?.[0]; if (!file) return; if (file.size > 5 * 1024 * 1024) { setError("Slika mora biti manja od 5 MB."); return; } const reader = new FileReader(); reader.onload = () => { setImageData(String(reader.result || "")); setImageName(file.name); setError(""); setStatus(""); }; reader.onerror = () => setError("Datoteku nije moguće pročitati."); reader.readAsDataURL(file); }} />{imageData && <div className="ai-image-preview"><img src={imageData} alt="Pregled odabrane slike" /><span>{imageName}</span><button type="button" onClick={() => { setImageData(""); setImageName(""); }}>Ukloni</button></div>}<p className="ai-muted">Sliku obrađuje AI usluga. Ne učitavaj dokumente s adresama, osobnim identifikacijskim podacima ili povjerljivim sadržajem.</p><button type="submit" disabled={!imageData || busy}><Camera size={16} />{busy ? "Analiziram…" : "Analiziraj materijal"}</button></form></div>}
