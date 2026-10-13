@@ -47,6 +47,9 @@ const initialPosts = [
 
 const navItems = [
   { icon: "⌂", label: "Zid zajednice" },
+  { icon: "🧠", label: "Kviz" },
+  { icon: "▤", label: "Forum" },
+  { icon: "▣", label: "Stranice" },
   { icon: "👥", label: "Čuvari nasljeđa" },
   { icon: "▦", label: "Grupe" },
   { icon: "▣", label: "Događaji" },
@@ -1691,8 +1694,8 @@ function App() {
           </a>
           <section className="side-section sidebar-nav-section">
             <h3>MOJA ZAJEDNICA</h3>
-            {navItems.filter((item) => ["Zid zajednice", "Čuvari nasljeđa", "Grupe"].includes(item.label)).map((item) => (
-              <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => setActiveNav(item.label)}>
+            {navItems.filter((item) => ["Zid zajednice", "Kviz", "Forum", "Stranice", "Čuvari nasljeđa", "Grupe"].includes(item.label)).map((item) => (
+              <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => item.label === "Kviz" ? (window.location.href = "/kviz/") : setActiveNav(item.label)}>
                 <span className="side-icon">{item.icon}</span><span className="side-link-label">{item.label}</span>
                 {item.label === "Čuvari nasljeđa" && <span className="side-count">{memberDirectory.length || ""}</span>}
                 {item.label === "Grupe" && <span className="side-count">{groupChats.length || ""}</span>}
@@ -1779,6 +1782,25 @@ function App() {
               <img src="/assets/images/PATRIA_SOUL_ORIGINAL_ISPRAVLJEN_GRB.png" alt="Izvorni ispravljeni grb PatriaSoul" />
               <span aria-hidden="true">Pogledaj sliku</span>
             </button>
+          </section>
+
+          <section className="community-hub-links" aria-label="Istraži PatriaSoul sadržaje">
+            <div className="community-hub-heading">
+              <span className="eyebrow">SVE NA JEDNOM MJESTU</span>
+              <h2>Istraži zajednicu</h2>
+              <p>Kviz, razgovori i stranice zajednice povezani su s glavnim zidom.</p>
+            </div>
+            <div className="community-hub-grid">
+              <a className="community-hub-card quiz-hub-card" href="/kviz/">
+                <span className="community-hub-icon">🧠</span><span className="community-hub-copy"><strong>PatriaSoul kviz</strong><small>Provjeri znanje i podijeli svoj rezultat.</small></span><span className="community-hub-arrow">↗</span>
+              </a>
+              <button className="community-hub-card" type="button" onClick={() => { setActiveNav("Forum"); setNotice("Forum je dodan u navigaciju. Sljedeći korak je sigurno povezivanje njegovih rubrika i tema s ovim Supabase projektom."); }}>
+                <span className="community-hub-icon">▤</span><span className="community-hub-copy"><strong>Domoljubni forum</strong><small>Teme, pitanja i razgovori o Hrvatskoj.</small></span><span className="community-hub-arrow">›</span>
+              </button>
+              <button className="community-hub-card" type="button" onClick={() => { setActiveNav("Stranice"); setNotice("Otvorene su Stranice zajednice. U sljedećem koraku povezujemo popis stranica i njihove objave s bazom."); }}>
+                <span className="community-hub-icon">▣</span><span className="community-hub-copy"><strong>Stranice zajednice</strong><small>Pronađi i prati tematske stranice.</small></span><span className="community-hub-arrow">›</span>
+              </button>
+            </div>
           </section>
 
           {brandImageOpen && (
