@@ -34,7 +34,7 @@ create index if not exists posts_author_id_idx on public.posts (author_id, creat
 
 create table if not exists public.comments (
   id uuid primary key default gen_random_uuid(),
-  post_id uuid not null references public.posts(id) on delete cascade,
+  post_id uuid references public.posts(id) on delete set null,
   author_id uuid not null references public.profiles(id) on delete cascade,
   body text not null,
   created_at timestamptz not null default now(),
@@ -210,8 +210,41 @@ create policy "content_reports_insert_own" on public.content_reports
   for insert to authenticated
   with check (reporter_id = (select auth.uid()));
 
--- Intentionally no member SELECT/UPDATE/DELETE policy. Moderator access needs a
--- separately designed, server-enforced role system before it is enabled.
+-- Reports and block lists are private. Guests have no table privileges.
+revoke all privileges on table public.content_reports from anon;
+grant select, insert, update on table public.content_reports to authenticated;
+revoke all privileges on table public.blocked_users from anon;
+grant select, insert, delete on table public.blocked_users to authenticated;
+
+-- Only the network owner may read and update moderation reports.
+drop policy if exists owner_select_content_reports on public.content_reports;
+create policy owner_select_content_reports on public.content_reports
+  for select to authenticated
+  using (lower(coalesce(auth.jwt() ->> 'email', '')) = 'patriasoul@protonmail.com');
+drop policy if exists owner_update_content_reports on public.content_reports;
+create policy owner_update_content_reports on public.content_reports
+  for update to authenticated
+  using (lower(coalesce(auth.jwt() ->> 'email', '')) = 'patriasoul@protonmail.com')
+  with check (
+    lower(coalesce(auth.jwt() ->> 'email', '')) = 'patriasoul@protonmail.com'
+    and status in ('pending', 'reviewed', 'dismissed', 'actioned')
+  );
+
+-- Keep a report even when its post is removed during moderation.
+alter table public.content_reports alter column post_id drop not null;
+alter table public.content_reports drop constraint if exists content_reports_post_id_fkey;
+alter table public.content_reports add constraint content_reports_post_id_fkey
+  foreign key (post_id) references public.posts(id) on delete set null;
+
+-- Owner-only removal policies; members still retain their own-row policies.
+drop policy if exists owner_delete_posts on public.posts;
+create policy owner_delete_posts on public.posts
+  for delete to authenticated
+  using (lower(coalesce(auth.jwt() ->> 'email', '')) = 'patriasoul@protonmail.com');
+drop policy if exists owner_delete_comments on public.comments;
+create policy owner_delete_comments on public.comments
+  for delete to authenticated
+  using (lower(coalesce(auth.jwt() ->> 'email', '')) = 'patriasoul@protonmail.com');
 
 -- Public wall photos are viewable through short-lived signed URLs.
 -- This SELECT policy allows signing community-image URLs for public posts; keep
