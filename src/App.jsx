@@ -21,9 +21,10 @@ function BrandMark() {
   return <img className="brand-mark" src="/assets/images/1000000982.png" alt="" aria-hidden="true" />;
 }
 
-function Avatar({ initials, variant = "" }) {
-  return <div className={`avatar ${variant}`}>{initials}</div>;
-}
+function Avatar({ initials, variant = "", src = "" }) {
+  return <div className={`avatar ${variant}`}>
+    {src ? <img src={src} alt="" loading="lazy" onError={(event) => { event.currentTarget.remove(); }} /> : initials}
+  </div>;
 
 function WeatherSidebar() {
   const [weather, setWeather] = useState({ loading: true, temp: null, code: null, city: "Zagreb" });
@@ -110,6 +111,7 @@ function App() {
   const [profileName, setProfileName] = useState("");
   const [profileUsername, setProfileUsername] = useState("");
   const [profileBio, setProfileBio] = useState("");
+  const [profileAvatarUrl, setProfileAvatarUrl] = useState("");
   const [profileBusy, setProfileBusy] = useState(false);
   const [profileMessage, setProfileMessage] = useState("");
   const [reportPost, setReportPost] = useState(null);
@@ -280,7 +282,7 @@ function App() {
       }
       const { data, error } = await supabase
         .from("posts")
-        .select("id, author_id, body, image_path, created_at, profiles(display_name, username)")
+        .select("id, author_id, body, image_path, created_at, profiles(display_name, username, avatar_url)")
         .order("created_at", { ascending: false })
         .limit(50);
       if (cancelled) return;
@@ -346,7 +348,7 @@ function App() {
         }
         const { data: commentRows, error: commentsError } = await supabase
           .from("comments")
-          .select("id, post_id, author_id, body, created_at, profiles(display_name, username)")
+          .select("id, post_id, author_id, body, created_at, profiles(display_name, username, avatar_url)")
           .in("post_id", postIds)
           .order("created_at", { ascending: true });
         if (cancelled) return;
@@ -390,10 +392,11 @@ function App() {
       setProfileName(metadata.display_name || "");
       setProfileUsername(metadata.username || "");
       setProfileBio(metadata.bio || "");
+      setProfileAvatarUrl("");
       if (!supabase || !session?.user?.id) return;
       const { data, error } = await supabase
         .from("profiles")
-        .select("username, display_name, bio")
+        .select("username, display_name, bio, avatar_url")
         .eq("id", session.user.id)
         .maybeSingle();
       if (cancelled) return;
@@ -406,6 +409,7 @@ function App() {
         setProfileName(data.display_name || "");
         setProfileUsername(data.username || "");
         setProfileBio(data.bio || "");
+        setProfileAvatarUrl(data.avatar_url || "");
         setProfileMessage("");
       }
     }
@@ -556,7 +560,7 @@ function App() {
       setMemberDirectoryBusy(true);
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, display_name, username, bio, created_at")
+        .select("id, display_name, username, bio, avatar_url, created_at")
         .neq("id", session.user.id)
         .order("display_name", { ascending: true })
         .limit(100);
@@ -1516,7 +1520,7 @@ function App() {
     const { data, error } = await supabase
       .from("comments")
       .insert({ post_id: id, author_id: session.user.id, body: text })
-      .select("id, post_id, author_id, body, created_at, profiles(display_name, username)")
+      .select("id, post_id, author_id, body, created_at, profiles(display_name, username, avatar_url)")
       .single();
     if (error) {
       setNotice("Komentar nije spremljen: " + (error.message || "provjeri tablicu comments i RLS pravila."));
@@ -2161,7 +2165,7 @@ function App() {
                       const displayName = member.display_name || member.username || "Čuvar nasljeđa";
                       const initials = displayName.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN";
                       return <article className="member-directory-card" key={member.id}>
-                        <Avatar initials={initials} />
+                        <Avatar initials={initials} src={member.avatar_url} />
                         <div className="member-directory-info"><strong>{displayName}</strong><span>@{member.username || "clan"}</span><span className={"member-presence-status " + getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).state}><i aria-hidden="true" />{getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).label}</span><p>{member.bio || "Ovaj član još nije dodao opis profila."}</p></div>
                         <button type="button" className="post-menu-button danger" disabled={blockBusyId === member.id} onClick={() => toggleBlockMember({ authorId: member.id, author: displayName, handle: "@" + (member.username || "clan") })}>{blockedMembers.some((blocked) => blocked.id === member.id) ? "Odblokiraj" : "Blokiraj"}</button>
                       </article>;
@@ -2294,7 +2298,7 @@ function App() {
                   <button type="button" className="avatar avatar-community avatar-community-image" onClick={() => setBrandImageOpen(true)} aria-label="Otvori grb PatriaSoul">
                     <img src="/assets/images/PATRIA_SOUL_ORIGINAL_ISPRAVLJEN_GRB.png" alt="" />
                   </button>
-                ) : <Avatar initials={post.initials} />}
+                ) : <Avatar initials={post.initials} src={post.avatarUrl} />}
                 <div className="post-author">
                   <strong>{post.author}</strong>
                   <span>{post.handle} <b>·</b> {post.time}</span>
@@ -2371,7 +2375,7 @@ function App() {
                   <div className="comments-list">
                     {(commentsByPost[post.id] || []).length ? (commentsByPost[post.id] || []).map((comment) => (
                       <div className="comment-item" key={comment.id}>
-                        <Avatar initials={comment.initials} variant={comment.owner ? "avatar-you" : ""} />
+                        <Avatar initials={comment.initials} src={comment.avatarUrl} variant={comment.owner ? "avatar-you" : ""} />
                         <div className="comment-bubble"><strong>{comment.author}</strong><p>{comment.text}</p>{comment.owner && <button type="button" className="comment-delete-button" onClick={() => deleteOwnComment(post.id, comment)}>Izbriši svoj komentar</button>}</div>
                       </div>
                     )) : <p className="comments-empty">Još nema komentara uz ovu objavu.</p>}
@@ -2448,25 +2452,64 @@ function App() {
             <strong>NAČELO ZAJEDNICE</strong>
           </section>
 
-          <footer className="right-footer">
-            <a href="/kviz/">Početna / PatriaSoul kviz</a>
-            <a href="/kviz/?mode=croatian">Hrvatski kviz</a>
-            <a href="/kviz/?mode=city">Brani svoj grad</a>
-            <a href="/kviz/?mode=daily">Dnevni kviz</a>
-            <a href="/kviz/?mode=leaderboard">Rang-lista</a>
-            <a href="/kviz/?mode=account">Prijava / Moj račun</a>
-            <a href="/pravila-koristenja.html">Pravila korištenja</a>
-            <a href="/pravila-zajednice.html">Pravila zajednice</a>
-            <a href="/kviz/rules.html">Pravilnik o igranju kviza</a>
-            <a href="/kviz/terms.html">Uvjeti korištenja</a>
-            <a href="/privatnost.html">Politika privatnosti</a>
-            <a href="/kviz/about.html">O PatriaSoul</a>
-            <a href="/kviz/contact.html">Kontakt</a>
-            <p>© 2026 PatriaSoul. Sva prava pridržana.</p>
-            <small>Hrvatska · Povijest · Znanje · Identitet</small>
-          </footer>
+
         </aside>
       </main>
+
+      <footer className="community-site-footer">
+        <div className="community-site-footer-grid">
+          <section className="community-footer-brand">
+            <a href="/" className="community-footer-logo" aria-label="PatriaSoul — Čuvari nasljeđa">
+              <img src="/assets/images/1000000982.png" alt="PatriaSoul" />
+              <span><strong>PatriaSoul</strong><small>ČUVARI NASLJEĐA</small></span>
+            </a>
+            <p>Hrvatska · povijest · znanje · identitet.</p>
+            <p>Prostor za učenje, igru i čuvanje priča koje čine naše nasljeđe.</p>
+            <strong className="community-footer-motto">Znanje · Ponos · Nasljeđe</strong>
+            <a className="community-footer-return" href="/">Povratak na zid zajednice <span aria-hidden="true">→</span></a>
+          </section>
+          <section>
+            <h2>Brzi izbornik</h2>
+            <nav aria-label="Brza navigacija podnožja">
+              <a href="/">Zid zajednice</a>
+              <a href="/kviz/">PatriaSoul kviz</a>
+              <a href="/kviz/?mode=croatian">Hrvatski kviz</a>
+              <a href="/kviz/?mode=city">Brani svoj grad</a>
+              <a href="/kviz/?mode=daily">Dnevni kviz</a>
+              <a href="/kviz/?mode=leaderboard">Rang-lista</a>
+              <a href="/forum.html">Forum zajednice</a>
+              <a href="/stranice.html">Stranice zajednice</a>
+              <a href="/dogadaji.html">Događaji</a>
+            </nav>
+          </section>
+          <section>
+            <h2>Prati nas</h2>
+            <div className="community-footer-social">
+              <strong>PatriaSoul</strong>
+              <p>Prati kratke priče, zanimljivosti i kvizove o Hrvatskoj.</p>
+              <a href="https://www.tiktok.com/@patriasoul" target="_blank" rel="noreferrer">Prati nas na TikToku <span aria-hidden="true">↗</span></a>
+            </div>
+            <div className="community-footer-social faith">
+              <strong>Vjera · Yeshua</strong>
+              <p>Vjera, nada i istina kroz priču o Yeshui — Isusu Kristu.</p>
+              <a href="https://www.tiktok.com/@hajdi331?lang=hr" target="_blank" rel="noreferrer">Prati vjerski kanal <span aria-hidden="true">↗</span></a>
+            </div>
+          </section>
+          <div className="community-footer-legal">
+            <nav aria-label="Pravne informacije">
+              <a href="/pravila-koristenja.html">Pravila korištenja</a>
+              <a href="/pravila-zajednice.html">Pravila zajednice</a>
+              <a href="/kviz/rules.html">Pravilnik o igranju kviza</a>
+              <a href="/kviz/terms.html">Uvjeti korištenja</a>
+              <a href="/privatnost.html">Politika privatnosti</a>
+              <a href="/kviz/about.html">O PatriaSoul</a>
+              <a href="/kviz/contact.html">Kontakt</a>
+            </nav>
+            <p>© 2026 PatriaSoul. Sva prava pridržana.</p>
+            <small>Hrvatska · Povijest · Znanje · Identitet</small>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
