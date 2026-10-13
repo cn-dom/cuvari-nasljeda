@@ -161,6 +161,7 @@ export default function Admin() {
       <section className="admin-workspace">
         <div className="admin-page-heading"><div><span className="admin-eyebrow">{current.group}</span><h1>{current.title}</h1><p>{current.description}</p></div><button type="button" className="admin-button secondary" onClick={() => { setActiveModule("overview"); setQuery(""); }}>Pregled sustava</button></div>
         {notice && <div className="admin-notice" role="status">{notice}<button type="button" onClick={() => setNotice("")} aria-label="Zatvori poruku">×</button></div>}
+        {activeModule === "members" && <div className="admin-notice" role="note">Ovaj modul trenutačno omogućuje siguran pregled i pretraživanje profila. Zaključavanje ili brisanje korisničkog računa nije aktivirano jer to mora prolaziti kroz provjereni poslužiteljski postupak, a ne samo kroz sučelje preglednika.</div>}
         {activeModule === "overview" ? (
           <section className="admin-table-card">
             <div className="admin-table-heading">
