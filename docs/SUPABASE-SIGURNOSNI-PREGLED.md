@@ -73,7 +73,7 @@ Ovaj dokument bilježi nalaze i predložene popravke; ne tvrdi da su stavke ozna
 
 ### Kvizni klijent: dobar znak, uz preostalu provjeru baze
 
-Pregledani su `kviz/src/lib/mainQuiz.js`, `kviz/src/lib/cityQuiz.js` i `kviz/src/lib/attempts.js`. Glavni i gradski kviz čitaju pitanja iz pogleda `quiz_questions_public` i `city_questions_public`, a popisi kolona koje traže ne uključuju `correct_index). Odgovor se predaje kroz RPC `submit_quiz_answer`, a završetak kroz `finish_quiz_attempt`. To je ispravan smjer dizajna jer klijent ne mora dobiti ključ odgovora.
+Pregledani su `kviz/src/lib/mainQuiz.js`, `kviz/src/lib/cityQuiz.js` i `kviz/src/lib/attempts.js`. Glavni i gradski kviz čitaju pitanja iz pogleda `quiz_questions_public` i `city_questions_public`, a popisi kolona koje traže ne uključuju `correct_index`. Odgovor se predaje kroz RPC `submit_quiz_answer`, a završetak kroz `finish_quiz_attempt`. To je ispravan smjer dizajna jer klijent ne mora dobiti ključ odgovora.
 
 To još nije potpuni dokaz zaštite: potrebno je potvrditi da pogledi ne izlažu ključ preko drugih putova i da `submit_quiz_answer` / `finish_quiz_attempt` provjeravaju vlasništvo pokušaja, aktivnost pokušaja, valjanost pitanja i bodovanje na strani baze. Klijent također ima pomoćnu funkciju koja broji aktivna pitanja iz `quiz_questions`; ona traži samo broj redaka, ne odgovore.
 
