@@ -88,3 +88,20 @@ Pregled aktivne Supabase Edge Function `patria-ai` pokazao je:
 **Nisam mijenjao tu funkciju** jer promjena `verify_jwt` bez provjere svih pozivatelja može prekinuti postojeći AI portal. Prije popravka treba utvrditi gdje se funkcija poziva i koji klijenti šalju autentikacijski token. Preporučeni popravak: poslužiteljska provjera prijave i ovlasti (ako AI nije namijenjen anonimnim posjetiteljima), ograničenje učestalosti/kvote, ograničenje duljine ulaza, pouzdana server-side sistemska pravila te jasno odvajanje nepouzdanog konteksta od uputa. Nikada ne slati ovom endpointu ključeve službenog kviza, tajne, privatne poruke ili administratorske podatke.
 
 Ovaj endpoint je odvojen od aktualnog `src/AICenter.jsx`, koji koristi Puter.js; nalaz se odnosi na aktivnu Supabase funkciju i svaki portal koji je poziva.
+
+## Sljedeći konkretan korak: read-only SQL provjera
+
+Dodana je skripta [`docs/sql/security-rpc-preflight.sql`](https://github.com/cn-dom/cuvari-nasljeda/blob/main/docs/sql/security-rpc-preflight.sql). Ona samo čita metapodatke i vraća:
+- RLS uključenost za ključne tablice;
+- postojeće RLS politike i njihove uvjete;
+- tablične dozvole za `anon` i `authenticated`;
+- definicije javnih kviznih pogleda;
+- funkcije `SECURITY DEFINER` i njihove EXECUTE dozvole;
+- polja profila povezana s ovlastima.
+
+Skripta **ne mijenja bazu**. Rezultate treba pregledati prije izrade migracije, posebno za `profiles.role`, administratorske RPC funkcije, privatne poruke i javne kvizne poglede.
+
+### Dodatna napomena o administratorskom sučelju
+
+U `src/Admin.jsx` sučelje provjerava vlasničku e-mail adresu prije učitavanja modula, što je korisno za prikaz sučelja, ali nije samostalna zaštita. Prava zaštita mora biti u RLS pravilima i u tijelu svake administratorske RPC funkcije. Kod klijenta koristi izravne upite za pojedine administratorske tablice, pa je osobito važno potvrditi da običan član ne može dobiti iste retke izravnim API pozivom.
+
