@@ -295,7 +295,9 @@ function App() {
     let cancelled = false;
     async function loadCommunityFeed() {
       if (!supabase) {
-        setPosts(initialPosts);
+        setPosts([]);
+        setCommentsByPost({});
+        setNotice("Zid je u probnom prikazu, ali baza još nije povezana. Poveži zasebni testni Supabase projekt prije testiranja objava i interakcija.");
         return;
       }
       let blockedIds = [];
@@ -324,8 +326,9 @@ function App() {
         .limit(50);
       if (cancelled) return;
       if (error) {
-        setNotice("Zid nije učitan iz baze. Provjeri postoji li tablica posts i jesu li RLS pravila primijenjena. Prikazuju se samo ogledne objave.");
-        setPosts(initialPosts);
+        setNotice("Zid nije učitan iz baze. Prikaz oglednih objava je isključen kako se testni podaci ne bi zamijenili stvarnim sadržajem. Provjeri tablicu posts i RLS pravila.");
+        setPosts([]);
+        setCommentsByPost({});
         return;
       }
       const rows = await Promise.all((data || []).filter((row) => !blockedIds.includes(row.author_id)).map(async (row) => {
