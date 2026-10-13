@@ -1436,6 +1436,7 @@ function App() {
     setPosts((current) => [{
       id: data.id,
       initials: author.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
+      avatarUrl: profile.avatar_url || "",
       author,
       handle: "@" + username,
       time: new Date(data.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" }),
