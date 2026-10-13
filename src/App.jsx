@@ -367,7 +367,7 @@ function App() {
           (reactionRows || []).forEach((row) => {
             if (!reactionCounts[row.post_id]) reactionCounts[row.post_id] = 0;
             if (row.reaction === "like") reactionCounts[row.post_id] += 1;
-            if (row.user_id === session.user.id) {
+            if (session?.user?.id && row.user_id === session.user.id) {
               ownReactions[row.post_id] = ({ like: "❤️", patriotism: "🇭🇷", gratitude: "🙏", support: "👏" })[row.reaction] || "";
             }
           });
@@ -397,7 +397,7 @@ function App() {
               author,
               initials: author.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
               text: row.body || "",
-              owner: row.author_id === session.user.id,
+              owner: Boolean(session?.user?.id && row.author_id === session.user.id),
             });
           });
           setCommentsByPost(grouped);
