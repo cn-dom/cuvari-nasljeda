@@ -137,8 +137,8 @@ export default function Admin() {
     if (deleteError) { setNotice("Objava nije uklonjena. Provjeri vlasnička pravila i povezane tablice."); return; }
     const { data, error: statusError } = await supabase.from("content_reports").update({ status: "actioned" }).eq("id", report.id).select("id,status").maybeSingle();
     if (statusError || !data) {
-      setNotice("Objava je uklonjena, ali status prijave nije ažuriran.");
-      setRows(current => current.filter(item => item.id !== report.id));
+      setNotice("Objava je uklonjena, ali status prijave nije ažuriran. Prijava je ostavljena u tablici radi naknadne provjere.");
+      setRows(current => current.map(item => item.id === report.id ? { ...item, post_id: null } : item));
       return;
     }
     setRows(current => current.map(item => item.id === report.id ? { ...item, status: "actioned" } : item));
