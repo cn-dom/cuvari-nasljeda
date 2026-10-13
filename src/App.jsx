@@ -687,7 +687,7 @@ function App() {
       if (cancelled) return;
       if (error) {
         setAdminReports([]);
-        setAdminError("Prijave se ne mogu učitati. Potrebno je pregledati i primijeniti docs/sql/owner-admin-policies.sql u potvrđenoj testnoj bazi.");
+        setAdminError("Prijave se ne mogu učitati. Potrebno je pregledati i primijeniti docs/sql/community-core.sql u potvrđenoj testnoj bazi.");
       } else { setAdminReports(data || []); setAdminError(""); }
       setAdminBusy(false);
     }
