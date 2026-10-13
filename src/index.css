@@ -1379,3 +1379,22 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
 .admin-module-status-card{display:grid;gap:12px}
 .admin-module-status-card>.admin-button{justify-self:start}
 @media(max-width:720px){.admin-security-grid{grid-template-columns:1fr}.admin-security-card{padding:16px}}
+
+
+/* PatriaSoul identity and follow links on the community wall */
+.patriasoul-promo-card { display: grid; gap: 12px; }
+.patriasoul-promo-brand { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
+.patriasoul-promo-brand img { display: block; width: 58px; height: 58px; flex: 0 0 58px; object-fit: contain; border-radius: 13px; }
+.patriasoul-promo-brand span { display: grid; gap: 4px; }
+.patriasoul-promo-brand strong { font-size: 1.12rem; line-height: 1.2; }
+.patriasoul-promo-brand small { color: var(--muted, #718096); font-size: .8rem; }
+.patriasoul-promo-tagline { margin: 0; font-weight: 800; font-size: .9rem; }
+.patriasoul-promo-copy { margin: 0; color: var(--muted, #718096); font-size: .84rem; line-height: 1.6; }
+.patriasoul-promo-motto { color: #b33a43; font-size: .82rem; letter-spacing: .025em; }
+.patriasoul-promo-links { display: grid; gap: 9px; }
+.patriasoul-promo-links a { display: grid; gap: 5px; padding: 12px; border: 1px solid rgba(130,153,184,.22); border-radius: 12px; color: inherit; text-decoration: none; background: rgba(130,153,184,.055); transition: border-color .18s ease, background .18s ease; }
+.patriasoul-promo-links a:hover { border-color: rgba(80,132,196,.65); background: rgba(80,132,196,.09); }
+.patriasoul-promo-links a strong { font-size: .86rem; }
+.patriasoul-promo-links a span { color: var(--muted, #718096); font-size: .78rem; line-height: 1.5; }
+.right-footer { display: grid; gap: 9px; }
+.right-footer small { color: var(--muted, #718096); font-size: .72rem; line-height: 1.5; }
