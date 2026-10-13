@@ -3,48 +3,6 @@ import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 import { Picker } from "emoji-mart";
 import emojiData from "@emoji-mart/data";
 
-const initialPosts = [
-  {
-    id: 1,
-    initials: "ČN",
-    author: "Čuvari nasljeđa",
-    handle: "@cuvari_nasljeda",
-    time: "Istaknuta objava",
-    tag: "BAŠTINA",
-    text: "Dobro došli u PatriaSoul – Čuvari nasljeđa. Ovdje čuvamo priče naših obitelji, mjesta, običaja i ljudi koji su oblikovali Hrvatsku. Svaka uspomena vrijedna je čuvanja i prenošenja novim naraštajima.",
-    likes: 18,
-    comments: 4,
-    icon: "🏛️",
-    owner: false,
-  },
-  {
-    id: 2,
-    initials: "MK",
-    author: "Marija K.",
-    handle: "@marija_prica",
-    time: "Prije 24 min",
-    tag: "OBITELJSKE PRIČE",
-    text: "Danas sam od bake zapisala recept koji se u našoj obitelji prenosi generacijama. Voljela bih da ovdje s vremenom skupimo ovakve male priče iz svih krajeva Hrvatske. Što se u vašoj obitelji čuva i prenosi?",
-    likes: 12,
-    comments: 7,
-    icon: "🧵",
-    owner: false,
-  },
-  {
-    id: 3,
-    initials: "IP",
-    author: "Ivan P.",
-    handle: "@ivan_povijest",
-    time: "Prije 1 h",
-    tag: "POVIJEST",
-    text: "Poziv zajednici: podijelite fotografiju starog predmeta, obiteljske isprave ili mjesta koje ima posebno značenje za vaš kraj. Ako znate priču iza predmeta, napišite je uz fotografiju i navedite izvor kad je poznat.",
-    likes: 9,
-    comments: 2,
-    icon: "📜",
-    owner: false,
-  },
-];
-
 const navItems = [
   { icon: "⌂", label: "Zid zajednice" },
   { icon: "🧠", label: "Kviz" },
