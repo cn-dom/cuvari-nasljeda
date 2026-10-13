@@ -65,8 +65,12 @@ export default function Forum() {
     event.preventDefault();
     if (!session?.user?.id) { setNotice("Za otvaranje teme prijavi se računom Čuvari nasljeđa."); return; }
     if (!activeCategory) return;
+    const cleanTitle = title.trim();
+    const cleanBody = body.trim();
+    if (cleanTitle.length < 5 || cleanTitle.length > 160) { setError("Naslov teme mora imati od 5 do 160 znakova."); return; }
+    if (!cleanBody || cleanBody.length > 10000) { setError("Prva poruka je obavezna i može imati najviše 10.000 znakova."); return; }
     setBusy(true); setError(""); setNotice("");
-    const { data, error: saveError } = await supabase.from("forum_topics").insert({ category_id: activeCategory, user_id: session.user.id, title: title.trim(), body: body.trim() }).select("id").single();
+    const { data, error: saveError } = await supabase.from("forum_topics").insert({ category_id: activeCategory, user_id: session.user.id, title: cleanTitle, body: cleanBody }).select("id").single();
     if (saveError) { setError(saveError.message || "Tema nije spremljena."); setBusy(false); return; }
     const { data: created, error: fetchError } = await supabase.from("forum_topics").select("id,category_id,user_id,title,body,status,is_pinned,created_at,profiles(display_name,username),forum_categories(name,slug)").eq("id", data.id).single();
     if (fetchError) { setNotice("Tema je spremljena. Osvježi popis kako bi se prikazala."); await loadTopics(activeCategory); }
@@ -77,9 +81,11 @@ export default function Forum() {
   async function addReply(event) {
     event.preventDefault();
     if (!session?.user?.id) { setNotice("Za odgovor se prvo prijavi."); return; }
-    if (!reply.trim() || !activeTopic) return;
+    const cleanReply = reply.trim();
+    if (!activeTopic) return;
+    if (!cleanReply || cleanReply.length > 5000) { setError("Odgovor je obavezan i može imati najviše 5.000 znakova."); return; }
     setBusy(true); setError("");
-    const { data, error: saveError } = await supabase.from("forum_posts").insert({ topic_id: activeTopic.id, user_id: session.user.id, content: reply.trim() }).select("id,user_id,content,parent_id,created_at").single();
+    const { data, error: saveError } = await supabase.from("forum_posts").insert({ topic_id: activeTopic.id, user_id: session.user.id, content: cleanReply }).select("id,user_id,content,parent_id,created_at").single();
     if (saveError) setError(saveError.message || "Odgovor nije spremljen.");
     else setReplies(current => [...current, { ...data, profiles: { display_name: session.user.user_metadata?.display_name || session.user.email } }]);
     setReply(""); setBusy(false);
