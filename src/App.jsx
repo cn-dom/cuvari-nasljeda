@@ -1418,7 +1418,7 @@ function App() {
     const { data, error } = await supabase
       .from("posts")
       .insert({ author_id: session.user.id, body: text, image_path: imagePath || null })
-      .select("id, author_id, body, image_path, created_at, profiles(display_name, username)")
+      .select("id, author_id, body, image_path, created_at, profiles(display_name, username, avatar_url)")
       .single();
     if (error) {
       if (imagePath) await supabase.storage.from("community-images").remove([imagePath]);
