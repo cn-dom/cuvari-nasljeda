@@ -862,19 +862,17 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
   background: linear-gradient(100deg, #061526 0%, #0a2740 45%, #123f60 100%);
 }
 .welcome-photo-layer { position: absolute; z-index: -1; inset: 0; overflow: hidden; }
+.welcome-hero-image {
+  display: block; width: 100%; height: 100%; min-height: 230px;
+  object-fit: cover; object-position: center 48%;
+}
 .welcome-photo-layer::before {
-  content: ""; position: absolute; inset: 0;
+  content: ""; position: absolute; inset: 0; z-index: 1;
   background:
-    linear-gradient(90deg, #061526 0%, #061526ed 27%, #0615269c 52%, #06152620 100%),
-    linear-gradient(0deg, #061526a8, transparent 52%),
-    radial-gradient(ellipse at 72% 16%, #ffc178 0%, #c77761 13%, #285b79 38%, #0b233a 70%);
+    linear-gradient(90deg, #061526f5 0%, #061526d9 31%, #0615267a 57%, #06152620 100%),
+    linear-gradient(0deg, #06152670, transparent 58%);
 }
-.welcome-photo-layer::after {
-  content: ""; position: absolute; left: 43%; right: -4%; bottom: -10%;
-  height: 48%; border-radius: 50% 50% 0 0;
-  background: linear-gradient(180deg, #174f6b, #071b2d 80%);
-  transform: rotate(-5deg); box-shadow: 0 -18px 45px #f4b46a18;
-}
+.welcome-photo-layer::after { content: none; }
 .welcome-landscape-sun {
   position: absolute; width: 72px; height: 72px; right: 25%; top: 19%;
   border-radius: 50%; background: #ffcc88; opacity: .8;
