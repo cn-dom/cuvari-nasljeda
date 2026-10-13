@@ -48,9 +48,13 @@ export default function Pages() {
   async function createPage(event) {
     event.preventDefault();
     if (!session?.user?.id) { setNotice("Za izradu stranice potrebno je prijaviti se."); return; }
+    const cleanName = name.trim();
+    const cleanDescription = description.trim();
+    if (cleanName.length < 3 || cleanName.length > 80) { setError("Naziv stranice mora imati od 3 do 80 znakova."); return; }
+    if (cleanDescription.length > 1000) { setError("Opis može imati najviše 1.000 znakova."); return; }
     setBusy(true); setError(""); setNotice("");
-    const baseSlug = slugify(name);
-    const { data, error: saveError } = await supabase.from("community_pages").insert({ slug: baseSlug + "-" + Math.random().toString(36).slice(2, 7), name: name.trim(), description: description.trim(), category, created_by: session.user.id }).select("id,slug,name,description,category,created_by,created_at").single();
+    const baseSlug = slugify(cleanName);
+    const { data, error: saveError } = await supabase.from("community_pages").insert({ slug: baseSlug + "-" + Math.random().toString(36).slice(2, 7), name: cleanName, description: cleanDescription, category, created_by: session.user.id }).select("id,slug,name,description,category,created_by,created_at").single();
     if (saveError) setError(saveError.message || "Stranica nije spremljena.");
     else { const created = { ...data, profiles: { display_name: session.user.user_metadata?.display_name || session.user.email } }; setPages(current => [created, ...current]); setName(""); setDescription(""); setNotice("Stranica je stvorena."); }
     setBusy(false);
@@ -59,9 +63,11 @@ export default function Pages() {
   async function createPagePost(event) {
     event.preventDefault();
     if (!session?.user?.id) { setNotice("Za objavu se prvo prijavi."); return; }
-    if (!draft.trim() || !selectedPage) return;
+    const cleanDraft = draft.trim();
+    if (!selectedPage) return;
+    if (!cleanDraft || cleanDraft.length > 5000) { setError("Objava je obavezna i može imati najviše 5.000 znakova."); return; }
     setBusy(true); setError("");
-    const { data, error: saveError } = await supabase.from("community_page_posts").insert({ page_id: selectedPage.id, author_id: session.user.id, body: draft.trim() }).select("id,page_id,author_id,body,created_at").single();
+    const { data, error: saveError } = await supabase.from("community_page_posts").insert({ page_id: selectedPage.id, author_id: session.user.id, body: cleanDraft }).select("id,page_id,author_id,body,created_at").single();
     if (saveError) setError(saveError.message || "Objava nije spremljena.");
     else setPagePosts(current => [{ ...data, profiles: { display_name: session.user.user_metadata?.display_name || session.user.email } }, ...current]);
     setDraft(""); setBusy(false);
