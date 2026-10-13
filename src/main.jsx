@@ -4,6 +4,7 @@ import App from "./App.jsx";
 import Admin from "./Admin.jsx";
 import Forum from "./Forum.jsx";
 import Pages from "./Pages.jsx";
+import Events from "./Events.jsx";
 import "./index.css";
 
 const route = window.location.pathname.replace(/\/$/, "");
@@ -13,7 +14,9 @@ const Screen = route === "/administracija.html"
     ? Forum
     : route === "/stranice.html"
       ? Pages
-      : App;
+      : route === "/dogadaji.html"
+        ? Events
+        : App;
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
