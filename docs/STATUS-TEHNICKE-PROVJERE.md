@@ -69,3 +69,43 @@ Supabase Security Advisor prikazuje upozorenja za više `SECURITY DEFINER` funkc
 - Jesu li grupe, poruke i ostale značajke funkcionalno testirane u objavljenoj aplikaciji.
 
 Ovaj dokument bilježi rezultate pregleda i ne mijenja nijednu Supabase bazu niti Cloudflare konfiguraciju.
+
+
+## Dodatna provjera baze — 13. listopada 2026.
+
+Provedena je i provjera stvarnih tablica te deset RPC funkcija koje kviz navodi u integracijskom inventaru.
+
+### Potvrđeni rezultati
+
+| Objekt | `Patriasoul's Project` | `kviz` |
+|---|---|---|
+| Društvene tablice koje koristi glavni zid (`posts`, `comments`, `post_reactions`) | postoje, trenutačno 0 redaka | nisu prisutne pod tim nazivima |
+| Kviz tablice `quiz_results`, `player_progress`, `player_badges` | nisu prisutne | postoje |
+| `cities` / `city_questions` / `quiz_questions` | nisu prisutne | postoje: 128 gradova, 9.600 gradskih pitanja, 2.000 kviznih pitanja |
+| Kviz RPC funkcije iz integracijskog inventara | nije pronađena nijedna od 10 provjeravanih funkcija | pronađeno svih 10 |
+| Dodatne društvene objave `community_posts` | nisu prisutne | postoje: 4 objave i 1 komentar |
+| Migracije zabilježene u bazi | 6 | 33 |
+
+Brojevi redaka i popis migracija odražavaju stanje u trenutku provjere; nisu jamstvo da će stanje ostati isto.
+
+### Važna korekcija plana
+
+Nije sigurno samo kopirati tablice iz jednog projekta u drugi. Oba projekta imaju tablicu `profiles`, ali njihove sheme i povezane tablice nisu iste. Projekt `kviz` također već ima tablice `private_messages` i druge objekte koji se razlikuju od društvenog modela. Jednostavno pokretanje društvenih migracija nad projektom kviza može pasti zbog sukoba naziva ili, još gore, napraviti nekompatibilne promjene.
+
+Zato se trenutačno **ne preporučuje automatski prijenos cijele baze niti promjena produkcijskog URL-a**. Prvo treba odabrati strategiju i mapirati tablice, RPC-je, profile, korisničke ID-jeve, Storage i RLS.
+
+### Sigurnije opcije za odluku
+
+1. **Jedna baza — migrirati društvenu jezgru u projekt `kviz`.** Čuva postojeće kvizne podatke i RPC-je, ali zahtijeva pažljivo usklađivanje `profiles`, poruka i ostalih tablica koje se preklapaju ili imaju drukčiju strukturu.
+2. **Jedna baza — migrirati kviz u `Patriasoul's Project`.** Zadržava društvenu shemu kao polazište, ali zahtijeva prijenos kviznih tablica, 10 RPC funkcija, pogleda, triggera, pravila i podataka te provjeru korisničkih profila.
+3. **Dvije baze.** Moguće je koristiti dva klijenta, ali prijava i ovlasti ne postaju automatski zajedničke. Bez dodatne arhitekture član bi mogao trebati odvojenu sesiju, a korisnički ID iz jednog projekta nije automatski korisnik drugog projekta. To nije preporučeni prečac za željeno jedinstveno iskustvo prijave.
+
+### Sljedeći tehnički koraci
+
+- Pregledati izvorni SQL migracija kviza i društvenog dijela te usporediti definicije `profiles`, poruka, komentara, reakcija i triggera.
+- Usporediti Storage buckete i RLS politike, ne samo postojanje tablica.
+- Pripremiti migracije koje su verzionirane u repozitoriju i ne brišu postojeće podatke.
+- Prije primjene napraviti backup i pokrenuti migracije na razvojnoj kopiji; tek nakon testova razmatrati produkciju.
+- Nakon potvrde ciljnog projekta ažurirati varijable za build/deploy i testirati prijavu, kviz, objave, komentare, reakcije, fotografije, privatne i grupne poruke.
+
+Ova dodatna provjera bila je samo čitanje metapodataka i popisa migracija. Nije izvršena nijedna DDL/DML promjena u Supabaseu niti je promijenjena Cloudflare konfiguracija.
