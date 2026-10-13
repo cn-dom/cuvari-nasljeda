@@ -23,8 +23,9 @@ function BrandMark() {
 
 function Avatar({ initials, variant = "", src = "" }) {
   return <div className={`avatar ${variant}`}>
-    {src ? <img src={src} alt="" loading="lazy" onError={(event) => { event.currentTarget.remove(); }} /> : initials}
+    {src ? <img src={src} alt="" loading="lazy" onError={(event) => { event.currentTarget.parentElement.textContent = initials; }} /> : initials}
   </div>;
+}
 
 function WeatherSidebar() {
   const [weather, setWeather] = useState({ loading: true, temp: null, code: null, city: "Zagreb" });
