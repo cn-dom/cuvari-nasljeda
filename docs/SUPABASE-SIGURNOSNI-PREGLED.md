@@ -67,3 +67,24 @@ Security Advisor izvještaji se razlikuju između dvaju projekata. U izvornom/kv
 6. Ponovno pokrenuti Supabase Security Advisor i kvizne testove.
 
 Ovaj dokument bilježi nalaze i predložene popravke; ne tvrdi da su stavke označene kao potrebne već popravljene.
+
+
+## Dodatna provjera — kvizni klijent i javni AI endpoint
+
+### Kvizni klijent: dobar znak, uz preostalu provjeru baze
+
+Pregledani su `kviz/src/lib/mainQuiz.js`, `kviz/src/lib/cityQuiz.js` i `kviz/src/lib/attempts.js`. Glavni i gradski kviz čitaju pitanja iz pogleda `quiz_questions_public` i `city_questions_public`, a popisi kolona koje traže ne uključuju `correct_index). Odgovor se predaje kroz RPC `submit_quiz_answer`, a završetak kroz `finish_quiz_attempt`. To je ispravan smjer dizajna jer klijent ne mora dobiti ključ odgovora.
+
+To još nije potpuni dokaz zaštite: potrebno je potvrditi da pogledi ne izlažu ključ preko drugih putova i da `submit_quiz_answer` / `finish_quiz_attempt` provjeravaju vlasništvo pokušaja, aktivnost pokušaja, valjanost pitanja i bodovanje na strani baze. Klijent također ima pomoćnu funkciju koja broji aktivna pitanja iz `quiz_questions`; ona traži samo broj redaka, ne odgovore.
+
+### AI endpoint `patria-ai`: zaseban rizik koji treba riješiti
+
+Pregled aktivne Supabase Edge Function `patria-ai` pokazao je:
+- `verify_jwt: false` — endpoint ne zahtijeva Supabase JWT provjeru na razini funkcije.
+- CORS dopušta `*`, a funkcija prihvaća `question`, `prompt` i `context` iz tijela zahtjeva.
+- `context` i dodatni `prompt` su pod kontrolom pozivatelja i umeću se u korisnički ulaz koji se šalje Gemini modelu; zapisi baze i dodatne upute nisu jasno označeni kao nepouzdani sadržaj.
+- Funkcija koristi poslužiteljski `GEMINI_API_KEY` i nema vidljivu ugrađenu autentikaciju, ograničenje učestalosti ili kvote u kodu koji je pregledan. To može omogućiti zloupotrebu kvote ako endpoint ostane javno dostupan.
+
+**Nisam mijenjao tu funkciju** jer promjena `verify_jwt` bez provjere svih pozivatelja može prekinuti postojeći AI portal. Prije popravka treba utvrditi gdje se funkcija poziva i koji klijenti šalju autentikacijski token. Preporučeni popravak: poslužiteljska provjera prijave i ovlasti (ako AI nije namijenjen anonimnim posjetiteljima), ograničenje učestalosti/kvote, ograničenje duljine ulaza, pouzdana server-side sistemska pravila te jasno odvajanje nepouzdanog konteksta od uputa. Nikada ne slati ovom endpointu ključeve službenog kviza, tajne, privatne poruke ili administratorske podatke.
+
+Ovaj endpoint je odvojen od aktualnog `src/AICenter.jsx`, koji koristi Puter.js; nalaz se odnosi na aktivnu Supabase funkciju i svaki portal koji je poziva.
