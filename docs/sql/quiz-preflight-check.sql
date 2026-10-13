@@ -12,6 +12,7 @@ with required_objects(object_name, object_kind) as (
     ('public.city_questions_public', 'table/view'),
     ('public.community_comments', 'table/view'),
     ('public.community_notifications', 'table/view'),
+    ('public.group_chat_message_reactions', 'table/view'),
     ('public.start_quiz_attempt', 'function'),
     ('public.submit_quiz_answer', 'function'),
     ('public.finish_quiz_attempt', 'function'),
