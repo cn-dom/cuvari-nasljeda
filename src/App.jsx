@@ -47,7 +47,7 @@ const initialPosts = [
 
 const navItems = [
   { icon: "⌂", label: "Zid zajednice" },
-  { icon: "♧", label: "Čuvari nasljeđa" },
+  { icon: "👥", label: "Čuvari nasljeđa" },
   { icon: "▦", label: "Grupe" },
   { icon: "▣", label: "Događaji" },
   { icon: "✉", label: "Poruke" },
@@ -1651,7 +1651,7 @@ function App() {
         </div>
         <nav className="topnav" aria-label="Brza navigacija">
           <button className={activeNav === "Zid zajednice" ? "topnav-link active" : "topnav-link"} onClick={() => setActiveNav("Zid zajednice")} aria-label="Početna">⌂</button>
-          <button className={activeNav === "Čuvari nasljeđa" ? "topnav-link active" : "topnav-link"} onClick={() => setActiveNav("Čuvari nasljeđa")} aria-label="Članovi">♧</button>
+          <button className={activeNav === "Čuvari nasljeđa" ? "topnav-link active" : "topnav-link"} onClick={() => setActiveNav("Čuvari nasljeđa")} aria-label="Članovi">👥</button>
           <button className={activeNav === "Poruke" ? "topnav-link active" : "topnav-link"} onClick={() => setActiveNav("Poruke")} aria-label="Poruke">✉</button>
           <button className={activeNav === "Obavijesti" ? "topnav-link active" : "topnav-link"} onClick={() => setActiveNav("Obavijesti")} aria-label="Obavijesti">🔔</button>
         </nav>
