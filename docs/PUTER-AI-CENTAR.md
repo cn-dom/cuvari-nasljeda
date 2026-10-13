@@ -9,6 +9,7 @@ Prije dodavanja nove funkcije pregledane su postojeće komponente src/App.jsx, s
 - Trener znanja koji izrađuje neovisnu vježbu od pet pitanja; ne upisuje bodove i ne mijenja službeni kviz.
 - Analiza slike ili skeniranog dokumenta; AI opis nije potvrda autentičnosti, datuma ili identiteta.
 - Čitanje zadnjeg AI odgovora naglas ako Puterov govorni model i preglednik podržavaju hrvatski glas.
+- Pretvaranje kratke učitane audio snimke u tekst pomoću Puter speech-to-text; prijepis se prvo prikaže u polju pitanja i ne šalje se automatski.
 - Izrada AI ilustracije u testnom načinu rada, uz jasno označavanje da nije povijesna fotografija.
 - Objašnjavanje tehničke poruke koju korisnik ručno zalijepi; ne pristupa automatski GitHubu, Supabaseu ni Cloudflareu.
 
