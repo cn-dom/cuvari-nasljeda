@@ -11,6 +11,9 @@ const modules = [
   { id: "comments", title: "Komentari", group: "SADRŽAJ", description: "Kontrola komentara i postupanje po prijavama.", icon: "☷", status: "Sljedeća faza" },
   { id: "groups", title: "Grupe i zajednice", group: "ZAJEDNICA", description: "Pregled grupa, članstva i upravljanja zajednicama.", icon: "♧", status: "Sljedeća faza" },
   { id: "events", title: "Događaji", group: "ZAJEDNICA", description: "Pregled događaja i upravljanje prijavama sudionika.", icon: "▣", status: "Sljedeća faza" },
+  { id: "quiz", title: "PatriaSoul kviz", group: "PATRiASOUL KVIZ", description: "Upravljanje kvizom, rezultatima, pitanjima i prijavama igrača.", icon: "🧠", status: "Povezivanje" },
+  { id: "forum", title: "Domoljubni forum", group: "RAZGOVORI", description: "Moderacija rubrika, tema, odgovora i prijava na forumu.", icon: "▤", status: "Povezivanje" },
+  { id: "pages", title: "Stranice zajednice", group: "ZAJEDNICA", description: "Upravljanje tematskim stranicama, urednicima i objavama stranica.", icon: "▣", status: "Povezivanje" },
   { id: "security", title: "Sigurnost i pravila", group: "SUSTAV", description: "Pravila zajednice, privatnost i provjera pristupa.", icon: "⬡", status: "Pregled" },
 ];
 
