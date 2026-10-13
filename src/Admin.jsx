@@ -242,7 +242,7 @@ export default function Admin() {
   return <main className="admin-page">
     <header className="admin-topbar">
       <a className="admin-brand" href="/" aria-label="Povratak na Čuvare nasljeđa"><img src="/assets/images/1000000982.png" alt="" /><span><strong>PatriaSoul</strong><small>ČUVARI NASLJEĐA · ADMINISTRACIJA</small></span></a>
-      <div className="admin-top-actions"><span className="admin-owner-pill">✓ VLASNIK</span><span className="admin-owner-email">{session?.user?.email}</span><a href="/" className="admin-back-link">← Povratak na mrežu</a></div>
+      <div className="admin-top-actions"><span className="admin-owner-pill">✓ VLASNIK</span><span className="admin-owner-email">{session?.user?.email}</span><a href="/ai-centar.html" className="admin-back-link">✦ AI pomoć</a><a href="/" className="admin-back-link">← Povratak na mrežu</a></div>
     </header>
     <div className="admin-layout">
       <aside className="admin-sidebar"><span className="admin-eyebrow">UPRAVLJANJE MREŽOM</span><h2>Administracija</h2><p>Odaberi jednu stavku. Detalji se otvaraju u radnom prostoru, bez gomilanja sadržaja na jednoj stranici.</p><div className="admin-side-nav">{modules.map(item => <button key={item.id} type="button" onClick={() => { setActiveModule(item.id); setQuery(""); setReportStatusFilter("all"); }} className={activeModule === item.id ? "selected" : ""}><span>{item.icon}</span><span>{item.title}</span><small>{item.status === "Sljedeća faza" ? "U pripremi" : "Otvori"}</small></button>)}</div><div className="admin-sidebar-foot">Prijavljen vlasnik<br/><strong>{session?.user?.email}</strong></div></aside>
