@@ -1521,6 +1521,30 @@ function App() {
     setNotice("Komentar je spremljen u bazu zajednice.");
   }
 
+  async function deleteOwnComment(postId, comment) {
+    if (!supabase || !session?.user?.id || !comment?.id || !comment.owner) return;
+    if (!window.confirm("Trajno izbrisati svoj komentar?")) return;
+    const { data, error } = await supabase
+      .from("comments")
+      .delete()
+      .eq("id", comment.id)
+      .eq("author_id", session.user.id)
+      .select("id")
+      .maybeSingle();
+    if (error || !data) {
+      setNotice("Komentar nije izbrisan. Provjeri vlasništvo nad komentarom i RLS pravila.");
+      return;
+    }
+    setCommentsByPost((current) => ({
+      ...current,
+      [postId]: (current[postId] || []).filter((item) => item.id !== comment.id),
+    }));
+    setPosts((current) => current.map((post) => (
+      post.id === postId ? { ...post, comments: Math.max(0, (post.comments || 0) - 1) } : post
+    )));
+    setNotice("Tvoj komentar je izbrisan.");
+  }
+
   function startEdit(post) {
     if (!post.owner) return;
     setEditingPostId(post.id);
@@ -2328,7 +2352,7 @@ function App() {
                     {(commentsByPost[post.id] || []).length ? (commentsByPost[post.id] || []).map((comment) => (
                       <div className="comment-item" key={comment.id}>
                         <Avatar initials={comment.initials} variant={comment.owner ? "avatar-you" : ""} />
-                        <div className="comment-bubble"><strong>{comment.author}</strong><p>{comment.text}</p></div>
+                        <div className="comment-bubble"><strong>{comment.author}</strong><p>{comment.text}</p>{comment.owner && <button type="button" className="comment-delete-button" onClick={() => deleteOwnComment(post.id, comment)}>Izbriši svoj komentar</button>}</div>
                       </div>
                     )) : <p className="comments-empty">Još nema komentara uz ovu objavu.</p>}
                   </div>
