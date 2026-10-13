@@ -16,6 +16,7 @@ const navItems = [
 ];
 
 const OWNER_EMAIL = "patriasoul@protonmail.com";
+const normalizeUsername = (value) => String(value || "").trim().replace(/^@/, "").toLowerCase();
 
 function BrandMark() {
   return <img className="brand-mark" src="/assets/images/1000000982.png" alt="" aria-hidden="true" />;
@@ -296,7 +297,7 @@ function App() {
       const rows = await Promise.all((data || []).filter((row) => !blockedIds.includes(row.author_id)).map(async (row) => {
         const profile = row.profiles || {};
         const name = profile.display_name || "Čuvar nasljeđa";
-        const username = profile.username || "clan";
+        const username = normalizeUsername(profile.username) || "clan";
         let imageUrl = "";
         if (row.image_path) {
           const { data: signedImage } = await supabase.storage
@@ -393,7 +394,7 @@ function App() {
     async function loadProfile() {
       const metadata = session?.user?.user_metadata || {};
       setProfileName(metadata.display_name || "");
-      setProfileUsername(metadata.username || "");
+      setProfileUsername(normalizeUsername(metadata.username));
       setProfileBio(metadata.bio || "");
       setProfileAvatarUrl("");
       if (!supabase || !session?.user?.id) return;
@@ -410,7 +411,7 @@ function App() {
       }
       if (data) {
         setProfileName(data.display_name || "");
-        setProfileUsername(data.username || "");
+        setProfileUsername(normalizeUsername(data.username));
         setProfileBio(data.bio || "");
         setProfileAvatarUrl(data.avatar_url || "");
         setProfileMessage("");
@@ -445,7 +446,7 @@ function App() {
         const { data: usernameMatches, error: usernameCheckError } = await supabase
           .from("profiles")
           .select("id")
-          .ilike("username", cleanUsername)
+          .ilike("username", cleanUsername.replace(/[\\%_]/g, "\\.ilike("username", cleanUsername)"))
           .neq("id", session.user.id)
           .limit(1);
         if (usernameCheckError) throw usernameCheckError;
@@ -457,7 +458,7 @@ function App() {
       const { data: nameMatches, error: nameCheckError } = await supabase
         .from("profiles")
         .select("id")
-        .ilike("display_name", cleanDisplayName)
+        .ilike("display_name", cleanDisplayName.replace(/[\\%_]/g, "\\.ilike("display_name", cleanDisplayName)"))
         .neq("id", session.user.id)
         .limit(1);
       if (nameCheckError) throw nameCheckError;
@@ -2039,7 +2040,7 @@ function App() {
                     <label htmlFor="message-recipient">Primatelj</label>
                     <select id="message-recipient" value={messageRecipient} onChange={(event) => { setMessageRecipient(event.target.value); setReplyingToMessage(null); }} required>
                       <option value="">Odaberi člana…</option>
-                      {memberDirectory.filter((member) => !blockedMembers.some((blocked) => blocked.id === member.id)).map((member) => <option key={member.id} value={member.id}>{member.display_name || member.username || "Čuvar nasljeđa"}{member.username ? " · @" + member.username : ""}</option>)}
+                      {memberDirectory.filter((member) => !blockedMembers.some((blocked) => blocked.id === member.id)).map((member) => <option key={member.id} value={member.id}>{member.display_name || member.username || "Čuvar nasljeđa"}{member.username ? " · @" + normalizeUsername(member.username) : ""}</option>)}
                     </select>
                     {replyingToMessage && <div className="message-reply-compose"><div><strong>Odgovor na poruku</strong><p>{replyingToMessage.body}</p></div><button type="button" onClick={() => setReplyingToMessage(null)} aria-label="Odustani od odgovora">×</button></div>}
                     <label htmlFor="private-message-draft">Poruka</label>
@@ -2218,7 +2219,7 @@ function App() {
                       const initials = displayName.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN";
                       return <article className="member-directory-card" key={member.id}>
                         <Avatar initials={initials} src={member.avatar_url} />
-                        <div className="member-directory-info"><strong>{displayName}</strong><span>@{member.username || "clan"}</span><span className={"member-presence-status " + getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).state}><i aria-hidden="true" />{getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).label}</span><p>{member.bio || "Ovaj član još nije dodao opis profila."}</p></div>
+                        <div className="member-directory-info"><strong>{displayName}</strong><span>@{normalizeUsername(member.username) || "clan"}</span><span className={"member-presence-status " + getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).state}><i aria-hidden="true" />{getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).label}</span><p>{member.bio || "Ovaj član još nije dodao opis profila."}</p></div>
                         <button type="button" className="post-menu-button danger" disabled={blockBusyId === member.id} onClick={() => toggleBlockMember({ authorId: member.id, author: displayName, handle: "@" + (member.username || "clan") })}>{blockedMembers.some((blocked) => blocked.id === member.id) ? "Odblokiraj" : "Blokiraj"}</button>
                       </article>;
                     })}</div> : <p className="directory-empty">Nema članova koji odgovaraju pretrazi.</p>;
@@ -2295,7 +2296,7 @@ function App() {
                       ) : mentionMembers.length ? (
                         mentionMembers.map((member) => {
                           const name = member.display_name || member.username || "Čuvar nasljeđa";
-                          const handle = "@" + (member.username || "clan");
+                          const handle = "@" + (normalizeUsername(member.username) || "clan");
                           return (
                             <button type="button" key={member.id} onClick={() => {
                               setDraft((value) => value + (value && !value.endsWith(" ") ? " " : "") + handle + " ");
