@@ -59,8 +59,8 @@ alter table public.comments enable row level security;
 alter table public.post_reactions enable row level security;
 
 -- Public community profiles are readable; only the owner may create/update their own profile.
-create policy "profiles_select_authenticated" on public.profiles
-  for select to authenticated using (true);
+create policy "profiles_select_public" on public.profiles
+  for select to anon, authenticated using (true);
 create policy "profiles_insert_own" on public.profiles
   for insert to authenticated with check (id = (select auth.uid()));
 create policy "profiles_update_own" on public.profiles
@@ -68,8 +68,8 @@ create policy "profiles_update_own" on public.profiles
   with check (id = (select auth.uid()));
 
 -- Community posts can be read by signed-in members; only the author may write or delete.
-create policy "posts_select_authenticated" on public.posts
-  for select to authenticated using (true);
+create policy "posts_select_public" on public.posts
+  for select to anon, authenticated using (true);
 create policy "posts_insert_own" on public.posts
   for insert to authenticated with check (author_id = (select auth.uid()));
 create policy "posts_update_own" on public.posts
@@ -79,8 +79,8 @@ create policy "posts_delete_own" on public.posts
   for delete to authenticated using (author_id = (select auth.uid()));
 
 -- Comments are readable to members; insert/update/delete are restricted to the author.
-create policy "comments_select_authenticated" on public.comments
-  for select to authenticated using (true);
+create policy "comments_select_public" on public.comments
+  for select to anon, authenticated using (true);
 create policy "comments_insert_own" on public.comments
   for insert to authenticated with check (author_id = (select auth.uid()));
 create policy "comments_update_own" on public.comments
@@ -89,8 +89,8 @@ create policy "comments_update_own" on public.comments
 create policy "comments_delete_own" on public.comments
   for delete to authenticated using (author_id = (select auth.uid()));
 
-create policy "post_reactions_select_authenticated" on public.post_reactions
-  for select to authenticated using (true);
+create policy "post_reactions_select_public" on public.post_reactions
+  for select to anon, authenticated using (true);
 create policy "post_reactions_insert_own" on public.post_reactions
   for insert to authenticated with check (user_id = (select auth.uid()));
 create policy "post_reactions_update_own" on public.post_reactions
@@ -193,9 +193,11 @@ create policy "content_reports_insert_own" on public.content_reports
 -- Intentionally no member SELECT/UPDATE/DELETE policy. Moderator access needs a
 -- separately designed, server-enforced role system before it is enabled.
 
--- Signed-in members may view community images through authenticated Storage requests.
-create policy "community_images_read_authenticated"
-  on storage.objects for select to authenticated
+-- Public wall photos are viewable through short-lived signed URLs.
+-- This SELECT policy allows signing community-image URLs for public posts; keep
+-- this bucket exclusively for images intentionally shared on the public community wall.
+create policy "community_images_read_public_posts"
+  on storage.objects for select to anon, authenticated
   using (bucket_id = 'community-images');
 
 -- Each member may upload only into their own first-level folder: <auth.uid()>/<filename>.
