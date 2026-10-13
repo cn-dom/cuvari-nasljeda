@@ -356,26 +356,28 @@ function App() {
       setPosts(rows);
       if (rows.length) {
         const postIds = rows.map((post) => post.id);
-        const { data: reactionRows, error: reactionsError } = await supabase
-          .from("post_reactions")
-          .select("post_id, user_id, reaction")
-          .in("post_id", postIds);
-        if (cancelled) return;
-        if (!reactionsError) {
-          const reactionCounts = {};
-          const ownReactions = {};
-          (reactionRows || []).forEach((row) => {
-            if (!reactionCounts[row.post_id]) reactionCounts[row.post_id] = 0;
-            if (row.reaction === "like") reactionCounts[row.post_id] += 1;
-            if (session?.user?.id && row.user_id === session.user.id) {
-              ownReactions[row.post_id] = ({ like: "❤️", patriotism: "🇭🇷", gratitude: "🙏", support: "👏" })[row.reaction] || "";
-            }
-          });
-          setPosts((current) => current.map((post) => ({ ...post, likes: reactionCounts[post.id] || 0 })));
-          setLiked(Object.keys(ownReactions).filter((postId) => ownReactions[postId] === "❤️"));
-          setReactionsByPost(ownReactions);
-        } else {
-          setNotice("Objave su učitane, ali reakcije nisu dostupne. Provjeri tablicu post_reactions i njezina RLS pravila.");
+        if (session?.user?.id) {
+          const { data: reactionRows, error: reactionsError } = await supabase
+            .from("post_reactions")
+            .select("post_id, user_id, reaction")
+            .in("post_id", postIds);
+          if (cancelled) return;
+          if (!reactionsError) {
+            const reactionCounts = {};
+            const ownReactions = {};
+            (reactionRows || []).forEach((row) => {
+              if (!reactionCounts[row.post_id]) reactionCounts[row.post_id] = 0;
+              if (row.reaction === "like") reactionCounts[row.post_id] += 1;
+              if (row.user_id === session.user.id) {
+                ownReactions[row.post_id] = ({ like: "❤️", patriotism: "🇭🇷", gratitude: "🙏", support: "👏" })[row.reaction] || "";
+              }
+            });
+            setPosts((current) => current.map((post) => ({ ...post, likes: reactionCounts[post.id] || 0 })));
+            setLiked(Object.keys(ownReactions).filter((postId) => ownReactions[postId] === "❤️"));
+            setReactionsByPost(ownReactions);
+          } else {
+            setNotice("Objave su učitane, ali reakcije nisu dostupne. Provjeri tablicu post_reactions i njezina RLS pravila.");
+          }
         }
         const { data: commentRows, error: commentsError } = await supabase
           .from("comments")
