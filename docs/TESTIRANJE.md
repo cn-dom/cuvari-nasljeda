@@ -50,8 +50,11 @@ Ovaj popis služi za završnu provjeru testne verzije. Označi stavku tek nakon 
 
 ## PatriaSoul kviz — preduvjeti povezivanja administracije
 - [ ] Otvoriti ugrađeni kviz na `/kviz/` i provjeriti prijavu/zajedničku sesiju.
-- [ ] U testnoj bazi potvrditi da postoje tablice `quiz_questions` i `quiz_results` te javni prikaz pitanja `quiz_questions_public`.
-- [ ] Provjeriti da su postavljene potrebne funkcije: `record_quiz_result`, `get_leaderboard`, `admin_dashboard_stats`, `admin_list_users`, `admin_list_quiz_results` i `admin_delete_quiz_result`.
+- [ ] Hrvatski kviz učitava 10 pitanja iz prenesenih 2.000 pitanja i ne otkriva točan odgovor prije odabira.
+- [ ] „Brani svoj grad” prikazuje 128 gradova i pokreće 10 pitanja odabranog grada.
+- [ ] Dnevni kviz pokreće 10 pitanja; isti korisnik ne može ga ponovno odigrati istoga dana.
+- [ ] Odgovori, rezultat, XP, razina i rang-lista spremaju se te ostaju nakon ponovne prijave.
+- [ ] Provjeriti administratorske funkcije: `record_quiz_result`, `get_leaderboard`, `admin_dashboard_stats`, `admin_list_users`, `admin_list_quiz_results` i `admin_delete_quiz_result`.
 - [ ] Uskladiti polja profila koja očekuje kviz (`role`, `avatar_url`) s društvenom shemom bez otkrivanja privatnih podataka.
 - [ ] Potvrditi da su administratorske funkcije zaštićene na strani baze i odbijaju poziv običnog prijavljenog člana.
 - [ ] Tek nakon uspješnih testova uključiti stvarne statistike i moderaciju rezultata u administratorskom modulu.
