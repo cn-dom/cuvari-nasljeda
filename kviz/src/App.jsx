@@ -891,12 +891,17 @@ export default function App() {
       return;
     }
 
-    supabase?.auth.getUser().then(({ data }) => {
-      if (data?.user) {
-        handleDeepLink(mode);
-        return;
+    // Čekamo da se Reactovo stanje prijave sinkronizira s postojećom Supabase sesijom.
+    // Pozivanje handleDeepLink izravno ovdje moglo je koristiti zastarjeli user=null
+    // i ponovno otvoriti prijavu čak i kad je sesija već postojala.
+    setPendingDeepLink(mode);
+    supabase?.auth.getUser().then(({ data, error: authError }) => {
+      if (authError || !data?.user) {
+        signIn();
       }
-      setPendingDeepLink(mode);
+      // Ako je korisnik prijavljen, useEffect koji prati user/pendingDeepLink
+      // otvorit će traženi način igre čim se stanje prijave učita.
+    }).catch(() => {
       signIn();
     });
   }, []);
