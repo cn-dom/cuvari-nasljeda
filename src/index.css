@@ -457,6 +457,14 @@ button { -webkit-tap-highlight-color: transparent; }
   font-size: 23px;
   cursor: pointer;
 }
+.emoji-croatian-flag {
+  display: block;
+  width: 30px;
+  height: 20px;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(25, 42, 58, 0.18);
+}
 .emoji-picker-grid button:hover,
 .emoji-picker-grid button:focus-visible {
   background: #edf3f8;
