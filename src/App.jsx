@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 import { Picker } from "emoji-mart";
+import FloatingGlobalChat from "./FloatingGlobalChat.jsx";
 import emojiData from "@emoji-mart/data";
 
 const navItems = [
@@ -2767,6 +2768,8 @@ function App() {
 
         </aside>
       </main>
+
+      {session?.user?.id && <FloatingGlobalChat supabase={supabase} session={session} onLoginRequest={() => { setAuthOpen(true); setAuthMessage(""); }} />}
 
       <footer className="community-site-footer">
         <div className="community-site-footer-grid">
