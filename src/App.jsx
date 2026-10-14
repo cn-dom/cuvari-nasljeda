@@ -359,7 +359,7 @@ function App() {
       }
       const { data, error } = await supabase
         .from("posts")
-        .select("id, author_id, body, image_path, created_at, profiles(display_name, username, avatar_url)")
+        .select("id, author_id, body, image_path, created_at, profiles:profiles!posts_author_id_fkey(display_name, username, avatar_url)")
         .order("created_at", { ascending: false })
         .limit(50);
       if (cancelled) return;
@@ -426,7 +426,7 @@ function App() {
         }
         const { data: commentRows, error: commentsError } = await supabase
           .from("comments")
-          .select("id, post_id, author_id, body, created_at, profiles(display_name, username, avatar_url)")
+          .select("id, post_id, author_id, body, created_at, profiles:profiles!comments_author_id_fkey(display_name, username, avatar_url)")
           .in("post_id", postIds)
           .order("created_at", { ascending: true });
         if (cancelled) return;
@@ -1538,7 +1538,7 @@ function App() {
     const { data, error } = await supabase
       .from("posts")
       .insert({ author_id: session.user.id, body: text, image_path: imagePath || null })
-      .select("id, author_id, body, image_path, created_at, profiles(display_name, username, avatar_url)")
+      .select("id, author_id, body, image_path, created_at, profiles:profiles!posts_author_id_fkey(display_name, username, avatar_url)")
       .single();
     if (error) {
       if (imagePath) await supabase.storage.from("community-images").remove([imagePath]);
@@ -1644,7 +1644,7 @@ function App() {
     const { data, error } = await supabase
       .from("comments")
       .insert({ post_id: id, author_id: session.user.id, body: text })
-      .select("id, post_id, author_id, body, created_at, profiles(display_name, username, avatar_url)")
+      .select("id, post_id, author_id, body, created_at, profiles:profiles!comments_author_id_fkey(display_name, username, avatar_url)")
       .single();
     if (error) {
       setNotice("Komentar nije spremljen: " + (error.message || "provjeri tablicu comments i RLS pravila."));
