@@ -34,56 +34,66 @@ const loadLiturgy=async()=>{
  const gospelRef=document.getElementById("gospel-reference");
  const gospelText=document.getElementById("gospel-text");
  try{
-   const url="https://r.jina.ai/http://hilp.hr/liturgija-dana/"+slug+"/";
-   const response=await fetch(url,{headers:{"Accept":"text/plain"},cache:"no-cache"});
-   if(!response.ok)throw new Error("Liturgijski izvor trenutno nije dostupan.");
-   const raw=await response.text();
-   if(!raw||raw.length<500)throw new Error("Nije vraćen potpun liturgijski zapis.");
-   const dateMatch=raw.match(/(?:Ponedjeljak|Utorak|Srijeda|Četvrtak|Petak|Subota|Nedjelja),?\s+\d{1,2}\.\s*\d{1,2}\.\s*\d{4}\.?/i);
-   if(dateMatch&&!dateMatch[0].includes(Number(today.day)+".")&&!dateMatch[0].includes(today.day+"."))throw new Error("Izvor je vratio podatke za drugi datum.");
-   let section=findSection(raw,"Evanđelje");
-   if(!section){
-     const at=raw.search(/#{1,5}\s*Evanđelje\s*:/i);
-     if(at>=0)section=raw.slice(at).replace(/^#{1,5}\s*Evanđelje\s*:?/i,"").split(/\n#{1,5}\s/)[0];
+   const path="liturgija-dana/"+slug+"/";
+   const urls=[
+     "https://r.jina.ai/http://hilp.hr/"+path,
+     "https://r.jina.ai/https://hilp.hr/"+path
+   ];
+   let raw="",lastError=null;
+   for(const url of urls){
+     try{
+       const response=await fetch(url,{headers:{"Accept":"text/plain"},cache:"no-store"});
+       if(!response.ok)throw new Error("HTTP "+response.status);
+       const text=await response.text();
+       if(text&&text.length>500&&/Evanđelje/i.test(text)){raw=text;break;}
+       throw new Error("Odgovor izvora nema očekivani sadržaj.");
+     }catch(err){lastError=err;}
    }
-   if(!section)throw new Error("U liturgijskom zapisu nije pronađeno evanđelje.");
+   if(!raw)throw lastError||new Error("Liturgijski izvor nije dostupan.");
+   const dateMatch=raw.match(/(?:Ponedjeljak|Utorak|Srijeda|Četvrtak|Petak|Subota|Nedjelja),?\s+\d{1,2}\.\s*\d{1,2}\.\s*\d{4}\.?/i);
+   if(dateMatch){
+     const expected=Number(today.day)+"."+String(Number(today.month))+"."+today.year;
+     const normalized=dateMatch[0].replace(/\s/g,"").replace(/,/g,"").replace(/\.$/,"");
+     if(!normalized.includes(expected))throw new Error("Izvor je vratio podatke za drugi datum.");
+   }
+   const headingIndex=raw.search(/#{1,6}\s*Evanđelje\s*:?\s*(?:\n|$)/i);
+   if(headingIndex<0)throw new Error("U zapisu nije pronađeno poglavlje Evanđelje.");
+   let section=raw.slice(headingIndex).replace(/^#{1,6}\s*Evanđelje\s*:?\s*/i,"");
+   section=section.split(/\n#{1,6}\s*(?:Izvor|Poveznice|Napomene)\b/i)[0];
    const lines=section.split(/\n+/).map(clean).filter(Boolean).filter(line=>!/^[-—]{2,}$/.test(line));
    const ref=lines.find(line=>/\b(?:Mt|Mk|Lk|Iv)\s*\d/.test(line))||"";
-   const textStart=lines.findIndex(line=>/Čitanje svetog Evanđelja|Čitanje svetoga Evanđelja/i.test(line));
-   const bodyLines=lines.slice(textStart>=0?textStart+1:(ref?lines.indexOf(ref)+1:1)).filter(line=>line!=="Riječ Gospodnja.");
-   const body=bodyLines.join("\n\n").trim();
+   const readingIndex=lines.findIndex(line=>/Čitanje svetog Evanđelja|Čitanje svetoga Evanđelja/i.test(line));
+   const bodyLines=lines.slice(readingIndex>=0?readingIndex+1:(ref?lines.indexOf(ref)+1:lines.length));
+   const body=bodyLines.filter(line=>line!=="Riječ Gospodnja.").join("\n\n").trim();
    if(!ref||body.length<80)throw new Error("Tekst evanđelja nije potpun.");
    if(gospelRef)gospelRef.textContent=ref;
    if(gospelText){gospelText.textContent=body;gospelText.style.whiteSpace="pre-line";}
-   const title=lines.filter(line=>line!==ref&&!/Čitanje svetog Evanđelja|Čitanje svetoga Evanđelja|Riječ Gospodnja/i.test(line)).find(line=>line.length>12&&line.length<180);
+   const title=lines.slice(0,Math.max(0,readingIndex)).find(line=>line!==ref&&line.length>8&&line.length<180);
    if(title)setText("gospel-heading",title);
    setText("gospel-response","Liturgijski izvor: Hrvatski institut za liturgijski pastoral (HILP).");
    const dayStart=raw.search(/(?:Ponedjeljak|Utorak|Srijeda|Četvrtak|Petak|Subota|Nedjelja),?\s+\d{1,2}\.\s*\d{1,2}\.\s*\d{4}\.?/i);
    const readingStart=raw.search(/#{1,5}\s*Misna čitanja/i);
    const dayBlock=dayStart>=0?raw.slice(dayStart,readingStart>dayStart?readingStart:dayStart+1400):"";
    const dayLines=dayBlock.split(/\n+/).map(clean).filter(Boolean);
-   const celebration=dayLines.filter(line=>!/(?:Ponedjeljak|Utorak|Srijeda|Četvrtak|Petak|Subota|Nedjelja),?\s+\d{1,2}\.\s*\d{1,2}\.\s*\d{4}/i.test(line)&&!/^(?:XX|X|I|V|\d+|ili:)/i.test(line)&&!/^\d+\. tjedan/i.test(line)&&line.length>2&&line.length<180).slice(0,3);
-   const saintLine=dayLines.find(line=>/sv\.|svet|blažen|bl\./i.test(line)&&!/svetog Evanđelja|svetoga Pavla|svetog Luke|svetog Mateja/i.test(line));
+   const saintLine=dayLines.find(line=>/(?:Sv\.|sveti|svetog|sveta|blaženi|blažena|bl\.)/i.test(line)&&!/svetog Evanđelja|svetoga Pavla|svetog Luke|svetog Mateja/i.test(line));
    if(saintLine){
-      const saintName=clean(saintLine).replace(/^ili:\s*/i,"");
-      const saintDetails=saintName.match(/\),?\s*(.+)$/);
-      setText("saint-heading",saintName);
-      setText("saint-description",saintDetails&&saintDetails[1]
-        ? "Danas se u liturgijskom kalendaru spominje: "+saintDetails[1].replace(/[.;,]+$/,"")+"."
-        : "Spomendan je preuzet iz današnjeg liturgijskog kalendara Hrvatskog instituta za liturgijski pastoral.");
-   } else {
-      setText("saint-heading",celebration.find(line=>/Svagdan|nedjelja|slavlje|blagdan|spomendan/i.test(line))||"Svagdan");
-      setText("saint-description","Za današnji datum nije naveden poseban svetac ili spomendan u sažetku kalendara.");
+     const saintName=clean(saintLine).replace(/^ili:\s*/i,"");
+     const saintDetails=saintName.match(/\),?\s*(.+)$/);
+     setText("saint-heading",saintName);
+     setText("saint-description",saintDetails&&saintDetails[1]?"Danas se u liturgijskom kalendaru spominje: "+saintDetails[1].replace(/[.;,]+$/,"")+".":"Spomendan je preuzet iz današnjeg liturgijskog kalendara HILP-a.");
+   }else{
+     const celebration=dayLines.find(line=>/^(?:Svagdan|Blagdan|Svetkovina|Spomendan|[A-ZČĆŽŠĐ].*(?:NEDJELJA|SVETKOVINA|BLAGDAN))/i.test(line));
+     setText("saint-heading",celebration||"Liturgijski kalendar dana");
+     setText("saint-description","Za današnji dan u sažetku kalendara nije pronađen poseban spomendan.");
    }
  }catch(error){
    if(gospelRef)gospelRef.textContent="Današnja čitanja trenutačno se ne mogu dohvatiti.";
-   if(gospelText)gospelText.textContent="PatriaSoul ne prikazuje neprovjeren tekst niti izmišlja liturgijska čitanja. Osvježi stranicu kasnije kako bi se pokušalo ponovno.";
-   setText("gospel-response","Automatsko učitavanje liturgijskog izvora nije uspjelo.");
+   if(gospelText)gospelText.textContent="PatriaSoul nije uspio učitati potvrđeni tekst iz liturgijskog izvora. Pokušat će se ponovno pri sljedećem otvaranju stranice.";
+   setText("gospel-response","Izvor liturgije trenutačno nije dostupan. Pokušaj ponovno kasnije.");
    setText("saint-heading","Podatak trenutačno nije dostupan");
-   setText("saint-description","Svetac ili spomendan prikazat će se čim provjereni liturgijski kalendar ponovno bude dostupan.");
+   setText("saint-description","Svetac ili spomendan prikazat će se čim provjereni liturgijski kalendar bude dostupan.");
    console.warn("PatriaSoul liturgy load:",error);
  }
-};
 const heritageStories=[
 {title:"Bašćanska ploča i početci hrvatske pismenosti",summary:"Bašćanska ploča jedan je od najpoznatijih spomenika hrvatske glagoljaške i pravne baštine.",detail:"Natpis je pronađen u crkvi sv. Lucije u Jurandvoru kraj Baške na otoku Krku. U njemu se spominje kralj Zvonimir, a tekst je važan izvor za proučavanje ranoga hrvatskog jezika, glagoljice i društvene povijesti. Datiranje i tumačenje pojedinih dijelova predmet su stručnog proučavanja.",source:"Za daljnje proučavanje: Hrvatska enciklopedija — natuknica „Bašćanska ploča”."},
 {title:"Glagoljaška liturgijska tradicija",summary:"Hrvatski glagoljaši stoljećima su čuvali posebnu slavensku liturgijsku i pisanu tradiciju.",detail:"U dijelovima hrvatske obale i otoka razvila se uporaba staroslavenskoga jezika u liturgiji uz glagoljsko pismo. Ta je praksa ostavila trag u misalima, brevijarima, natpisima i lokalnoj kulturnoj povijesti. Pojedina razdoblja i lokalne prakse razlikuju se pa ih treba opisivati prema konkretnim izvorima.",source:"Za daljnje proučavanje: Hrvatska enciklopedija — natuknice o glagoljici i hrvatskom glagoljaštvu."},
