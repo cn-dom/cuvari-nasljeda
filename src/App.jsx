@@ -2709,28 +2709,30 @@ function App() {
                   }
                   setShareMenuPostId(null);
                 };
-                const nativeShare = async () => {
-                  if (!navigator.share) { await copyShareLink(); return; }
+                const shareToTikTok = async () => {
+                  // TikTok nema javni web endpoint koji izravno objavljuje vanjsku objavu.
+                  // Otvaramo PatriaSoul profil i kopiramo poveznicu da je korisnik može zalijepiti gdje TikTok to dopušta.
+                  window.open("https://www.tiktok.com/@patriasoul", "_blank", "noopener,noreferrer");
                   try {
-                    await navigator.share({ title: "PatriaSoul – Čuvari nasljeđa", text: shareText, url: shareUrl });
-                    setShareMenuPostId(null);
-                  } catch (error) {
-                    if (error?.name !== "AbortError") setNotice("Dijeljenje nije uspjelo. Pokušaj drugu mogućnost.");
-                    setShareMenuPostId(null);
+                    await navigator.clipboard.writeText(shareUrl);
+                    setNotice("Poveznica na objavu kopirana je. Otvoren je PatriaSoul TikTok profil; zalijepi poveznicu ondje gdje je TikTok dopušta.");
+                  } catch {
+                    setNotice("Otvoren je PatriaSoul TikTok profil. Poveznicu možeš kopirati opcijom „Kopiraj poveznicu”.");
                   }
+                  setShareMenuPostId(null);
                 };
                 return <div className="post-share-menu" id={"share-menu-" + post.id} aria-label="Mogućnosti dijeljenja ove objave">
                   <p>Podijeli poveznicu na ovu objavu</p>
                   <div className="post-share-options">
-                    {typeof navigator !== "undefined" && typeof navigator.share === "function" && <button type="button" onClick={nativeShare}>📲 Podijeli aplikacijom</button>}
                     <button type="button" onClick={copyShareLink}>🔗 Kopiraj poveznicu</button>
                     <button type="button" onClick={() => openShare("https://www.facebook.com/sharer/sharer.php?u=" + encodedUrl)}>ⓕ Facebook</button>
                     <button type="button" onClick={() => openShare("https://twitter.com/intent/tweet?text=" + encodedText + "&url=" + encodedUrl)}>𝕏 X</button>
                     <button type="button" onClick={() => openShare("https://wa.me/?text=" + encodedText + "%20" + encodedUrl)}>☏ WhatsApp</button>
                     <button type="button" onClick={() => openShare("https://t.me/share/url?url=" + encodedUrl + "&text=" + encodedText)}>➤ Telegram</button>
+                    <button type="button" onClick={shareToTikTok}>♪ TikTok</button>
                     <button type="button" onClick={() => { window.location.href = "mailto:?subject=" + encodeURIComponent("PatriaSoul – Čuvari nasljeđa") + "&body=" + encodedText + "%0A%0A" + encodedUrl; setShareMenuPostId(null); }}>✉ E-pošta</button>
                   </div>
-                  <small>Ovo dijeli poveznicu na izvornu objavu. Izravno objavljivanje sadržaja na drugim računima dodaje se zasebno uz službene API-je.</small>
+                  <small>Facebook, X, WhatsApp i Telegram otvaraju dijeljenje poveznice. TikTok nema izravnu opciju objave vanjske poveznice, pa se kopira poveznica i otvara PatriaSoul profil.</small>
                 </div>;
               })()}
               {openComments.includes(post.id) && (
