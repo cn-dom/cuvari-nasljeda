@@ -24,7 +24,7 @@ document.querySelectorAll(".prayer-item").forEach(button=>button.addEventListene
 const weekday=["nedjelja","ponedjeljak","utorak","srijeda","četvrtak","petak","subota"][new Date(today.iso+"T12:00:00+02:00").getDay()];
 const slug=weekday+"-"+Number(today.day)+"-"+Number(today.month)+"-"+today.year;
 const setText=(id,text)=>{const el=document.getElementById(id);if(el)el.textContent=text;};
-const clean=s=>String(s||"").replace(/\[([^\]]+)\]\([^)]+\)/g,"$1").replace(/[*_>#`]/g,"").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#39;|&apos;/g,"'").replace(/\s+/g," ").trim();
+const clean=s=>String(s||"").replace(/\[([^\]]+)\]\([^)]+\)/g,"$1").replace(/[]/g," ").replace(/[*_>#`]/g,"").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#39;|&apos;/g,"'").replace(/\s+/g," ").trim();
 const findSection=(source,heading)=>{
  const escaped=heading.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
  const re=new RegExp("(?:^|\\n)#{1,5}\\s*"+escaped+"\\s*:?\\s*\\n([\\s\\S]*?)(?=\\n#{1,5}\\s|$)","i");
