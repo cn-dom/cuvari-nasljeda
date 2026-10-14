@@ -121,6 +121,14 @@ function App() {
   const [editingPostId, setEditingPostId] = useState(null);
   const [editDraft, setEditDraft] = useState("");
   const [memberPickerOpen, setMemberPickerOpen] = useState(false);
+  useEffect(() => {
+    if (!memberPickerOpen) return undefined;
+    const closeMemberPicker = (event) => {
+      if (!event.target.closest?.(".mention-tool-wrap")) setMemberPickerOpen(false);
+    };
+    document.addEventListener("pointerdown", closeMemberPicker);
+    return () => document.removeEventListener("pointerdown", closeMemberPicker);
+  }, [memberPickerOpen]);
   const [selectedImage, setSelectedImage] = useState("");
   const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [authOpen, setAuthOpen] = useState(false);
