@@ -2123,7 +2123,7 @@ function App() {
                 <span className="community-hub-icon">▣</span><span className="community-hub-copy"><strong>Stranice zajednice</strong><small>Otkrij stranice, pokreni svoju i objavljuj.</small></span><span className="community-hub-arrow">↗</span>
               </a>
               <a className="community-hub-card ai-hub-card" href="/ai-centar.html">
-                <span className="community-hub-icon">✦</span><span className="community-hub-copy"><strong>PatriaSoul AI centar</strong><small>Učenje, povijesna baština, slike i glasovni vodič.</small></span><span className="community-hub-arrow">↗</span>
+                <span className="community-hub-icon">✦</span><span className="community-hub-copy"><strong>PatriaSoul Centar</strong><small>Središte znanja, hrvatske baštine i pametnih alata.</small></span><span className="community-hub-arrow">↗</span>
               </a>
             </div>
           </section>
