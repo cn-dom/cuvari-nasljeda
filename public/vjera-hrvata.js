@@ -34,22 +34,10 @@ const loadLiturgy=async()=>{
  const gospelRef=document.getElementById("gospel-reference");
  const gospelText=document.getElementById("gospel-text");
  try{
-   const path="liturgija-dana/"+slug+"/";
-   const urls=[
-     "https://r.jina.ai/http://hilp.hr/"+path,
-     "https://r.jina.ai/https://hilp.hr/"+path
-   ];
-   let raw="",lastError=null;
-   for(const url of urls){
-     try{
-       const response=await fetch(url,{headers:{"Accept":"text/plain"},cache:"no-store"});
-       if(!response.ok)throw new Error("HTTP "+response.status);
-       const text=await response.text();
-       if(text&&text.length>500&&/Evanđelje/i.test(text)){raw=text;break;}
-       throw new Error("Odgovor izvora nema očekivani sadržaj.");
-     }catch(err){lastError=err;}
-   }
-   if(!raw)throw lastError||new Error("Liturgijski izvor nije dostupan.");
+   const response=await fetch("/api/liturgy?slug="+encodeURIComponent(slug),{headers:{"Accept":"text/plain"},cache:"no-store"});
+   if(!response.ok)throw new Error("Liturgijski posrednik HTTP "+response.status);
+   const raw=await response.text();
+   if(!raw||raw.length<500||!/Evanđelje/i.test(raw))throw new Error("Posrednik nije vratio provjereni liturgijski sadržaj.");
    const dateMatch=raw.match(/(?:Ponedjeljak|Utorak|Srijeda|Četvrtak|Petak|Subota|Nedjelja),?\s+\d{1,2}\.\s*\d{1,2}\.\s*\d{4}\.?/i);
    if(dateMatch){
      const expected=Number(today.day)+"."+String(Number(today.month))+"."+today.year;
