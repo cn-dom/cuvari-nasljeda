@@ -1,6 +1,6 @@
 -- PatriaSoul – Čuvari nasljeđa
 -- SIGURNOSNI SQL NACRT — pregledati i testirati prije primjene.
--- Ne dopušta dodavanje reakcije na privatnu poruku između članova koji su se blokirali.
+-- Blokira reakcije između članova koji su se blokirali, uključujući INSERT i UPDATE.
 -- Oslanja se na postojeću tablicu private_message_reactions(message_id, user_id, emoji).
 
 begin;
@@ -15,7 +15,20 @@ declare
   v_sender_id uuid;
   v_recipient_id uuid;
 begin
-  if auth.uid() is null or new.user_id is distinct from auth.uid() then
+  if auth.uid() is null then
+    raise exception 'Za reakciju je potrebna prijava.'
+      using errcode = '42501';
+  end if;
+
+  if tg_op = 'UPDATE' then
+    -- Ne dopusti preuzimanje tuđe reakcije niti premještanje reakcije na drugu poruku.
+    if old.user_id is distinct from auth.uid()
+       or new.user_id is distinct from old.user_id
+       or new.message_id is distinct from old.message_id then
+      raise exception 'Vlasnik reakcije i poruka ne mogu se promijeniti.'
+        using errcode = '42501';
+    end if;
+  elsif new.user_id is distinct from auth.uid() then
     raise exception 'Reakciju može dodati samo prijavljeni član za vlastiti račun.'
       using errcode = '42501';
   end if;
@@ -54,7 +67,7 @@ drop trigger if exists private_message_reactions_prevent_blocked_pair
   on public.private_message_reactions;
 
 create trigger private_message_reactions_prevent_blocked_pair
-before insert on public.private_message_reactions
+before insert or update on public.private_message_reactions
 for each row
 execute function public.prevent_private_message_reaction_between_blocked_users();
 
