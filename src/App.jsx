@@ -92,6 +92,12 @@ function App() {
   const [communityActionAds, setCommunityActionAds] = useState([]);
   const [communityActionLoading, setCommunityActionLoading] = useState(false);
   const [communityActionBusy, setCommunityActionBusy] = useState(false);
+  const [communityHelpReportAd, setCommunityHelpReportAd] = useState(null);
+  const [communityHelpReportReason, setCommunityHelpReportReason] = useState("spam");
+  const [communityHelpReportDetails, setCommunityHelpReportDetails] = useState("");
+  const [communityHelpReportBusy, setCommunityHelpReportBusy] = useState(false);
+  const [communityHelpAdReports, setCommunityHelpAdReports] = useState([]);
+  const [communityHelpAdReportsLoading, setCommunityHelpAdReportsLoading] = useState(false);
   const communityActionPage = new URLSearchParams(window.location.search).get("zajedno");
   const [activeNav, setActiveNav] = useState("Zid zajednice");
   const [liked, setLiked] = useState([]);
@@ -185,7 +191,7 @@ function App() {
       const adType = communityActionPage === "trebam-pomoc" ? "seeking" : "offering";
       const { data, error } = await supabase
         .from("community_help_ads")
-        .select("id, author_id, ad_type, title, description, category, location, created_at")
+        .select("id, author_id, ad_type, title, description, category, location, status, created_at")
         .eq("ad_type", adType)
         .eq("status", "open")
         .order("created_at", { ascending: false })
@@ -193,12 +199,25 @@ function App() {
       if (!cancelled) {
         setCommunityActionAds(error ? [] : (data || []));
         setCommunityActionLoading(false);
-        if (error) setNotice("Oglasnik još nije povezan s bazom. Primijeni migraciju docs/sql/community-help-ads.sql u Supabaseu.");
+        if (error) setNotice("Oglasnik se ne može učitati. Provjeri je li migracija community_help_ad_board_and_reports primijenjena u Supabaseu.");
+      }
+      if (isOwner && !cancelled) {
+        setCommunityHelpAdReportsLoading(true);
+        const { data: reportRows, error: reportError } = await supabase
+          .from("community_help_ad_reports")
+          .select("id, ad_id, reporter_id, reason, details, status, created_at, community_help_ads(title, ad_type, author_id)")
+          .order("created_at", { ascending: false })
+          .limit(100);
+        if (!cancelled) {
+          setCommunityHelpAdReports(error || reportError ? [] : (reportRows || []));
+          setCommunityHelpAdReportsLoading(false);
+          if (reportError) setNotice("Prijave oglasa nisu dostupne vlasniku. Provjeri RLS pravila za community_help_ad_reports.");
+        }
       }
     }
     loadCommunityActionAds();
     return () => { cancelled = true; };
-  }, [communityActionPage]);
+  }, [communityActionPage, isOwner]);
 
   useEffect(() => {
     if (!emojiPickerOpen || !emojiPickerHost.current) return undefined;
@@ -1720,6 +1739,77 @@ function App() {
     setNotice("Vlastita objava izbrisana je iz baze zajednice.");
   }
 
+  async function reportCommunityHelpAd(event) {
+    event.preventDefault();
+    if (!supabase || !session?.user?.id || !communityHelpReportAd?.id) {
+      setAuthMode("login");
+      setAuthMessage("Za prijavu oglasa potrebno je prijaviti se.");
+      setAuthOpen(true);
+      return;
+    }
+    setCommunityHelpReportBusy(true);
+    const { error } = await supabase.from("community_help_ad_reports").insert({
+      ad_id: communityHelpReportAd.id,
+      reporter_id: session.user.id,
+      reason: communityHelpReportReason,
+      details: communityHelpReportDetails.trim() || null
+    });
+    setCommunityHelpReportBusy(false);
+    if (error) {
+      setNotice(error.code === "23505"
+        ? "Ovaj oglas već si prijavio/la."
+        : "Prijava nije spremljena. Pokušaj ponovno ili provjeri vezu s bazom.");
+      return;
+    }
+    setCommunityHelpReportAd(null);
+    setCommunityHelpReportReason("spam");
+    setCommunityHelpReportDetails("");
+    setNotice("Prijava oglasa poslana je moderatorima. Hvala što čuvaš sigurnost zajednice.");
+  }
+
+  async function updateCommunityHelpAdStatus(ad, status) {
+    if (!supabase || !session?.user?.id || ad?.author_id !== session.user.id) return;
+    const label = status === "closed" ? "označiti oglas kao riješen" : "ponovno otvoriti oglas";
+    if (!window.confirm("Želiš li " + label + "?")) return;
+    const { data, error } = await supabase.from("community_help_ads")
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq("id", ad.id).eq("author_id", session.user.id)
+      .select("id, status").maybeSingle();
+    if (error || !data) {
+      setNotice("Status oglasa nije promijenjen. Provjeri vezu i prava pristupa.");
+      return;
+    }
+    setCommunityActionAds((current) => status === "open"
+      ? current.map((item) => item.id === ad.id ? { ...item, status } : item)
+      : current.filter((item) => item.id !== ad.id));
+    setNotice(status === "closed" ? "Oglas je označen kao riješen." : "Oglas je ponovno otvoren.");
+  }
+
+  async function deleteCommunityHelpAd(ad) {
+    if (!supabase || !session?.user?.id || ad?.author_id !== session.user.id) return;
+    if (!window.confirm("Trajno izbrisati ovaj oglas? Ovu radnju nije moguće poništiti.")) return;
+    const { data, error } = await supabase.from("community_help_ads")
+      .delete().eq("id", ad.id).eq("author_id", session.user.id).select("id").maybeSingle();
+    if (error || !data) {
+      setNotice("Oglas nije izbrisan. Provjeri vezu i prava pristupa.");
+      return;
+    }
+    setCommunityActionAds((current) => current.filter((item) => item.id !== ad.id));
+    setNotice("Oglas je trajno izbrisan.");
+  }
+
+  async function updateCommunityHelpReport(report, status) {
+    if (!isOwner || !supabase || !report?.id) return;
+    const { data, error } = await supabase.from("community_help_ad_reports")
+      .update({ status }).eq("id", report.id).select("id, status").maybeSingle();
+    if (error || !data) {
+      setNotice("Status prijave oglasa nije promijenjen.");
+      return;
+    }
+    setCommunityHelpAdReports((current) => current.map((item) => item.id === report.id ? { ...item, status: data.status } : item));
+    setNotice("Status prijave oglasa je ažuriran.");
+  }
+
   async function submitCommunityAction(event) {
     event.preventDefault();
     if (!communityActionTitle.trim() || !communityActionDetails.trim()) {
@@ -1813,10 +1903,40 @@ function App() {
                   <h3>{ad.title}</h3><p>{ad.description}</p>
                   <div className="community-action-ad-tags"><span>{ad.category}</span>{ad.location && <span>⌖ {ad.location}</span>}</div>
                   <small className="community-action-ad-author">Objavio/la: {authorLabel}</small>
+                  <div className="community-action-ad-actions">
+                    {session?.user?.id && ad.author_id !== session.user.id && <button type="button" onClick={() => { setMessageRecipient(ad.author_id); setActiveNav("Poruke"); setNotice("Odabran je član koji je objavio oglas. Možeš mu poslati privatnu poruku u odjeljku Poruke."); }}>✉ Kontaktiraj člana</button>}
+                    {session?.user?.id && ad.author_id === session.user.id && <button type="button" onClick={() => updateCommunityHelpAdStatus(ad, "closed")}>✓ Označi riješeno</button>}
+                    {session?.user?.id && ad.author_id !== session.user.id && <button type="button" className="community-action-report-button" onClick={() => { setCommunityHelpReportAd(ad); setCommunityHelpReportReason("spam"); setCommunityHelpReportDetails(""); }}>⚑ Prijavi oglas</button>}
+                    {session?.user?.id && ad.author_id === session.user.id && <button type="button" className="community-action-report-button" onClick={() => deleteCommunityHelpAd(ad)}>Izbriši</button>}
+                  </div>
                 </article>;
               })}</div> : <p className="community-action-empty">{communityActionPage === "trebam-pomoc" ? "Još nema aktivnih oglasa za pomoć. Možeš biti prvi/a i objaviti što ti treba." : "Još nema aktivnih ponuda pomoći. Možeš biti prvi/a i ponuditi ono što znaš."}</p>}
             </section>
+            {isOwner && <section className="community-action-listing" aria-labelledby="community-help-reports-title">
+              <div className="community-action-listing-heading"><div><p className="community-action-eyebrow">MODERACIJA</p><h2 id="community-help-reports-title">Prijave oglasa</h2></div><span>{communityHelpAdReports.filter((item) => item.status === "open" || item.status === "reviewing").length}</span></div>
+              {communityHelpAdReportsLoading ? <p className="community-action-empty">Učitavam prijave…</p> : communityHelpAdReports.length ? <div className="community-action-ad-list">{communityHelpAdReports.map((report) => <article className="community-action-ad" key={report.id}>
+                <div className="community-action-ad-meta"><span>{report.status.toLocaleUpperCase("hr")}</span><time>{new Date(report.created_at).toLocaleDateString("hr-HR")}</time></div>
+                <h3>{report.community_help_ads?.title || "Oglas je uklonjen"}</h3><p>Razlog: {({spam:"Spam",scam:"Sumnja na prijevaru",harassment:"Uznemiravanje ili prijetnje",hate:"Govor mržnje",privacy:"Povreda privatnosti",other:"Drugo"})[report.reason] || report.reason}</p>
+                {report.details && <p>{report.details}</p>}
+                <div className="community-action-ad-actions"><button type="button" onClick={() => updateCommunityHelpReport(report, "reviewing")}>U pregledu</button><button type="button" onClick={() => updateCommunityHelpReport(report, "resolved")}>Riješeno</button><button type="button" onClick={() => updateCommunityHelpReport(report, "dismissed")}>Odbaci</button></div>
+              </article>)}</div> : <p className="community-action-empty">Trenutačno nema prijava oglasa.</p>}
+            </section>}
           </div>
+          {communityHelpReportAd && <div className="community-action-modal-backdrop" role="presentation" onClick={(event) => { if (event.target === event.currentTarget && !communityHelpReportBusy) setCommunityHelpReportAd(null); }}>
+            <section className="community-action-report-modal" role="dialog" aria-modal="true" aria-labelledby="community-help-report-title">
+              <button type="button" className="community-action-modal-close" aria-label="Zatvori" onClick={() => setCommunityHelpReportAd(null)}>×</button>
+              <p className="community-action-eyebrow">SIGURNOST ZAJEDNICE</p><h2 id="community-help-report-title">Prijavi oglas</h2><p>Prijavljuješ: <strong>{communityHelpReportAd.title}</strong></p>
+              <form className="community-action-form" onSubmit={reportCommunityHelpAd}>
+                <label htmlFor="community-help-report-reason">Razlog prijave</label>
+                <select id="community-help-report-reason" value={communityHelpReportReason} onChange={(event) => setCommunityHelpReportReason(event.target.value)} required>
+                  <option value="spam">Spam ili neželjeni sadržaj</option><option value="scam">Sumnja na prijevaru</option><option value="harassment">Uznemiravanje ili prijetnje</option><option value="hate">Govor mržnje</option><option value="privacy">Povreda privatnosti</option><option value="other">Drugo</option>
+                </select>
+                <label htmlFor="community-help-report-details">Dodatni detalji (neobavezno)</label>
+                <textarea id="community-help-report-details" rows={4} maxLength={2000} value={communityHelpReportDetails} onChange={(event) => setCommunityHelpReportDetails(event.target.value)} placeholder="Objasni zašto je oglas problematičan…" />
+                <button className="community-action-submit" type="submit" disabled={communityHelpReportBusy}>{communityHelpReportBusy ? "Šaljem prijavu…" : "Pošalji prijavu"} <span aria-hidden="true">→</span></button>
+              </form>
+            </section>
+          </div>}
         </section>
       )}
       <div className="preview-ribbon">
