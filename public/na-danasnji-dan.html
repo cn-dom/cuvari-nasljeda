@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1d30">
+<meta name="description" content="Na današnji dan — povijesni događaji, znanost, kultura i sport koji su obilježili određeni datum.">
+<title>Na današnji dan · PatriaSoul</title>
+<link rel="stylesheet" href="/na-danasnji-dan.css">
+</head>
+<body>
+<main class="ps-today-page">
+<section class="ps-today-hero">
+<div class="ps-container">
+<a class="ps-today-back" href="/">← Povratak na zid</a>
+<p class="ps-today-kicker">PATRIASOUL · POVIJEST</p>
+<h1>Na današnji dan</h1>
+<p>Otkrij događaje koji su se dogodili na ovaj kalendarski datum kroz povijest — uz godinu, kratak opis i poveznicu na izvor.</p>
+<div class="ps-today-date" id="today-date">Učitavanje datuma…</div>
+</div>
+</section>
+<section class="ps-today-section">
+<div class="ps-container">
+<div class="ps-today-toolbar">
+<div><span class="ps-today-eyebrow">ODABERI DATUM</span><h2>Putovanje kroz kalendar</h2><p class="ps-today-hint">Prikazuju se događaji za odabrani dan i mjesec, kroz različite godine.</p></div>
+<div class="ps-date-controls">
+<button type="button" id="date-prev" aria-label="Prethodni dan" title="Prethodni dan">←</button>
+<input type="date" id="date-picker" aria-label="Odaberi datum">
+<button type="button" id="date-next" aria-label="Sljedeći dan" title="Sljedeći dan">→</button>
+<button type="button" id="date-today">Danas</button>
+</div>
+</div>
+<div class="ps-today-status" id="today-status" role="status" aria-live="polite">Događaji se automatski dohvaćaju…</div>
+<article class="ps-feature-event" id="featured-event" hidden><div class="ps-feature-label">ISTAKNUTI DOGAĐAJ DANA</div><div id="featured-event-content"></div></article>
+<div class="ps-today-grid" id="events-grid" aria-live="polite"></div>
+<div class="ps-today-empty" id="events-empty" hidden><strong>Za ovaj datum trenutačno nema dostupnih događaja.</strong><p>Pokušaj drugi datum ili provjeri dostupnost povijesnog izvora.</p></div>
+<div class="ps-today-source">Povijesni podaci dohvaćaju se iz Wikipedijina javnog API-ja. Svaki prikazani događaj, kada je poveznica dostupna, vodi na pripadajući članak radi provjere i dodatnog čitanja.</div>
+<div class="ps-share"><strong>Podijeli ovaj datum</strong><button type="button" id="share-button">Podijeli</button><button type="button" id="copy-button">Kopiraj poveznicu</button><span id="share-status" aria-live="polite"></span></div>
+</div>
+</section>
+</main>
+<script src="/na-danasnji-dan.js" defer></script>
+</body>
+</html>
