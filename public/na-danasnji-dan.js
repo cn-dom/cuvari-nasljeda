@@ -145,25 +145,43 @@
     try {
       // Čitamo hrvatsku stranicu datuma i izdvajamo Događaje, Rođene, Preminule/Umrle te Blagdane i spomendane.
       const pageTitle = datePageTitle(date);
-      const api = new URL("https://hr.wikipedia.org/w/api.php");
-      api.search = new URLSearchParams({
-        action: "parse",
-        page: pageTitle,
-        prop: "text",
-        format: "json",
-        origin: "*"
-      }).toString();
-      const response = await fetch(api.href, {
-        headers: {"Accept":"application/json"},
-        cache: "no-store"
-      });
-      if (!response.ok) throw new Error("Hrvatska Wikipedija trenutačno nije dostupna.");
-      const data = await response.json();
+      let html = "";
+      let apiError = null;
+      try {
+        const api = new URL("https://hr.wikipedia.org/w/api.php");
+        api.search = new URLSearchParams({
+          action: "parse",
+          page: pageTitle,
+          prop: "text",
+          format: "json",
+          origin: "*"
+        }).toString();
+        const response = await fetch(api.href, {
+          headers: {"Accept":"application/json"},
+          cache: "no-store"
+        });
+        if (!response.ok) throw new Error("MediaWiki API nije dostupan.");
+        const data = await response.json();
+        if (data?.error || !data?.parse?.text) throw new Error("MediaWiki API nije vratio stranicu.");
+        html = typeof data.parse.text === "string" ? data.parse.text : data.parse.text["*"];
+      } catch (error) {
+        apiError = error;
+      }
       if (currentRequest !== requestNumber) return;
-      if (data?.error || !data?.parse?.text) throw new Error("Hrvatska Wikipedija nije vratila stranicu za taj datum.");
+
+      // Rezervni izvor: HTML prikaz iste hrvatske Wikipedije, ako API ne odgovara.
+      if (!html) {
+        const titlePath = encodeURIComponent(pageTitle.replaceAll(" ", "_"));
+        const fallback = await fetch("https://hr.wikipedia.org/api/rest_v1/page/html/" + titlePath, {
+          headers: {"Accept":"text/html"},
+          cache: "no-store"
+        });
+        if (!fallback.ok) throw apiError || new Error("Hrvatska Wikipedija trenutačno nije dostupna.");
+        html = await fallback.text();
+      }
+      if (currentRequest !== requestNumber) return;
 
       const daySource = "https://hr.wikipedia.org/wiki/" + encodeURIComponent(pageTitle.replaceAll(" ", "_"));
-      const html = typeof data.parse.text === "string" ? data.parse.text : data.parse.text["*"];
       const events = eventsFromWikipediaHtml(html || "", daySource).slice(0, 60);
       if (!events.length) {
         status.dataset.state = "empty";
