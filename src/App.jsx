@@ -364,10 +364,10 @@ function App() {
         const username = normalizeUsername(profile.username) || "clan";
         let imageUrl = "";
         if (row.image_path) {
-          const { data: signedImage } = await supabase.storage
+          const { data: publicImage } = supabase.storage
             .from("community-images")
-            .createSignedUrl(row.image_path, 60 * 60);
-          imageUrl = signedImage?.signedUrl || "";
+            .getPublicUrl(row.image_path);
+          imageUrl = publicImage?.publicUrl || "";
         }
         return {
           id: row.id,
@@ -1536,8 +1536,8 @@ function App() {
     }
     let uploadedImageUrl = "";
     if (imagePath) {
-      const { data: signedImage } = await supabase.storage.from("community-images").createSignedUrl(imagePath, 60 * 60);
-      uploadedImageUrl = signedImage?.signedUrl || "";
+      const { data: publicImage } = supabase.storage.from("community-images").getPublicUrl(imagePath);
+      uploadedImageUrl = publicImage?.publicUrl || "";
     }
     const profile = data.profiles || {};
     const author = profile.display_name || session.user.email || "Čuvar nasljeđa";
