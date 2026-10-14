@@ -5,7 +5,7 @@ import FloatingGlobalChat from "./FloatingGlobalChat.jsx";
 import emojiData from "@emoji-mart/data";
 
 const navItems = [
-  { icon: "⌂", label: "Zid zajednice" },
+  { icon: "⌂", label: "PatriaSoul" },
   { icon: "🧠", label: "Kviz" },
   { icon: "▤", label: "Forum" },
   { icon: "▣", label: "Stranice" },
@@ -100,7 +100,7 @@ function App() {
   const [communityHelpAdReports, setCommunityHelpAdReports] = useState([]);
   const [communityHelpAdReportsLoading, setCommunityHelpAdReportsLoading] = useState(false);
   const communityActionPage = new URLSearchParams(window.location.search).get("zajedno");
-  const [activeNav, setActiveNav] = useState("Zid zajednice");
+  const [activeNav, setActiveNav] = useState("PatriaSoul");
   const [liked, setLiked] = useState([]);
   const [reactionsByPost, setReactionsByPost] = useState({});
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
@@ -181,7 +181,7 @@ function App() {
   const isOwner = (session?.user?.email || "").trim().toLowerCase() === OWNER_EMAIL;
 
   function navigateToSection(label) {
-    if (!session?.user?.id && label !== "Zid zajednice") {
+    if (!session?.user?.id && label !== "PatriaSoul") {
       setAuthMode("login");
       setAuthMessage("Prijavi se ili izradi račun kako bi pristupio/la sadržaju zajednice.");
       setAuthOpen(true);
@@ -1966,7 +1966,7 @@ function App() {
       </div>
 
       <header className="topbar">
-        <a className="brand" href="#pocetna" onClick={() => setActiveNav("Zid zajednice")}>
+        <a className="brand" href="#pocetna" onClick={() => setActiveNav("PatriaSoul")}>
           <BrandMark />
           <span className="brand-copy">
             <strong>PatriaSoul</strong>
@@ -1981,12 +1981,12 @@ function App() {
             aria-label="Pretraži objave i članove"
             placeholder="Pretraži objave, članove i grupe…"
             value={feedSearch}
-            onChange={(event) => { setFeedSearch(event.target.value); setActiveNav("Zid zajednice"); }}
+            onChange={(event) => { setFeedSearch(event.target.value); setActiveNav("PatriaSoul"); }}
           />
           {feedSearch && <button className="global-search-clear" type="button" aria-label="Očisti pretragu" onClick={() => setFeedSearch("")}>×</button>}
         </div>
         <nav className="topnav" aria-label="Brza navigacija">
-          <button className={activeNav === "Zid zajednice" ? "topnav-link active" : "topnav-link"} onClick={() => setActiveNav("Zid zajednice")} aria-label="Početna">⌂</button>
+          <button className={activeNav === "PatriaSoul" ? "topnav-link active" : "topnav-link"} onClick={() => setActiveNav("PatriaSoul")} aria-label="Početna">⌂</button>
           <button className={activeNav === "Čuvari nasljeđa" ? "topnav-link active" : "topnav-link"} onClick={() => navigateToSection("Čuvari nasljeđa")} aria-label="Članovi">👥</button>
           <button className={activeNav === "Poruke" ? "topnav-link active" : "topnav-link"} onClick={() => navigateToSection("Poruke")} aria-label="Poruke">✉</button>
           <button className={activeNav === "Obavijesti" ? "topnav-link active" : "topnav-link"} onClick={() => navigateToSection("Obavijesti")} aria-label="Obavijesti">🔔</button>
@@ -1998,7 +1998,7 @@ function App() {
               <button className="login-button" onClick={signOut}>Odjava</button>
             </div>
           ) : (
-            <button className="login-button" onClick={() => navigateToSection("Zid zajednice")}>PatriaSoul</button>
+            <button className="login-button" onClick={() => navigateToSection("PatriaSoul")}>PatriaSoul</button>
           )}
         </div>
       </header>
@@ -2016,7 +2016,7 @@ function App() {
                 <div><strong>{postCount}</strong><span>objava</span></div>
                 <div><strong>{groupChats.length}</strong><span>grupa</span></div>
               </div>
-              <button type="button" className="community-profile-action" onClick={() => { setActiveNav("Zid zajednice"); if (session?.user?.id) { document.getElementById("post-draft")?.focus(); } else { setAuthOpen(true); setAuthMode("login"); setAuthMessage("Prijavi se ili izradi račun kako bi podijelio/la svoju priču."); } }}>＋ Podijeli priču</button>
+              <button type="button" className="community-profile-action" onClick={() => { setActiveNav("PatriaSoul"); if (session?.user?.id) { document.getElementById("post-draft")?.focus(); } else { setAuthOpen(true); setAuthMode("login"); setAuthMessage("Prijavi se ili izradi račun kako bi podijelio/la svoju priču."); } }}>＋ Podijeli priču</button>
             </div>
           </section>
 
@@ -2027,7 +2027,7 @@ function App() {
           </a>
           <section className="side-section sidebar-nav-section">
             <h3>MOJA ZAJEDNICA</h3>
-            {navItems.filter((item) => ["Zid zajednice", "Kviz", "Forum", "Stranice", "Čuvari nasljeđa", "Grupe"].includes(item.label)).map((item) => (
+            {navItems.filter((item) => ["PatriaSoul", "Kviz", "Forum", "Stranice", "Čuvari nasljeđa", "Grupe"].includes(item.label)).map((item) => (
               <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => item.label === "Kviz" ? (window.location.href = "/kviz/") : item.label === "Forum" ? (window.location.href = "/forum.html") : item.label === "Stranice" ? (window.location.href = "/stranice.html") : setActiveNav(item.label)}>
                 <span className="side-icon">{item.icon}</span><span className="side-link-label">{item.label}</span>
                 {item.label === "Čuvari nasljeđa" && <span className="side-count">{memberDirectory.length || ""}</span>}
@@ -2602,7 +2602,7 @@ function App() {
           <div className="feed-heading">
             <div>
               <span className="eyebrow">ŽIVOT ZAJEDNICE</span>
-              <h2>{activeNav === "Zid zajednice" ? "PatriaSoul – Čuvari nasljeđa" : activeNav}</h2>
+              <h2>{activeNav === "PatriaSoul" ? "PatriaSoul – Čuvari nasljeđa" : activeNav}</h2>
             </div>
             <span className="feed-total">{visiblePosts.length} objava</span>
           </div>
