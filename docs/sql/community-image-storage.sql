@@ -1,7 +1,16 @@
 -- PatriaSoul · Čuvari nasljeđa
--- Storage access for public wall images in the separate TEST project.
--- Images are readable for public feed display; writes/deletes are limited to the owner's folder.
+-- SECURITY UPDATE: community images must be private and available only to members.
+-- The bucket itself must be Private in Supabase Storage. A public bucket can
+-- bypass object SELECT policies for public object URLs.
+-- For a complete review-first migration, see member-only-wall-access.sql.
+
 begin;
+
+update storage.buckets
+set public = false,
+    file_size_limit = 10485760,
+    allowed_mime_types = array['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+where id = 'community-images';
 
 drop policy if exists community_images_read_public on storage.objects;
 drop policy if exists community_images_read_authenticated on storage.objects;
@@ -12,8 +21,8 @@ drop policy if exists community_images_upload_own on storage.objects;
 drop policy if exists community_images_delete_own on storage.objects;
 drop policy if exists community_images_update_own on storage.objects;
 
-create policy community_images_read_public
-  on storage.objects for select to anon, authenticated
+create policy community_images_read_authenticated
+  on storage.objects for select to authenticated
   using (bucket_id = 'community-images');
 
 create policy community_images_upload_own
