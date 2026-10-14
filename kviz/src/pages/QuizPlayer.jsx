@@ -1,10 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, X, Clock, Volume2, VolumeX } from "lucide-react";
+import { Check, X, Clock, Volume2, VolumeX, BookOpen, Loader2 } from "lucide-react";
+import { puter } from "@heyputer/puter.js";
 import { getSoundEnabled, setSoundEnabled, playStart, playSelect, playCorrect, playWrong, playTick, playFinish, playResult } from "../lib/soundEffects";
 import { submitQuizAnswer } from "../lib/attempts";
 
 const LETTERS = ["A", "B", "C", "D"];
+
+function getAIText(reply) {
+  const content = reply?.message?.content ?? reply?.text ?? reply?.content ?? reply;
+  if (typeof content === "string") return content.trim();
+  if (Array.isArray(content)) return content.map((part) => part?.text || "").filter(Boolean).join("\n").trim();
+  return "";
+}
 
 function shuffleAnswers(answers = []) {
   const copy = answers.map((text, originalIndex) => ({ text, originalIndex }));
@@ -22,6 +30,9 @@ export default function QuizPlayer({ questions, title, subtitle, timeLimit = 20,
   const [answered, setAnswered] = useState(false);
   const [serverCorrectIndex, setServerCorrectIndex] = useState(null);
   const [answerError, setAnswerError] = useState("");
+  const [explanation, setExplanation] = useState("");
+  const [explanationLoading, setExplanationLoading] = useState(false);
+  const [explanationError, setExplanationError] = useState("");
   const [remaining, setRemaining] = useState(timeLimit);
   const [soundEnabled, setSoundEnabledState] = useState(getSoundEnabled);
   const startRef = useRef(Date.now());
@@ -52,9 +63,20 @@ export default function QuizPlayer({ questions, title, subtitle, timeLimit = 20,
     if (!questions.length || answered) return undefined;
     if (remaining <= 0) {
       submitQuizAnswer(attemptId, q.id, -1)
-        .then((response) => {
-          setServerCorrectIndex(displayedAnswers.findIndex((answer) => answer.originalIndex === response.correctIndex));
+        .then(async (response) => {
+          const correctPosition = displayedAnswers.findIndex((answer) => answer.originalIndex === response.correctIndex);
+          setSelected(-1);
+          setServerCorrectIndex(correctPosition);
           setAnswered(true);
+          await explainAnswer({
+            question: q.question,
+            category: q.category,
+            correctAnswer: displayedAnswers[correctPosition]?.text || "Točan odgovor nije dostupan.",
+            selectedAnswer: "",
+            sourceUrl: q.sourceUrl,
+            isCorrect: false,
+            timedOut: true
+          });
         })
         .catch((error) => setAnswerError(error.message || "Odgovor se nije mogao potvrditi."));
       return undefined;
@@ -63,24 +85,56 @@ export default function QuizPlayer({ questions, title, subtitle, timeLimit = 20,
     return () => clearTimeout(timer);
   }, [remaining, answered, questions.length]);
 
-  useEffect(() => {
-    if (!answered) return undefined;
-    const timer = setTimeout(() => {
-      if (index + 1 < questions.length) {
-        setIndex((v) => v + 1);
-        setSelected(null);
-        setAnswered(false);
-        setServerCorrectIndex(null);
-        setAnswerError("");
-        setRemaining(timeLimit);
-      } else {
-        playFinish();
-        playResult();
-        onComplete?.({ score: scoreRef.current, total: questions.length, timeSeconds: Math.floor((Date.now() - startRef.current) / 1000) });
-      }
-    }, 1100);
-    return () => clearTimeout(timer);
-  }, [answered, index, questions.length, timeLimit, onComplete]);
+  async function explainAnswer({ question, category, correctAnswer, selectedAnswer, sourceUrl, isCorrect, timedOut = false }) {
+    setExplanation("");
+    setExplanationError("");
+    setExplanationLoading(true);
+    try {
+      const reply = await puter.ai.chat([
+        {
+          role: "system",
+          content: "Ti si obrazovni vodič kviza Čuvari nasljeđa. Odgovaraj isključivo na hrvatskom jeziku. Objasni odgovor u 3 do 5 kratkih rečenica, jednostavno i poučno. Točan odgovor već je provjeren poslužiteljem kviza: nemoj ga mijenjati niti ponovno odlučivati koji je odgovor točan. Objasni zašto je naveden odgovor točan, dodaj povijesni ili kulturni kontekst samo ako si dovoljno siguran. Ne izmišljaj datume, osobe, citate ni izvore. Ako detalj nije siguran, reci da ga treba dodatno provjeriti. Ako je priložena poveznica izvora, prikaži je kao izvor za daljnje čitanje, ali nemoj tvrditi da si je otvorio ili provjerio. Ne traži osobne podatke, ne otkrivaj tajne ni druge odgovore iz baze. Vrati samo objašnjenje, bez uvodnih rečenica."
+        },
+        {
+          role: "user",
+          content: JSON.stringify({
+            kategorija: category || "Hrvatsko opće znanje",
+            pitanje: question,
+            provjereni_tocan_odgovor: correctAnswer,
+            odgovor_igraca: timedOut ? "Vrijeme je isteklo; igrač nije odgovorio." : (selectedAnswer || "Nije odabran odgovor"),
+            igrac_je_tocno_odgovorio: Boolean(isCorrect),
+            poveznica_izvora: sourceUrl || null,
+            zadatak: "Objasni poučno zašto je provjereni točan odgovor ispravan i što je najvažnije zapamtiti."
+          })
+        }
+      ]);
+      const text = getAIText(reply);
+      if (!text) throw new Error("Puter nije vratio objašnjenje.");
+      setExplanation(text);
+    } catch (error) {
+      setExplanationError("AI objašnjenje trenutačno nije dostupno. Kviz i bodovanje i dalje rade. " + (error?.message || ""));
+    } finally {
+      setExplanationLoading(false);
+    }
+  }
+
+  function handleNext() {
+    if (!answered || explanationLoading) return;
+    setExplanation("");
+    setExplanationError("");
+    setAnswerError("");
+    if (index + 1 < questions.length) {
+      setIndex((v) => v + 1);
+      setSelected(null);
+      setAnswered(false);
+      setServerCorrectIndex(null);
+      setRemaining(timeLimit);
+    } else {
+      playFinish();
+      playResult();
+      onComplete?.({ score: scoreRef.current, total: questions.length, timeSeconds: Math.floor((Date.now() - startRef.current) / 1000) });
+    }
+  }
 
   const handleAnswer = async (i) => {
     if (answered || !q || !attemptId) return;
@@ -91,7 +145,8 @@ export default function QuizPlayer({ questions, title, subtitle, timeLimit = 20,
       const answer = displayedAnswers[i];
       if (!answer) throw new Error("Odgovori se još učitavaju. Pokušaj ponovno.");
       const response = await submitQuizAnswer(attemptId, q.id, answer.originalIndex);
-      setServerCorrectIndex(displayedAnswers.findIndex((item) => item.originalIndex === response.correctIndex));
+      const correctPosition = displayedAnswers.findIndex((item) => item.originalIndex === response.correctIndex);
+      setServerCorrectIndex(correctPosition);
       if (response.isCorrect) {
         scoreRef.current += 1;
         playCorrect();
@@ -99,6 +154,14 @@ export default function QuizPlayer({ questions, title, subtitle, timeLimit = 20,
         playWrong();
       }
       setAnswered(true);
+      await explainAnswer({
+        question: q.question,
+        category: q.category,
+        correctAnswer: displayedAnswers[correctPosition]?.text || "Točan odgovor nije dostupan.",
+        selectedAnswer: answer.text,
+        sourceUrl: q.sourceUrl,
+        isCorrect: response.isCorrect
+      });
     } catch (error) {
       setSelected(null);
       setAnswerError(error.message || "Odgovor se nije mogao potvrditi. Pokušaj ponovno.");
@@ -131,6 +194,13 @@ export default function QuizPlayer({ questions, title, subtitle, timeLimit = 20,
             </div>
             {answerError && <div className="mt-6 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">{answerError}</div>}
             {answered && <div className="mt-6 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80">{selected === -1 ? "Vrijeme je isteklo. Odgovor se smatra netočnim." : selected === serverCorrectIndex ? "Točan odgovor!" : "Netočan odgovor. Točan odgovor je označen."}</div>}
+            {answered && <section className="mt-4 rounded-2xl border border-sky-300/20 bg-sky-400/[0.07] p-4 sm:p-5" aria-live="polite">
+              <div className="mb-3 flex items-center gap-2 text-sky-200"><BookOpen className="h-5 w-5" /><h3 className="font-semibold">Puter objašnjava</h3></div>
+              {explanationLoading && <div className="flex items-center gap-2 text-sm text-white/70"><Loader2 className="h-4 w-4 animate-spin" />Pripremam kratko objašnjenje na hrvatskom…</div>}
+              {explanation && <p className="whitespace-pre-line text-sm leading-6 text-white/85">{explanation}</p>}
+              {explanationError && <div className="text-sm text-amber-100"><p>{explanationError}</p><button type="button" className="mt-3 rounded-lg border border-white/20 px-3 py-2 hover:bg-white/10" onClick={() => explainAnswer({ question: q.question, category: q.category, correctAnswer: displayedAnswers[serverCorrectIndex]?.text || "Točan odgovor nije dostupan.", selectedAnswer: selected >= 0 ? displayedAnswers[selected]?.text : "", sourceUrl: q.sourceUrl, isCorrect: selected >= 0 && selected === serverCorrectIndex, timedOut: selected === -1 })}>Pokušaj ponovno</button></div>}
+              {!explanationLoading && <button type="button" onClick={handleNext} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-700 px-4 py-3 font-semibold text-white transition hover:brightness-110">{index + 1 < questions.length ? "Sljedeće pitanje" : "Prikaži rezultat"} <span aria-hidden="true">→</span></button>}
+            </section>}
           </motion.div>
         </AnimatePresence>
         {onQuit && <button onClick={onQuit} className="mt-8 text-sm text-white/40 transition-colors hover:text-white/70">Odustani</button>}
