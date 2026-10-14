@@ -1451,3 +1451,37 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
   .community-footer-legal { grid-column: auto; }
   .community-footer-legal nav { gap: 10px 16px; }
 }
+
+
+/* Zajedno možemo više — dedicated community action pages */
+.community-action-page{position:fixed;inset:0;z-index:5000;overflow-y:auto;background:#f3f5f7;color:#20252b}
+.community-action-topbar{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:12px max(22px,calc((100vw - 1120px)/2));background:#fff;border-bottom:1px solid #e1e6eb}
+.community-action-brand{display:flex;align-items:center;gap:11px;color:#172c46}
+.community-action-brand>span{display:flex;flex-direction:column;gap:3px}
+.community-action-brand strong{font-family:"Playfair Display",Georgia,serif;font-size:21px}
+.community-action-brand small{font-size:9px;font-weight:850;letter-spacing:.13em;color:#697582}
+.community-action-back{font-size:12px;font-weight:750;color:#24537d}
+.community-action-content{width:min(100% - 32px,690px);margin:42px auto 70px;padding:clamp(22px,5vw,42px);background:#fff;border:1px solid #e1e6eb;border-radius:20px;box-shadow:0 18px 48px #172c460d}
+.community-action-symbol{display:grid;place-items:center;width:58px;height:58px;border-radius:17px;font-size:27px;margin-bottom:20px}
+.community-action-symbol.help{background:#fff0f1;border:1px solid #f0d2d6}
+.community-action-symbol.offer{background:#eaf3fb;border:1px solid #d2e2f1}
+.community-action-eyebrow{margin:0 0 10px;color:#8a6b30;font-size:10px;font-weight:850;letter-spacing:.13em}
+.community-action-content h1{margin:0;color:#172c46;font-family:"Playfair Display",Georgia,serif;font-size:clamp(30px,5vw,42px);line-height:1.12}
+.community-action-intro{max-width:570px;margin:13px 0 24px;color:#596777;font-size:15px;line-height:1.7}
+.community-action-guidance{padding:16px 18px;border:1px solid #e2e8ee;border-left:3px solid #cba85d;border-radius:12px;background:#f8fafc}
+.community-action-guidance strong{font-size:13px;color:#172c46}
+.community-action-guidance p{margin:6px 0 0;color:#647180;font-size:12px;line-height:1.65}
+.community-action-form{display:flex;flex-direction:column;gap:9px;margin-top:24px}
+.community-action-form label{margin-top:7px;font-size:12px;font-weight:800;color:#273b50}
+.community-action-form input,.community-action-form textarea{width:100%;padding:12px 13px;border:1px solid #d7dfe7;border-radius:10px;background:#fff;color:#20252b;font:inherit;font-size:14px;outline:none}
+.community-action-form input:focus,.community-action-form textarea:focus{border-color:#24537d;box-shadow:0 0 0 3px #24537d1a}
+.community-action-form textarea{resize:vertical;min-height:130px;line-height:1.55}
+.community-action-privacy,.community-action-login-note{margin:4px 0;color:#697582;font-size:11px;line-height:1.6}
+.community-action-notice{margin:4px 0;color:#a21d2e;font-size:12px;line-height:1.5}
+.community-action-submit{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:7px;padding:13px 17px;border:0;border-radius:10px;background:linear-gradient(110deg,#172c46,#24537d);color:#fff;font-size:13px;font-weight:800}
+.community-action-submit:disabled{opacity:.65;cursor:wait}
+.community-action-login-note{text-align:center}
+.community-focus-card .focus-link{min-height:76px}
+.community-focus-card .focus-link:hover{background:#f7f9fb}
+.community-focus-card .focus-icon{display:grid;place-items:center;font-size:19px}
+@media(max-width:600px){.community-action-topbar{align-items:flex-start;padding:13px 16px}.community-action-brand strong{font-size:17px}.community-action-brand small{font-size:8px}.community-action-back{max-width:120px;text-align:right;line-height:1.5}.community-action-content{margin:20px auto 35px;padding:22px 18px;border-radius:15px}.community-action-intro{font-size:14px}}
