@@ -11,6 +11,8 @@ create table if not exists public.community_global_chat_messages (
 );
 create index if not exists community_global_chat_messages_created_idx
   on public.community_global_chat_messages (created_at desc);
+create index if not exists community_global_chat_messages_sender_idx
+  on public.community_global_chat_messages (sender_id, created_at desc);
 
 create table if not exists public.community_chat_preferences (
   user_id uuid primary key references public.profiles(id) on delete cascade,
@@ -30,6 +32,8 @@ create table if not exists public.community_global_chat_reports (
 );
 create index if not exists community_global_chat_reports_status_created_idx
   on public.community_global_chat_reports (status, created_at desc);
+create index if not exists community_global_chat_reports_reporter_idx
+  on public.community_global_chat_reports (reporter_id, created_at desc);
 
 create table if not exists public.community_friend_requests (
   id uuid primary key default gen_random_uuid(),
