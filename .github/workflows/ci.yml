@@ -54,7 +54,15 @@ jobs:
       - name: Instaliraj ovisnosti
         run: npm install --no-audit --no-fund
       - name: Izgradi aplikaciju
-        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "::error::Nedostaju VITE_SUPABASE_URL i/ili VITE_SUPABASE_PUBLISHABLE_KEY u GitHub Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          npm run build
       - name: Objavi Worker i statičke datoteke
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
