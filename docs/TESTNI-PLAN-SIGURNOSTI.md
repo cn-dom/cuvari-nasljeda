@@ -51,3 +51,22 @@ Ne kopirati lozinke, access tokene, session JWT-ove ni tajne ključeve u zapis.
 - Storage politika čitanja dopušta svim prijavljenim članovima čitanje objekata u bucketu. To odgovara fotografijama zajednice, ali nije prikladno za privatne poruke ili privatne albume.
 - Čišćenje fotografije nakon brisanja objave nije atomska transakcija; potreban je siguran proces čišćenja i provjera vlasništva.
 - Prije javnog rada treba razmotriti prijavu sadržaja, blokiranje korisnika, moderiranje, ograničenje učestalosti i uklanjanje sadržaja.
+
+## Privatne poruke i blokade
+
+Ovaj dio provjerava nacrte `docs/sql/private-message-block-guard.sql` i `docs/sql/private-message-reaction-block-guard.sql`. Testirati samo u zasebnom Supabase testnom projektu nakon pregleda i primjene nacrta na tom projektu. Trenutačno se ne tvrdi da su ovi triggeri aktivni na produkciji.
+
+| Test | Očekivani rezultat |
+| --- | --- |
+| Član A pošalje poruku članu B, bez blokade | Poruka se spremi; postojeća obavijest primatelju radi. |
+| Član A pokuša poslati poruku s `sender_id` člana B | Odbijeno; identitet pošiljatelja mora odgovarati `auth.uid()`. |
+| A blokira B pa pokuša poslati poruku | Odbijeno na razini baze. |
+| B blokira A pa A pokuša poslati poruku B | Odbijeno na razini baze, neovisno o smjeru blokade. |
+| A odgovori na dopuštenu poruku B | Odgovor prolazi ako zadovoljava postojeću provjeru `reply_to_id`. |
+| A doda reakciju na poruku u kojoj je sudionik, bez blokade | Reakcija prolazi uz vlastiti `user_id`. |
+| A pokuša dodati reakciju s tuđim `user_id` ili na poruku u kojoj nije sudionik | Odbijeno. |
+| A pokuša reagirati na razgovor A–B dok je među njima aktivna blokada | Odbijeno. |
+| Član koji nije sudionik pokuša čitati privatnu poruku | Odbijeno postojećim RLS pravilima. |
+
+Nakon svakog testa provjeriti i negativni učinak: nije nastala neželjena poruka, reakcija ili obavijest. Zabilježiti točan rezultat i pogrešku bez spremanja JWT-a ili drugih tajni. Uspješan GitHub CI prolaz provjerava repozitorij, a ne izvršavanje ovih SQL nacrta niti ponašanje žive baze.
+
