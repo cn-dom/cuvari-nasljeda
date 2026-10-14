@@ -6,8 +6,18 @@ import { submitQuizAnswer } from "../lib/attempts";
 
 const LETTERS = ["A", "B", "C", "D"];
 
+function shuffleAnswers(answers = []) {
+  const copy = answers.map((text, originalIndex) => ({ text, originalIndex }));
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 export default function QuizPlayer({ questions, title, subtitle, timeLimit = 20, attemptId, onComplete, onQuit }) {
   const [index, setIndex] = useState(0);
+  const [displayedAnswers, setDisplayedAnswers] = useState([]);
   const [selected, setSelected] = useState(null);
   const [answered, setAnswered] = useState(false);
   const [serverCorrectIndex, setServerCorrectIndex] = useState(null);
@@ -26,6 +36,11 @@ export default function QuizPlayer({ questions, title, subtitle, timeLimit = 20,
   };
 
   useEffect(() => {
+    if (q?.answers?.length === 4) setDisplayedAnswers(shuffleAnswers(q.answers));
+    else setDisplayedAnswers([]);
+  }, [q?.id]);
+
+  useEffect(() => {
     if (questions.length) playStart();
   }, [questions.length]);
 
@@ -37,7 +52,10 @@ export default function QuizPlayer({ questions, title, subtitle, timeLimit = 20,
     if (!questions.length || answered) return undefined;
     if (remaining <= 0) {
       submitQuizAnswer(attemptId, q.id, -1)
-        .then((response) => { setServerCorrectIndex(response.correctIndex); setAnswered(true); })
+        .then((response) => {
+          setServerCorrectIndex(displayedAnswers.findIndex((answer) => answer.originalIndex === response.correctIndex));
+          setAnswered(true);
+        })
         .catch((error) => setAnswerError(error.message || "Odgovor se nije mogao potvrditi."));
       return undefined;
     }
@@ -70,8 +88,10 @@ export default function QuizPlayer({ questions, title, subtitle, timeLimit = 20,
     setAnswerError("");
     playSelect();
     try {
-      const response = await submitQuizAnswer(attemptId, q.id, i);
-      setServerCorrectIndex(response.correctIndex);
+      const answer = displayedAnswers[i];
+      if (!answer) throw new Error("Odgovori se još učitavaju. Pokušaj ponovno.");
+      const response = await submitQuizAnswer(attemptId, q.id, answer.originalIndex);
+      setServerCorrectIndex(displayedAnswers.findIndex((item) => item.originalIndex === response.correctIndex));
       if (response.isCorrect) {
         scoreRef.current += 1;
         playCorrect();
@@ -101,12 +121,12 @@ export default function QuizPlayer({ questions, title, subtitle, timeLimit = 20,
           <motion.div key={q.id ?? index} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.3 }}>
             <h2 className="mb-6 min-h-[3.5rem] font-display text-xl font-semibold leading-snug sm:text-2xl">{q.question}</h2>
             <div className="grid gap-3">
-              {q.answers.map((ans, i) => {
+              {displayedAnswers.map((answer, i) => {
                 const isCorrect = i === serverCorrectIndex;
                 const isSelected = i === selected;
                 let cls = "border-white/15 bg-white/5 hover:border-white/30 hover:bg-white/10";
                 if (answered) cls = isCorrect ? "border-green-400 bg-green-400/15 text-white" : isSelected ? "border-red-500 bg-red-500/15 text-white" : "border-white/10 bg-white/5 opacity-50";
-                return <button key={`${q.id}-${i}`} onClick={() => handleAnswer(i)} disabled={answered} className={`flex w-full items-center gap-3 rounded-xl border-2 px-4 py-4 text-left transition-all ${cls} ${!answered ? "active:scale-[0.99]" : ""}`}><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-sm font-bold">{LETTERS[i]}</span><span className="flex-1 font-medium">{ans}</span>{answered && isCorrect && <Check className="h-5 w-5 text-green-400" />}{answered && isSelected && !isCorrect && <X className="h-5 w-5 text-red-400" />}</button>;
+                return <button key={`${q.id}-${i}`} onClick={() => handleAnswer(i)} disabled={answered} className={`flex w-full items-center gap-3 rounded-xl border-2 px-4 py-4 text-left transition-all ${cls} ${!answered ? "active:scale-[0.99]" : ""}`}><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-sm font-bold">{LETTERS[i]}</span><span className="flex-1 font-medium">{answer.text}</span>{answered && isCorrect && <Check className="h-5 w-5 text-green-400" />}{answered && isSelected && !isCorrect && <X className="h-5 w-5 text-red-400" />}</button>;
               })}
             </div>
             {answerError && <div className="mt-6 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">{answerError}</div>}
