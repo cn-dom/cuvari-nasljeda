@@ -193,7 +193,7 @@ function App() {
         .from("community_help_ads")
         .select("id, author_id, ad_type, title, description, category, location, status, created_at")
         .eq("ad_type", adType)
-        .eq("status", "open")
+        .or(session?.user?.id ? `status.eq.open,author_id.eq.${session.user.id}` : "status.eq.open")
         .order("created_at", { ascending: false })
         .limit(50);
       if (!cancelled) {
@@ -217,7 +217,7 @@ function App() {
     }
     loadCommunityActionAds();
     return () => { cancelled = true; };
-  }, [communityActionPage, isOwner]);
+  }, [communityActionPage, isOwner, session?.user?.id]);
 
   useEffect(() => {
     if (!emojiPickerOpen || !emojiPickerHost.current) return undefined;
@@ -244,6 +244,15 @@ function App() {
       if (emojiPickerHost.current) emojiPickerHost.current.replaceChildren();
     };
   }, [emojiPickerOpen]);
+
+  useEffect(() => {
+    const contactId = new URLSearchParams(window.location.search).get("contact");
+    if (!contactId || !session?.user?.id || contactId === session.user.id) return;
+    setMessageRecipient(contactId);
+    setActiveNav("Poruke");
+    setNotice("Odabran je član iz oglasnika. Možeš mu poslati privatnu poruku.");
+    window.history.replaceState({}, "", window.location.pathname + window.location.hash);
+  }, [session?.user?.id]);
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -1899,13 +1908,14 @@ function App() {
                 const member = memberDirectory.find((item) => item.id === ad.author_id);
                 const authorLabel = ad.author_id === session?.user?.id ? (profileName || "Ti") : (member?.display_name || member?.username || "Čuvar nasljeđa");
                 return <article className="community-action-ad" key={ad.id}>
-                  <div className="community-action-ad-meta"><span>{ad.ad_type === "seeking" ? "TRAŽI POMOĆ" : "NUDI POMOĆ"}</span><time dateTime={ad.created_at}>{new Date(ad.created_at).toLocaleDateString("hr-HR", {day:"numeric",month:"short",year:"numeric"})}</time></div>
+                  <div className="community-action-ad-meta"><span>{ad.status === "closed" ? "RIJEŠENO" : ad.ad_type === "seeking" ? "TRAŽI POMOĆ" : "NUDI POMOĆ"}</span><time dateTime={ad.created_at}>{new Date(ad.created_at).toLocaleDateString("hr-HR", {day:"numeric",month:"short",year:"numeric"})}</time></div>
                   <h3>{ad.title}</h3><p>{ad.description}</p>
                   <div className="community-action-ad-tags"><span>{ad.category}</span>{ad.location && <span>⌖ {ad.location}</span>}</div>
                   <small className="community-action-ad-author">Objavio/la: {authorLabel}</small>
                   <div className="community-action-ad-actions">
-                    {session?.user?.id && ad.author_id !== session.user.id && <button type="button" onClick={() => { setMessageRecipient(ad.author_id); setActiveNav("Poruke"); setNotice("Odabran je član koji je objavio oglas. Možeš mu poslati privatnu poruku u odjeljku Poruke."); }}>✉ Kontaktiraj člana</button>}
-                    {session?.user?.id && ad.author_id === session.user.id && <button type="button" onClick={() => updateCommunityHelpAdStatus(ad, "closed")}>✓ Označi riješeno</button>}
+                    {session?.user?.id && ad.author_id !== session.user.id && <button type="button" onClick={() => { window.location.href = "/?contact=" + encodeURIComponent(ad.author_id); }}>✉ Kontaktiraj člana</button>}
+                    {session?.user?.id && ad.author_id === session.user.id && ad.status === "open" && <button type="button" onClick={() => updateCommunityHelpAdStatus(ad, "closed")}>✓ Označi riješeno</button>}
+                    {session?.user?.id && ad.author_id === session.user.id && ad.status === "closed" && <button type="button" onClick={() => updateCommunityHelpAdStatus(ad, "open")}>↻ Ponovno otvori</button>}
                     {session?.user?.id && ad.author_id !== session.user.id && <button type="button" className="community-action-report-button" onClick={() => { setCommunityHelpReportAd(ad); setCommunityHelpReportReason("spam"); setCommunityHelpReportDetails(""); }}>⚑ Prijavi oglas</button>}
                     {session?.user?.id && ad.author_id === session.user.id && <button type="button" className="community-action-report-button" onClick={() => deleteCommunityHelpAd(ad)}>Izbriši</button>}
                   </div>
