@@ -67,3 +67,15 @@ Uspješan GitHub Actions build potvrđuje da se projekt izgradio, ali ne potvrđ
 Workflow `.github/workflows/ci.yml` sada radi produkcijsku izgradnju glavne aplikacije i kviza, zatim pokreće Vite preview i izvršava `node scripts/smoke-routes.mjs`. Smoke test provjerava HTTP odgovor za početnu stranicu, forum, stranice zajednice, događaje, administraciju, AI centar i kviz, provjerava mobilni viewport te postojanje manifesta, service workera, logotipa i izgrađenih JS/CSS paketa.
 
 **Ograničenje:** smoke test provjerava dostupnost stranica i datoteka, ne prijavljuje se u Supabase i ne stvara stvarne objave, poruke, rezultate kviza ili događaje. Te interakcije ostaju označene kao nepotvrđene dok se ne provedu end-to-end testovi s dva namjenska testna računa. Ne koristiti stvarne korisničke lozinke u repozitoriju ili zapisima workflowa.
+
+## Dodatne provjere sigurnosti (14. 10. 2026.)
+
+- [ ] Vlasnik ili administrator otvara plutajući chat → **Prijave poruka**, učitava prijave i mijenja status; običan član ne vidi moderatorski prikaz i ne može mijenjati status preko API-ja.
+- [ ] Član ne može prijaviti vlastitu poruku, poslati nepoznat razlog ili predugačko objašnjenje; ponovljena prijava iste poruke ostaje blokirana.
+- [ ] Dva testna računa: zahtjev se šalje, primatelj ga prihvaća i veza se upisuje u `community_friendships`; oba računa vide samo svoje veze.
+- [ ] Objavljena fotografija na javnom zidu učitava se gostu i ostaje dostupna nakon isteka sata. **Važno:** slike u spremniku `community-images` sada su javno dostupne jer su privici javnih objava; ne stavljati privatne/osjetljive fotografije u taj spremnik.
+- [ ] Provjeriti da prijenos i brisanje fotografija ostaju ograničeni na vlasničku mapu korisnika te da ograničenje ostaje 10 MB.
+- [ ] U Supabase Dashboardu uključiti **Leaked password protection** u postavkama Auth/Password Security. To je postavka Auth projekta i ne može se sigurno promijeniti kroz SQL migraciju; ponoviti Security Advisor nakon uključivanja.
+- [ ] Ponovno pregledati sve funkcije `SECURITY DEFINER`: anonimno izvršavanje iz javne uloge je opozvano; funkcije koje ostaju dostupne prijavljenim korisnicima moraju zadržati provjeru vlasnika/člana unutar same funkcije. Security Advisor može i dalje upozoravati na taj obrazac iako je autorizacija unutar tijela funkcije namjerna.
+
+Migracija baze: [security-friendships-reports-images.sql](sql/security-friendships-reports-images.sql).
