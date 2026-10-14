@@ -48,3 +48,41 @@ create policy "Members can delete their own help ads"
   on public.community_help_ads for delete
   to authenticated
   using (author_id = (select auth.uid()));
+ 
+-- Prijave neprimjerenih oglasa. Vlasnik mreže može pregledavati i moderirati prijave.
+create table if not exists public.community_help_ad_reports (
+  id uuid primary key default gen_random_uuid(),
+  ad_id uuid not null references public.community_help_ads(id) on delete cascade,
+  reporter_id uuid not null references auth.users(id) on delete cascade,
+  reason text not null check (reason in ('spam','scam','harassment','hate','privacy','other')),
+  details text null check (details is null or char_length(details) <= 2000),
+  status text not null default 'open' check (status in ('open','reviewing','resolved','dismissed')),
+  created_at timestamptz not null default now(),
+  unique (ad_id, reporter_id)
+);
+create index if not exists community_help_ad_reports_status_created_idx
+  on public.community_help_ad_reports (status, created_at desc);
+create index if not exists community_help_ad_reports_reporter_idx
+  on public.community_help_ad_reports (reporter_id, created_at desc);
+alter table public.community_help_ad_reports enable row level security;
+revoke all on table public.community_help_ad_reports from anon;
+grant select, insert, update on table public.community_help_ad_reports to authenticated;
+drop policy if exists "Members can report help ads" on public.community_help_ad_reports;
+create policy "Members can report help ads"
+  on public.community_help_ad_reports for insert to authenticated
+  with check (
+    reporter_id = (select auth.uid())
+    and exists (
+      select 1 from public.community_help_ads a
+      where a.id = ad_id and a.status = 'open' and a.author_id <> (select auth.uid())
+    )
+  );
+drop policy if exists "Reporters can view own help ad reports" on public.community_help_ad_reports;
+create policy "Reporters can view own help ad reports"
+  on public.community_help_ad_reports for select to authenticated
+  using (reporter_id = (select auth.uid()));
+drop policy if exists "Network owner can manage help ad reports" on public.community_help_ad_reports;
+create policy "Network owner can manage help ad reports"
+  on public.community_help_ad_reports for all to authenticated
+  using ((select auth.email()) = 'patriasoul@protonmail.com')
+  with check ((select auth.email()) = 'patriasoul@protonmail.com');
