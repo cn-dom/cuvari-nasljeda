@@ -85,6 +85,10 @@ function FaithSidebar() {
 function App() {
   const [posts, setPosts] = useState([]);
   const [draft, setDraft] = useState("");
+  const [communityActionTitle, setCommunityActionTitle] = useState("");
+  const [communityActionDetails, setCommunityActionDetails] = useState("");
+  const [communityActionBusy, setCommunityActionBusy] = useState(false);
+  const communityActionPage = new URLSearchParams(window.location.search).get("zajedno");
   const [activeNav, setActiveNav] = useState("Zid zajednice");
   const [liked, setLiked] = useState([]);
   const [reactionsByPost, setReactionsByPost] = useState({});
@@ -1685,8 +1689,61 @@ function App() {
     setNotice("Vlastita objava izbrisana je iz baze zajednice.");
   }
 
+  async function submitCommunityAction(event) {
+    event.preventDefault();
+    if (!communityActionTitle.trim() || !communityActionDetails.trim()) {
+      setNotice("Ispuni naslov i opis kako bi objava bila jasna drugim članovima.");
+      return;
+    }
+    if (!session?.user?.id) {
+      setAuthMode("login");
+      setAuthMessage("Prijavi se ili izradi račun kako bi objavio/la zahtjev ili ponudu pomoći.");
+      setAuthOpen(true);
+      return;
+    }
+    if (!supabase || !["trebam-pomoc", "pruzi-ruku"].includes(communityActionPage)) {
+      setNotice("Ova stranica trenutačno nije dostupna.");
+      return;
+    }
+    setCommunityActionBusy(true);
+    const prefix = communityActionPage === "trebam-pomoc" ? "[TREBAŠ POMOĆ]" : "[NUDIM POMOĆ]";
+    const body = prefix + " " + communityActionTitle.trim() + "\n\n" + communityActionDetails.trim();
+    const { error } = await supabase.from("posts").insert({ author_id: session.user.id, body, image_path: null });
+    setCommunityActionBusy(false);
+    if (error) {
+      setNotice("Objava nije spremljena: " + (error.message || "provjeri vezu i prava pristupa."));
+      return;
+    }
+    window.location.href = "/";
+  }
+
   return (
     <div className="app-shell">
+      {["trebam-pomoc", "pruzi-ruku"].includes(communityActionPage) && (
+        <section className="community-action-page" aria-labelledby="community-action-heading">
+          <div className="community-action-topbar">
+            <a className="community-action-brand" href="/" aria-label="Povratak na Čuvare nasljeđa"><BrandMark /><span><strong>Čuvari nasljeđa</strong><small>ZAJEDNO MOŽEMO VIŠE</small></span></a>
+            <a className="community-action-back" href="/">← Povratak na zajednicu</a>
+          </div>
+          <div className="community-action-content">
+            <span className={communityActionPage === "trebam-pomoc" ? "community-action-symbol help" : "community-action-symbol offer"} aria-hidden="true">{communityActionPage === "trebam-pomoc" ? "🤝" : "🫶"}</span>
+            <p className="community-action-eyebrow">ČUVARI NASLJEĐA · ZAJEDNO MOŽEMO VIŠE</p>
+            <h1 id="community-action-heading">{communityActionPage === "trebam-pomoc" ? "Trebaš pomoć?" : "Pruži ruku"}</h1>
+            <p className="community-action-intro">{communityActionPage === "trebam-pomoc" ? "Napiši što ti treba. Netko iz zajednice možda ima savjet, iskustvo ili mogućnost pomoći." : "Podijeli što možeš ponuditi — svoje znanje, vještinu, vrijeme ili praktičnu pomoć drugom članu."}</p>
+            <div className="community-action-guidance"><strong>{communityActionPage === "trebam-pomoc" ? "Kako zatražiti pomoć" : "Kako ponuditi pomoć"}</strong><p>{communityActionPage === "trebam-pomoc" ? "Opiši situaciju jasno i bez nepotrebnih osobnih podataka. Nemoj javno objavljivati adresu, broj telefona ni financijske podatke." : "Napiši u čemu možeš pomoći i postoje li ograničenja. Ne objavljuj tuđe osobne podatke i ne obećavaj ono što ne možeš ispuniti."}</p></div>
+            <form className="community-action-form" onSubmit={submitCommunityAction}>
+              <label htmlFor="community-action-title">Naslov</label>
+              <input id="community-action-title" value={communityActionTitle} onChange={(event) => setCommunityActionTitle(event.target.value)} maxLength={120} placeholder={communityActionPage === "trebam-pomoc" ? "Npr. Trebam savjet oko…" : "Npr. Mogu pomoći s računalima…"} required />
+              <label htmlFor="community-action-details">Detaljniji opis</label>
+              <textarea id="community-action-details" value={communityActionDetails} onChange={(event) => setCommunityActionDetails(event.target.value)} maxLength={4000} rows={6} placeholder={communityActionPage === "trebam-pomoc" ? "Opiši što ti treba i kakav bi ti odgovor pomogao…" : "Opiši što nudiš, kome može biti korisno i kako…"} required />
+              <p className="community-action-privacy">Objava će biti podijeljena na zidu zajednice. Nemoj unositi osjetljive osobne ili financijske podatke.</p>
+              {notice && <p className="community-action-notice" role="status">{notice}</p>}
+              <button className="community-action-submit" type="submit" disabled={communityActionBusy}>{communityActionBusy ? "Objavljujem…" : communityActionPage === "trebam-pomoc" ? "Objavi zahtjev za pomoć" : "Objavi ponudu pomoći"} <span aria-hidden="true">→</span></button>
+              {!session?.user?.id && <p className="community-action-login-note">Za objavu se potrebno prijaviti ili izraditi račun.</p>}
+            </form>
+          </div>
+        </section>
+      )}
       <div className="preview-ribbon">
         <span className="status-dot" /> RAZVOJNI PREGLED
         <span>Zajednica je u razvoju · povezivanje i pojedine funkcije još se provjeravaju.</span>
@@ -2467,16 +2524,13 @@ function App() {
               <a href="https://www.tiktok.com/@hajdi331?lang=hr" target="_blank" rel="noreferrer"><strong>Vjera · Yeshua</strong><span>Vjera, nada i istina kroz priču o Yeshui — Isusu Kristu. ↗</span></a>
             </div>
           </section>
-          <section className="right-card card">
-            <div className="right-card-title"><h3>U FOKUSU</h3><span>✦</span></div>
-            <a href="/stranice.html" className="focus-link">
-              <span className="focus-icon red">⌂</span><span><strong>Obiteljske priče</strong><small>Uspomene koje se prenose generacijama</small></span><b>›</b>
+          <section className="right-card card community-focus-card">
+            <div className="right-card-title"><h3>ZAJEDNO MOŽEMO VIŠE</h3><span>✦</span></div>
+            <a href="/?zajedno=trebam-pomoc" className="focus-link help-focus-link">
+              <span className="focus-icon red">🤝</span><span><strong>Trebaš pomoć?</strong><small>Zatraži savjet, preporuku ili pomoć zajednice.</small></span><b>›</b>
             </a>
-            <a href="/kviz/" className="focus-link">
-              <span className="focus-icon blue">▤</span><span><strong>Povijest i baština</strong><small>Znanje, izvori i lokalne priče</small></span><b>›</b>
-            </a>
-            <a href="/forum.html" className="focus-link">
-              <span className="focus-icon gold">✥</span><span><strong>Naši krajevi</strong><small>Mjesta, običaji i ljudi</small></span><b>›</b>
+            <a href="/?zajedno=pruzi-ruku" className="focus-link offer-focus-link">
+              <span className="focus-icon blue">🫶</span><span><strong>Pruži ruku</strong><small>Ponudi svoje znanje, vrijeme ili vještine.</small></span><b>›</b>
             </a>
           </section>
 
