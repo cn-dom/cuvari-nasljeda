@@ -7,6 +7,7 @@ const routes = [
   "/stranice.html",
   "/dogadaji.html",
   "/vjera-hrvata.html",
+  "/na-danasnji-dan.html",
   "/administracija.html",
   "/ai-centar.html",
   "/kviz/",
@@ -39,6 +40,8 @@ const requiredAssets = [
   "/assets/images/1000000982.png",
   "/vjera-hrvata.css",
   "/vjera-hrvata.js",
+  "/na-danasnji-dan.css",
+  "/na-danasnji-dan.js",
 ];
 
 for (const asset of requiredAssets) {
