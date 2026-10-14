@@ -102,6 +102,14 @@ function App() {
   const [liked, setLiked] = useState([]);
   const [reactionsByPost, setReactionsByPost] = useState({});
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  useEffect(() => {
+    if (!emojiPickerOpen) return undefined;
+    const closeEmojiPicker = (event) => {
+      if (!event.target.closest?.(".emoji-tool-wrap")) setEmojiPickerOpen(false);
+    };
+    document.addEventListener("pointerdown", closeEmojiPicker);
+    return () => document.removeEventListener("pointerdown", closeEmojiPicker);
+  }, [emojiPickerOpen]);
   const [notice, setNotice] = useState("");
   const [brandImageOpen, setBrandImageOpen] = useState(false);
   const [feedFilter, setFeedFilter] = useState("Sve objave");
