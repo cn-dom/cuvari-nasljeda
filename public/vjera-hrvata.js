@@ -84,5 +84,27 @@ const loadLiturgy=async()=>{
    console.warn("PatriaSoul liturgy load:",error);
  }
 };
+const heritageStories=[
+{title:"Bašćanska ploča i početci hrvatske pismenosti",summary:"Bašćanska ploča jedan je od najpoznatijih spomenika hrvatske glagoljaške i pravne baštine.",detail:"Natpis je pronađen u crkvi sv. Lucije u Jurandvoru kraj Baške na otoku Krku. U njemu se spominje kralj Zvonimir, a tekst je važan izvor za proučavanje ranoga hrvatskog jezika, glagoljice i društvene povijesti. Datiranje i tumačenje pojedinih dijelova predmet su stručnog proučavanja.",source:"Za daljnje proučavanje: Hrvatska enciklopedija — natuknica „Bašćanska ploča”."},
+{title:"Glagoljaška liturgijska tradicija",summary:"Hrvatski glagoljaši stoljećima su čuvali posebnu slavensku liturgijsku i pisanu tradiciju.",detail:"U dijelovima hrvatske obale i otoka razvila se uporaba staroslavenskoga jezika u liturgiji uz glagoljsko pismo. Ta je praksa ostavila trag u misalima, brevijarima, natpisima i lokalnoj kulturnoj povijesti. Pojedina razdoblja i lokalne prakse razlikuju se pa ih treba opisivati prema konkretnim izvorima.",source:"Za daljnje proučavanje: Hrvatska enciklopedija — natuknice o glagoljici i hrvatskom glagoljaštvu."},
+{title:"Zadarska crkva sv. Donata",summary:"Crkva sv. Donata u Zadru jedan je od prepoznatljivih spomenika ranosrednjovjekovne sakralne arhitekture u Hrvatskoj.",detail:"Kružna građevina nastala je u ranom srednjem vijeku i povezuje se s predromaničkom arhitekturom Dalmacije. Njezin oblik i ponovna uporaba antičkih kamenih elemenata svjedoče o slojevitoj povijesti Zadra. Točan opis gradnje i povijesnih okolnosti treba temeljiti na konzervatorskoj i povijesnoumjetničkoj literaturi.",source:"Za daljnje proučavanje: službene kulturno-povijesne publikacije Grada Zadra i konzervatorske službe."},
+{title:"Marijanska svetišta i hodočašća",summary:"Hodočašća su oblikovala duhovni život mnogih hrvatskih zajednica i obitelji.",detail:"Svetišta poput Marije Bistrice, Trsata i Sinja povezana su s lokalnim pobožnostima, zavjetima i okupljanjima vjernika. Njihova povijest nije jednaka: svako svetište ima vlastite dokumente, predaje i običaje, a predaju valja jasno razlikovati od potvrđene povijesne činjenice.",source:"Za daljnje proučavanje: službene povijesti pojedinih svetišta i stručna lokalna izdanja."},
+{title:"Crkve i samostani kao čuvari baštine",summary:"Sakralni prostori često čuvaju umjetnine, rukopise, arhivsku građu i sjećanje zajednice.",detail:"Crkve i samostani u Hrvatskoj mogu sadržavati slojeve gradnje iz različitih stoljeća, oltare, freske, orgulje, knjige i arhive. Za pouzdano datiranje i pripisivanje umjetnina važni su inventari, konzervatorski elaborati i muzejski ili crkveni katalozi.",source:"Za daljnje proučavanje: Registar kulturnih dobara Republike Hrvatske i katalozi nadležnih muzeja."},
+{title:"Vjera u glazbi i pučkim običajima",summary:"Liturgijska i pučka glazba dio su nematerijalne kulturne baštine mnogih hrvatskih krajeva.",detail:"Napjevi, procesije, bratovštine i blagdanski običaji razlikuju se od mjesta do mjesta. Njihovo bilježenje traži razgovor s nositeljima tradicije, terensku dokumentaciju i usporedbu sa stručnim etnomuzikološkim radovima kako se lokalna predaja ne bi prikazala kao jedinstvena praksa cijele Hrvatske.",source:"Za daljnje proučavanje: stručne publikacije etnologije i folkloristike te dokumentacija lokalnih kulturnih ustanova."},
+{title:"Obiteljska molitva i prijenos običaja",summary:"Duhovna baština prenosi se i kroz svakodnevne obiteljske navike, blagdane i sjećanja.",detail:"Obiteljske molitve, blagoslovi, pjesme i običaji dio su življene vjere, ali se mogu razlikovati i unutar istoga kraja. Vrijedno ih je bilježiti uz suglasnost članova obitelji te navesti tko svjedoči o običaju i iz kojeg mjesta ili razdoblja potječe.",source:"Za daljnje proučavanje: obiteljska svjedočanstva uz usporedbu s lokalnim etnografskim zbirkama i stručnom literaturom."}
+];
+let heritageIndex=((dayNumber%heritageStories.length)+heritageStories.length)%heritageStories.length;
+const renderHeritage=()=>{
+ const story=heritageStories[heritageIndex];
+ setText("heritage-heading",story.title);
+ setText("heritage-summary",story.summary);
+ setText("heritage-detail",story.detail);
+ setText("heritage-source",story.source);
+};
+renderHeritage();
+document.getElementById("heritage-next")?.addEventListener("click",()=>{
+ heritageIndex=(heritageIndex+1)%heritageStories.length;
+ renderHeritage();
+});
 loadLiturgy();
 })();
