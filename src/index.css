@@ -1529,3 +1529,13 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
 
 /* Sidebar link for the historical calendar */
 .today-sidebar-link{text-decoration:none;color:inherit}.today-sidebar-link .today-sidebar-arrow{margin-left:auto;color:#8fc9ff;font-size:13px;font-weight:800}.today-sidebar-link:hover .today-sidebar-arrow{color:#fff}
+
+
+/* Native and external share options for wall posts */
+.post-share-menu{margin:0 0 14px;padding:14px;border:1px solid rgba(112,164,235,.3);border-radius:12px;background:linear-gradient(145deg,rgba(31,52,78,.06),rgba(65,112,166,.08))}
+.post-share-menu>p{margin:0 0 10px;color:var(--text,#24384c);font-size:12px;font-weight:800}
+.post-share-options{display:flex;flex-wrap:wrap;gap:8px}
+.post-share-options button{display:inline-flex;align-items:center;gap:6px;padding:9px 11px;border:1px solid rgba(112,137,166,.28);border-radius:9px;background:rgba(255,255,255,.82);color:#24384c;font:inherit;font-size:11px;font-weight:750;cursor:pointer;transition:border-color .18s ease,background .18s ease,transform .18s ease}
+.post-share-options button:hover,.post-share-options button:focus-visible{border-color:#6d9ed3;background:#edf5ff;transform:translateY(-1px)}
+.post-share-menu>small{display:block;margin-top:11px;color:var(--muted,#718096);font-size:10px;line-height:1.55}
+@media(max-width:560px){.post-share-menu{padding:11px}.post-share-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.post-share-options button{justify-content:flex-start;min-width:0;padding:10px 8px;font-size:10px}}
