@@ -1072,7 +1072,7 @@ export default function App() {
           <a href="#kategorije" className="patria-button-accent"><BookOpen className="mr-2 h-4 w-4" /> Testiraj svoje znanje</a>
           <button onClick={openCities} className="patria-button"><MapPin className="mr-2 h-4 w-4" /> Brani svoj grad</button>
           <button onClick={() => openLeaderboard()} className="patria-button"><Medal className="mr-2 h-4 w-4" /> Rang-lista</button>
-          <a href="/ai-centar.html" className="patria-button"><MessageCircle className="mr-2 h-4 w-4" /> AI vodič</a>
+          <a href="/ai-centar.html" className="patria-button"><MessageCircle className="mr-2 h-4 w-4" /> PatriaSoul Centar</a>
         </div>
         <div className="mt-7 flex flex-wrap gap-2 text-sm text-white/70">
           <span className="rounded-full border border-white/15 bg-black/20 px-3 py-1.5">{loadingMainCount ? "Učitavam bazu…" : `${mainCount.toLocaleString("hr-HR")} pitanja`}</span>
