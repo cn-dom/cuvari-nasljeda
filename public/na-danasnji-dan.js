@@ -19,15 +19,22 @@
   };
   const monthNames = ["siječnja","veljače","ožujka","travnja","svibnja","lipnja","srpnja","kolovoza","rujna","listopada","studenoga","prosinca"];
   const datePageTitle = (date) => `${date.getDate()}. ${monthNames[date.getMonth()]}`;
-  const titleFor = (item) => item.title || item.text || "Povijesni događaj";
-  const descriptionFor = (item) => item.text || "Opis događaja nije dostupan na hrvatskoj Wikipediji.";
+  const titleFor = (item) => item.title || item.text || "Povijesni zapis";
+  const descriptionFor = (item) => item.description || item.text || "Dodatni opis nije naveden na hrvatskoj Wikipediji.";
   const sourceFor = (item) => item.source || item.daySource || "";
+  const categoryLabel = (category) => ({
+    events: "DOGAĐAJ",
+    births: "ROĐEN",
+    deaths: "PREMINUO",
+    holidays: "BLAGDAN I SPOMENDAN"
+  })[category] || "POVIJEST";
+
   const makeCard = (item, index, large = false) => {
     const article = document.createElement(large ? "div" : "article");
     article.className = large ? "" : "ps-event-card";
     const year = document.createElement("span");
     year.className = "ps-event-year";
-    year.textContent = Number.isFinite(Number(item.year)) ? String(item.year) : "POVIJEST";
+    year.textContent = item.year ? item.category === "births" ? \`ROĐEN \${item.year}.\` : item.category === "deaths" ? \`PREMINUO \${item.year}.\` : \`\${categoryLabel(item.category)} · \${item.year}.\` : categoryLabel(item.category);
     const title = document.createElement("h3");
     title.className = "ps-event-title";
     title.textContent = titleFor(item);
@@ -50,44 +57,76 @@
 
   function eventsFromWikipediaHtml(html, daySource) {
     const parsed = new DOMParser().parseFromString(html, "text/html");
-    const headings = [...parsed.querySelectorAll("h2")];
-    const eventHeading = headings.find((heading) => {
-      const label = (heading.querySelector(".mw-headline")?.textContent || heading.textContent || "").trim().toLocaleLowerCase("hr-HR");
-      return label.includes("događaj");
-    });
-    if (!eventHeading) return [];
-
-    const nodes = [];
-    let sibling = eventHeading.parentElement?.nextElementSibling || eventHeading.nextElementSibling;
-    while (sibling && !sibling.matches("h2, .mw-heading2")) {
-      nodes.push(sibling);
-      sibling = sibling.nextElementSibling;
-    }
-    // Neki izgledni predlošci omataju naslove u .mw-heading2.
-    const candidates = nodes.flatMap((node) => [...node.querySelectorAll("li, tr")]);
+    const sectionDefinitions = [
+      {key:"events", labels:["događaji", "događaj"]},
+      {key:"births", labels:["rođeni", "rođen"]},
+      {key:"deaths", labels:["preminuli", "umrli", "preminuo", "umro"]},
+      {key:"holidays", labels:["blagdani i spomendani", "blagdani", "spomendani"]}
+    ];
+    const headings = [...parsed.querySelectorAll("h2, h3, .mw-heading2, .mw-heading3")];
+    const collected = [];
     const seen = new Set();
-    const events = [];
-    for (const node of candidates) {
-      const rawText = (node.innerText || node.textContent || "").replace(/\s+/g, " ").trim();
-      if (!rawText || seen.has(rawText) || rawText.length < 12) continue;
-      const match = rawText.match(/^\s*(\d{1,4})\s*\.\s*(?:godine\s*)?[—–-]?\s*(.+)$/u)
-        || rawText.match(/^\s*(\d{1,4})\s+(?:godine\s*)?[—–-]\s*(.+)$/u);
-      if (!match) continue;
-      const year = Number(match[1]);
-      if (!Number.isFinite(year) || year < 1 || year > 3000) continue;
-      seen.add(rawText);
-      const anchors = [...node.querySelectorAll('a[href^="/wiki/"]')];
-      const meaningfulAnchor = anchors.find((anchor) => {
-        const label = (anchor.textContent || "").trim();
-        return label && !/^\[?\d+\]?$/.test(label) && !/^(uredi|edit)$/i.test(label);
+
+    for (const heading of headings) {
+      const label = (heading.querySelector(".mw-headline")?.textContent || heading.textContent || "")
+        .trim().replace(/\[uredi\s*\]/i, "").toLocaleLowerCase("hr-HR");
+      const section = sectionDefinitions.find((definition) =>
+        definition.labels.some((candidate) => label === candidate || label.startsWith(candidate + " "))
+      );
+      if (!section) continue;
+
+      const level = /^H3$/.test(heading.tagName) || heading.classList.contains("mw-heading3") ? 3 : 2;
+      const nodes = [];
+      let sibling = heading.classList.contains("mw-heading2") || heading.classList.contains("mw-heading3")
+        ? heading.nextElementSibling
+        : heading.parentElement?.nextElementSibling || heading.nextElementSibling;
+      while (sibling) {
+        if (/^H[1-6]$/.test(sibling.tagName) && Number(sibling.tagName.slice(1)) <= level) break;
+        if (sibling.matches?.(".mw-heading1, .mw-heading2") && level <= 2) break;
+        if (sibling.matches?.(".mw-heading3") && level <= 3) break;
+        nodes.push(sibling);
+        sibling = sibling.nextElementSibling;
+      }
+
+      const candidates = nodes.flatMap((node) => {
+        if (node.matches?.("li, tr")) return [node];
+        return [...node.querySelectorAll("li, tr")];
       });
-      const title = meaningfulAnchor?.textContent?.trim() || match[2].trim();
-      const href = meaningfulAnchor?.getAttribute("href");
-      const source = href ? new URL(href, "https://hr.wikipedia.org").href : daySource;
-      const text = match[2].trim().replace(/\s*\[[0-9]+\]\s*/g, "").replace(/\s+/g, " ");
-      events.push({year, title, text, source, daySource});
+      for (const node of candidates) {
+        const rawText = (node.innerText || node.textContent || "").replace(/\s+/g, " ").trim();
+        if (!rawText || rawText.length < 2 || seen.has(section.key + "|" + rawText)) continue;
+        if (/^(uredi|edit)$/i.test(rawText)) continue;
+        seen.add(section.key + "|" + rawText);
+
+        const yearMatch = rawText.match(/^\s*(\d{1,4})\s*\.?\s*(?:godine\s*)?[—–-]\s*(.+)$/u)
+          || rawText.match(/^\s*(\d{1,4})\s*\.\s*(.+)$/u);
+        let year = yearMatch ? Number(yearMatch[1]) : null;
+        if (year && (year < 1 || year > 3000)) year = null;
+
+        const anchors = [...node.querySelectorAll('a[href^="/wiki/"]')].filter((anchor) => {
+          const label = (anchor.textContent || "").trim();
+          return label && !/^\[?\d+\]?$/.test(label) && !/^(uredi|edit)$/i.test(label);
+        });
+        const firstAnchor = anchors[0];
+        const afterYear = yearMatch ? yearMatch[2].trim() : rawText;
+        const title = firstAnchor?.textContent?.trim() || afterYear;
+        const href = firstAnchor?.getAttribute("href");
+        const source = href ? new URL(href, "https://hr.wikipedia.org").href : daySource;
+
+        let description = afterYear;
+        if (firstAnchor && description.startsWith(firstAnchor.textContent.trim())) {
+          description = description.slice(firstAnchor.textContent.trim().length).replace(/^\s*[-–—,:;.]?\s*/, "").trim();
+        }
+        description = description.replace(/\s*\[[0-9]+\]\s*/g, "").replace(/\s+/g, " ").trim();
+        if (description === title || !description) description = "Na hrvatskoj Wikipediji nije naveden dodatni opis.";
+
+        collected.push({category:section.key, year, title, description, text:description, source, daySource});
+      }
     }
-    return events.sort((a, b) => b.year - a.year);
+    return collected.sort((a, b) => {
+      const order = {events:0, births:1, deaths:2, holidays:3};
+      return order[a.category] - order[b.category] || (b.year || 0) - (a.year || 0);
+    });
   }
 
   async function loadEvents(date) {
@@ -102,8 +141,7 @@
     empty.hidden = true;
 
     try {
-      // Hrvatska Wikipedija ne nudi pouzdano popunjen feed "Na današnji dan".
-      // Zato čitamo hrvatsku stranicu datuma i izdvajamo samo odjeljak "Događaji".
+      // Čitamo hrvatsku stranicu datuma i izdvajamo Događaje, Rođene, Preminule/Umrle te Blagdane i spomendane.
       const pageTitle = datePageTitle(date);
       const api = new URL("https://hr.wikipedia.org/w/api.php");
       api.search = new URLSearchParams({
@@ -124,15 +162,25 @@
 
       const daySource = "https://hr.wikipedia.org/wiki/" + encodeURIComponent(pageTitle.replaceAll(" ", "_"));
       const html = typeof data.parse.text === "string" ? data.parse.text : data.parse.text["*"];
-      const events = eventsFromWikipediaHtml(html || "", daySource).slice(0, 25);
+      const events = eventsFromWikipediaHtml(html || "", daySource).slice(0, 60);
       if (!events.length) {
         status.dataset.state = "empty";
-        status.textContent = `Na hrvatskoj Wikipediji nisu pronađeni događaji za ${pad(day)}. ${monthNames[date.getMonth()]}. Engleski sadržaj ne prikazujemo.`;
+        status.textContent = \`Na hrvatskoj Wikipediji nisu pronađeni zapisi za \${pad(day)}. \${monthNames[date.getMonth()]}. Engleski sadržaj ne prikazujemo.\`;
         empty.hidden = false;
         return;
       }
+      const counts = events.reduce((result, item) => {
+        result[item.category] = (result[item.category] || 0) + 1;
+        return result;
+      }, {});
+      const summary = [
+        counts.events ? \`\${counts.events} događaja\` : "",
+        counts.births ? \`\${counts.births} rođenih\` : "",
+        counts.deaths ? \`\${counts.deaths} preminulih\` : "",
+        counts.holidays ? \`\${counts.holidays} blagdana i spomendana\` : ""
+      ].filter(Boolean).join(", ");
       status.dataset.state = "success";
-      status.textContent = `Pronađeno je ${events.length} povijesnih zapisa za ${pad(day)}. ${monthNames[date.getMonth()]}. kroz različite godine.`;
+      status.textContent = \`Za \${pad(day)}. \${monthNames[date.getMonth()]} pronađeno: \${summary}.\`;
       featuredContent.append(makeCard(events[0], 0, true));
       featured.hidden = false;
       events.slice(1).forEach((item, index) => grid.append(makeCard(item, index + 1, false)));
