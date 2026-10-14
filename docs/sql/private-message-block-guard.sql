@@ -1,7 +1,7 @@
 -- PatriaSoul – Čuvari nasljeđa
 -- SIGURNOSNI SQL NACRT — NE IZVRŠAVATI NA PRODUKCIJSKOJ BAZI BEZ TESTA.
 -- Provjera blokiranih članova na razini baze. UI filtri nisu sigurnosna granica.
--- Ako je bilo koja strana blokirala drugu, nova privatna poruka se odbija.
+-- Ako je bilo koja strana blokirala drugu, slanje i uređivanje privatne poruke se odbija.
 -- Dodatno: zahtjev prijavljenog člana ne smije slati poruku pod tuđim sender_id.
 
 begin;
@@ -38,7 +38,7 @@ $function$;
 
 drop trigger if exists private_messages_prevent_blocked_pair on public.private_messages;
 create trigger private_messages_prevent_blocked_pair
-before insert on public.private_messages
+before insert or update on public.private_messages
 for each row
 execute function public.prevent_private_message_between_blocked_users();
 
