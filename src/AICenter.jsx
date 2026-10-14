@@ -65,7 +65,7 @@ export default function AICenter() {
     { id: "quality", label: "Pomoć pri greškama", icon: ShieldCheck, description: "Protumači tehničku poruku i dobij prijedlog provjere." }
   ], []);
 
-  useEffect(() => { document.title = "PatriaSoul AI centar · Čuvari nasljeđa"; }, []);
+  useEffect(() => { document.title = "PatriaSoul Centar · Čuvari nasljeđa"; }, []);
 
   async function askAI(text, purpose = "guide") {
     const clean = text.trim();
@@ -228,8 +228,8 @@ export default function AICenter() {
   return <main className="ai-center-page">
     <header className="ai-center-header">
       <a href="/" className="ai-back-link"><ArrowLeft size={16} /> Povratak na zid</a>
-      <div className="ai-center-brand"><img src="/assets/images/1000000982.png" alt="" /><span><small>PATRIASOUL · ČUVARI NASLJEĐA</small><strong>AI centar</strong></span></div>
-      <p>Alati za učenje, hrvatsku baštinu i tehničku pomoć — povezani na jednom mjestu.</p>
+      <div className="ai-center-brand"><img src="/assets/images/1000000982.png" alt="" /><span><small>PATRIASOUL · ČUVARI NASLJEĐA</small><strong>PatriaSoul Centar</strong><small className="ai-center-subtitle">Središte znanja, hrvatske baštine i pametnih alata</small></span></div>
+      <p>Upoznaj Hrvatsku, istražuj njezinu baštinu i pronađi pametnu pomoć — sve na jednom mjestu.</p>
       <div className="ai-notice"><ShieldCheck size={18} /><span>AI može pogriješiti. Ne učitavaj privatne dokumente, osobne podatke, lozinke ni tajne ključeve.</span></div>
     </header>
     <div className="ai-center-layout">
