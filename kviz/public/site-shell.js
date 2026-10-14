@@ -106,11 +106,6 @@
             <p class="ps-heading">PatriaSoul</p>
             <div class="ps-footer-links">
               <a href="https://patriasoul-portal-v2.patriasoul.workers.dev/">Povratak na PatriaSoul portal</a>
-              <a href="${links.home}">Početna</a>
-              <a href="${links.croatian}">Hrvatski kviz</a>
-              <a href="${links.cities}">Brani svoj grad</a>
-              <a href="${links.daily}">Dnevni kviz</a>
-              <a href="${links.leaderboard}">Rang-lista</a>
             </div>
           </div>
           <div class="ps-social">
