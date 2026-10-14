@@ -79,7 +79,6 @@
           <a href="${links.cities}">📍 Brani svoj grad</a>
           <a href="${links.daily}">📅 Dnevni kviz</a>
           <a href="${links.leaderboard}">🏅 Rang-lista</a>
-          <a href="${links.account}">👤 Prijava</a>
         </nav>
         <details class="ps-menu">
           <summary aria-label="Otvori izbornik">☰</summary>
@@ -89,7 +88,6 @@
             <a href="${links.cities}">📍 Brani svoj grad</a>
             <a href="${links.daily}">📅 Dnevni kviz</a>
             <a href="${links.leaderboard}">🏅 Rang-lista</a>
-            <a href="${links.account}">👤 Prijava</a>
           </nav>
         </details>
       </div>
@@ -113,7 +111,6 @@
               <a href="${links.cities}">Brani svoj grad</a>
               <a href="${links.daily}">Dnevni kviz</a>
               <a href="${links.leaderboard}">Rang-lista</a>
-              <a href="${links.account}">Prijava / Moj račun</a>
             </div>
           </div>
           <div class="ps-social">
