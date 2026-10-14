@@ -391,14 +391,21 @@ create or replace function public.guard_group_chat_message_changes()
 returns trigger
 language plpgsql
 set search_path = public, pg_temp
-as $$
+as $
 begin
-  if new.id is distinct from old.id
-     or new.group_id is distinct from old.group_id
-     or new.sender_id is distinct from old.sender_id
-     or new.created_at is distinct from old.created_at then
-    raise exception 'Group message identity and reply target cannot be changed';
+  -- On UPDATE, protect immutable message identity fields. On INSERT there is
+  -- no OLD row, so validate the reply target independently below.
+  if tg_op = 'UPDATE' then
+    if new.id is distinct from old.id
+       or new.group_id is distinct from old.group_id
+       or new.sender_id is distinct from old.sender_id
+       or new.created_at is distinct from old.created_at then
+      raise exception 'Group message identity fields cannot be changed';
+    end if;
   end if;
+
+  -- This check must run on INSERT as well as UPDATE: a reply can only point
+  -- to a message in the same group.
   if new.reply_to_id is not null and not exists (
     select 1 from public.group_chat_messages replied
     where replied.id = new.reply_to_id and replied.group_id = new.group_id
@@ -407,7 +414,12 @@ begin
   end if;
   return new;
 end;
-$$;
+$;
+
+drop trigger if exists guard_group_chat_message_changes on public.group_chat_messages;
+create trigger guard_group_chat_message_changes
+before insert or update on public.group_chat_messages
+for each row execute function public.guard_group_chat_message_changes();
 
 commit;
 
