@@ -87,6 +87,10 @@ function App() {
   const [draft, setDraft] = useState("");
   const [communityActionTitle, setCommunityActionTitle] = useState("");
   const [communityActionDetails, setCommunityActionDetails] = useState("");
+  const [communityActionCategory, setCommunityActionCategory] = useState("Savjet i preporuka");
+  const [communityActionLocation, setCommunityActionLocation] = useState("");
+  const [communityActionAds, setCommunityActionAds] = useState([]);
+  const [communityActionLoading, setCommunityActionLoading] = useState(false);
   const [communityActionBusy, setCommunityActionBusy] = useState(false);
   const communityActionPage = new URLSearchParams(window.location.search).get("zajedno");
   const [activeNav, setActiveNav] = useState("Zid zajednice");
@@ -168,6 +172,33 @@ function App() {
   const [adminBusy, setAdminBusy] = useState(false);
   const [adminError, setAdminError] = useState("");
   const isOwner = (session?.user?.email || "").trim().toLowerCase() === OWNER_EMAIL;
+
+  useEffect(() => {
+    if (!["trebam-pomoc", "pruzi-ruku"].includes(communityActionPage)) return undefined;
+    let cancelled = false;
+    async function loadCommunityActionAds() {
+      setCommunityActionLoading(true);
+      if (!supabase) {
+        if (!cancelled) { setCommunityActionAds([]); setCommunityActionLoading(false); }
+        return;
+      }
+      const adType = communityActionPage === "trebam-pomoc" ? "seeking" : "offering";
+      const { data, error } = await supabase
+        .from("community_help_ads")
+        .select("id, author_id, ad_type, title, description, category, location, created_at")
+        .eq("ad_type", adType)
+        .eq("status", "open")
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (!cancelled) {
+        setCommunityActionAds(error ? [] : (data || []));
+        setCommunityActionLoading(false);
+        if (error) setNotice("Oglasnik još nije povezan s bazom. Primijeni migraciju docs/sql/community-help-ads.sql u Supabaseu.");
+      }
+    }
+    loadCommunityActionAds();
+    return () => { cancelled = true; };
+  }, [communityActionPage]);
 
   useEffect(() => {
     if (!emojiPickerOpen || !emojiPickerHost.current) return undefined;
@@ -1692,29 +1723,42 @@ function App() {
   async function submitCommunityAction(event) {
     event.preventDefault();
     if (!communityActionTitle.trim() || !communityActionDetails.trim()) {
-      setNotice("Ispuni naslov i opis kako bi objava bila jasna drugim članovima.");
+      setNotice("Ispuni naslov i opis oglasa.");
       return;
     }
     if (!session?.user?.id) {
       setAuthMode("login");
-      setAuthMessage("Prijavi se ili izradi račun kako bi objavio/la zahtjev ili ponudu pomoći.");
+      setAuthMessage("Prijavi se ili izradi račun kako bi objavio/la oglas.");
       setAuthOpen(true);
       return;
     }
     if (!supabase || !["trebam-pomoc", "pruzi-ruku"].includes(communityActionPage)) {
-      setNotice("Ova stranica trenutačno nije dostupna.");
+      setNotice("Oglasnik trenutačno nije dostupan.");
       return;
     }
     setCommunityActionBusy(true);
-    const prefix = communityActionPage === "trebam-pomoc" ? "[TREBAŠ POMOĆ]" : "[NUDIM POMOĆ]";
-    const body = prefix + " " + communityActionTitle.trim() + "\n\n" + communityActionDetails.trim();
-    const { error } = await supabase.from("posts").insert({ author_id: session.user.id, body, image_path: null });
+    const adType = communityActionPage === "trebam-pomoc" ? "seeking" : "offering";
+    const { data, error } = await supabase.from("community_help_ads").insert({
+      author_id: session.user.id,
+      ad_type: adType,
+      title: communityActionTitle.trim(),
+      description: communityActionDetails.trim(),
+      category: communityActionCategory,
+      location: communityActionLocation.trim() || null
+    }).select("id, author_id, ad_type, title, description, category, location, created_at").single();
     setCommunityActionBusy(false);
     if (error) {
-      setNotice("Objava nije spremljena: " + (error.message || "provjeri vezu i prava pristupa."));
+      setNotice(error.message?.includes("community_help_ads")
+        ? "Oglasnik još nije postavljen u bazi. Primijeni docs/sql/community-help-ads.sql u Supabaseu."
+        : "Oglas nije spremljen: " + (error.message || "provjeri vezu i prava pristupa."));
       return;
     }
-    window.location.href = "/";
+    setCommunityActionAds((current) => [data, ...current]);
+    setCommunityActionTitle("");
+    setCommunityActionDetails("");
+    setCommunityActionLocation("");
+    setCommunityActionCategory("Savjet i preporuka");
+    setNotice("Oglas je objavljen i sada je vidljiv članovima zajednice.");
   }
 
   return (
@@ -1730,17 +1774,48 @@ function App() {
             <p className="community-action-eyebrow">ČUVARI NASLJEĐA · ZAJEDNO MOŽEMO VIŠE</p>
             <h1 id="community-action-heading">{communityActionPage === "trebam-pomoc" ? "Trebaš pomoć?" : "Pruži ruku"}</h1>
             <p className="community-action-intro">{communityActionPage === "trebam-pomoc" ? "Napiši što ti treba. Netko iz zajednice možda ima savjet, iskustvo ili mogućnost pomoći." : "Podijeli što možeš ponuditi — svoje znanje, vještinu, vrijeme ili praktičnu pomoć drugom članu."}</p>
-            <div className="community-action-guidance"><strong>{communityActionPage === "trebam-pomoc" ? "Kako zatražiti pomoć" : "Kako ponuditi pomoć"}</strong><p>{communityActionPage === "trebam-pomoc" ? "Opiši situaciju jasno i bez nepotrebnih osobnih podataka. Nemoj javno objavljivati adresu, broj telefona ni financijske podatke." : "Napiši u čemu možeš pomoći i postoje li ograničenja. Ne objavljuj tuđe osobne podatke i ne obećavaj ono što ne možeš ispuniti."}</p></div>
+            <div className="community-action-type-switch" aria-label="Vrsta oglasa">
+              <a className={communityActionPage === "trebam-pomoc" ? "selected" : ""} href="/?zajedno=trebam-pomoc">Tražim pomoć</a>
+              <a className={communityActionPage === "pruzi-ruku" ? "selected" : ""} href="/?zajedno=pruzi-ruku">Nudim pomoć</a>
+            </div>
+            <div className="community-action-guidance"><strong>{communityActionPage === "trebam-pomoc" ? "Objavi oglas za pomoć" : "Objavi oglas s ponudom pomoći"}</strong><p>{communityActionPage === "trebam-pomoc" ? "Opiši što ti treba. Nemoj javno objavljivati adresu, broj telefona, bankovne podatke ili druge osjetljive podatke." : "Napiši koju pomoć nudiš, kome može koristiti i postoje li ograničenja. Objavljuj samo ono što zaista možeš ponuditi."}</p></div>
             <form className="community-action-form" onSubmit={submitCommunityAction}>
-              <label htmlFor="community-action-title">Naslov</label>
+              <label htmlFor="community-action-title">Naslov oglasa</label>
               <input id="community-action-title" value={communityActionTitle} onChange={(event) => setCommunityActionTitle(event.target.value)} maxLength={120} placeholder={communityActionPage === "trebam-pomoc" ? "Npr. Trebam savjet oko…" : "Npr. Mogu pomoći s računalima…"} required />
-              <label htmlFor="community-action-details">Detaljniji opis</label>
+              <label htmlFor="community-action-category">Kategorija</label>
+              <select id="community-action-category" value={communityActionCategory} onChange={(event) => setCommunityActionCategory(event.target.value)} required>
+                <option>Savjet i preporuka</option>
+                <option>Kućanstvo i popravci</option>
+                <option>Prijevoz i pratnja</option>
+                <option>Računala i tehnologija</option>
+                <option>Učenje i poduka</option>
+                <option>Obitelj i svakodnevica</option>
+                <option>Volontiranje i zajednica</option>
+                <option>Razmjena stvari</option>
+                <option>Ostalo</option>
+              </select>
+              <label htmlFor="community-action-location">Mjesto ili područje (neobavezno)</label>
+              <input id="community-action-location" value={communityActionLocation} onChange={(event) => setCommunityActionLocation(event.target.value)} maxLength={100} placeholder="Npr. Sinj, Trilj ili online" />
+              <label htmlFor="community-action-details">Opis oglasa</label>
               <textarea id="community-action-details" value={communityActionDetails} onChange={(event) => setCommunityActionDetails(event.target.value)} maxLength={4000} rows={6} placeholder={communityActionPage === "trebam-pomoc" ? "Opiši što ti treba i kakav bi ti odgovor pomogao…" : "Opiši što nudiš, kome može biti korisno i kako…"} required />
-              <p className="community-action-privacy">Objava će biti podijeljena na zidu zajednice. Nemoj unositi osjetljive osobne ili financijske podatke.</p>
+              <p className="community-action-privacy">Oglas će biti vidljiv prijavljenim članovima. Dogovore sklapajte oprezno i ne objavljujte osobne ni financijske podatke.</p>
               {notice && <p className="community-action-notice" role="status">{notice}</p>}
               <button className="community-action-submit" type="submit" disabled={communityActionBusy}>{communityActionBusy ? "Objavljujem…" : communityActionPage === "trebam-pomoc" ? "Objavi zahtjev za pomoć" : "Objavi ponudu pomoći"} <span aria-hidden="true">→</span></button>
               {!session?.user?.id && <p className="community-action-login-note">Za objavu se potrebno prijaviti ili izraditi račun.</p>}
             </form>
+            <section className="community-action-listing" aria-labelledby="community-action-listing-title">
+              <div className="community-action-listing-heading"><div><p className="community-action-eyebrow">OGLASNIK ZAJEDNICE</p><h2 id="community-action-listing-title">{communityActionPage === "trebam-pomoc" ? "Članovi koji traže pomoć" : "Članovi koji nude pomoć"}</h2></div><span>{communityActionAds.length}</span></div>
+              {communityActionLoading ? <p className="community-action-empty">Učitavam oglase…</p> : communityActionAds.length ? <div className="community-action-ad-list">{communityActionAds.map((ad) => {
+                const member = memberDirectory.find((item) => item.id === ad.author_id);
+                const authorLabel = ad.author_id === session?.user?.id ? (profileName || "Ti") : (member?.display_name || member?.username || "Čuvar nasljeđa");
+                return <article className="community-action-ad" key={ad.id}>
+                  <div className="community-action-ad-meta"><span>{ad.ad_type === "seeking" ? "TRAŽI POMOĆ" : "NUDI POMOĆ"}</span><time dateTime={ad.created_at}>{new Date(ad.created_at).toLocaleDateString("hr-HR", {day:"numeric",month:"short",year:"numeric"})}</time></div>
+                  <h3>{ad.title}</h3><p>{ad.description}</p>
+                  <div className="community-action-ad-tags"><span>{ad.category}</span>{ad.location && <span>⌖ {ad.location}</span>}</div>
+                  <small className="community-action-ad-author">Objavio/la: {authorLabel}</small>
+                </article>;
+              })}</div> : <p className="community-action-empty">{communityActionPage === "trebam-pomoc" ? "Još nema aktivnih oglasa za pomoć. Možeš biti prvi/a i objaviti što ti treba." : "Još nema aktivnih ponuda pomoći. Možeš biti prvi/a i ponuditi ono što znaš."}</p>}
+            </section>
           </div>
         </section>
       )}
