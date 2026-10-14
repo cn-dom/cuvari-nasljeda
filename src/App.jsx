@@ -2769,7 +2769,7 @@ function App() {
         </aside>
       </main>
 
-      {session?.user?.id && <FloatingGlobalChat supabase={supabase} session={session} onLoginRequest={() => { setAuthOpen(true); setAuthMessage(""); }} />}
+      <FloatingGlobalChat supabase={supabase} session={session} onLoginRequest={() => { setAuthOpen(true); setAuthMessage(""); }} />
 
       <footer className="community-site-footer">
         <div className="community-site-footer-grid">
