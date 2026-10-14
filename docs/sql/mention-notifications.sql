@@ -50,7 +50,13 @@ begin
       and p.id <> new.author_id
     limit 1;
 
-    if v_recipient_id is not null then
+    if v_recipient_id is not null
+       and not exists (
+         select 1
+         from public.blocked_users as b
+         where (b.blocker_id = new.author_id and b.blocked_id = v_recipient_id)
+            or (b.blocker_id = v_recipient_id and b.blocked_id = new.author_id)
+       ) then
       insert into public.notifications
         (recipient_id, actor_id, type, title, body, reference_id)
       values
