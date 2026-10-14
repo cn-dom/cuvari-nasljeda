@@ -12,65 +12,188 @@
   const pad = (value) => String(value).padStart(2, "0");
   const dateKey = (date) => `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
   const formatDate = (date) => new Intl.DateTimeFormat("hr-HR", {weekday:"long", day:"numeric", month:"long", year:"numeric"}).format(date);
-  const safeDate = (value) => { const parts = value.split("-").map(Number); return new Date(parts[0], parts[1]-1, parts[2], 12); };
-  const titleFor = (item) => (item.pages?.[0]?.title || item.text || "Povijesni događaj").replaceAll("_"," ");
-  const descriptionFor = (item) => {
-    const text = String(item.text || "").trim();
-    const title = String(item.pages?.[0]?.title || "").replaceAll("_"," ");
-    return text && text.toLocaleLowerCase("hr-HR") !== title.toLocaleLowerCase("hr-HR") ? text : (item.pages?.[0]?.extract || "Opis događaja nije dostupan na hrvatskoj Wikipediji.");
+  const safeDate = (value) => {
+    const parts = value.split("-").map(Number);
+    const date = new Date(parts[0], parts[1]-1, parts[2], 12);
+    return date.getFullYear() === parts[0] && date.getMonth() === parts[1]-1 && date.getDate() === parts[2] ? date : new Date(NaN);
   };
-  const sourceFor = (item) => item.pages?.[0]?.content_urls?.desktop?.page || (item.pages?.[0]?.title ? "https://hr.wikipedia.org/wiki/" + encodeURIComponent(item.pages[0].title.replaceAll(" ","_")) : "");
+  const monthNames = ["siječnja","veljače","ožujka","travnja","svibnja","lipnja","srpnja","kolovoza","rujna","listopada","studenoga","prosinca"];
+  const datePageTitle = (date) => `${date.getDate()}. ${monthNames[date.getMonth()]}`;
+  const titleFor = (item) => item.title || item.text || "Povijesni događaj";
+  const descriptionFor = (item) => item.text || "Opis događaja nije dostupan na hrvatskoj Wikipediji.";
+  const sourceFor = (item) => item.source || item.daySource || "";
   const makeCard = (item, index, large = false) => {
     const article = document.createElement(large ? "div" : "article");
     article.className = large ? "" : "ps-event-card";
-    const year = document.createElement("span"); year.className = "ps-event-year"; year.textContent = Number.isFinite(Number(item.year)) ? String(item.year) : "POVIJEST";
-    const title = document.createElement("h3"); title.className = "ps-event-title"; title.textContent = titleFor(item);
-    const description = document.createElement("p"); description.className = "ps-event-description"; description.textContent = descriptionFor(item);
-    article.append(year,title,description);
+    const year = document.createElement("span");
+    year.className = "ps-event-year";
+    year.textContent = Number.isFinite(Number(item.year)) ? String(item.year) : "POVIJEST";
+    const title = document.createElement("h3");
+    title.className = "ps-event-title";
+    title.textContent = titleFor(item);
+    const description = document.createElement("p");
+    description.className = "ps-event-description";
+    description.textContent = descriptionFor(item);
+    article.append(year, title, description);
     const href = sourceFor(item);
-    if (href) { const link = document.createElement("a"); link.className = "ps-event-source"; link.href = href; link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = "Pročitaj izvor ↗"; article.append(link); }
+    if (href) {
+      const link = document.createElement("a");
+      link.className = "ps-event-source";
+      link.href = href;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Pročitaj izvor ↗";
+      article.append(link);
+    }
     return article;
   };
+
+  function eventsFromWikipediaHtml(html, daySource) {
+    const parsed = new DOMParser().parseFromString(html, "text/html");
+    const headings = [...parsed.querySelectorAll("h2")];
+    const eventHeading = headings.find((heading) => {
+      const label = (heading.querySelector(".mw-headline")?.textContent || heading.textContent || "").trim().toLocaleLowerCase("hr-HR");
+      return label.includes("događaj");
+    });
+    if (!eventHeading) return [];
+
+    const nodes = [];
+    let sibling = eventHeading.parentElement?.nextElementSibling || eventHeading.nextElementSibling;
+    while (sibling && !sibling.matches("h2, .mw-heading2")) {
+      nodes.push(sibling);
+      sibling = sibling.nextElementSibling;
+    }
+    // Neki izgledni predlošci omataju naslove u .mw-heading2.
+    const candidates = nodes.flatMap((node) => [...node.querySelectorAll("li, tr")]);
+    const seen = new Set();
+    const events = [];
+    for (const node of candidates) {
+      const rawText = (node.innerText || node.textContent || "").replace(/\s+/g, " ").trim();
+      if (!rawText || seen.has(rawText) || rawText.length < 12) continue;
+      const match = rawText.match(/^\s*(\d{1,4})\s*\.\s*(?:godine\s*)?[—–-]?\s*(.+)$/u)
+        || rawText.match(/^\s*(\d{1,4})\s+(?:godine\s*)?[—–-]\s*(.+)$/u);
+      if (!match) continue;
+      const year = Number(match[1]);
+      if (!Number.isFinite(year) || year < 1 || year > 3000) continue;
+      seen.add(rawText);
+      const anchors = [...node.querySelectorAll('a[href^="/wiki/"]')];
+      const meaningfulAnchor = anchors.find((anchor) => {
+        const label = (anchor.textContent || "").trim();
+        return label && !/^\[?\d+\]?$/.test(label) && !/^(uredi|edit)$/i.test(label);
+      });
+      const title = meaningfulAnchor?.textContent?.trim() || match[2].trim();
+      const href = meaningfulAnchor?.getAttribute("href");
+      const source = href ? new URL(href, "https://hr.wikipedia.org").href : daySource;
+      const text = match[2].trim().replace(/\s*\[[0-9]+\]\s*/g, "").replace(/\s+/g, " ");
+      events.push({year, title, text, source, daySource});
+    }
+    return events.sort((a, b) => b.year - a.year);
+  }
+
   async function loadEvents(date) {
     const currentRequest = ++requestNumber;
-    const month = date.getMonth()+1, day = date.getDate();
+    const day = date.getDate();
     dateLabel.textContent = formatDate(date);
-    status.dataset.state = "loading"; status.textContent = "Dohvaćaju se povijesni događaji s hrvatske Wikipedije…";
-    grid.replaceChildren(); featuredContent.replaceChildren(); featured.hidden = true; empty.hidden = true;
+    status.dataset.state = "loading";
+    status.textContent = "Dohvaćaju se povijesni događaji s hrvatske Wikipedije…";
+    grid.replaceChildren();
+    featuredContent.replaceChildren();
+    featured.hidden = true;
+    empty.hidden = true;
+
     try {
-      // Koristi središnji Wikimedia Feed API umjesto zastarjele adrese na domeni pojedine Wikipedije.
-      const url = `https://api.wikimedia.org/feed/v1/wikipedia/hr/onthisday/events/${pad(month)}/${pad(day)}`;
-      const response = await fetch(url, {headers:{"Accept":"application/json"}, cache:"no-store"});
-      if (!response.ok) throw new Error("Hrvatski izvor trenutačno nije dostupan.");
+      // Hrvatska Wikipedija ne nudi pouzdano popunjen feed "Na današnji dan".
+      // Zato čitamo hrvatsku stranicu datuma i izdvajamo samo odjeljak "Događaji".
+      const pageTitle = datePageTitle(date);
+      const api = new URL("https://hr.wikipedia.org/w/api.php");
+      api.search = new URLSearchParams({
+        action: "parse",
+        page: pageTitle,
+        prop: "text",
+        format: "json",
+        origin: "*"
+      }).toString();
+      const response = await fetch(api.href, {
+        headers: {"Accept":"application/json"},
+        cache: "no-store"
+      });
+      if (!response.ok) throw new Error("Hrvatska Wikipedija trenutačno nije dostupna.");
       const data = await response.json();
       if (currentRequest !== requestNumber) return;
-      const events = (data?.events || []).filter(item => item && item.text && Number.isFinite(Number(item.year))).sort((a,b)=>Number(b.year)-Number(a.year));
+      if (data?.error || !data?.parse?.text) throw new Error("Hrvatska Wikipedija nije vratila stranicu za taj datum.");
+
+      const daySource = "https://hr.wikipedia.org/wiki/" + encodeURIComponent(pageTitle.replaceAll(" ", "_"));
+      const html = typeof data.parse.text === "string" ? data.parse.text : data.parse.text["*"];
+      const events = eventsFromWikipediaHtml(html || "", daySource).slice(0, 25);
       if (!events.length) {
-        status.dataset.state = "error";
-        status.textContent = "Hrvatska Wikipedija trenutačno nema dostupnih događaja za ovaj datum. Engleski sadržaj ne prikazujemo.";
+        status.dataset.state = "empty";
+        status.textContent = `Na hrvatskoj Wikipediji nisu pronađeni događaji za ${pad(day)}. ${monthNames[date.getMonth()]}. Engleski sadržaj ne prikazujemo.`;
         empty.hidden = false;
         return;
       }
       status.dataset.state = "success";
-      status.textContent = `Pronađeno je ${events.length} događaja za ${pad(day)}.${pad(month)}. kroz povijest. Prikazujemo najviše 25 zapisa.`;
-      featuredContent.append(makeCard(events[0],0,true)); featured.hidden = false;
-      events.slice(1,25).forEach((item,index)=>grid.append(makeCard(item,index+1,false)));
+      status.textContent = `Pronađeno je ${events.length} povijesnih zapisa za ${pad(day)}. ${monthNames[date.getMonth()]}. kroz različite godine.`;
+      featuredContent.append(makeCard(events[0], 0, true));
+      featured.hidden = false;
+      events.slice(1).forEach((item, index) => grid.append(makeCard(item, index + 1, false)));
     } catch (error) {
       if (currentRequest !== requestNumber) return;
       status.dataset.state = "error";
       status.textContent = "Povijesne događaje s hrvatske Wikipedije trenutačno nije moguće dohvatiti. Provjeri internetsku vezu ili pokušaj ponovno malo kasnije.";
-      // Ne prikazuj istodobno poruku o praznim rezultatima i poruku o pogrešci veze.
       empty.hidden = true;
     }
   }
-  picker.max = dateKey(today); picker.value = dateKey(today);
+
+  picker.max = dateKey(today);
+  picker.value = dateKey(today);
   const selectedDate = () => safeDate(picker.value || dateKey(today));
-  picker.addEventListener("change",()=>{ if (picker.value) loadEvents(selectedDate()); });
-  byId("date-prev").addEventListener("click",()=>{const d=selectedDate();d.setDate(d.getDate()-1);picker.value=dateKey(d);loadEvents(d);});
-  byId("date-next").addEventListener("click",()=>{const d=selectedDate();d.setDate(d.getDate()+1);picker.value=dateKey(d);loadEvents(d);});
-  byId("date-today").addEventListener("click",()=>{picker.value=dateKey(today);loadEvents(new Date(today));});
-  byId("share-button").addEventListener("click",async()=>{const url=new URL(window.location.href);url.searchParams.set("datum",picker.value);try{if(navigator.share){await navigator.share({title:"Na današnji dan · PatriaSoul",text:"Povijesni događaji za "+formatDate(selectedDate()),url:url.href});}else{await navigator.clipboard.writeText(url.href);byId("share-status").textContent="Poveznica je kopirana.";}}catch(error){if(error?.name!=="AbortError")byId("share-status").textContent="Dijeljenje nije uspjelo. Pokušaj kopirati poveznicu."; }});
-  byId("copy-button").addEventListener("click",async()=>{const url=new URL(window.location.href);url.searchParams.set("datum",picker.value);try{await navigator.clipboard.writeText(url.href);byId("share-status").textContent="Poveznica je kopirana."; }catch{byId("share-status").textContent="Preglednik nije dopustio kopiranje. Kopiraj adresu iz adresne trake."; }});
+  picker.addEventListener("change", () => { if (picker.value) loadEvents(selectedDate()); });
+  byId("date-prev").addEventListener("click", () => {
+    const date = selectedDate();
+    date.setDate(date.getDate() - 1);
+    picker.value = dateKey(date);
+    loadEvents(date);
+  });
+  byId("date-next").addEventListener("click", () => {
+    const date = selectedDate();
+    date.setDate(date.getDate() + 1);
+    if (date > today) return;
+    picker.value = dateKey(date);
+    loadEvents(date);
+  });
+  byId("date-today").addEventListener("click", () => {
+    picker.value = dateKey(today);
+    loadEvents(new Date(today));
+  });
+  byId("share-button").addEventListener("click", async () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("datum", picker.value);
+    try {
+      if (navigator.share) {
+        await navigator.share({title:"Na današnji dan · PatriaSoul", text:"Povijesni događaji za " + formatDate(selectedDate()), url:url.href});
+      } else {
+        await navigator.clipboard.writeText(url.href);
+        byId("share-status").textContent = "Poveznica je kopirana.";
+      }
+    } catch (error) {
+      if (error?.name !== "AbortError") byId("share-status").textContent = "Dijeljenje nije uspjelo. Pokušaj kopirati poveznicu.";
+    }
+  });
+  byId("copy-button").addEventListener("click", async () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("datum", picker.value);
+    try {
+      await navigator.clipboard.writeText(url.href);
+      byId("share-status").textContent = "Poveznica je kopirana.";
+    } catch {
+      byId("share-status").textContent = "Preglednik nije dopustio kopiranje. Kopiraj adresu iz adresne trake.";
+    }
+  });
   const queryDate = new URLSearchParams(window.location.search).get("datum");
-  if (queryDate && /^\d{4}-\d{2}-\d{2}$/.test(queryDate) && !Number.isNaN(safeDate(queryDate).getTime())) { picker.value=queryDate; loadEvents(safeDate(queryDate)); } else loadEvents(new Date(today));
+  if (queryDate && /^\d{4}-\d{2}-\d{2}$/.test(queryDate) && !Number.isNaN(safeDate(queryDate).getTime())) {
+    picker.value = queryDate;
+    loadEvents(safeDate(queryDate));
+  } else {
+    loadEvents(new Date(today));
+  }
 })();
