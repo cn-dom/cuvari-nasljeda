@@ -362,10 +362,13 @@ function App() {
         const username = normalizeUsername(profile.username) || "clan";
         let imageUrl = "";
         if (row.image_path) {
-          const { data: publicImage } = supabase.storage
+          const { data: signedImage, error: signedImageError } = await supabase.storage
             .from("community-images")
-            .getPublicUrl(row.image_path);
-          imageUrl = publicImage?.publicUrl || "";
+            .createSignedUrl(row.image_path, 60 * 60);
+          if (signedImageError) {
+            console.error("PatriaSoul: community image signing failed", signedImageError);
+          }
+          imageUrl = signedImage?.signedUrl || "";
         }
         return {
           id: row.id,
@@ -1534,8 +1537,14 @@ function App() {
     }
     let uploadedImageUrl = "";
     if (imagePath) {
-      const { data: publicImage } = supabase.storage.from("community-images").getPublicUrl(imagePath);
-      uploadedImageUrl = publicImage?.publicUrl || "";
+      const { data: signedImage, error: signedImageError } = await supabase.storage
+        .from("community-images")
+        .createSignedUrl(imagePath, 60 * 60);
+      if (signedImageError) {
+        console.error("PatriaSoul: uploaded community image signing failed", signedImageError);
+        setNotice("Objava je spremljena, ali fotografija se ne može prikazati. Provjeri privatni spremnik community-images i njegova pravila.");
+      }
+      uploadedImageUrl = signedImage?.signedUrl || "";
     }
     const profile = data.profiles || {};
     const author = profile.display_name || session.user.email || "Čuvar nasljeđa";
