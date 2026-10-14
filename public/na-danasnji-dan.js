@@ -36,7 +36,7 @@
     article.className = large ? "" : "ps-event-card";
     const year = document.createElement("span");
     year.className = "ps-event-year";
-    year.textContent = item.year ? item.category === "births" ? \`ROĐEN \${item.year}.\` : item.category === "deaths" ? \`PREMINUO \${item.year}.\` : \`\${categoryLabel(item.category)} · \${item.year}.\` : categoryLabel(item.category);
+    year.textContent = item.year ? item.category === "births" ? `ROĐEN ${item.year}.` : item.category === "deaths" ? `PREMINUO ${item.year}.` : `${categoryLabel(item.category)} · ${item.year}.` : categoryLabel(item.category);
     const title = document.createElement("h3");
     title.className = "ps-event-title";
     title.textContent = titleFor(item);
@@ -167,7 +167,7 @@
       const events = eventsFromWikipediaHtml(html || "", daySource).slice(0, 60);
       if (!events.length) {
         status.dataset.state = "empty";
-        status.textContent = \`Na hrvatskoj Wikipediji nisu pronađeni zapisi za \${pad(day)}. \${monthNames[date.getMonth()]}. Engleski sadržaj ne prikazujemo.\`;
+        status.textContent = `Na hrvatskoj Wikipediji nisu pronađeni zapisi za ${pad(day)}. ${monthNames[date.getMonth()]}. Engleski sadržaj ne prikazujemo.`;
         empty.hidden = false;
         return;
       }
@@ -191,13 +191,13 @@
         return result;
       }, {});
       const summary = [
-        counts.events ? \`\${counts.events} događaja\` : "",
-        counts.births ? \`\${counts.births} rođenih\` : "",
-        counts.deaths ? \`\${counts.deaths} preminulih\` : "",
-        counts.holidays ? \`\${counts.holidays} blagdana i spomendana\` : ""
+        counts.events ? `${counts.events} događaja` : "",
+        counts.births ? `${counts.births} rođenih` : "",
+        counts.deaths ? `${counts.deaths} preminulih` : "",
+        counts.holidays ? `${counts.holidays} blagdana i spomendana` : ""
       ].filter(Boolean).join(", ");
       status.dataset.state = "success";
-      status.textContent = \`Za \${pad(day)}. \${monthNames[date.getMonth()]} pronađeno: \${summary}.\`;
+      status.textContent = `Za ${pad(day)}. ${monthNames[date.getMonth()]} pronađeno: ${summary}.`;
       featuredContent.append(makeCard(events[0], 0, true));
       featured.hidden = false;
       events.slice(1).forEach((item, index) => grid.append(makeCard(item, index + 1, false)));
