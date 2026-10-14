@@ -1998,7 +1998,7 @@ function App() {
               <button className="login-button" onClick={signOut}>Odjava</button>
             </div>
           ) : (
-            <button className="login-button" onClick={() => navigateToSection("Zid zajednice")}>Zid zajednice</button>
+            <button className="login-button" onClick={() => navigateToSection("Zid zajednice")}>PatriaSoul</button>
           )}
         </div>
       </header>
@@ -2089,7 +2089,7 @@ function App() {
           <p className="sidebar-foot">PatriaSoul · Znanje. Ponos. Nasljeđe.</p>
         </aside>
 
-        <section className="feed-column" aria-label="Zid zajednice">
+        <section className="feed-column" aria-label="PatriaSoul – Čuvari nasljeđa">
           <section className="welcome-panel" aria-label="Dobrodošlica u PatriaSoul">
             <div className="welcome-photo-layer" aria-hidden="true">
               <img
@@ -2592,7 +2592,7 @@ function App() {
           </section>
 
           </> : (
-            <section className="composer card wall-login-prompt" aria-label="Prijava za zid zajednice">
+            <section className="composer card wall-login-prompt" aria-label="Prijava za PatriaSoul – Čuvari nasljeđa">
               <div className="composer-heading"><span className="composer-heading-mark" aria-hidden="true">✦</span><div><strong>Podijeli svoju priču</strong><small>Čitanje zida je javno; za objavu i interakcije trebaš račun.</small></div></div>
               <p className="post-text">Prijavi se ili izradi račun kako bi objavljivao/la, komentirao/la i podržao/la priče drugih članova.</p>
               <button type="button" className="primary-button" onClick={() => { setAuthOpen(true); setAuthMode("login"); setAuthMessage("Prijavi se ili izradi račun kako bi objavljivao/la, komentirao/la i reagirao/la na objave."); }}>Prijava / Registracija ↗</button>
@@ -2602,7 +2602,7 @@ function App() {
           <div className="feed-heading">
             <div>
               <span className="eyebrow">ŽIVOT ZAJEDNICE</span>
-              <h2>{activeNav === "Zid zajednice" ? "Zid zajednice" : activeNav}</h2>
+              <h2>{activeNav === "Zid zajednice" ? "PatriaSoul – Čuvari nasljeđa" : activeNav}</h2>
             </div>
             <span className="feed-total">{visiblePosts.length} objava</span>
           </div>
@@ -2791,12 +2791,12 @@ function App() {
             <p>Hrvatska · povijest · znanje · identitet.</p>
             <p>Prostor za učenje, igru i čuvanje priča koje čine naše nasljeđe.</p>
             <strong className="community-footer-motto">Znanje · Ponos · Nasljeđe</strong>
-            <a className="community-footer-return" href="/">Povratak na zid zajednice <span aria-hidden="true">→</span></a>
+            <a className="community-footer-return" href="/">Povratak na PatriaSoul <span aria-hidden="true">→</span></a>
           </section>
           <section>
             <h2>Brzi izbornik</h2>
             <nav aria-label="Brza navigacija podnožja">
-              <a href="/">Zid zajednice</a>
+              <a href="/">PatriaSoul – Čuvari nasljeđa</a>
               <a href="/kviz/">PatriaSoul kviz</a>
               <a href="/kviz/?mode=croatian">Hrvatski kviz</a>
               <a href="/kviz/?mode=city">Brani svoj grad</a>
