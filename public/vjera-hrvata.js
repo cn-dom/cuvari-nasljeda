@@ -55,14 +55,16 @@ const loadLiturgy=async()=>{
    const refLine=lines.find(line=>/\b(?:Mt|Mk|Lk|Iv)\s*\d/.test(line))||"";
    const refMatch=refLine.match(/\b((?:Mt|Mk|Lk|Iv)\s*\d{1,3}\s*,?\s*\d{1,3}(?:[–-]\d{1,3})?(?:\s*[-–]\s*\d{1,3})?)/);
    const ref=refMatch?refMatch[1].replace(/\s+/g," ").replace(/\s*,\s*/g,","):refLine;
+   const referenceLineIndex=lines.findIndex(line=>/\b(?:Mt|Mk|Lk|Iv)\s*\d/.test(line));
    const linesWithoutReference=lines.map(line=>line===refLine?line.replace(refMatch?.[0]||"","").trim():line).filter(Boolean);
-   const readingIndex=linesWithoutReference.findIndex(line=>/Čitanje svetog Evanđelja|Čitanje svetoga Evanđelja/i.test(line));
-   const bodyLines=linesWithoutReference.slice(readingIndex>=0?readingIndex+1:(refLine?Math.max(0,linesWithoutReference.indexOf(refLine)):linesWithoutReference.length));
+   const readingIndex=lines.findIndex(line=>/Čitanje svetog Evanđelja|Čitanje svetoga Evanđelja/i.test(line));
+   const bodyStart=readingIndex>=0?readingIndex+1:referenceLineIndex+1;
+   const bodyLines=lines.slice(Math.max(0,bodyStart));
    const body=bodyLines.filter(line=>!/^Riječ Gospodnja\.?$/i.test(line)&&!/^(?:Ksaverska cesta|Kontakt\b|Pretplata\b|Narudžbe\b|HBK\b|Liturgijski izvor\b)/i.test(line)).join("\n\n").trim();
    if(!ref||body.length<80)throw new Error("Tekst evanđelja nije potpun.");
    if(gospelRef)gospelRef.textContent=ref;
    if(gospelText){gospelText.textContent=body;gospelText.style.whiteSpace="pre-line";}
-   const title=linesWithoutReference.slice(0,Math.max(0,readingIndex)).find(line=>line.length>8&&line.length<180);
+   const title=linesWithoutReference.slice(0,referenceLineIndex+1).find(line=>line.length>8&&line.length<180);
    if(title)setText("gospel-heading",title);
    setText("gospel-response","");
    const dayStart=raw.search(/(?:Ponedjeljak|Utorak|Srijeda|Četvrtak|Petak|Subota|Nedjelja),?\s+\d{1,2}\.\s*\d{1,2}\.\s*\d{4}\.?/i);
