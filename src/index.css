@@ -431,16 +431,37 @@ button { -webkit-tap-highlight-color: transparent; }
   background: #fff;
   box-shadow: 0 14px 38px #172b4022;
 }
-.emoji-picker-host em-emoji-picker {
-  display: block;
-  width: 100%;
-  max-height: min(430px, 68vh);
-  --rgb-background: 255, 255, 255;
-  --rgb-input: 246, 248, 250;
-  --rgb-color: 24, 43, 64;
-  --rgb-accent: 36, 79, 118;
-  --rgb-border: 222, 229, 236;
-  --rgb-hover: 239, 244, 248;
+.emoji-picker-search-label {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e4e8ed;
+  color: #244f76;
+  font-size: 12px;
+  font-weight: 700;
+}
+.emoji-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 3px;
+  padding: 8px;
+  max-height: min(320px, 55vh);
+  overflow-y: auto;
+}
+.emoji-picker-grid button {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 23px;
+  cursor: pointer;
+}
+.emoji-picker-grid button:hover,
+.emoji-picker-grid button:focus-visible {
+  background: #edf3f8;
+  outline: 2px solid #244f76;
+  outline-offset: -2px;
 }
 @media (max-width: 520px) {
   .emoji-picker-host {
