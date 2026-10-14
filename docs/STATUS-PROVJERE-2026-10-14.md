@@ -10,7 +10,8 @@ Oznake:
 
 ## 1. Gotovo / potvrđeno
 
-- [x] Najnoviji GitHub Actions build za commit `f991965db75039cfb59bcf80c8891b16fb346ae1` prošao je uspješno, uključujući `npm run build` i izgradnju kviza.
+- [x] GitHub Actions build za commit `f991965db75039cfb59bcf80c8891b16fb346ae1` prošao je uspješno, uključujući `npm run build` i izgradnju kviza.
+- [x] Dodan je automatizirani smoke test `scripts/smoke-routes.mjs`; GitHub Actions run #428 uspješno je prošao izgradnju, lokalni Vite preview, 7 ruta i obavezne assete/pakete.
 - [x] Logo PatriaSoul za plutajući Domoljubni chat postavljen je na `/assets/images/logo%20Patriasoul.png`; datoteka postoji u repozitoriju.
 - [x] U repozitoriju postoji React/Vite aplikacija i ugrađena aplikacija kviza.
 - [x] `.env.example` koristi samo javne Supabase klijentske vrijednosti i izričito upozorava da se ne koristi service-role/secret ključ u pregledniku.
