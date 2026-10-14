@@ -61,3 +61,12 @@
 .fgc-compose-bottom button span { margin-left: 5px; }
 @media (max-width: 600px) { .floating-global-chat-root { right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); gap: 9px; } .fgc-launcher { min-width: 0; gap: 8px; padding: 9px 10px; border-radius: 14px; } .fgc-launcher-icon { width: 35px; height: 35px; flex-basis: 35px; } .fgc-launcher-copy strong { font-size: 11px; } .fgc-launcher-copy small { font-size: 9px; } .floating-global-chat-panel { width: min(390px, calc(100vw - 24px)); height: min(590px, calc(100dvh - 100px)); min-height: min(350px, calc(100dvh - 100px)); border-radius: 16px; } }
 @media (prefers-reduced-motion: reduce) { .fgc-launcher, .floating-global-chat-panel { animation: none; transition: none; } }
+
+.fgc-report-form { display: grid; gap: 7px; margin-top: 9px; padding-top: 9px; border-top: 1px solid #24445c; }
+.fgc-report-form label { color: #a9c5db; font-size: 9px; font-weight: 700; }
+.fgc-report-form select, .fgc-report-form textarea { width: 100%; border: 1px solid #294b64; border-radius: 8px; padding: 8px; color: #dcecff; background: #071827; font: inherit; font-size: 10px; }
+.fgc-report-form textarea { resize: vertical; line-height: 1.5; }
+.fgc-report-form > div { display: flex; justify-content: flex-end; gap: 7px; }
+.fgc-report-form button { border: 1px solid #236b9b; border-radius: 7px; padding: 6px 8px; color: #e8f5ff; background: #0d4974; font-size: 9px; font-weight: 700; }
+.fgc-report-form button.quiet { border-color: #304b61; color: #94afc5; background: transparent; }
+.fgc-report-form button:disabled { opacity: .55; }
