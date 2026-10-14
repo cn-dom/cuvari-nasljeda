@@ -19,10 +19,27 @@ export default function FloatingGlobalChat({ supabase, session, onLoginRequest }
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState("");
   const [friendRequests, setFriendRequests] = useState([]);
+  const [isModerator, setIsModerator] = useState(false);
+  const [adminReportsOpen, setAdminReportsOpen] = useState(false);
+  const [adminReports, setAdminReports] = useState([]);
+  const [reportsLoading, setReportsLoading] = useState(false);
   const [reportingId, setReportingId] = useState("");
   const [reportReason, setReportReason] = useState("spam");
   const [reportDetails, setReportDetails] = useState("");
   const userId = session?.user?.id || "";
+
+  useEffect(() => {
+    let cancelled = false;
+    async function checkModerator() {
+      if (!supabase || !userId) { setIsModerator(false); return; }
+      const email = String(session?.user?.email || "").toLowerCase();
+      if (email === "patriasoul@protonmail.com") { setIsModerator(true); return; }
+      const { data } = await supabase.from("profiles").select("role").eq("id", userId).maybeSingle();
+      if (!cancelled) setIsModerator(data?.role === "admin");
+    }
+    checkModerator();
+    return () => { cancelled = true; };
+  }, [supabase, userId, session?.user?.email]);
 
   const loadMessages = useCallback(async () => {
     if (!supabase || !userId) return;
@@ -187,6 +204,32 @@ export default function FloatingGlobalChat({ supabase, session, onLoginRequest }
 
   const pendingIncoming = friendRequests.filter((row) => row.recipient_id === userId && row.status === "pending");
 
+  async function loadAdminReports() {
+    if (!supabase || !userId || !isModerator) return;
+    setReportsLoading(true);
+    const { data, error } = await supabase
+      .from("community_global_chat_reports")
+      .select("id, message_id, reporter_id, reason, details, status, created_at, message:community_global_chat_messages(body, sender_id, created_at)")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) setNotice("Prijave se ne mogu učitati. Provjeri administratorska prava i migraciju.");
+    else setAdminReports(data || []);
+    setReportsLoading(false);
+  }
+
+  async function updateReportStatus(report, status) {
+    if (!isModerator || busy) return;
+    setBusy(true);
+    const { error } = await supabase.from("community_global_chat_reports")
+      .update({ status }).eq("id", report.id);
+    if (error) setNotice("Status prijave nije moguće spremiti.");
+    else {
+      setAdminReports((current) => current.map((item) => item.id === report.id ? { ...item, status } : item));
+      setNotice("Status prijave ažuriran.");
+    }
+    setBusy(false);
+  }
+
   return (
     <div className="floating-global-chat-root">
       {open && (
@@ -205,12 +248,36 @@ export default function FloatingGlobalChat({ supabase, session, onLoginRequest }
             <>
               <div className="fgc-toolbar">
                 <span><i className={muted ? "fgc-status-dot muted" : "fgc-status-dot"} />{muted ? "Obavijesti utišane" : "Chat aktivan"}</span>
-                <button type="button" onClick={toggleMuted} disabled={busy || !settingsReady}>{muted ? "Uključi chat" : "Utišaj chat"}</button>
+                {isModerator && <button type="button" onClick={() => {
+                  const nextOpen = !adminReportsOpen;
+                  setAdminReportsOpen(nextOpen);
+                  if (nextOpen) loadAdminReports();
+                }}>{adminReportsOpen ? "Natrag na chat" : "Prijave poruka"}</button>}
+                {!adminReportsOpen && <button type="button" onClick={toggleMuted} disabled={busy || !settingsReady}>{muted ? "Uključi chat" : "Utišaj chat"}</button>}
               </div>
               {pendingIncoming.length > 0 && <div className="fgc-requests"><strong>Zahtjevi za prijateljstvo · {pendingIncoming.length}</strong>{pendingIncoming.slice(0, 3).map((request) => {
                 const sender = profiles[request.sender_id];
                 return <div className="fgc-request-row" key={request.id}><span>{sender?.display_name || sender?.username || "Čuvar nasljeđa"}</span><button type="button" disabled={busy} onClick={() => respondToFriendRequest(request, "accepted")}>Prihvati</button><button type="button" className="quiet" disabled={busy} onClick={() => respondToFriendRequest(request, "declined")}>Odbij</button></div>;
               })}</div>}
+              {adminReportsOpen && isModerator ? (
+                <section className="fgc-admin-reports" aria-label="Administratorski pregled prijava poruka">
+                  <div className="fgc-admin-reports-heading"><strong>Prijave poruka</strong><button type="button" onClick={loadAdminReports} disabled={reportsLoading}>Osvježi</button></div>
+                  {reportsLoading ? <p className="fgc-empty">Učitavam prijave…</p> : adminReports.length ? adminReports.map((report) => (
+                    <article className="fgc-admin-report" key={report.id}>
+                      <div className="fgc-admin-report-top"><strong>{report.reason}</strong><span>{report.status}</span></div>
+                      <p>{report.message?.body || "Izvorna poruka više nije dostupna."}</p>
+                      {report.details && <small>Napomena: {report.details}</small>}
+                      <small>Prijavljeno: {new Date(report.created_at).toLocaleString("hr-HR")}</small>
+                      <div className="fgc-admin-report-actions">
+                        {report.status !== "reviewing" && <button type="button" disabled={busy} onClick={() => updateReportStatus(report, "reviewing")}>U obradi</button>}
+                        {report.status !== "resolved" && <button type="button" disabled={busy} onClick={() => updateReportStatus(report, "resolved")}>Riješeno</button>}
+                        {report.status !== "dismissed" && <button type="button" className="quiet" disabled={busy} onClick={() => updateReportStatus(report, "dismissed")}>Odbaci</button>}
+                        {report.status !== "open" && <button type="button" className="quiet" disabled={busy} onClick={() => updateReportStatus(report, "open")}>Ponovno otvori</button>}
+                      </div>
+                    </article>
+                  )) : <p className="fgc-empty">Trenutačno nema prijava poruka.</p>}
+                </section>
+              ) : <>
               <div className="fgc-messages" role="log" aria-live="polite" aria-label="Poruke Domoljubnog chata">
                 {loading && !messages.length ? <p className="fgc-empty">Učitavam razgovor…</p> : messages.length ? messages.map((message) => {
                   const author = profiles[message.sender_id] || {};
@@ -246,6 +313,7 @@ export default function FloatingGlobalChat({ supabase, session, onLoginRequest }
                 <textarea id="fgc-draft" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Napiši poruku zajednici…" maxLength={MAX_MESSAGE_LENGTH} rows={2} />
                 <div className="fgc-compose-bottom"><small>{draft.length}/{MAX_MESSAGE_LENGTH}</small><button type="submit" disabled={busy || !draft.trim()}>Pošalji <span>↗</span></button></div>
               </form>
+              </>}
             </>
           )}
         </section>
