@@ -94,6 +94,7 @@ const loadLiturgy=async()=>{
    setText("saint-description","Svetac ili spomendan prikazat će se čim provjereni liturgijski kalendar bude dostupan.");
    console.warn("PatriaSoul liturgy load:",error);
  }
+};
 const heritageStories=[
 {title:"Bašćanska ploča i početci hrvatske pismenosti",summary:"Bašćanska ploča jedan je od najpoznatijih spomenika hrvatske glagoljaške i pravne baštine.",detail:"Natpis je pronađen u crkvi sv. Lucije u Jurandvoru kraj Baške na otoku Krku. U njemu se spominje kralj Zvonimir, a tekst je važan izvor za proučavanje ranoga hrvatskog jezika, glagoljice i društvene povijesti. Datiranje i tumačenje pojedinih dijelova predmet su stručnog proučavanja.",source:"Za daljnje proučavanje: Hrvatska enciklopedija — natuknica „Bašćanska ploča”."},
 {title:"Glagoljaška liturgijska tradicija",summary:"Hrvatski glagoljaši stoljećima su čuvali posebnu slavensku liturgijsku i pisanu tradiciju.",detail:"U dijelovima hrvatske obale i otoka razvila se uporaba staroslavenskoga jezika u liturgiji uz glagoljsko pismo. Ta je praksa ostavila trag u misalima, brevijarima, natpisima i lokalnoj kulturnoj povijesti. Pojedina razdoblja i lokalne prakse razlikuju se pa ih treba opisivati prema konkretnim izvorima.",source:"Za daljnje proučavanje: Hrvatska enciklopedija — natuknice o glagoljici i hrvatskom glagoljaštvu."},
