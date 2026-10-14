@@ -965,7 +965,7 @@ export default function App() {
           <span className="text-lg font-extrabold tracking-wide">PatriaSoul</span>
         </a>
         <nav aria-label="Glavna navigacija kviza" className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-bold">
-          <a href="/" className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300/40 bg-amber-300/10 px-3 py-2 text-amber-200 transition hover:bg-amber-300/20 hover:text-white" aria-label="Povratak na zid zajednice"><ArrowLeft className="h-4 w-4" /> Zid zajednice</a>
+          <a href="/" className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300/40 bg-amber-300/10 px-3 py-2 text-amber-200 transition hover:bg-amber-300/20 hover:text-white" aria-label="Povratak na PatriaSoul – Čuvari nasljeđa"><ArrowLeft className="h-4 w-4" /> PatriaSoul</a>
           <a href="/kviz/" className="transition hover:text-amber-300">⌂ Početna</a>
           <a href="/kviz/?mode=croatian" className="transition hover:text-amber-300">📖 Hrvatski kviz</a>
           <a href="/kviz/?mode=city" className="transition hover:text-amber-300">📍 Brani svoj grad</a>
