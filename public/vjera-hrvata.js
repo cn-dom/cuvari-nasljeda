@@ -22,7 +22,6 @@ if(date)date.textContent=new Intl.DateTimeFormat("hr-HR",{timeZone:"Europe/Zagre
 for(const [id,value] of [["faith-verse","„"+item.verse+"”"],["faith-reference",item.ref],["faith-reflection",item.reflection],["faith-question",item.question]]){const el=document.getElementById(id);if(el)el.textContent=value;}
 document.querySelectorAll(".prayer-item").forEach(button=>button.addEventListener("click",()=>{const expanded=button.getAttribute("aria-expanded")==="true";button.setAttribute("aria-expanded",String(!expanded));const mark=button.querySelector(":scope > b");if(mark)mark.textContent=expanded?"＋":"−";}));
 const weekday=["nedjelja","ponedjeljak","utorak","srijeda","četvrtak","petak","subota"][new Date(today.iso+"T12:00:00+02:00").getDay()];
-const monthNames=["sijecnja","veljace","ozujka","travnja","svibnja","lipnja","srpnja","kolovoza","rujna","listopada","studenoga","prosinca"];
 const slug=weekday+"-"+Number(today.day)+"-"+Number(today.month)+"-"+today.year;
 const setText=(id,text)=>{const el=document.getElementById(id);if(el)el.textContent=text;};
 const clean=s=>String(s||"").replace(/\[([^\]]+)\]\([^)]+\)/g,"$1").replace(/[*_>#`]/g,"").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#39;|&apos;/g,"'").replace(/\s+/g," ").trim();
@@ -66,8 +65,12 @@ const loadLiturgy=async()=>{
    const celebration=dayLines.filter(line=>!/(?:Ponedjeljak|Utorak|Srijeda|Četvrtak|Petak|Subota|Nedjelja),?\s+\d{1,2}\.\s*\d{1,2}\.\s*\d{4}/i.test(line)&&!/^(?:XX|X|I|V|\d+|ili:)/i.test(line)&&!/^\d+\. tjedan/i.test(line)&&line.length>2&&line.length<180).slice(0,3);
    const saintLine=dayLines.find(line=>/sv\.|svet|blažen|bl\./i.test(line)&&!/svetog Evanđelja|svetoga Pavla|svetog Luke|svetog Mateja/i.test(line));
    if(saintLine){
-      setText("saint-heading",clean(saintLine).replace(/^ili:\s*/i,""));
-      setText("saint-description","Liturgijski spomendan prema današnjem kalendaru. Ako je navedeno više slavlja, prednost ima slavlje koje propisuje liturgijski kalendar.");
+      const saintName=clean(saintLine).replace(/^ili:\s*/i,"");
+      const saintDetails=saintName.match(/\),?\s*(.+)$/);
+      setText("saint-heading",saintName);
+      setText("saint-description",saintDetails&&saintDetails[1]
+        ? "Danas se u liturgijskom kalendaru spominje: "+saintDetails[1].replace(/[.;,]+$/,"")+"."
+        : "Spomendan je preuzet iz današnjeg liturgijskog kalendara Hrvatskog instituta za liturgijski pastoral.");
    } else {
       setText("saint-heading",celebration.find(line=>/Svagdan|nedjelja|slavlje|blagdan|spomendan/i.test(line))||"Svagdan");
       setText("saint-description","Za današnji datum nije naveden poseban svetac ili spomendan u sažetku kalendara.");
