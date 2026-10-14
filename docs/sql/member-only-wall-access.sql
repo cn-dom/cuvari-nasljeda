@@ -37,7 +37,7 @@ drop policy if exists profiles_read_public on public.profiles;
 -- Remove anonymous table privileges. Authenticated members can read the wall.
 revoke all privileges on table public.posts, public.comments, public.profiles from anon;
 grant select on table public.posts, public.comments to authenticated;
-grant select (id, display_name, username, avatar_path, avatar_url) on public.profiles to authenticated;
+grant select (id, display_name, username, bio, avatar_path, avatar_url, created_at) on public.profiles to authenticated;
 
 -- Recreate authenticated-only read policies. These policies do not grant guest access.
 drop policy if exists posts_select_authenticated on public.posts;
