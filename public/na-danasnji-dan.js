@@ -17,7 +17,7 @@
   const descriptionFor = (item) => {
     const text = String(item.text || "").trim();
     const title = String(item.pages?.[0]?.title || "").replaceAll("_"," ");
-    return text && text.toLocaleLowerCase("hr-HR") !== title.toLocaleLowerCase("hr-HR") ? text : (item.pages?.[0]?.extract || "Opis događaja nije dostupan u ovom izvoru.");
+    return text && text.toLocaleLowerCase("hr-HR") !== title.toLocaleLowerCase("hr-HR") ? text : (item.pages?.[0]?.extract || "Opis događaja nije dostupan na hrvatskoj Wikipediji.");
   };
   const sourceFor = (item) => item.pages?.[0]?.content_urls?.desktop?.page || (item.pages?.[0]?.title ? "https://hr.wikipedia.org/wiki/" + encodeURIComponent(item.pages[0].title.replaceAll(" ","_")) : "");
   const makeCard = (item, index, large = false) => {
@@ -35,27 +35,31 @@
     const currentRequest = ++requestNumber;
     const month = date.getMonth()+1, day = date.getDate();
     dateLabel.textContent = formatDate(date);
-    status.dataset.state = "loading"; status.textContent = "Dohvaćaju se povijesni događaji…";
+    status.dataset.state = "loading"; status.textContent = "Dohvaćaju se povijesni događaji s hrvatske Wikipedije…";
     grid.replaceChildren(); featuredContent.replaceChildren(); featured.hidden = true; empty.hidden = true;
-    const urls = [
-      `https://hr.wikipedia.org/api/rest_v1/feed/onthisday/events/${month}/${day}`,
-      `https://en.wikipedia.org/api/rest_v1/feed/onthisday/events/${month}/${day}`
-    ];
-    let data = null, lastError = null;
-    for (const url of urls) {
-      try { const response = await fetch(url, {headers:{"Accept":"application/json"}, cache:"no-store"}); if (!response.ok) throw new Error("Izvor trenutno nije dostupan."); data = await response.json(); if (Array.isArray(data.events) && data.events.length) break; data = null; }
-      catch (error) { lastError = error; }
+    try {
+      const url = `https://hr.wikipedia.org/api/rest_v1/feed/onthisday/events/${month}/${day}`;
+      const response = await fetch(url, {headers:{"Accept":"application/json"}, cache:"no-store"});
+      if (!response.ok) throw new Error("Hrvatski izvor trenutačno nije dostupan.");
+      const data = await response.json();
+      if (currentRequest !== requestNumber) return;
+      const events = (data?.events || []).filter(item => item && item.text && Number.isFinite(Number(item.year))).sort((a,b)=>Number(b.year)-Number(a.year));
+      if (!events.length) {
+        status.dataset.state = "error";
+        status.textContent = "Hrvatska Wikipedija trenutačno nema dostupnih događaja za ovaj datum. Engleski sadržaj ne prikazujemo.";
+        empty.hidden = false;
+        return;
+      }
+      status.dataset.state = "success";
+      status.textContent = `Pronađeno je ${events.length} događaja za ${pad(day)}.${pad(month)}. kroz povijest. Prikazujemo najviše 25 zapisa.`;
+      featuredContent.append(makeCard(events[0],0,true)); featured.hidden = false;
+      events.slice(1,25).forEach((item,index)=>grid.append(makeCard(item,index+1,false)));
+    } catch (error) {
+      if (currentRequest !== requestNumber) return;
+      status.dataset.state = "error";
+      status.textContent = "Povijesne događaje s hrvatske Wikipedije trenutačno nije moguće dohvatiti. Pokušaj ponovno malo kasnije.";
+      empty.hidden = false;
     }
-    if (currentRequest !== requestNumber) return;
-    const events = (data?.events || []).filter(item => item && item.text && Number.isFinite(Number(item.year))).sort((a,b)=>Number(b.year)-Number(a.year));
-    if (!events.length) {
-      status.dataset.state = "error"; status.textContent = lastError ? "Povijesne događaje trenutačno nije moguće dohvatiti. Pokušaj ponovno malo kasnije." : "Izvor za ovaj datum nije vratio događaje.";
-      empty.hidden = false; return;
-    }
-    status.dataset.state = "success";
-    status.textContent = `Pronađeno je ${events.length} događaja za ${pad(day)}.${pad(month)}. kroz povijest. Prikazujemo najviše 25 zapisa.`;
-    featuredContent.append(makeCard(events[0],0,true)); featured.hidden = false;
-    events.slice(1,25).forEach((item,index)=>grid.append(makeCard(item,index+1,false)));
   }
   picker.max = dateKey(today); picker.value = dateKey(today);
   const selectedDate = () => safeDate(picker.value || dateKey(today));
