@@ -48,17 +48,23 @@ const loadLiturgy=async()=>{
    if(headingIndex<0)throw new Error("U zapisu nije pronađeno poglavlje Evanđelje.");
    let section=raw.slice(headingIndex).replace(/^#{1,6}\s*Evanđelje\s*:?\s*/i,"");
    section=section.split(/\n#{1,6}\s*(?:Izvor|Poveznice|Napomene)\b/i)[0];
-   const lines=section.split(/\n+/).map(clean).filter(Boolean).filter(line=>!/^[-—]{2,}$/.test(line));
-   const ref=lines.find(line=>/\b(?:Mt|Mk|Lk|Iv)\s*\d/.test(line))||"";
-   const readingIndex=lines.findIndex(line=>/Čitanje svetog Evanđelja|Čitanje svetoga Evanđelja/i.test(line));
-   const bodyLines=lines.slice(readingIndex>=0?readingIndex+1:(ref?lines.indexOf(ref)+1:lines.length));
-   const body=bodyLines.filter(line=>line!=="Riječ Gospodnja.").join("\n\n").trim();
+   // Očisti navigaciju i kontaktne podatke koje izvor može dodati iza Evanđelja.
+   const lines=section.split(/\n+/).map(clean).filter(Boolean)
+     .map(line=>line.replace(/\s*(?:Ksaverska cesta|\+385\s*\(?0\)?|Kontakt\b|Pretplata\b|Narudžbe\b|HBK\b|Liturgijski izvor\s*:).*/i,"").trim())
+     .filter(line=>line&&!/^[-—]{2,}$/.test(line));
+   const refLine=lines.find(line=>/\b(?:Mt|Mk|Lk|Iv)\s*\d/.test(line))||"";
+   const refMatch=refLine.match(/\b((?:Mt|Mk|Lk|Iv)\s*\d{1,3}\s*,?\s*\d{1,3}(?:[–-]\d{1,3})?(?:\s*[-–]\s*\d{1,3})?)/);
+   const ref=refMatch?refMatch[1].replace(/\s+/g," ").replace(/\s*,\s*/g,","):refLine;
+   const linesWithoutReference=lines.map(line=>line===refLine?line.replace(refMatch?.[0]||"","").trim():line).filter(Boolean);
+   const readingIndex=linesWithoutReference.findIndex(line=>/Čitanje svetog Evanđelja|Čitanje svetoga Evanđelja/i.test(line));
+   const bodyLines=linesWithoutReference.slice(readingIndex>=0?readingIndex+1:(refLine?Math.max(0,linesWithoutReference.indexOf(refLine)):linesWithoutReference.length));
+   const body=bodyLines.filter(line=>!/^Riječ Gospodnja\.?$/i.test(line)&&!/^(?:Ksaverska cesta|Kontakt\b|Pretplata\b|Narudžbe\b|HBK\b|Liturgijski izvor\b)/i.test(line)).join("\n\n").trim();
    if(!ref||body.length<80)throw new Error("Tekst evanđelja nije potpun.");
    if(gospelRef)gospelRef.textContent=ref;
    if(gospelText){gospelText.textContent=body;gospelText.style.whiteSpace="pre-line";}
-   const title=lines.slice(0,Math.max(0,readingIndex)).find(line=>line!==ref&&line.length>8&&line.length<180);
+   const title=linesWithoutReference.slice(0,Math.max(0,readingIndex)).find(line=>line.length>8&&line.length<180);
    if(title)setText("gospel-heading",title);
-   setText("gospel-response","Liturgijski izvor: Hrvatski institut za liturgijski pastoral (HILP).");
+   setText("gospel-response","");
    const dayStart=raw.search(/(?:Ponedjeljak|Utorak|Srijeda|Četvrtak|Petak|Subota|Nedjelja),?\s+\d{1,2}\.\s*\d{1,2}\.\s*\d{4}\.?/i);
    const readingStart=raw.search(/#{1,5}\s*Misna čitanja/i);
    const dayBlock=dayStart>=0?raw.slice(dayStart,readingStart>dayStart?readingStart:dayStart+1400):"";
