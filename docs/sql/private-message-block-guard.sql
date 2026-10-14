@@ -32,4 +32,8 @@ before insert on public.private_messages
 for each row
 execute function public.prevent_private_message_between_blocked_users();
 
+-- Trigger izvršava funkciju bez potrebe da je član izravno poziva.
+-- Ukloni zadane EXECUTE ovlasti za javne/klijentske uloge.
+revoke all on function public.prevent_private_message_between_blocked_users() from public, anon, authenticated;
+
 commit;
