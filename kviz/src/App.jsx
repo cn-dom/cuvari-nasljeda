@@ -970,7 +970,6 @@ export default function App() {
           <a href="/kviz/?mode=city" className="transition hover:text-amber-300">📍 Brani svoj grad</a>
           <a href="/kviz/?mode=daily" className="transition hover:text-amber-300">📅 Dnevni kviz</a>
           <a href="/kviz/?mode=leaderboard" className="transition hover:text-amber-300">🏅 Rang-lista</a>
-          <a href="/kviz/?mode=account" className="transition hover:text-amber-300">👤 Prijava</a>
         </nav>
       </div>
     </header>
@@ -1541,7 +1540,6 @@ export default function App() {
             <a href="/kviz/?mode=city" className="hover:text-white">Brani svoj grad</a>
             <a href="/kviz/?mode=daily" className="hover:text-white">Dnevni kviz</a>
             <a href="/kviz/?mode=leaderboard" className="hover:text-white">Rang-lista</a>
-            <a href="/kviz/?mode=account" className="hover:text-white">Prijava / Moj račun</a>
           </nav>
         </section>
         <section>
