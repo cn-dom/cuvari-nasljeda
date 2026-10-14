@@ -192,7 +192,7 @@ export default function FloatingGlobalChat({ supabase, session, onLoginRequest }
       {open && (
         <section className="floating-global-chat-panel" aria-label="Domoljubni chat">
           <header className="fgc-header">
-            <div className="fgc-brand-icon" aria-hidden="true">🇭🇷</div>
+            <div className="fgc-brand-icon"><img src="/assets/images/patriasoul-logo.jpg" alt="PatriaSoul" /></div>
             <div className="fgc-heading">
               <strong>Domoljubni chat</strong>
               <span><i className={muted ? "fgc-status-dot muted" : "fgc-status-dot"} />{muted ? "Utišan na ovom računu" : "Zajednički razgovor članova"}</span>
@@ -251,7 +251,7 @@ export default function FloatingGlobalChat({ supabase, session, onLoginRequest }
         </section>
       )}
       <button type="button" className={muted ? "fgc-launcher muted" : "fgc-launcher"} onClick={() => { if (!userId) { onLoginRequest?.(); return; } setOpen((value) => !value); }} aria-expanded={open} aria-label={open ? "Zatvori Domoljubni chat" : "Otvori Domoljubni chat"} title={muted ? "Domoljubni chat · utišan" : "Domoljubni chat · aktivan"}>
-        <span className="fgc-launcher-icon">✦</span><span className="fgc-launcher-copy"><strong>Domoljubni chat</strong><small>{muted ? "Utišan" : "Zajedno smo jači"}</small></span><i className={muted ? "fgc-status-dot muted" : "fgc-status-dot"} aria-label={muted ? "Chat je utišan" : "Chat je aktivan"} />
+        <span className="fgc-launcher-icon"><img src="/assets/images/patriasoul-logo.jpg" alt="" /></span><span className="fgc-launcher-copy"><strong>Domoljubni chat</strong><small>{muted ? "Utišan" : "Zajedno smo jači"}</small></span><i className={muted ? "fgc-status-dot muted" : "fgc-status-dot"} aria-label={muted ? "Chat je utišan" : "Chat je aktivan"} />
         {unreadCount > 0 && !open && <b className="fgc-unread">{unreadCount > 99 ? "99+" : unreadCount}</b>}
       </button>
     </div>
