@@ -1,4 +1,4 @@
-const CACHE_NAME = "patriasoul-app-v3";
+const CACHE_NAME = "patriasoul-app-v4";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/assets/images/1000000982.png"];
 
 self.addEventListener("install", (event) => {
@@ -49,13 +49,18 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (!["script", "style", "image", "font"].includes(request.destination)) return;
+  // Network-first: stable paths such as /na-danasnji-dan.js must not stay stale forever.
+  // Keep a cached copy only as an offline fallback.
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
-    const cached = await cache.match(request);
-    const network = fetch(request).then(async (response) => {
-      if (response.ok && response.type === "basic") await cache.put(request, response.clone());
+    try {
+      const response = await fetch(request, { cache: "no-cache" });
+      if (response.ok && response.type === "basic") {
+        await cache.put(request, response.clone());
+      }
       return response;
-    }).catch(() => cached || Response.error());
-    return cached || network;
+    } catch {
+      return (await cache.match(request)) || Response.error();
+    }
   })());
 });
