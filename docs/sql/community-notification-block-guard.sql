@@ -26,7 +26,7 @@ begin
     raise exception 'Moraš biti prijavljen.';
   end if;
 
-  if p_type not in ('mention', 'reply') then
+  if p_type is null or p_type not in ('mention', 'reply') then
     raise exception 'Nevažeća vrsta obavijesti.';
   end if;
 
