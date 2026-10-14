@@ -20,6 +20,8 @@ export default function FloatingGlobalChat({ supabase, session, onLoginRequest }
   const [notice, setNotice] = useState("");
   const [friendRequests, setFriendRequests] = useState([]);
   const [reportingId, setReportingId] = useState("");
+  const [reportReason, setReportReason] = useState("spam");
+  const [reportDetails, setReportDetails] = useState("");
   const userId = session?.user?.id || "";
 
   const loadMessages = useCallback(async () => {
@@ -167,18 +169,20 @@ export default function FloatingGlobalChat({ supabase, session, onLoginRequest }
     setBusy(false);
   }
 
-  async function reportMessage(message) {
+  async function reportMessage(event, message) {
+    event.preventDefault();
     if (!userId) { onLoginRequest?.(); return; }
-    const reason = window.prompt("Zašto prijavljuješ ovu poruku? (spam, uvreda, prijetnja, drugo)", "spam");
-    if (!reason) return;
-    setReportingId(message.id);
+    setReportingId(message.id + ":sending");
     const { error } = await supabase.from("community_global_chat_reports").insert({
       message_id: message.id,
       reporter_id: userId,
-      reason: reason.trim().slice(0, 80),
+      reason: reportReason,
+      details: reportDetails.trim().slice(0, 500) || null,
     });
-    setNotice(error ? "Prijavu nije moguće poslati." : "Hvala. Poruka je prijavljena moderatorima.");
+    setNotice(error ? (error.code === "23505" ? "Ovu si poruku već prijavio." : "Prijavu nije moguće poslati.") : "Hvala. Poruka je prijavljena moderatorima.");
     setReportingId("");
+    setReportDetails("");
+    setReportReason("spam");
   }
 
   const pendingIncoming = friendRequests.filter((row) => row.recipient_id === userId && row.status === "pending");
@@ -222,8 +226,16 @@ export default function FloatingGlobalChat({ supabase, session, onLoginRequest }
                       <p>{message.body}</p>
                       {!own && <div className="fgc-message-actions">
                         {request?.status === "pending" && request.recipient_id === userId ? <button type="button" onClick={() => setNotice("Zahtjev možeš prihvatiti u gornjem dijelu chata.")}>Zahtjev primljen</button> : <button type="button" disabled={busy || request?.status === "accepted" || (request?.status === "pending" && request.sender_id === userId)} onClick={() => sendFriendRequest(message)}>{actionLabel}</button>}
-                        <button type="button" className="quiet" disabled={reportingId === message.id} onClick={() => reportMessage(message)}>Prijavi</button>
+                        <button type="button" className="quiet" disabled={reportingId === message.id + ":sending"} onClick={() => { setReportingId((current) => current === message.id ? "" : message.id); setReportReason("spam"); setReportDetails(""); }}>Prijavi</button>
                       </div>}
+                      {reportingId === message.id && <form className="fgc-report-form" onSubmit={(event) => reportMessage(event, message)}>
+                        <label htmlFor={"fgc-report-reason-" + message.id}>Razlog prijave</label>
+                        <select id={"fgc-report-reason-" + message.id} value={reportReason} onChange={(event) => setReportReason(event.target.value)}>
+                          <option value="spam">Spam ili oglašavanje</option><option value="insult">Uvreda ili uznemiravanje</option><option value="threat">Prijetnja</option><option value="hate">Govor mržnje</option><option value="other">Drugo</option>
+                        </select>
+                        <textarea value={reportDetails} onChange={(event) => setReportDetails(event.target.value)} maxLength={500} rows={2} placeholder="Dodatno objašnjenje (nije obavezno)" />
+                        <div><button type="button" className="quiet" onClick={() => setReportingId("")}>Odustani</button><button type="submit" disabled={reportingId === message.id + ":sending"}>Pošalji prijavu</button></div>
+                      </form>}
                     </div>
                   </article>;
                 }) : <p className="fgc-empty">Još nema poruka. Pozdravi zajednicu i započni razgovor.</p>}
