@@ -4,3 +4,9 @@
 
 /* Čitljiv prikaz dnevnog Evanđelja i liturgijskih podataka. */
 .faith-gospel-card{gap:10px}.faith-gospel-card #gospel-reference{font-weight:900;color:var(--red);font-size:13px}.faith-gospel-card .gospel-text{margin:4px 0 0;color:#344252;font-size:13px;line-height:1.9;white-space:pre-line}.faith-gospel-card #gospel-response{display:block;margin-top:4px}.faith-data-card #saint-description{line-height:1.75}
+
+/* Funkcionalna kartica Vjera i baština */
+.faith-heritage-detail{line-height:1.75;margin-top:12px;color:var(--faith-text,#243247)}
+.faith-more-button{display:inline-flex;align-items:center;justify-content:center;margin-top:12px;padding:10px 15px;border:1px solid #345c83;border-radius:10px;background:#173657;color:#fff;font:inherit;font-weight:700;cursor:pointer;transition:background .2s ease,transform .2s ease}
+.faith-more-button:hover{background:#244d75;transform:translateY(-1px)}
+.faith-more-button:focus-visible{outline:3px solid #e4b94e;outline-offset:3px}
