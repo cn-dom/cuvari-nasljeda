@@ -6,6 +6,8 @@
   const featured = byId("featured-event");
   const featuredContent = byId("featured-event-content");
   const empty = byId("events-empty");
+  const warGrid = byId("war-events-grid");
+  const warEmpty = byId("war-events-empty");
   const dateLabel = byId("today-date");
   const today = new Date();
   let requestNumber = 0;
@@ -169,6 +171,21 @@
         empty.hidden = false;
         return;
       }
+      // Izdvoji samo zapise koji su za datum iz hrvatske Wikipedije i
+      // koji sadrže jasne pojmove povezane s Domovinskim ratom. Ovo nije zamjena
+      // za stručnu kronologiju; uz izostanak podudaranja nudimo pouzdane izvore.
+      const warTerms = /\b(domovinsk\w*\s+rat|hrvatsk\w*\s+vojska|\bHV\b|\bZNG\b|\bJNA\b|srpsk\w*\s+snag|okupacij\w*|Vukovar|Škabrnja|Borovo Selo|Dubrovnik|Vinkovci|Osijek|Gospić|Pakrac|Maslenic\w*|Medačk\w*|Bljesak|Oluja|Zadar|Šibenik|Knin|Vukovarsk\w*)\b/i;
+      const warEvents = events.filter((item) =>
+        item.category === "events" &&
+        Number(item.year) >= 1990 && Number(item.year) <= 1998 &&
+        warTerms.test([item.title, item.description, item.text].filter(Boolean).join(" "))
+      );
+      if (warGrid && warEmpty) {
+        warGrid.replaceChildren();
+        warEvents.forEach((item, index) => warGrid.append(makeCard(item, index, false)));
+        warEmpty.hidden = warEvents.length > 0;
+      }
+
       const counts = events.reduce((result, item) => {
         result[item.category] = (result[item.category] || 0) + 1;
         return result;
