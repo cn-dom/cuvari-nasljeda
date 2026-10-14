@@ -75,3 +75,16 @@
 .fgc-launcher-icon img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .fgc-brand-icon { overflow: hidden; padding: 0; }
 .fgc-brand-icon img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+
+.fgc-admin-reports { flex: 1; min-height: 0; overflow: auto; padding: 12px; background: #071827; }
+.fgc-admin-reports-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; color: #d9edff; font-size: 12px; }
+.fgc-admin-reports-heading button, .fgc-admin-report-actions button { border: 1px solid #2a5b7b; border-radius: 7px; padding: 6px 8px; color: #d7edff; background: #0d304a; font-size: 9px; font-weight: 700; }
+.fgc-admin-report { margin: 0 0 9px; padding: 10px; border: 1px solid #24465e; border-radius: 10px; background: #0a2133; }
+.fgc-admin-report-top { display: flex; justify-content: space-between; gap: 8px; color: #b8ddf8; font-size: 10px; text-transform: uppercase; }
+.fgc-admin-report-top span { color: #8caac2; text-transform: none; }
+.fgc-admin-report > p { margin: 8px 0; color: #edf6ff; font-size: 11px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+.fgc-admin-report > small { display: block; margin-top: 5px; color: #8eaac0; font-size: 9px; line-height: 1.5; overflow-wrap: anywhere; }
+.fgc-admin-report-actions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+.fgc-admin-report-actions button.quiet { border-color: #3a4b5b; color: #a9bdce; background: transparent; }
+.fgc-admin-report-actions button:disabled, .fgc-admin-reports-heading button:disabled { opacity: .5; }
