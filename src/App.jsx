@@ -2035,6 +2035,13 @@ function App() {
               </button>
             ))}
           </section>
+          <section className="side-section sidebar-nav-section today-sidebar-section">
+            <h3>ISTRAŽI HRVATSKU</h3>
+            <a className="side-link today-sidebar-link" href="/na-danasnji-dan.html" title="Otvori povijesne događaje za odabrani datum">
+              <span className="side-icon" aria-hidden="true">📅</span><span className="side-link-label">Na današnji dan</span><span className="today-sidebar-arrow" aria-hidden="true">↗</span>
+            </a>
+          </section>
+
           <section className="side-section sidebar-nav-section">
             <h3>RAZGOVORI</h3>
             {navItems.filter((item) => ["Poruke", "Obavijesti"].includes(item.label)).map((item) => {
