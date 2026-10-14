@@ -2829,10 +2829,6 @@ function App() {
             <nav aria-label="Brza navigacija podnožja">
               <a href="/">PatriaSoul – Čuvari nasljeđa</a>
               <a href="/kviz/">PatriaSoul kviz</a>
-              <a href="/kviz/?mode=croatian">Hrvatski kviz</a>
-              <a href="/kviz/?mode=city">Brani svoj grad</a>
-              <a href="/kviz/?mode=daily">Dnevni kviz</a>
-              <a href="/kviz/?mode=leaderboard">Rang-lista</a>
               <a href="/forum.html">Forum zajednice</a>
               <a href="/stranice.html">Stranice zajednice</a>
               <a href="/dogadaji.html">Događaji</a>
