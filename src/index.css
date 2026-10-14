@@ -1526,3 +1526,6 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
 
 /* PatriaSoul Centar — discreet subtitle beneath the brand title */
 .ai-center-subtitle { display: block; margin-top: 5px; color: #b7c7d8; font-size: 10px; font-weight: 500; line-height: 1.45; letter-spacing: .015em; }
+
+/* Sidebar link for the historical calendar */
+.today-sidebar-link{text-decoration:none;color:inherit}.today-sidebar-link .today-sidebar-arrow{margin-left:auto;color:#8fc9ff;font-size:13px;font-weight:800}.today-sidebar-link:hover .today-sidebar-arrow{color:#fff}
