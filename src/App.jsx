@@ -265,6 +265,23 @@ function App() {
     return () => data.subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("shareQuiz") !== "1") return;
+    const score = Number(params.get("score"));
+    const total = Number(params.get("total"));
+    const seconds = Number(params.get("time"));
+    const type = params.get("type");
+    const title = params.get("title") || "PatriaSoul kviz";
+    if (!Number.isFinite(score) || !Number.isFinite(total) || total < 1 || score < 0 || score > total) return;
+    const percentage = Math.round((score / total) * 100);
+    const timeText = Number.isFinite(seconds) && seconds >= 0 ? ` Vrijeme: ${seconds} sekundi.` : "";
+    setDraft(`🎯 Upravo sam odigrao/la ${title} na PatriaSoul kvizu i ostvario/la rezultat ${score}/${total} (${percentage}%).${timeText} Znanje. Ponos. Nasljeđe. 🇭🇷`);
+    setActiveNav("PatriaSoul");
+    setNotice("PatriaSoul ti je pripremio objavu rezultata. Provjeri tekst i klikni „Objavi” kada budeš spreman/spremna.");
+    window.history.replaceState({}, "", window.location.pathname + window.location.hash);
+  }, []);
+
   async function submitAuth(event) {
     event.preventDefault();
     if (!supabase || !isSupabaseConfigured) {
