@@ -23,6 +23,8 @@ jobs:
           node-version: 22
       - name: Instaliraj ovisnosti
         run: npm install --no-audit --no-fund
+      - name: Provjeri sintaksu dnevne liturgije
+        run: node --check public/vjera-hrvata.js
       - name: Provjeri produkcijsku izgradnju
         run: npm run build
       - name: Pokreni lokalni pregled izgrađene aplikacije
