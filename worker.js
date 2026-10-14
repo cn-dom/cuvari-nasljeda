@@ -1,12 +1,12 @@
 const htmlToText = (html) => {
-  let text = String(html || "")
-    .replace(/<!--[\\s\\S]*?-->/g, " ")
-    .replace(/<(script|style|noscript|svg)[^>]*>[\\s\\S]*?<\\/\\1>/gi, " ")
-    .replace(/<h[1-6][^>]*>/gi, "\\n#### ")
-    .replace(/<\\/h[1-6]>/gi, "\\n")
-    .replace(/<br\\s*\\/?\\s*>/gi, "\\n")
-    .replace(/<\\/(p|div|li|section|article|tr|blockquote)>/gi, "\\n")
-    .replace(/<li[^>]*>/gi, "\\n- ")
+  return String(html || "")
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<(script|style|noscript|svg)[^>]*>[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<h[1-6][^>]*>/gi, "\n#### ")
+    .replace(/<\/h[1-6]>/gi, "\n")
+    .replace(/<br\s*\/?\s*>/gi, "\n")
+    .replace(/<\/(p|div|li|section|article|tr|blockquote)>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "\n- ")
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;|&#160;/gi, " ")
     .replace(/&amp;/gi, "&")
@@ -14,13 +14,12 @@ const htmlToText = (html) => {
     .replace(/&#39;|&apos;/gi, "'")
     .replace(/&lt;/gi, "<")
     .replace(/&gt;/gi, ">")
-    .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(Number(n)))
-    .replace(/&#x([\\da-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)))
-    .replace(/[ \\t]+/g, " ")
-    .replace(/ *\\n */g, "\\n")
-    .replace(/\\n{3,}/g, "\\n\\n")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&#x([\da-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)))
+    .replace(/[ \t]+/g, " ")
+    .replace(/ *\n */g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
     .trim();
-  return text;
 };
 
 export default {
@@ -31,8 +30,9 @@ export default {
       if (request.method !== "GET") {
         return new Response("Method not allowed", { status: 405, headers: { Allow: "GET" } });
       }
+
       const slug = url.searchParams.get("slug") || "";
-      if (!/^(ponedjeljak|utorak|srijeda|četvrtak|petak|subota|nedjelja)-\\d{1,2}-\\d{1,2}-\\d{4}$/.test(slug)) {
+      if (!/^(ponedjeljak|utorak|srijeda|četvrtak|petak|subota|nedjelja)-\d{1,2}-\d{1,2}-\d{4}$/.test(slug)) {
         return Response.json({ error: "Neispravan datum liturgije." }, { status: 400 });
       }
 
@@ -53,9 +53,10 @@ export default {
             cf: { cacheTtl: 900, cacheEverything: true }
           });
           if (!upstream.ok) continue;
+
           const original = await upstream.text();
           const body = source.html ? htmlToText(original) : original;
-          if (body.length < 500 || !/Evanđelje/i.test(body) || !/Lk\\s*\\d|Mt\\s*\\d|Mk\\s*\\d|Iv\\s*\\d/i.test(body)) continue;
+          if (body.length < 500 || !/Evanđelje/i.test(body) || !/(Lk|Mt|Mk|Iv)\s*\d/i.test(body)) continue;
 
           return new Response(body, {
             status: 200,
