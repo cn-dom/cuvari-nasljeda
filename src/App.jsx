@@ -1308,20 +1308,9 @@ function App() {
     }
     setReportBusy(true);
     try {
-      const { data: existingReport, error: lookupError } = await supabase
-        .from("content_reports")
-        .select("id")
-        .eq("reporter_id", session.user.id)
-        .eq("post_id", reportPost.id)
-        .eq("status", "pending")
-        .limit(1)
-        .maybeSingle();
-      if (lookupError) throw lookupError;
-      if (existingReport) {
-        setReportPost(null);
-        setNotice("Već si prijavio/la ovu objavu. Prijava je na čekanju pregleda moderatora.");
-        return;
-      }
+      // Članovi nemaju SELECT pristup tablici content_reports; zato ne radimo
+      // klijentsku provjeru postojećih prijava. Jedinstveni djelomični indeks
+      // u bazi sprječava duplikate, a SQLSTATE 23505 obrađuje se u catch bloku.
 
       const { error } = await supabase.from("content_reports").insert({
         reporter_id: session.user.id,
