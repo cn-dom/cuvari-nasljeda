@@ -4,6 +4,7 @@ import { Check, X, Clock, Volume2, VolumeX, BookOpen, Loader2 } from "lucide-rea
 import { puter } from "@heyputer/puter.js";
 import { getSoundEnabled, setSoundEnabled, playStart, playSelect, playCorrect, playWrong, playTick, playFinish, playResult } from "../lib/soundEffects";
 import { submitQuizAnswer } from "../lib/attempts";
+import { getMyProfile } from "../lib/profile";
 
 const LETTERS = ["A", "B", "C", "D"];
 
@@ -33,6 +34,7 @@ export default function QuizPlayer({ questions, title, subtitle, timeLimit = 20,
   const [explanation, setExplanation] = useState("");
   const [explanationLoading, setExplanationLoading] = useState(false);
   const [explanationError, setExplanationError] = useState("");
+  const [playerNickname, setPlayerNickname] = useState("");
   const [remaining, setRemaining] = useState(timeLimit);
   const [soundEnabled, setSoundEnabledState] = useState(getSoundEnabled);
   const startRef = useRef(Date.now());
@@ -45,6 +47,18 @@ export default function QuizPlayer({ questions, title, subtitle, timeLimit = 20,
     setSoundEnabledState(next);
     setSoundEnabled(next);
   };
+
+  useEffect(() => {
+    let active = true;
+    getMyProfile()
+      .then((profile) => {
+        if (active) setPlayerNickname(String(profile?.display_name || "").trim());
+      })
+      .catch(() => {
+        // Kviz mora raditi i ako se profil privremeno ne može učitati.
+      });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     if (q?.answers?.length === 4) setDisplayedAnswers(shuffleAnswers(q.answers));
@@ -93,12 +107,15 @@ export default function QuizPlayer({ questions, title, subtitle, timeLimit = 20,
       const reply = await puter.ai.chat([
         {
           role: "system",
-          content: "Ti si obrazovni vodič kviza Čuvari nasljeđa. Odgovaraj isključivo na hrvatskom jeziku. Objasni odgovor u 3 do 5 kratkih rečenica, jednostavno i poučno. Točan odgovor već je provjeren poslužiteljem kviza: nemoj ga mijenjati niti ponovno odlučivati koji je odgovor točan. Objasni zašto je naveden odgovor točan, dodaj povijesni ili kulturni kontekst samo ako si dovoljno siguran. Ne izmišljaj datume, osobe, citate ni izvore. Ako detalj nije siguran, reci da ga treba dodatno provjeriti. Ako je priložena poveznica izvora, prikaži je kao izvor za daljnje čitanje, ali nemoj tvrditi da si je otvorio ili provjerio. Ne traži osobne podatke, ne otkrivaj tajne ni druge odgovore iz baze. Vrati samo objašnjenje, bez uvodnih rečenica."
+          content: "Ti si osobni AI voditelj kviza PatriaSoul – Čuvari nasljeđa. Odgovaraj isključivo na hrvatskom jeziku. Uvijek poštuj naziv odabranog kviza, kategoriju i vrstu kviza koje dobivaš u kontekstu; nikad ih nemoj nagađati ni prebacivati razgovor na drugu temu. Ako je dostupan nadimak igrača, povremeno ga prirodno upotrijebi u obraćanju, ali nemoj ga ponavljati u svakoj rečenici. Nakon odgovora napiši 2 do 4 kratke rečenice kao voditelj: kratko komentiraj ishod, objasni provjereni točan odgovor i dodaj zanimljiv kontekst samo ako si dovoljno siguran. Točan odgovor već je provjeren poslužiteljem kviza: nemoj ga mijenjati niti ponovno odlučivati koji je odgovor točan. Ne izmišljaj datume, osobe, citate ni izvore. Ako detalj nije siguran, reci da ga treba dodatno provjeriti. Ako je priložena poveznica izvora, prikaži je kao izvor za daljnje čitanje, ali nemoj tvrditi da si je otvorio ili provjerio. Ne traži osobne podatke, ne otkrivaj tajne ni druge odgovore iz baze. Vrati samo kratku poruku voditelja, bez uvodnih oznaka."
         },
         {
           role: "user",
           content: JSON.stringify({
-            kategorija: category || "Hrvatsko opće znanje",
+            nadimak_igraca: playerNickname || null,
+            odabrani_kviz: title || "PatriaSoul kviz",
+            vrsta_i_opis_kviza: subtitle || null,
+            kategorija: category || title || "Hrvatsko opće znanje",
             pitanje: question,
             provjereni_tocan_odgovor: correctAnswer,
             odgovor_igraca: timedOut ? "Vrijeme je isteklo; igrač nije odgovorio." : (selectedAnswer || "Nije odabran odgovor"),
@@ -180,6 +197,10 @@ export default function QuizPlayer({ questions, title, subtitle, timeLimit = 20,
           <div className="flex items-center gap-2"><button type="button" onClick={toggleSound} className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/70 transition hover:bg-white/10 hover:text-white" aria-label={soundEnabled ? "Isključi zvuk" : "Uključi zvuk"} title={soundEnabled ? "Isključi zvuk" : "Uključi zvuk"}>{soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}</button><div className="flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-sm text-white/70"><Clock className="h-4 w-4" />00:{String(Math.max(0, remaining)).padStart(2, "0")}</div></div>
         </div>
         <div className="mb-8 flex items-center gap-3"><div className="h-2 flex-1 overflow-hidden rounded-full bg-white/10"><motion.div className="h-full bg-gradient-to-r from-amber-400 to-red-600" initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.4 }} /></div><div className="whitespace-nowrap text-sm font-medium text-white/70">{index + 1} / {questions.length}</div></div>
+        {index === 0 && <section className="mb-5 rounded-2xl border border-amber-300/25 bg-gradient-to-r from-amber-300/[0.10] to-sky-400/[0.07] p-4 sm:p-5" aria-label="PatriaSoul AI voditelj">
+          <div className="mb-2 flex items-center gap-2 text-amber-200"><BookOpen className="h-5 w-5" /><h2 className="font-semibold">PatriaSoul AI voditelj</h2></div>
+          <p className="text-sm leading-6 text-white/85">Dobro došao{playerNickname ? `, ${playerNickname}` : ""}! Danas igraš: <strong>{title || "PatriaSoul kviz"}</strong>. Pratit ću te kroz ovu rundu, objasniti odgovore i držati se odabrane teme. Sretno!</p>
+        </section>}
         <AnimatePresence mode="wait">
           <motion.div key={q.id ?? index} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.3 }}>
             <h2 className="mb-6 min-h-[3.5rem] font-display text-xl font-semibold leading-snug sm:text-2xl">{q.question}</h2>
