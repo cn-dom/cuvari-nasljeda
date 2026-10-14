@@ -180,6 +180,16 @@ function App() {
   const [adminError, setAdminError] = useState("");
   const isOwner = (session?.user?.email || "").trim().toLowerCase() === OWNER_EMAIL;
 
+  function navigateToSection(label) {
+    if (!session?.user?.id && label !== "Zid zajednice") {
+      setAuthMode("login");
+      setAuthMessage("Prijavi se ili izradi račun kako bi pristupio/la sadržaju zajednice.");
+      setAuthOpen(true);
+      return;
+    }
+    setActiveNav(label);
+  }
+
   useEffect(() => {
     if (!["trebam-pomoc", "pruzi-ruku"].includes(communityActionPage)) return undefined;
     let cancelled = false;
@@ -1977,9 +1987,9 @@ function App() {
         </div>
         <nav className="topnav" aria-label="Brza navigacija">
           <button className={activeNav === "Zid zajednice" ? "topnav-link active" : "topnav-link"} onClick={() => setActiveNav("Zid zajednice")} aria-label="Početna">⌂</button>
-          <button className={activeNav === "Čuvari nasljeđa" ? "topnav-link active" : "topnav-link"} onClick={() => setActiveNav("Čuvari nasljeđa")} aria-label="Članovi">👥</button>
-          <button className={activeNav === "Poruke" ? "topnav-link active" : "topnav-link"} onClick={() => setActiveNav("Poruke")} aria-label="Poruke">✉</button>
-          <button className={activeNav === "Obavijesti" ? "topnav-link active" : "topnav-link"} onClick={() => setActiveNav("Obavijesti")} aria-label="Obavijesti">🔔</button>
+          <button className={activeNav === "Čuvari nasljeđa" ? "topnav-link active" : "topnav-link"} onClick={() => navigateToSection("Čuvari nasljeđa")} aria-label="Članovi">👥</button>
+          <button className={activeNav === "Poruke" ? "topnav-link active" : "topnav-link"} onClick={() => navigateToSection("Poruke")} aria-label="Poruke">✉</button>
+          <button className={activeNav === "Obavijesti" ? "topnav-link active" : "topnav-link"} onClick={() => navigateToSection("Obavijesti")} aria-label="Obavijesti">🔔</button>
         </nav>
         <div className="top-actions">
           {session ? (
@@ -1988,7 +1998,7 @@ function App() {
               <button className="login-button" onClick={signOut}>Odjava</button>
             </div>
           ) : (
-            <button className="login-button" onClick={() => { setAuthOpen(true); setAuthMessage(""); }}>Prijava / Registracija</button>
+            <button className="login-button" onClick={() => navigateToSection("Zid zajednice")}>Zid zajednice</button>
           )}
         </div>
       </header>
@@ -2033,7 +2043,7 @@ function App() {
               const unreadGroups = Object.values(groupUnreadCounts).reduce((sum, count) => sum + (Number(count) || 0), 0);
               const badgeCount = item.label === "Poruke" ? unreadMessages : unreadNotifications.length;
               const badgeLabel = item.label === "Poruke" ? "nepročitanih obavijesti o porukama" : "nepročitanih obavijesti";
-              return <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => setActiveNav(item.label)}>
+              return <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => navigateToSection(item.label)}>
                 <span className="side-icon">{item.icon}</span><span className="side-link-label">{item.label}</span>
                 {item.label === "Poruke" && unreadGroups > 0 && <span className="side-count group-side-count" title={unreadGroups + " nepročitanih grupnih poruka"}>＋{unreadGroups > 99 ? "99+" : unreadGroups}</span>}
                 {badgeCount > 0 && <span className="side-count side-count-badge" aria-label={badgeCount + " " + badgeLabel}>{badgeCount > 99 ? "99+" : badgeCount}</span>}
@@ -2749,13 +2759,13 @@ function App() {
               const online = memberDirectory.filter((member) => memberPresence.some((presence) => presence.user_id === member.id && presence.show_activity !== false && Date.now() - new Date(presence.last_seen_at).getTime() <= 120000)).slice(0, 5);
               return online.length ? <div className="online-member-list">{online.map((member) => <button type="button" className="online-member" key={member.id} onClick={() => { setMemberDirectoryQuery(member.display_name || member.username || ""); setActiveNav("Čuvari nasljeđa"); }}><span className="online-avatar">{(member.display_name || member.username || "Č").split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr")}</span><span className="online-member-copy"><strong>{member.display_name || member.username || "Čuvar nasljeđa"}</strong><small><i /> Na mreži</small></span></button>)}</div> : <p className="sidebar-empty">{isSupabaseConfigured ? "Prikaz članova pojavit će se kada se učita imenik i njihova aktivnost." : "Poveži testni Supabase za prikaz stvarnih članova na mreži."}</p>;
             })()}
-            <button className="outline-button full-width" onClick={() => setActiveNav("Čuvari nasljeđa")}>Prikaži članove <span>→</span></button>
+            <button className="outline-button full-width" onClick={() => navigateToSection("Čuvari nasljeđa")}>Prikaži članove <span>→</span></button>
           </section>
 
           <section className="right-card card">
             <div className="right-card-title"><h3>GRUPE ZAJEDNICE</h3><span>{groupChats.length}</span></div>
-            {groupChats.length ? <div className="sidebar-group-list">{groupChats.slice(0, 4).map((group) => <button type="button" className="sidebar-group-row" key={group.id} onClick={() => { setActiveNav("Grupe"); setActiveGroupId(group.id); }}><span className="group-icon">♧</span><span><strong>{group.name}</strong><small>{group.members?.length || 0} članova</small></span>{(groupUnreadCounts[group.id] || 0) > 0 && <b className="group-unread-badge">{groupUnreadCounts[group.id] > 99 ? "99+" : groupUnreadCounts[group.id]}</b>}</button>)}</div> : <p className="sidebar-empty">Ovdje će se prikazati tvoji grupni razgovori nakon što budu učitani.</p>}
-            <button className="outline-button full-width" onClick={() => setActiveNav("Grupe")}>Otvori grupe <span>→</span></button>
+            {groupChats.length ? <div className="sidebar-group-list">{groupChats.slice(0, 4).map((group) => <button type="button" className="sidebar-group-row" key={group.id} onClick={() => { if (!session?.user?.id) { navigateToSection("Grupe"); return; } setActiveNav("Grupe"); setActiveGroupId(group.id); }}><span className="group-icon">♧</span><span><strong>{group.name}</strong><small>{group.members?.length || 0} članova</small></span>{(groupUnreadCounts[group.id] || 0) > 0 && <b className="group-unread-badge">{groupUnreadCounts[group.id] > 99 ? "99+" : groupUnreadCounts[group.id]}</b>}</button>)}</div> : <p className="sidebar-empty">Ovdje će se prikazati tvoji grupni razgovori nakon što budu učitani.</p>}
+            <button className="outline-button full-width" onClick={() => navigateToSection("Grupe")}>Otvori grupe <span>→</span></button>
           </section>
 
           <section className="principle-card">
