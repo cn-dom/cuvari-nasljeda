@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
-import { Picker } from "emoji-mart";
 import FloatingGlobalChat from "./FloatingGlobalChat.jsx";
-import emojiData from "@emoji-mart/data";
 
 const navItems = [
   { icon: "⌂", label: "PatriaSoul" },
@@ -230,32 +228,6 @@ function App() {
     loadCommunityActionAds();
     return () => { cancelled = true; };
   }, [communityActionPage, isOwner, session?.user?.id]);
-
-  useEffect(() => {
-    if (!emojiPickerOpen || !emojiPickerHost.current) return undefined;
-    const picker = new Picker({
-      data: emojiData,
-      theme: "light",
-      set: "native",
-      locale: "en",
-      categories: ["frequent", "people", "nature", "foods", "activity", "places", "objects", "symbols", "flags"],
-      previewPosition: "none",
-      navPosition: "top",
-      searchPosition: "sticky",
-      perLine: 8,
-      dynamicWidth: true,
-      onEmojiSelect: (emoji) => {
-        if (emoji?.native) setDraft((value) => value + emoji.native);
-        setEmojiPickerOpen(false);
-      },
-      onClickOutside: () => setEmojiPickerOpen(false),
-    });
-    emojiPickerHost.current.replaceChildren(picker);
-    return () => {
-      picker.remove();
-      if (emojiPickerHost.current) emojiPickerHost.current.replaceChildren();
-    };
-  }, [emojiPickerOpen]);
 
   useEffect(() => {
     const contactId = new URLSearchParams(window.location.search).get("contact");
@@ -1602,7 +1574,8 @@ function App() {
           { onConflict: "post_id,user_id" }
         );
     if (error) {
-      setNotice("Reakcija nije spremljena. Provjeri tablicu post_reactions i RLS pravila.");
+      console.error("PatriaSoul reaction save failed:", error);
+      setNotice("Reakcija nije spremljena: " + (error.message || error.details || "provjeri prava pristupa tablici post_reactions."));
       return;
     }
     const nextReaction = currentReaction === reaction ? "" : reaction;
@@ -2562,7 +2535,14 @@ function App() {
                 <div className="emoji-tool-wrap">
                   <button type="button" aria-expanded={emojiPickerOpen} onClick={() => setEmojiPickerOpen((open) => !open)}>☺ <span>Emoji</span></button>
                   {emojiPickerOpen && (
-                    <div className="emoji-picker-host" ref={emojiPickerHost} aria-label="Odaberi emoji" />
+                    <div className="emoji-picker-host" aria-label="Odaberi emoji">
+                      <div className="emoji-picker-search-label">Odaberi emoji</div>
+                      <div className="emoji-picker-grid">
+                        {["😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😍","🥰","😘","😎","🤔","🤗","😭","😡","🤝","🙏","👏","👍","👎","❤️","🧡","💛","💚","💙","💜","🖤","🤍","💔","🔥","✨","⭐","🎉","🎂","☀️","🌈","🌹","🌻","🐕","🐈","🦅","🐬","🌳","🍎","🍕","☕","🍰","⚽","🏆","🎵","🎮","📚","📷","🚗","✈️","🏡","⛪","🇭🇷","🇧🇦","🇪🇺","✅","❌","❗","❓","💯"].map((emoji) => (
+                          <button key={emoji} type="button" aria-label={emoji} onClick={() => { setDraft((value) => value + emoji); setEmojiPickerOpen(false); }}>{emoji}</button>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
                 <div className="mention-tool-wrap">
