@@ -130,6 +130,45 @@ create trigger private_messages_guard_identity before update on public.private_m
 for each row execute function public.guard_private_message_identity();
 
 
+-- Source: docs/sql/private-message-block-guard.sql
+-- Apply the block rule to both new and edited private messages in this bundle.
+create or replace function public.prevent_private_message_between_blocked_users()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+begin
+  if auth.uid() is not null
+     and new.sender_id is distinct from auth.uid() then
+    raise exception 'Pošiljatelj poruke ne odgovara prijavljenom članu.'
+      using errcode = '42501';
+  end if;
+
+  if exists (
+    select 1
+    from public.blocked_users b
+    where (b.blocker_id = new.sender_id and b.blocked_id = new.recipient_id)
+       or (b.blocker_id = new.recipient_id and b.blocked_id = new.sender_id)
+  ) then
+    raise exception 'Privatna poruka nije dopuštena jer je između ovih članova aktivna blokada.'
+      using errcode = '42501';
+  end if;
+
+  return new;
+end;
+$function$;
+
+drop trigger if exists private_messages_prevent_blocked_pair on public.private_messages;
+create trigger private_messages_prevent_blocked_pair
+before insert or update on public.private_messages
+for each row
+execute function public.prevent_private_message_between_blocked_users();
+
+revoke all on function public.prevent_private_message_between_blocked_users()
+  from public, anon, authenticated;
+
+
 -- Source: docs/sql/private-message-reactions.sql
 -- PatriaSoul – Čuvari nasljeđa
 -- SQL NACRT: emoji reakcije na privatne poruke.
