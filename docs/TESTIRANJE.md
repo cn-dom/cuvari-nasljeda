@@ -61,3 +61,9 @@ Ovaj popis služi za završnu provjeru testne verzije. Označi stavku tek nakon 
 
 ## Važno
 Uspješan GitHub Actions build potvrđuje da se projekt izgradio, ali ne potvrđuje automatski sve tokove prijave, pohrane i RLS pravila. Za svaku stavku potrebno je stvarno testiranje u pregledniku s najmanje dva testna računa.
+
+## Automatizirana provjera u GitHub Actions
+
+Workflow `.github/workflows/ci.yml` sada radi produkcijsku izgradnju glavne aplikacije i kviza, zatim pokreće Vite preview i izvršava `node scripts/smoke-routes.mjs`. Smoke test provjerava HTTP odgovor za početnu stranicu, forum, stranice zajednice, događaje, administraciju, AI centar i kviz, provjerava mobilni viewport te postojanje manifesta, service workera, logotipa i izgrađenih JS/CSS paketa.
+
+**Ograničenje:** smoke test provjerava dostupnost stranica i datoteka, ne prijavljuje se u Supabase i ne stvara stvarne objave, poruke, rezultate kviza ili događaje. Te interakcije ostaju označene kao nepotvrđene dok se ne provedu end-to-end testovi s dva namjenska testna računa. Ne koristiti stvarne korisničke lozinke u repozitoriju ili zapisima workflowa.
