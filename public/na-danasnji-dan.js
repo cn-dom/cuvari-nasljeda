@@ -38,7 +38,8 @@
     status.dataset.state = "loading"; status.textContent = "Dohvaćaju se povijesni događaji s hrvatske Wikipedije…";
     grid.replaceChildren(); featuredContent.replaceChildren(); featured.hidden = true; empty.hidden = true;
     try {
-      const url = `https://hr.wikipedia.org/api/rest_v1/feed/onthisday/events/${month}/${day}`;
+      // Koristi središnji Wikimedia Feed API umjesto zastarjele adrese na domeni pojedine Wikipedije.
+      const url = `https://api.wikimedia.org/feed/v1/wikipedia/hr/onthisday/events/${pad(month)}/${pad(day)}`;
       const response = await fetch(url, {headers:{"Accept":"application/json"}, cache:"no-store"});
       if (!response.ok) throw new Error("Hrvatski izvor trenutačno nije dostupan.");
       const data = await response.json();
@@ -57,8 +58,9 @@
     } catch (error) {
       if (currentRequest !== requestNumber) return;
       status.dataset.state = "error";
-      status.textContent = "Povijesne događaje s hrvatske Wikipedije trenutačno nije moguće dohvatiti. Pokušaj ponovno malo kasnije.";
-      empty.hidden = false;
+      status.textContent = "Povijesne događaje s hrvatske Wikipedije trenutačno nije moguće dohvatiti. Provjeri internetsku vezu ili pokušaj ponovno malo kasnije.";
+      // Ne prikazuj istodobno poruku o praznim rezultatima i poruku o pogrešci veze.
+      empty.hidden = true;
     }
   }
   picker.max = dateKey(today); picker.value = dateKey(today);
