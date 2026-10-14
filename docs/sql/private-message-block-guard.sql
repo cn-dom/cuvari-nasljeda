@@ -2,6 +2,7 @@
 -- SIGURNOSNI SQL NACRT — NE IZVRŠAVATI NA PRODUKCIJSKOJ BAZI BEZ TESTA.
 -- Provjera blokiranih članova na razini baze. UI filtri nisu sigurnosna granica.
 -- Ako je bilo koja strana blokirala drugu, nova privatna poruka se odbija.
+-- Dodatno: zahtjev prijavljenog člana ne smije slati poruku pod tuđim sender_id.
 
 begin;
 
@@ -12,6 +13,15 @@ security definer
 set search_path = ''
 as $function$
 begin
+  -- Dodatna obrana uz RLS: prijavljeni korisnik smije slati samo kao sam sebe.
+  -- Ako auth.uid() nije NULL, radi se o korisničkoj sesiji; servisni pozivi
+  -- bez korisničkog JWT-a i dalje se mogu kontrolirati na svojoj poslužiteljskoj strani.
+  if (select auth.uid()) is not null
+     and new.sender_id is distinct from (select auth.uid()) then
+    raise exception 'Pošiljatelj poruke ne odgovara prijavljenom članu.'
+      using errcode = '42501';
+  end if;
+
   if exists (
     select 1
     from public.blocked_users as b
@@ -37,3 +47,10 @@ execute function public.prevent_private_message_between_blocked_users();
 revoke all on function public.prevent_private_message_between_blocked_users() from public, anon, authenticated;
 
 commit;
+
+-- Nakon primjene u testnoj bazi provjeriti:
+-- 1) normalna poruka prijavljenog člana prolazi;
+-- 2) INSERT s tuđim sender_id ne prolazi;
+-- 3) poruka između članova blokiranih u bilo kojem smjeru ne prolazi;
+-- 4) odgovor na poruku i obavijest i dalje rade;
+-- 5) privatne poruke i dalje su vidljive samo sudionicima prema postojećim RLS pravilima.
