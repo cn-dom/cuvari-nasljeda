@@ -109,6 +109,7 @@ function App() {
   const [brandImageOpen, setBrandImageOpen] = useState(false);
   const [feedFilter, setFeedFilter] = useState("Sve objave");
   const [feedSearch, setFeedSearch] = useState("");
+  const [shareMenuPostId, setShareMenuPostId] = useState(null);
   const [openComments, setOpenComments] = useState([]);
   const [commentsByPost, setCommentsByPost] = useState({});
   const [commentDrafts, setCommentDrafts] = useState({});
@@ -2691,18 +2692,47 @@ function App() {
                   <span>♡</span> Podržavam
                 </button>
                 <button className={openComments.includes(post.id) ? "post-action liked" : "post-action"} onClick={() => toggleComments(post.id)}><span>▢</span> Komentiraj</button>
-                <button className="post-action" onClick={async () => {
-                  const shareUrl = window.location.origin + window.location.pathname + "#objava-" + post.id;
-                  const shareText = (post.text || "PatriaSoul – Čuvari nasljeđa").slice(0, 240);
-                  if (navigator.share) {
-                    try { await navigator.share({ title: "PatriaSoul – Čuvari nasljeđa", text: shareText, url: shareUrl }); }
-                    catch (error) { if (error?.name !== "AbortError") setNotice("Dijeljenje trenutačno nije uspjelo."); }
-                  } else if (navigator.clipboard?.writeText) {
-                    try { await navigator.clipboard.writeText(shareUrl); setNotice("Poveznica na objavu kopirana je u međuspremnik."); }
-                    catch { setNotice("Kopiranje nije dostupno u ovom pregledniku."); }
-                  } else { setNotice(shareUrl); }
-                }}><span>↗</span> Podijeli</button>
+                <button type="button" className={shareMenuPostId === post.id ? "post-action liked" : "post-action"} aria-expanded={shareMenuPostId === post.id} aria-controls={"share-menu-" + post.id} onClick={() => setShareMenuPostId((current) => current === post.id ? null : post.id)}><span>↗</span> Podijeli</button>
               </div>
+              {shareMenuPostId === post.id && (() => {
+                const shareUrl = window.location.origin + window.location.pathname + "#objava-" + encodeURIComponent(post.id);
+                const shareText = (post.text || "PatriaSoul – Čuvari nasljeđa").slice(0, 240);
+                const encodedUrl = encodeURIComponent(shareUrl);
+                const encodedText = encodeURIComponent(shareText);
+                const openShare = (url) => { window.open(url, "_blank", "noopener,noreferrer"); setShareMenuPostId(null); };
+                const copyShareLink = async () => {
+                  try {
+                    await navigator.clipboard.writeText(shareUrl);
+                    setNotice("Poveznica na objavu kopirana je u međuspremnik. Zalijepi je u objavu ili poruku na drugoj mreži.");
+                  } catch {
+                    setNotice("Preglednik nije dopustio kopiranje. Kopiraj poveznicu ručno: " + shareUrl);
+                  }
+                  setShareMenuPostId(null);
+                };
+                const nativeShare = async () => {
+                  if (!navigator.share) { await copyShareLink(); return; }
+                  try {
+                    await navigator.share({ title: "PatriaSoul – Čuvari nasljeđa", text: shareText, url: shareUrl });
+                    setShareMenuPostId(null);
+                  } catch (error) {
+                    if (error?.name !== "AbortError") setNotice("Dijeljenje nije uspjelo. Pokušaj drugu mogućnost.");
+                    setShareMenuPostId(null);
+                  }
+                };
+                return <div className="post-share-menu" id={"share-menu-" + post.id} aria-label="Mogućnosti dijeljenja ove objave">
+                  <p>Podijeli poveznicu na ovu objavu</p>
+                  <div className="post-share-options">
+                    {typeof navigator !== "undefined" && typeof navigator.share === "function" && <button type="button" onClick={nativeShare}>📲 Podijeli aplikacijom</button>}
+                    <button type="button" onClick={copyShareLink}>🔗 Kopiraj poveznicu</button>
+                    <button type="button" onClick={() => openShare("https://www.facebook.com/sharer/sharer.php?u=" + encodedUrl)}>ⓕ Facebook</button>
+                    <button type="button" onClick={() => openShare("https://twitter.com/intent/tweet?text=" + encodedText + "&url=" + encodedUrl)}>𝕏 X</button>
+                    <button type="button" onClick={() => openShare("https://wa.me/?text=" + encodedText + "%20" + encodedUrl)}>☏ WhatsApp</button>
+                    <button type="button" onClick={() => openShare("https://t.me/share/url?url=" + encodedUrl + "&text=" + encodedText)}>➤ Telegram</button>
+                    <button type="button" onClick={() => { window.location.href = "mailto:?subject=" + encodeURIComponent("PatriaSoul – Čuvari nasljeđa") + "&body=" + encodedText + "%0A%0A" + encodedUrl; setShareMenuPostId(null); }}>✉ E-pošta</button>
+                  </div>
+                  <small>Ovo dijeli poveznicu na izvornu objavu. Izravno objavljivanje sadržaja na drugim računima dodaje se zasebno uz službene API-je.</small>
+                </div>;
+              })()}
               {openComments.includes(post.id) && (
                 <section className="comments-panel" aria-label={"Komentari uz objavu: " + post.author}>
                   <div className="comments-list">
