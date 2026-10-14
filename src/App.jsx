@@ -2538,7 +2538,19 @@ function App() {
                       <div className="emoji-picker-search-label">Odaberi emoji</div>
                       <div className="emoji-picker-grid">
                         {["😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😍","🥰","😘","😎","🤔","🤗","😭","😡","🤝","🙏","👏","👍","👎","❤️","🧡","💛","💚","💙","💜","🖤","🤍","💔","🔥","✨","⭐","🎉","🎂","☀️","🌈","🌹","🌻","🐕","🐈","🦅","🐬","🌳","🍎","🍕","☕","🍰","⚽","🏆","🎵","🎮","📚","📷","🚗","✈️","🏡","⛪","🇭🇷","🇧🇦","🇪🇺","✅","❌","❗","❓","💯"].map((emoji) => (
-                          <button key={emoji} type="button" aria-label={emoji} onClick={() => { setDraft((value) => value + emoji); setEmojiPickerOpen(false); }}>{emoji}</button>
+                          <button key={emoji} type="button" aria-label={emoji === "🇭🇷" ? "Hrvatska zastava" : emoji} title={emoji === "🇭🇷" ? "Hrvatska zastava" : emoji} onClick={() => { setDraft((value) => value + emoji); setEmojiPickerOpen(false); }}>
+                            {emoji === "🇭🇷" ? (
+                              <svg className="emoji-croatian-flag" viewBox="0 0 36 24" role="img" aria-label="Hrvatska zastava">
+                                <rect width="36" height="8" fill="#ed1c24" />
+                                <rect y="8" width="36" height="8" fill="#fff" />
+                                <rect y="16" width="36" height="8" fill="#171796" />
+                                <g transform="translate(13 5)" stroke="#fff" strokeWidth=".45">
+                                  <rect width="10" height="10" fill="#fff" />
+                                  {Array.from({ length: 25 }, (_, i) => <rect key={i} x={(i % 5) * 2} y={Math.floor(i / 5) * 2} width="2" height="2" fill={(Math.floor(i / 5) + i % 5) % 2 === 0 ? "#ed1c24" : "#fff"} />)}
+                                </g>
+                              </svg>
+                            ) : emoji}
+                          </button>
                         ))}
                       </div>
                     </div>
