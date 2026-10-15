@@ -1953,3 +1953,136 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
   .welcome-panel { min-height: 205px; padding: 22px 18px; }
   .community-hub-links { padding: 14px; }
 }
+
+
+/* PatriaSoul auth layout — nadahnuto čistim, centriranim AuthLayout obrascem */
+.auth-layout-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: min(100%, 520px);
+  margin: 24px auto;
+  padding: clamp(20px, 3vw, 32px);
+  border: 1px solid rgba(103, 163, 211, .28);
+  border-radius: 20px;
+  background:
+    radial-gradient(ellipse at 50% -15%, rgba(18, 113, 181, .23), transparent 58%),
+    linear-gradient(155deg, rgba(13, 31, 51, .98), rgba(7, 18, 32, .99));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .32), inset 0 1px 0 rgba(224, 241, 255, .06);
+}
+.auth-layout-card::before {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  right: 12%;
+  left: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(112, 190, 255, .8), transparent);
+  content: "";
+}
+.auth-layout-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 17px;
+}
+.auth-layout-brand-mark {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid rgba(112, 190, 255, .38);
+  border-radius: 10px;
+  background: linear-gradient(145deg, #164d78, #0c2a46);
+  color: #b8e2ff;
+  box-shadow: 0 5px 18px rgba(0, 116, 210, .18);
+}
+.auth-layout-brand-name {
+  background: linear-gradient(100deg, #fff 8%, #b9e3ff 52%, #67baff 100%);
+  background-clip: text;
+  color: transparent;
+  font-size: 22px;
+  font-weight: 850;
+  letter-spacing: -.8px;
+}
+.auth-layout-brand-divider { color: #52728e; }
+.auth-layout-brand-subtitle {
+  color: #a8bfd4;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.auth-layout-intro {
+  max-width: 350px;
+  margin: 0 auto 22px;
+  color: #a9bed2;
+  font-size: 12px;
+  line-height: 1.7;
+  text-align: center;
+}
+.auth-layout-card .auth-panel-heading {
+  align-items: center;
+  margin-bottom: 18px;
+}
+.auth-layout-card .auth-panel-heading h2 {
+  color: #f2f7fc;
+  font-size: clamp(23px, 3vw, 28px);
+  letter-spacing: -.7px;
+}
+.auth-layout-card .auth-panel-heading .eyebrow {
+  color: #78c3fa;
+  letter-spacing: .14em;
+}
+.auth-layout-card .auth-form label {
+  color: #c5d6e6;
+  font-size: 12px;
+}
+.auth-layout-card .auth-form input {
+  min-height: 46px;
+  border-color: rgba(132, 169, 201, .28);
+  border-radius: 10px;
+  background: rgba(5, 16, 29, .74);
+  color: #f4f8fc;
+}
+.auth-layout-card .auth-form input::placeholder { color: #718ba3; }
+.auth-layout-card .auth-form input:focus {
+  border-color: #5bb5f1;
+  box-shadow: 0 0 0 3px rgba(61, 157, 224, .16);
+}
+.auth-layout-card .auth-submit {
+  min-height: 46px;
+  border-radius: 10px;
+  background: linear-gradient(100deg, #0879d8, #168fe8);
+  box-shadow: 0 8px 20px rgba(0, 112, 211, .2);
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+}
+.auth-layout-card .auth-submit:not(:disabled):hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow: 0 11px 24px rgba(0, 112, 211, .28);
+}
+.auth-layout-card .auth-switch { color: #9db4ca; font-size: 12px; }
+.auth-layout-card .auth-switch button { color: #83cbff; }
+.auth-layout-card .auth-footnote { color: #7f97ae; font-size: 10px; }
+.auth-layout-card .auth-message {
+  border: 1px solid rgba(110, 169, 210, .2);
+  background: rgba(22, 50, 75, .72);
+  color: #d6eaff;
+}
+.auth-layout-card .auth-config-notice {
+  border-color: rgba(231, 189, 94, .3);
+  background: rgba(94, 70, 22, .2);
+  color: #f4dfad;
+}
+@media (max-width: 600px) {
+  .auth-layout-card { margin: 12px auto; padding: 20px 16px; border-radius: 15px; }
+  .auth-layout-brand { gap: 6px; }
+  .auth-layout-brand-name { font-size: 20px; }
+  .auth-layout-brand-subtitle { font-size: 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-layout-card .auth-submit { transition: none; }
+}
