@@ -81,7 +81,7 @@ export default function MuseumPuterAssistant({ collection }) {
   return <section className="museum-puter" aria-labelledby="museum-puter-title">
     <div className="museum-puter-heading">
       <span className="museum-puter-mark"><Sparkles size={20} /></span>
-      <div><span className="eyebrow">PUTER AI · DIGITALNI KUSTOS</span><h2 id="museum-puter-title">Pomoć pri izgradnji muzeja</h2><p>Priprema prijedloge eksponata, nacrte izložbi i uredničke provjere za <strong>Virtualni muzej PatriaSoul</strong>.</p></div>
+      <div><span className="eyebrow">VIRTUALNI MUZEJ PATRIASOUL · DIGITALNI KUSTOS</span><h2 id="museum-puter-title">Pomoć pri izgradnji muzeja</h2><p>Priprema prijedloge eksponata, nacrte izložbi i uredničke provjere za <strong>Virtualni muzej PatriaSoul</strong>.</p></div>
     </div>
     <label className="museum-puter-label" htmlFor="museum-puter-topic">Tema, mjesto ili povijesno razdoblje (neobavezno)</label>
     <input id="museum-puter-topic" className="museum-puter-input" value={topic} onChange={(event) => setTopic(event.target.value)} maxLength={180} placeholder="Npr. Salona, Bašćanska ploča, tradicijska nošnja…" />
