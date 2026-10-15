@@ -15,8 +15,6 @@ const navItems = [
   { icon: "🔔", label: "Obavijesti" },
 ];
 
-const museumCollections = [];
-
 const OWNER_EMAIL = "patriasoul@protonmail.com";
 const normalizeUsername = (value) => String(value || "").trim().replace(/^@/, "").toLowerCase();
 
@@ -102,7 +100,6 @@ function App() {
   const [communityHelpAdReportsLoading, setCommunityHelpAdReportsLoading] = useState(false);
   const communityActionPage = new URLSearchParams(window.location.search).get("zajedno");
   const [activeNav, setActiveNav] = useState("PatriaSoul");
-  const [museumCollectionId, setMuseumCollectionId] = useState(null);
   const [liked, setLiked] = useState([]);
   const [reactionsByPost, setReactionsByPost] = useState({});
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
@@ -2256,7 +2253,7 @@ function App() {
                 <div><span className="eyebrow">TVOJ MUZEJ POČINJE OVDJE</span><h2>Od fotografija do izložbe</h2><p>Učitaj jednu ili više fotografija, dodaj priču ako je znaš, a digitalni kustos pripremit će nacrte kartica i prijedlog kako ih predstaviti u virtualnoj izložbi.</p></div>
                 <span className="virtual-museum-emblem" aria-hidden="true">🏛️</span>
               </div>
-              <MuseumPuterAssistant collection={null} />
+              <MuseumPuterAssistant />
               <div className="virtual-museum-note"><strong>Ti čuvaš priču. Kustos pomaže oblikovati izložbu.</strong><p>Pregledaj i ispravi svaki prijedlog prije spremanja ili objave. AI ne potvrđuje sam autentičnost, datume ni podrijetlo, a fotografije se ne objavljuju automatski.</p></div>
               <button type="button" className="outline-button virtual-museum-back" onClick={() => setActiveNav("PatriaSoul")}>← Povratak na zid zajednice</button>
             </section>
