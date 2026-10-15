@@ -32,7 +32,7 @@ export default {
       }
 
       const date = url.searchParams.get("date") || "";
-      if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
         return Response.json({ error: "Neispravan datum sveca dana." }, { status: 400 });
       }
 
@@ -47,9 +47,9 @@ export default {
         if (!upstream.ok) throw new Error("Kalendar HTTP " + upstream.status);
 
         const body = htmlToText(await upstream.text());
-        const sectionMatch = body.match(/Sveci i imendani\\s*([\\s\\S]*?)(?=\\n(?:####\\s*)?Ukratko\\b|$)/i);
-        const section = sectionMatch?.[1]?.replace(/\\s+/g, " ").trim() || "";
-        const names = section.replace(/^(?:Koji se sveci slave i tko ima imendan[^?]*\\?\\s*)/i, "").trim();
+        const sectionMatch = body.match(/Sveci i imendani\s*([\s\S]*?)(?=\n(?:####\s*)?Ukratko\b|$)/i);
+        const section = sectionMatch?.[1]?.replace(/\s+/g, " ").trim() || "";
+        const names = section.replace(/^(?:Koji se sveci slave i tko ima imendan[^?]*\?\s*)/i, "").trim();
         if (names.length < 3 || names.length > 240) throw new Error("Kalendar ne sadrži očekivani popis svetaca.");
 
         return Response.json(
