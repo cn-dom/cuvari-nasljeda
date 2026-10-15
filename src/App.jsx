@@ -2465,7 +2465,14 @@ function App() {
           )}
 
           {authOpen && (
-            <section className="auth-panel card" aria-labelledby="auth-title">
+            <section className="auth-panel auth-layout-card card" aria-labelledby="auth-title">
+              <div className="auth-layout-brand" aria-label="PatriaSoul — Čuvari nasljeđa">
+                <span className="auth-layout-brand-mark" aria-hidden="true">✦</span>
+                <span className="auth-layout-brand-name">PatriaSoul</span>
+                <span className="auth-layout-brand-divider" aria-hidden="true">/</span>
+                <span className="auth-layout-brand-subtitle">Čuvari nasljeđa</span>
+              </div>
+              <p className="auth-layout-intro">{authMode === "register" ? "Postani dio zajednice koja čuva hrvatsku baštinu." : authMode === "reset" ? "Vratimo ti siguran pristup računu." : "Lijepo je ponovno te vidjeti u zajednici."}</p>
               <div className="auth-panel-heading">
                 <div>
                   <span className="eyebrow">ČUVARI NASLJEĐA</span>
