@@ -59,7 +59,8 @@ const loadLiturgy=async()=>{
      const normalized=dateMatch[0].replace(/\s/g,"").replace(/,/g,"").replace(/\.$/,"");
      if(!normalized.includes(expected))throw new Error("Izvor je vratio podatke za drugi datum.");
    }
-   const headingMatch=raw.match(/^\s*#{1,6}\s*Evanđelje\b[^\n]*$/im);\n   const headingIndex=headingMatch?raw.indexOf(headingMatch[0]):-1;
+   const headingMatch=raw.match(/^\s*#{1,6}\s*Evanđelje\b[^\n]*$/im);
+   const headingIndex=headingMatch?raw.indexOf(headingMatch[0]):-1;
    if(headingIndex<0)throw new Error("U zapisu nije pronađeno poglavlje Evanđelje.");
    let section=raw.slice(headingIndex).replace(/^\s*#{1,6}\s*Evanđelje\b[^\n]*\n?/i,"");
    section=section.split(/\n#{1,6}\s*(?:Izvor|Poveznice|Napomene)\b/i)[0];
