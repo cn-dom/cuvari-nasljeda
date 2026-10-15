@@ -10,3 +10,14 @@
 .faith-more-button{display:inline-flex;align-items:center;justify-content:center;margin-top:12px;padding:10px 15px;border:1px solid #345c83;border-radius:10px;background:#173657;color:#fff;font:inherit;font-weight:700;cursor:pointer;transition:background .2s ease,transform .2s ease}
 .faith-more-button:hover{background:#244d75;transform:translateY(-1px)}
 .faith-more-button:focus-visible{outline:3px solid #e4b94e;outline-offset:3px}
+
+
+/* Službeni znak PatriaSoul u zaglavlju stranice Vjera Hrvata */
+.faith-logo {
+  display: block;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  object-fit: contain;
+  border-radius: 10px;
+}
