@@ -2061,6 +2061,13 @@ function App() {
             <span className="quiz-sidebar-copy"><strong>PatriaSoul kviz</strong><small>Znanje · Ponos · Nasljeđe</small></span>
             <span className="quiz-sidebar-arrow">↗</span>
           </a>
+          {session && <section className="side-section sidebar-nav-section profile-sidebar-section">
+            <h3>MOJ PROSTOR</h3>
+            <button type="button" className={profileOpen ? "side-link selected profile-sidebar-link" : "side-link profile-sidebar-link"} onClick={() => { setProfileOpen(true); setProfileMessage(""); }}>
+              <span className="side-icon profile-sidebar-avatar">{profileAvatarUrl ? <img src={profileAvatarUrl} alt="" /> : (profileName || profileUsername || session.user?.email || "Č").slice(0, 1).toLocaleUpperCase("hr")}</span>
+              <span className="side-link-label">Moj profil</span><span className="profile-sidebar-arrow">↗</span>
+            </button>
+          </section>}
           <section className="side-section sidebar-nav-section">
             <h3>MOJA ZAJEDNICA</h3>
             {navItems.filter((item) => ["PatriaSoul", "Kviz", "Forum", "Stranice", "Čuvari nasljeđa", "Grupe"].includes(item.label)).map((item) => (
