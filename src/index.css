@@ -1651,3 +1651,10 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
 .profile-empty-posts>strong { color:#e9f2fb; font-size:14px; }
 .profile-empty-posts>p { max-width:420px; margin:0 0 5px; color:#a9bbcd; font-size:12px; line-height:1.65; }
 @media(max-width:600px){.profile-page{padding:0 14px 18px}.profile-cover-photo{min-height:190px;margin:0 -14px;padding:17px}.profile-page-toolbar{align-items:flex-start;flex-direction:column;padding:17px 0 12px}.profile-identity-row{grid-template-columns:1fr;padding:16px}.profile-identity-row .profile-avatar-editor{margin:0}.profile-identity-row .profile-completion{text-align:center}.profile-identity-row .profile-progress-track{margin:0 auto}.profile-post-item{padding:12px}.profile-cover-change{top:10px;right:10px}}
+
+
+/* Clickable author identity on the community wall */
+.post-author-profile-button { display:inline-flex; flex:0 0 auto; padding:0; border:0; border-radius:50%; background:transparent; cursor:pointer; }
+.post-author-profile-button:focus-visible,.post-author-name-button:focus-visible { outline:2px solid #7ec8f3; outline-offset:3px; }
+.post-author-name-button { display:inline; padding:0; border:0; background:transparent; color:inherit; font:inherit; font-weight:800; text-align:left; cursor:pointer; }
+.post-author-name-button:hover { color:#8fc9ff; }
