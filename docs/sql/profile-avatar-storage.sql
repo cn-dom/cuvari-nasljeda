@@ -49,4 +49,7 @@ create policy profile_avatars_delete_own
     and (storage.foldername(name))[1] = (select auth.uid())::text
   );
 
+-- The account form upserts this public display field for the signed-in member.
+grant insert (avatar_url) on table public.profiles to authenticated;
+
 commit;
