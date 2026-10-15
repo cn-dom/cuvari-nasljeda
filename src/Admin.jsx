@@ -107,6 +107,27 @@ export default function Admin() {
         }
         return;
       }
+      if (activeModule === "quiz") {
+        setBusy(true);
+        const [statsResult, resultsResult] = await Promise.all([
+          supabase.rpc("admin_dashboard_stats"),
+          supabase.rpc("admin_list_quiz_results"),
+        ]);
+        if (cancelled) return;
+        if (statsResult.error || resultsResult.error) {
+          setDbStatus("greska");
+          setError("Kvizni podaci nisu dostupni ovom računu. Provjeri administratorske ovlasti SQL funkcija.");
+          setRows([]);
+          setBusy(false);
+          return;
+        }
+        const stats = statsResult.data || {};
+        setDbStatus("povezano");
+        setRows((resultsResult.data || []).map(row => ({ ...row, id: row.id })));
+        setNotice("Kviz povezan · " + Number(stats.questions || 0) + " pitanja · " + Number(stats.quiz_results || 0) + " rezultata · " + Number(stats.users || 0) + " računa.");
+        setBusy(false);
+        return;
+      }
       if (activeModule === "groups") {
         setBusy(true);
         const { data, error: loadError } = await supabase.rpc("admin_group_chat_overview");
@@ -216,6 +237,18 @@ export default function Admin() {
     setNotice("Objava je uklonjena." + (logged ? "" : " Napomena: zapisnik radnje nije spremljen."));
   }
 
+  async function deleteQuizResult(row) {
+    if (!window.confirm("Trajno obrisati rezultat kviza ovog igrača? Ova radnja se ne može poništiti.")) return;
+    const { data, error: deleteError } = await supabase.rpc("admin_delete_quiz_result", { p_result_id: row.id });
+    if (deleteError || data !== true) {
+      setNotice("Rezultat nije obrisan. Provjeri administratorske ovlasti i pravila baze.");
+      return;
+    }
+    setRows(current => current.filter(item => item.id !== row.id));
+    const logged = await recordAdminAction("quiz_result_deleted", "quiz_result", row.id, "Obrisan rezultat kviza.");
+    setNotice("Rezultat kviza je obrisan." + (logged ? "" : " Napomena: zapisnik radnje nije spremljen."));
+  }
+
   async function cancelEvent(row) {
     if (row.status === "cancelled") { setNotice("Ovaj događaj već je otkazan."); return; }
     if (!window.confirm("Otkazati događaj „" + row.title + "“? Ostat će u bazi, ali više neće biti prikazan kao objavljen.")) return;
@@ -291,15 +324,32 @@ export default function Admin() {
           </section>
         )}
         {activeModule === "quiz" && (
-          <section className="admin-table-card admin-module-status-card">
-            <div className="admin-table-heading"><div><h2>PatriaSoul kviz</h2><p>Modul je pripremljen kao administracijska stavka, ali nije još povezan s podacima kviza.</p></div><span className="admin-live-mark admin-connection-warning">● ČEKA POVEZIVANJE</span></div>
-            <div className="admin-security-grid">
-              <article className="admin-security-card"><span className="admin-security-icon">✓</span><div><h2>Kviz sučelje</h2><p>Ugrađeni kviz nalazi se u mapi <code>/kviz/</code> i dijeli Supabase klijent sa društvenom mrežom.</p><a className="admin-button secondary" href="/kviz/">Otvori kviz →</a></div></article>
-              <article className="admin-security-card warning"><span className="admin-security-icon">!</span><div><h2>Nedostaju podaci kviza</h2><p>U testnoj bazi nisu pronađene tablice <code>quiz_questions</code> i <code>quiz_results</code>, ni RPC funkcije <code>admin_dashboard_stats</code>, <code>admin_list_users</code> i <code>admin_list_quiz_results</code>.</p><span className="admin-security-status pending">Potrebna provjera baze</span></div></article>
-              <article className="admin-security-card warning"><span className="admin-security-icon">!</span><div><h2>Kompatibilnost profila</h2><p>Kvizni kod očekuje polja profila poput <code>role</code> i <code>avatar_url</code>, dok društvena shema koristi drugačija polja. Prije spajanja treba uskladiti prikaz imena i ovlasti bez slabljenja RLS zaštite.</p><span className="admin-security-status pending">Nije usklađeno</span></div></article>
-              <article className="admin-security-card"><span className="admin-security-icon">i</span><div><h2>Sljedeći siguran korak</h2><p>Uskladiti SQL shemu i administratorske funkcije s postojećim kviznim kodom, zatim provjeriti da samo vlasnik može pregledavati i brisati rezultate.</p><a className="admin-button secondary" href="https://github.com/cn-dom/cuvari-nasljeda/tree/main/kviz/src/lib" target="_blank" rel="noreferrer">Pregledati kvizne funkcije →</a></div></article>
+          <section className="admin-table-card">
+            <div className="admin-table-heading">
+              <div><h2>PatriaSoul kviz</h2><p>Statistika se učitava iz aktivne Supabase baze. Prikazuje se najviše 1.000 najnovijih rezultata.</p></div>
+              <span className={"admin-live-mark " + (dbStatus === "povezano" ? "" : "admin-connection-warning")}>{dbStatus === "povezano" ? "● POVEZANO" : dbStatus === "greska" ? "● PROVJERI OVLASTI" : "● PROVJERAVAM"}</span>
             </div>
-            <a className="admin-button secondary" href="https://github.com/Patriasoul/kviz" target="_blank" rel="noreferrer">Otvori izvorni repozitorij kviza →</a>
+            {notice && <p className="admin-report-details">{notice}</p>}
+            {error ? <p className="admin-error">{error}</p> : busy ? <p className="admin-empty">Učitavam rezultate kviza…</p> : rows.length ? (
+              <div className="admin-table-scroll">
+                <table className="admin-table">
+                  <thead><tr><th>Igrač</th><th>Kviz</th><th>Kategorija / grad</th><th>Rezultat</th><th>Uspješnost</th><th>Vrijeme</th><th>Datum</th><th>Radnja</th></tr></thead>
+                  <tbody>{rows.filter(row => JSON.stringify(row).toLowerCase().includes(query.toLowerCase())).map(row => (
+                    <tr key={row.id}>
+                      <td><strong>{row.user_name || "Igrač"}</strong><small className="admin-report-details">{row.user_email || row.user_id}</small></td>
+                      <td>{row.quiz_type || "Opći kviz"}</td>
+                      <td>{row.category || row.city_slug || "—"}</td>
+                      <td className="admin-count-cell">{row.score ?? 0} / {row.total ?? 0}</td>
+                      <td>{Number(row.percentage || 0).toFixed(1)}%</td>
+                      <td>{row.time_seconds == null ? "—" : String(row.time_seconds) + " s"}</td>
+                      <td>{dateLabel(row.created_at)}</td>
+                      <td><button className="admin-row-action danger" type="button" onClick={() => deleteQuizResult(row)}>Obriši rezultat</button></td>
+                    </tr>
+                  ))}</tbody>
+                </table>
+              </div>
+            ) : <p className="admin-empty">Nema spremljenih rezultata kviza za prikaz.</p>}
+            <div className="admin-heading-actions"><a className="admin-button secondary" href="/kviz/">Otvori kviz →</a></div>
           </section>
         )}
         {activeModule === "overview" ? (
