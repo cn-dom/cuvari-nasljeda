@@ -22,7 +22,7 @@ if(date)date.textContent=new Intl.DateTimeFormat("hr-HR",{timeZone:"Europe/Zagre
 for(const [id,value] of [["faith-verse","„"+item.verse+"”"],["faith-reference",item.ref],["faith-reflection",item.reflection],["faith-question",item.question]]){const el=document.getElementById(id);if(el)el.textContent=value;}
 document.querySelectorAll(".prayer-item").forEach(button=>button.addEventListener("click",()=>{const expanded=button.getAttribute("aria-expanded")==="true";button.setAttribute("aria-expanded",String(!expanded));const mark=button.querySelector(":scope > b");if(mark)mark.textContent=expanded?"＋":"−";}));
 const weekday=["nedjelja","ponedjeljak","utorak","srijeda","četvrtak","petak","subota"][new Date(today.iso+"T12:00:00+02:00").getDay()];
-const slug=weekday+"-"+Number(today.day)+"-"+Number(today.month)+"-"+today.year;
+const slug=weekday.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D")+"-"+Number(today.day)+"-"+Number(today.month)+"-"+today.year;
 const setText=(id,text)=>{const el=document.getElementById(id);if(el)el.textContent=text;};
 const clean=s=>String(s||"").replace(/\[([^\]]+)\]\([^)]+\)/g,"$1").replace(/[]/g," ").replace(/\b(?:U kalendaru|Podijelite|Markdown)\b/gi," ").replace(/[*_>#`]/g,"").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#39;|&apos;/g,"'").replace(/\s+/g," ").trim();
 const findSection=(source,heading)=>{
