@@ -97,8 +97,22 @@ button { -webkit-tap-highlight-color: transparent; }
 .symbol-sun { color: #e6c982; font-size: 19px; line-height: 1; }
 .symbol-letters { color: #fff; font-family: "Playfair Display", Georgia, serif; font-size: 42px; line-height: 1.1; }
 .symbol-caption { color: #e7c77c; text-align: center; font-size: 7px; font-weight: 800; letter-spacing: .15em; line-height: 1.4; }
-.notice { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin: 13px 0; padding: 11px 13px; background: #fff8e7; color: #6d5422; border: 1px solid #ead9a8; border-radius: 10px; font-size: 11px; line-height: 1.5; }
-.notice button { border: 0; background: transparent; color: inherit; font-size: 19px; }
+.notice { position: relative; display: flex; justify-content: space-between; gap: 12px; align-items: center; margin: 13px 0; padding: 11px 13px; background: #fff8e7; color: #6d5422; border: 1px solid #ead9a8; border-radius: 10px; font-size: 11px; line-height: 1.5; }
+.notice > span:first-child { position: relative; z-index: 1; }
+.notice button { position: relative; z-index: 2; flex: 0 0 auto; border: 0; background: transparent; color: inherit; font-size: 19px; }
+.notice-celebration { overflow: hidden; border-color: rgba(65, 143, 198, .45); background: linear-gradient(100deg, #fff8e7, #f4faff); box-shadow: 0 5px 20px rgba(29, 93, 139, .12); }
+.celebration-fireworks { position: absolute; z-index: 0; inset: 0 42px 0 auto; width: 180px; pointer-events: none; overflow: hidden; }
+.celebration-fireworks i { position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; border-radius: 50%; background: #1766a0; opacity: 0; animation: patria-firework-pop 850ms cubic-bezier(.15,.7,.2,1) var(--spark-delay) both; }
+.celebration-fireworks i:nth-child(3n) { background: #c52c3c; }
+.celebration-fireworks i:nth-child(3n + 1) { background: #f0b94b; }
+@keyframes patria-firework-pop {
+  0% { opacity: 0; transform: rotate(var(--spark-angle)) translateX(0) scale(.5); }
+  18% { opacity: .95; }
+  100% { opacity: 0; transform: rotate(var(--spark-angle)) translateX(var(--spark-distance)) scale(.2); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .celebration-fireworks i { animation: none !important; display: none; }
+}
 .composer { margin-top: 17px; padding: 17px; overflow: visible; }
 .composer-top { display: flex; align-items: flex-start; gap: 12px; }
 .avatar { width: 42px; height: 42px; display: flex; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 50%; background: #e8edf3; color: var(--navy); font-size: 11px; font-weight: 800; border: 1px solid #dfe5eb; }
@@ -239,8 +253,15 @@ button { -webkit-tap-highlight-color: transparent; }
 .feed-search { width: 100%; min-width: 0; border: 1px solid var(--line); border-radius: 9px; padding: 11px 13px; background: #fbfcfd; color: var(--ink); font: inherit; font-size: 12px; outline: none; }
 .feed-search:focus { border-color: var(--blue); box-shadow: 0 0 0 3px #244f7612; }
 .feed-filter-list { display: flex; flex-wrap: wrap; gap: 7px; }
-.feed-filter { border: 1px solid #e1e6eb; border-radius: 999px; background: #fff; color: #657382; padding: 7px 10px; font-size: 9px; font-weight: 800; cursor: pointer; }
-.feed-filter:hover, .feed-filter.active { border-color: var(--navy); background: var(--navy); color: #fff; }
+.feed-filter { position: relative; isolation: isolate; overflow: hidden; border: 1px solid #e1e6eb; border-radius: 999px; background: #fff; color: #657382; padding: 7px 10px; font-size: 9px; font-weight: 800; cursor: pointer; transition: color .2s ease, border-color .2s ease, transform .2s ease; }
+.feed-filter:hover { border-color: #9aaec1; color: var(--navy); }
+.feed-filter:active { transform: scale(.97); }
+.feed-filter.active { border-color: transparent; background: transparent; color: #fff; }
+.feed-filter-highlight { position: absolute; z-index: -1; inset: 0; border-radius: inherit; background: linear-gradient(120deg, #102c45, #174e78); box-shadow: 0 3px 10px rgba(10, 36, 58, .2); }
+.feed-filter-label { position: relative; z-index: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .feed-filter { transition: none !important; }
+}
 .feed-total { color: #7d8996; font-size: 10px; white-space: nowrap; }
 .empty-feed { padding: 26px 18px; text-align: center; }
 .empty-feed strong { color: var(--navy); font-size: 14px; }
