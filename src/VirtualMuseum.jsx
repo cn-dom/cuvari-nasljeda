@@ -68,6 +68,9 @@ function MuseumScene({ onSelect }) {
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "low-power" });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.7));
     renderer.setSize(mount.clientWidth, mount.clientHeight);
+    renderer.domElement.tabIndex = 0;
+    renderer.domElement.setAttribute("role", "application");
+    renderer.domElement.setAttribute("aria-label", "3D dvorana. Klikni ovdje pa koristi W A S D ili strelice za kretanje. Drži desnu tipku miša i pomiči miš za pogled.");
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -129,12 +132,33 @@ function MuseumScene({ onSelect }) {
     };
     renderer.domElement.addEventListener("click", onClick);
     const keys = new Set();
-    const onKeyDown = (e) => { if (["w","a","s","d","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) { keys.add(e.key.toLowerCase()); if (e.key.startsWith("Arrow")) keys.add(e.key.toLowerCase()); e.preventDefault(); } };
+    const movementKeys = new Set(["w","a","s","d","arrowup","arrowdown","arrowleft","arrowright"]);
+    const onKeyDown = (e) => {
+      const key = e.key.toLowerCase();
+      if (!movementKeys.has(key)) return;
+      const target = e.target;
+      if (target && (target.isContentEditable || ["INPUT","TEXTAREA","SELECT","BUTTON"].includes(target.tagName))) return;
+      keys.add(key);
+      e.preventDefault();
+    };
     const onKeyUp = (e) => keys.delete(e.key.toLowerCase());
-    window.addEventListener("keydown", onKeyDown); window.addEventListener("keyup", onKeyUp);
+    const clearKeys = () => keys.clear();
+    window.addEventListener("keydown", onKeyDown, { passive: false });
+    window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", clearKeys);
     let yaw = 0, pitch = 0, dragging = false, lastX = 0, lastY = 0;
-    const onPointerDown = (e) => { if (e.button === 2) { dragging = true; lastX = e.clientX; lastY = e.clientY; } };
-    const onPointerMove = (e) => { if (!dragging) return; yaw -= (e.clientX-lastX)*.003; pitch = THREE.MathUtils.clamp(pitch-(e.clientY-lastY)*.002, -.65, .65); lastX=e.clientX; lastY=e.clientY; };
+    const onPointerDown = (e) => {
+      if (e.button === 2) { dragging = true; lastX = e.clientX; lastY = e.clientY; }
+      else if (e.button === 0) renderer.domElement.focus({ preventScroll: true });
+    };
+    const onPointerMove = (e) => {
+      if (!dragging) return;
+      const dx = document.pointerLockElement === renderer.domElement ? e.movementX : e.clientX-lastX;
+      const dy = document.pointerLockElement === renderer.domElement ? e.movementY : e.clientY-lastY;
+      yaw -= dx*.003;
+      pitch = THREE.MathUtils.clamp(pitch-dy*.002, -.65, .65);
+      lastX=e.clientX; lastY=e.clientY;
+    };
     const onPointerUp = () => { dragging = false; };
     const onContext = (e) => e.preventDefault();
     renderer.domElement.addEventListener("pointerdown", onPointerDown);
@@ -158,8 +182,9 @@ function MuseumScene({ onSelect }) {
     const observer = new ResizeObserver(resize); observer.observe(mount);
     return () => {
       cancelAnimationFrame(frame); observer.disconnect(); renderer.domElement.removeEventListener("click", onClick);
-      window.removeEventListener("keydown", onKeyDown); window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("keydown", onKeyDown); window.removeEventListener("keyup", onKeyUp); window.removeEventListener("blur", clearKeys);
       renderer.domElement.removeEventListener("pointerdown", onPointerDown); window.removeEventListener("pointermove", onPointerMove); window.removeEventListener("pointerup", onPointerUp); renderer.domElement.removeEventListener("contextmenu", onContext);
+      keys.clear();
       scene.traverse(obj => { obj.geometry?.dispose(); if (Array.isArray(obj.material)) obj.material.forEach(m=>m.dispose()); else obj.material?.dispose(); });
       renderer.dispose(); renderer.domElement.remove(); 
     };
