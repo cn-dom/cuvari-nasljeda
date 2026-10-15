@@ -145,6 +145,9 @@ function App() {
   const [profileAvatarUrl, setProfileAvatarUrl] = useState("");
   const [profileAvatarFile, setProfileAvatarFile] = useState(null);
   const [profileAvatarPreview, setProfileAvatarPreview] = useState("");
+  const [profileCoverUrl, setProfileCoverUrl] = useState("");
+  const [profileCoverFile, setProfileCoverFile] = useState(null);
+  const [profileCoverPreview, setProfileCoverPreview] = useState("");
   const [profileBusy, setProfileBusy] = useState(false);
   const [profileMessage, setProfileMessage] = useState("");
   const [reportPost, setReportPost] = useState(null);
@@ -481,12 +484,15 @@ function App() {
       setProfileUsername(normalizeUsername(metadata.username));
       setProfileBio(metadata.bio || "");
       setProfileAvatarUrl(metadata.avatar_url || "");
+      setProfileCoverUrl(metadata.cover_url || "");
       setProfileAvatarFile(null);
       setProfileAvatarPreview("");
+      setProfileCoverFile(null);
+      setProfileCoverPreview("");
       if (!supabase || !session?.user?.id) return;
       const { data, error } = await supabase
         .from("profiles")
-        .select("username, display_name, bio, avatar_url")
+        .select("username, display_name, bio, avatar_url, cover_url")
         .eq("id", session.user.id)
         .maybeSingle();
       if (cancelled) return;
@@ -500,6 +506,7 @@ function App() {
         setProfileUsername(normalizeUsername(data.username));
         setProfileBio(data.bio || "");
         setProfileAvatarUrl(data.avatar_url || "");
+        setProfileCoverUrl(data.cover_url || "");
         setProfileMessage("");
       }
     }
@@ -576,20 +583,42 @@ function App() {
         const { data: publicImage } = supabase.storage.from("profile-avatars").getPublicUrl(objectPath);
         nextAvatarUrl = publicImage?.publicUrl || nextAvatarUrl;
       }
+      let nextCoverUrl = profileCoverUrl;
+      if (profileCoverFile) {
+        if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(profileCoverFile.type)) {
+          setProfileMessage("Naslovnica mora biti JPG, PNG, WebP ili GIF.");
+          return;
+        }
+        if (profileCoverFile.size > 10 * 1024 * 1024) {
+          setProfileMessage("Slika naslovnice može imati najviše 10 MB.");
+          return;
+        }
+        const extension = ({ "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" })[profileCoverFile.type];
+        const objectPath = `${session.user.id}/profile-cover-${Date.now()}.${extension}`;
+        const { error: uploadError } = await supabase.storage.from("profile-covers")
+          .upload(objectPath, profileCoverFile, { upsert: true, contentType: profileCoverFile.type, cacheControl: "3600" });
+        if (uploadError) throw uploadError;
+        const { data: publicImage } = supabase.storage.from("profile-covers").getPublicUrl(objectPath);
+        nextCoverUrl = publicImage?.publicUrl || nextCoverUrl;
+      }
       const { error } = await supabase.from("profiles").upsert({
         id: session.user.id,
         display_name: cleanDisplayName,
         username: cleanUsername || null,
         bio: profileBio.trim(),
         avatar_url: nextAvatarUrl || null,
+        cover_url: nextCoverUrl || null,
         updated_at: new Date().toISOString(),
       }, { onConflict: "id" });
       if (error) throw error;
       setProfileUsername(cleanUsername);
       setProfileName(cleanDisplayName);
       setProfileAvatarUrl(nextAvatarUrl || "");
+      setProfileCoverUrl(nextCoverUrl || "");
       setProfileAvatarFile(null);
       setProfileAvatarPreview("");
+      setProfileCoverFile(null);
+      setProfileCoverPreview("");
       setFeedRefreshKey((current) => current + 1);
       setProfileMessage("Profil je spremljen u bazi zajednice.");
     } catch (error) {
@@ -1601,6 +1630,7 @@ function App() {
       likes: 0,
       comments: 0,
       icon: "💬",
+      authorId: data.author_id,
       owner: data.author_id === session.user.id,
     }, ...current]);
     setDraft("");
@@ -2139,7 +2169,7 @@ function App() {
           <p className="sidebar-foot">PatriaSoul · Znanje. Ponos. Nasljeđe.</p>
         </aside>
 
-        <section className="feed-column" aria-label="PatriaSoul – Čuvari nasljeđa">
+        <section className={profileOpen ? "feed-column profile-page-open" : "feed-column"} aria-label="PatriaSoul – Čuvari nasljeđa">
           <section className="welcome-panel" aria-label="Dobrodošlica u PatriaSoul">
             <div className="welcome-photo-layer" aria-hidden="true">
               <img
@@ -2256,44 +2286,48 @@ function App() {
           )}
 
           {profileOpen && session && (
-            <section className="profile-panel card" aria-labelledby="profile-title">
-              <div className="profile-cover-strip"><span>🇭🇷</span><div><strong>ČUVAR NASLJEĐA</strong><small>Tvoj identitet. Tvoja priča. Naša zajednica.</small></div><span className="profile-cover-star">✦</span></div>
-              <div className="auth-panel-heading">
-                <div>
-                  <span className="eyebrow">MOJ RAČUN</span>
-                  <h2 id="profile-title">Korisnički profil</h2>
-                  <p className="profile-email">{session.user?.email}</p>
-                </div>
-                <button type="button" className="auth-close" aria-label="Zatvori profil" onClick={() => setProfileOpen(false)}>×</button>
+            <section className="profile-panel card profile-page" aria-labelledby="profile-title">
+              <div className="profile-cover-photo" style={{ backgroundImage: profileCoverPreview ? `url("${profileCoverPreview}")` : profileCoverUrl ? `url("${profileCoverUrl}")` : undefined }}>
+                {!profileCoverPreview && !profileCoverUrl && <div className="profile-cover-default"><span>🇭🇷</span><strong>ČUVAR NASLJEĐA</strong><small>Tvoj identitet. Tvoja priča. Naša zajednica.</small></div>}
+                <label className="profile-cover-change" htmlFor="profile-cover-file">▧ Promijeni naslovnicu</label>
+                <input id="profile-cover-file" className="profile-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (!file) return; if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) { setProfileMessage("Naslovnica mora biti JPG, PNG, WebP ili GIF."); event.target.value = ""; return; } if (file.size > 10 * 1024 * 1024) { setProfileMessage("Slika naslovnice može imati najviše 10 MB."); event.target.value = ""; return; } setProfileCoverFile(file); setProfileCoverPreview(URL.createObjectURL(file)); setProfileMessage(""); }} />
               </div>
-              <div className="profile-editor-intro">
+              <div className="profile-page-toolbar">
+                <div><span className="eyebrow">MOJ PROSTOR</span><h2 id="profile-title">Moj profil</h2><p className="profile-email">{session.user?.email}</p></div>
+                <button type="button" className="outline-button" onClick={() => { setProfileOpen(false); setActiveNav("PatriaSoul"); }}>← Zid zajednice</button>
+              </div>
+              <div className="profile-identity-row">
                 <div className="profile-avatar-editor">
                   <Avatar initials={(profileName || profileUsername || session.user?.email || "Č").slice(0, 1).toLocaleUpperCase("hr")} src={profileAvatarPreview || profileAvatarUrl} variant="profile-avatar-large" />
-                  <label className="profile-upload-button" htmlFor="profile-avatar-file">＋ Promijeni sliku</label>
-                  <input id="profile-avatar-file" className="profile-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (!file) return; if (!file.type.startsWith("image/")) { setProfileMessage("Odaberi slikovnu datoteku."); event.target.value = ""; return; } if (file.size > 10 * 1024 * 1024) { setProfileMessage("Slika profila može imati najviše 10 MB."); event.target.value = ""; return; } if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) { setProfileMessage("Podržani formati su JPG, PNG, WebP i GIF."); event.target.value = ""; return; } setProfileAvatarFile(file); setProfileAvatarPreview(URL.createObjectURL(file)); setProfileMessage(""); }} />
-                  <small>JPG, PNG, WebP ili GIF · do 10 MB. Slika profila vidljiva je osobama koje mogu vidjeti tvoj profil.</small>
+                  <label className="profile-upload-button" htmlFor="profile-avatar-file">＋ Promijeni profilnu sliku</label>
+                  <input id="profile-avatar-file" className="profile-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (!file) return; if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) { setProfileMessage("Profilna slika mora biti JPG, PNG, WebP ili GIF."); event.target.value = ""; return; } if (file.size > 10 * 1024 * 1024) { setProfileMessage("Profilna slika može imati najviše 10 MB."); event.target.value = ""; return; } setProfileAvatarFile(file); setProfileAvatarPreview(URL.createObjectURL(file)); setProfileMessage(""); }} />
                 </div>
-                <div className="profile-completion">
-                  <span className="eyebrow">TVOJ PROFIL</span>
-                  <strong>{[profileName.trim(), profileUsername.trim(), profileBio.trim(), profileAvatarFile || profileAvatarUrl].filter(Boolean).length}/4</strong>
-                  <p>{[profileName.trim(), profileUsername.trim(), profileBio.trim(), profileAvatarFile || profileAvatarUrl].filter(Boolean).length === 4 ? "Profil je spreman za predstavljanje." : "Dodaj nekoliko detalja da te zajednica lakše upozna."}</p>
-                  <div className="profile-progress-track"><span style={{ width: `${[profileName.trim(), profileUsername.trim(), profileBio.trim(), profileAvatarFile || profileAvatarUrl].filter(Boolean).length * 25}%` }} /></div>
-                </div>
+                <div className="profile-completion"><span className="eyebrow">TVOJ PROFIL</span><strong>{profileName.trim() || "Ime za prikaz"}</strong><small>@{profileUsername.trim().replace(/^@/, "") || "korisnicko_ime"}</small><p>{profileBio.trim() || "Dodaj kratki opis kako bi te zajednica lakše upoznala."}</p></div>
               </div>
               <form className="auth-form profile-edit-form" onSubmit={saveProfile}>
+                <div className="profile-form-heading"><h3>Uredi podatke profila</h3><span>Promjene se spremaju u Supabase</span></div>
                 <label htmlFor="profile-name">Ime za prikaz</label>
-                <input id="profile-name" value={profileName} onChange={(event) => setProfileName(event.target.value)} maxLength={60} placeholder="Kako da te zajednica oslovljava?" />
+                <input id="profile-name" value={profileName} onChange={(event) => setProfileName(event.target.value)} maxLength={60} required placeholder="Kako da te zajednica oslovljava?" />
                 <label htmlFor="profile-username">Korisničko ime</label>
                 <input id="profile-username" value={profileUsername} onChange={(event) => setProfileUsername(event.target.value)} maxLength={24} autoComplete="username" placeholder="npr. cuvar_bastine" />
                 <small className="profile-hint">3–24 znaka; slova, brojevi, točka, crtica ili podvlaka.</small>
                 <label htmlFor="profile-bio">O meni</label>
                 <textarea id="profile-bio" className="profile-bio-input" value={profileBio} onChange={(event) => setProfileBio(event.target.value)} maxLength={240} rows={3} placeholder="Napiši nekoliko riječi o svojim interesima…" />
                 <small className="profile-hint">{profileBio.length}/240 znakova</small>
-                <div className="profile-preview-card"><span className="profile-preview-icon">✦</span><div><strong>{profileName.trim() || "Ime za prikaz"}</strong><small>{profileUsername.trim() ? `@${profileUsername.trim().replace(/^@/, "")}` : "@tvoje_korisnicko_ime"}</small><p>{profileBio.trim() || "Ovdje će se prikazati tvoja kratka priča i interesi."}</p></div></div>
-                <button className="auth-submit profile-save-button" type="submit" disabled={profileBusy}>{profileBusy ? "Spremanje…" : "✓  Spremi profil"}</button>
+                <button className="auth-submit profile-save-button" type="submit" disabled={profileBusy}>{profileBusy ? "Spremanje…" : "✓ Spremi promjene profila"}</button>
               </form>
               {profileMessage && <p className="auth-message" role="status">{profileMessage}</p>}
-              <p className="auth-footnote">Ovi podaci služe za prikaz profila. Korisnički metapodaci nisu dokaz ovlasti; prava pristupa moraju se provoditi pravilima baze.</p>
+              <section className="profile-posts-section" aria-labelledby="profile-posts-title">
+                <div className="profile-posts-heading"><div><span className="eyebrow">TVOJE OBJAVE</span><h3 id="profile-posts-title">Sve moje objave</h3><p>Objave su zajedničke: ovdje i na zidu zajednice prikazuje se isti zapis.</p></div><span className="profile-post-count">{posts.filter((post) => post.authorId === session.user.id).length}</span></div>
+                {posts.filter((post) => post.authorId === session.user.id).length ? posts.filter((post) => post.authorId === session.user.id).map((post) => (
+                  <article className="profile-post-item" key={post.id}>
+                    <div className="profile-post-meta"><Avatar initials={post.initials} src={post.avatarUrl} /><div><strong>{post.author}</strong><small>{post.time}</small></div></div>
+                    {post.text && <p>{post.text}</p>}
+                    {post.imageUrl && <img className="profile-post-image" src={post.imageUrl} alt="Fotografija uz objavu" loading="lazy" />}
+                    <button type="button" className="profile-view-wall-post" onClick={() => { setProfileOpen(false); setActiveNav("PatriaSoul"); }}>Prikaži na zidu zajednice ↗</button>
+                  </article>
+                )) : <div className="profile-empty-posts"><span>✦</span><strong>Ovdje će se prikazivati tvoje objave</strong><p>Kada nešto objaviš na zidu zajednice, automatski će se pojaviti i na tvom profilu.</p><button type="button" className="outline-button" onClick={() => { setProfileOpen(false); setActiveNav("PatriaSoul"); document.getElementById("post-draft")?.focus(); }}>＋ Napiši prvu objavu</button></div>}
+              </section>
             </section>
           )}
 
