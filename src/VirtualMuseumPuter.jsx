@@ -23,7 +23,7 @@ export default function MuseumPuterAssistant({ collection }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
-  const [memoryImage, setMemoryImage] = useState(null);
+  const [memoryImages, setMemoryImages] = useState([]);
   const [memoryTitle, setMemoryTitle] = useState("");
   const [memoryPlace, setMemoryPlace] = useState("");
   const [memoryYear, setMemoryYear] = useState("");
@@ -73,29 +73,46 @@ export default function MuseumPuterAssistant({ collection }) {
     }
   }
 
-  function chooseMemoryImage(event) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) { setError("Odaberi slikovnu datoteku."); event.target.value = ""; return; }
-    if (file.size > 10 * 1024 * 1024) { setError("Najveća dopuštena veličina slike je 10 MB."); event.target.value = ""; return; }
-    const reader = new FileReader();
-    reader.onload = () => { setMemoryImage({ name: file.name, dataUrl: String(reader.result || "") }); setError(""); setStatus("Fotografija je spremna za pregled. Još nije poslana na AI analizu niti dodana u muzejsku zbirku."); };
-    reader.onerror = () => setError("Slika se nije mogla učitati. Pokušaj ponovno.");
-    reader.readAsDataURL(file);
+  function chooseMemoryImages(event) {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+    const remaining = Math.max(0, 10 - memoryImages.length);
+    const selected = files.slice(0, remaining);
+    if (!selected.length) { setError("Možeš učitati najviše 10 fotografija odjednom."); event.target.value = ""; return; }
+    if (selected.some((file) => !file.type.startsWith("image/"))) { setError("Odaberi samo slikovne datoteke."); event.target.value = ""; return; }
+    if (selected.some((file) => file.size > 10 * 1024 * 1024)) { setError("Svaka fotografija može imati najviše 10 MB."); event.target.value = ""; return; }
+    Promise.all(selected.map((file) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve({ name: file.name, dataUrl: String(reader.result || "") });
+      reader.onerror = () => reject(new Error("Jedna od fotografija nije se mogla učitati."));
+      reader.readAsDataURL(file);
+    }))).then((loaded) => {
+      setMemoryImages((previous) => [...previous, ...loaded].slice(0, 10));
+      setError("");
+      setStatus("Fotografije su spremne za pregled. Još nisu poslane na AI analizu niti spremljene u muzejsku zbirku.");
+    }).catch((err) => setError(err.message || "Fotografije se nisu mogle učitati."));
+    event.target.value = "";
   }
 
   async function analyzeMemoryImage() {
-    if (!memoryImage || memoryBusy) return;
+    if (!memoryImages.length || memoryBusy) return;
     setMemoryBusy(true); setError(""); setStatus(""); setResult("");
     const context = [memoryTitle && "Naslov: " + memoryTitle, memoryPlace && "Mjesto: " + memoryPlace, memoryYear && "Godina/razdoblje: " + memoryYear, memoryStory && "Priča korisnika: " + memoryStory].filter(Boolean).join("\\n");
     try {
-      const imageNotes = await puter.ai.img2txt(memoryImage.dataUrl);
+      const imageNotes = await Promise.all(memoryImages.map(async (image, index) => {
+        try {
+          const notes = await puter.ai.img2txt(image.dataUrl);
+          return "FOTOGRAFIJA " + (index + 1) + " — " + image.name + ": " + String(notes || "Nije dobiven tekstualni opis.");
+        } catch {
+          return "FOTOGRAFIJA " + (index + 1) + " — " + image.name + ": analiza slike nije uspjela; nemoj nagađati njezin sadržaj.";
+        }
+      }));
       const reply = await puter.ai.chat([
         { role: "system", content: "Ti si Digitalni kustos PatriaSoul, asistent Virtualnog muzeja PatriaSoul. Odgovaraj na hrvatskom. Opis slike ili OCR može biti pogrešan. Ne identificiraj osobe, ne potvrđuj autentičnost, točnu godinu, mjesto, autorstvo ili podrijetlo bez dokaza. Odvoji vidljive detalje od korisnikovih tvrdnji i hipoteza. Ne izmišljaj činjenice ni izvore. Pripremi samo nacrt za ljudsku provjeru; ništa ne spremaj i ne objavljuj." },
-        { role: "user", content: "Pripremi nacrt muzejske kartice za fotografiju/uspomenu. Tekst dobiven analizom slike (može biti netočan): " + String(imageNotes || "Nije dobiven tekstualni opis.") + "\\nPodaci korisnika:\\n" + (context || "Nije dodan kontekst.") + "\\nVrati: neutralan opis vidljivog sadržaja, predloženi naslov, korisnikov kontekst označen kao nepotvrđeno svjedočanstvo, moguću zbirku, nedostajuće metapodatke, pitanja za korisnika, što se ne može zaključiti samo iz slike te napomenu o pravima i privatnosti. Ne pretvaraj pretpostavke u činjenice." }
+        { role: "user", content: "Pripremi muzejske kartice za sve učitane fotografije i na kraju predloži kako bi se mogle povezati u malu virtualnu izložbu. Za svaku fotografiju zasebno navedi naziv datoteke, predloženi naslov, neutralan opis, moguću zbirku, korisnikov kontekst označen kao nepotvrđeno svjedočanstvo, nedostajuće metapodatke, pitanja za korisnika, što se ne može zaključiti samo iz slike te napomenu o pravima i privatnosti. Zatim predloži naslov izložbe, kratak uvod, tematski redoslijed eksponata i kratke natpise. Ako fotografije nisu povezane, reci to i nemoj izmišljati poveznicu. Ne pretvaraj pretpostavke u činjenice.\n\nAnaliza fotografija (može biti netočna):\n" + imageNotes.join("\n") + "\n\nPodaci korisnika:\n" + (context || "Nije dodan kontekst.") }
       ]);
       setResult(responseText(reply));
-      setStatus("AI je pripremio prijedlog opisa. Fotografija nije dodana u muzejsku zbirku niti je javno objavljena. Provjeri opis, prava i privatnost prije daljnjeg korištenja.");
+      setStatus("Digitalni kustos pripremio je nacrte kartica i prijedlog izložbe na temelju učitanih fotografija. Ništa nije spremljeno u muzejsku zbirku niti javno objavljeno. Provjeri opise, činjenice, prava i privatnost.");
     } catch (err) {
       setError("Analiza fotografije trenutačno nije uspjela. Pokušaj ponovno za nekoliko trenutaka. " + (err?.message || ""));
     } finally { setMemoryBusy(false); }
@@ -126,9 +143,9 @@ export default function MuseumPuterAssistant({ collection }) {
     <textarea id="museum-puter-draft" className="museum-puter-textarea" value={draft} onChange={(event) => setDraft(event.target.value)} maxLength={8000} rows={4} placeholder="Ovdje možeš zalijepiti opis predmeta ili dokumenta za pregled…" />
     <section className="museum-memory-upload" aria-labelledby="museum-memory-title">
       <div className="museum-memory-title-row"><ImagePlus size={20} /><div><h3 id="museum-memory-title">Dodaj svoju uspomenu</h3><p>Učitaj fotografiju i zatraži pomoć AI kustosa pri pripremi muzejske kartice.</p></div></div>
-      <label className="museum-puter-label" htmlFor="museum-memory-file">Fotografija (najviše 10 MB)</label>
-      <input id="museum-memory-file" className="museum-memory-file" type="file" accept="image/*" onChange={chooseMemoryImage} />
-      {memoryImage && <div className="museum-memory-preview"><img src={memoryImage.dataUrl} alt="Pregled učitane fotografije" /><div><strong>{memoryImage.name}</strong><small>Privremeni pregled · nije spremljeno</small><button type="button" className="museum-memory-remove" onClick={() => setMemoryImage(null)}>Ukloni fotografiju</button></div></div>}
+      <label className="museum-puter-label" htmlFor="museum-memory-file">Fotografije (do 10 slika, najviše 10 MB po slici)</label>
+      <input id="museum-memory-file" className="museum-memory-file" type="file" accept="image/*" multiple onChange={chooseMemoryImages} />
+      {memoryImages.length > 0 && <div className="museum-memory-gallery">{memoryImages.map((image, index) => <div className="museum-memory-preview" key={image.name + index}><img src={image.dataUrl} alt={"Pregled fotografije " + (index + 1)} /><div><strong>{image.name}</strong><small>Privremeni pregled · nije spremljeno</small><button type="button" className="museum-memory-remove" onClick={() => setMemoryImages((previous) => previous.filter((_, i) => i !== index))}>Ukloni fotografiju</button></div></div>)}</div>}
       <div className="museum-memory-fields">
         <label>Naslov (neobavezno)<input className="museum-puter-input" value={memoryTitle} onChange={(event) => setMemoryTitle(event.target.value)} maxLength={160} placeholder="Npr. Obiteljska fotografija" /></label>
         <label>Mjesto (ako je poznato)<input className="museum-puter-input" value={memoryPlace} onChange={(event) => setMemoryPlace(event.target.value)} maxLength={160} placeholder="Grad, selo ili kraj" /></label>
@@ -136,7 +153,7 @@ export default function MuseumPuterAssistant({ collection }) {
       </div>
       <label className="museum-puter-label" htmlFor="museum-memory-story">Priča koju želiš sačuvati</label>
       <textarea id="museum-memory-story" className="museum-puter-textarea" value={memoryStory} onChange={(event) => setMemoryStory(event.target.value)} maxLength={3000} rows={3} placeholder="Što znaš o fotografiji ili predmetu? Nemoj unositi osjetljive osobne podatke." />
-      <button type="button" className="museum-puter-action" onClick={analyzeMemoryImage} disabled={!memoryImage || memoryBusy}><ImagePlus size={17} />{memoryBusy ? "AI pregledava sliku…" : "Pomozi mi opisati fotografiju"}</button>
+      <button type="button" className="museum-puter-action" onClick={analyzeMemoryImage} disabled={!memoryImages.length || memoryBusy}><ImagePlus size={17} />{memoryBusy ? "AI priprema kartice i izložbu…" : "Pripremi kartice i prijedlog izložbe"}</button>
       <p className="museum-puter-privacy">Fotografija se šalje vanjskoj AI usluzi radi analize tek kada odabereš gumb za pomoć. Ne dodaje se automatski u muzejsku zbirku niti se šalje uredništvu. Prije javne objave provjeri imaš li pravo dijeliti fotografiju i poštuje li se privatnost prikazanih osoba.</p>
     </section>
     <p className="museum-puter-privacy">Kada zatražiš pomoć, tekst i fotografija koje odabereš obrađuju se putem vanjske AI usluge. Nemoj slati lozinke, osobne dokumente ni druge povjerljive podatke. Prijedlozi se ne dodaju automatski u muzejsku zbirku i ne objavljuju se bez tvoje provjere.</p>
