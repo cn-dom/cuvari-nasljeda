@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 import FloatingGlobalChat from "./FloatingGlobalChat.jsx";
-import MuseumPuterAssistant from "./VirtualMuseumPuter.jsx";
 
 const navItems = [
   { icon: "⌂", label: "PatriaSoul" },
@@ -2178,9 +2177,6 @@ function App() {
           </section>
           <section className="side-section sidebar-nav-section today-sidebar-section">
             <h3>ISTRAŽI HRVATSKU</h3>
-            <button type="button" className={activeNav === "Virtualni muzej" ? "side-link selected virtual-museum-sidebar-link" : "side-link virtual-museum-sidebar-link"} onClick={() => { setProfileOpen(false); setProfileViewId(null); setActiveNav("Virtualni muzej"); }} aria-current={activeNav === "Virtualni muzej" ? "page" : undefined}>
-              <span className="side-icon" aria-hidden="true">🏛️</span><span className="side-link-label">Virtualni muzej</span><span className="today-sidebar-arrow" aria-hidden="true">↗</span>
-            </button>
             <a className="side-link today-sidebar-link" href="/na-danasnji-dan.html" title="Otvori povijesne događaje za odabrani datum">
               <span className="side-icon" aria-hidden="true">📅</span><span className="side-link-label">Na današnji dan</span><span className="today-sidebar-arrow" aria-hidden="true">↗</span>
             </a>
@@ -2240,25 +2236,7 @@ function App() {
           <p className="sidebar-foot">PatriaSoul · Znanje. Ponos. Nasljeđe.</p>
         </aside>
 
-        <section className={`feed-column${profileOpen || (profileViewId && profileViewId !== session?.user?.id) ? " profile-page-open" : ""}${activeNav === "Virtualni muzej" ? " virtual-museum-open" : ""}`} aria-label="PatriaSoul – Čuvari nasljeđa">
-          {activeNav === "Virtualni muzej" && (
-            <section className="virtual-museum-panel card" aria-labelledby="virtual-museum-title">
-              <div className="virtual-museum-hero">
-                <span className="eyebrow">PATRiASOUL · DIGITALNA BAŠTINA</span>
-                <h1 id="virtual-museum-title">Virtualni muzej PatriaSoul</h1>
-                <p>Stvori svoj virtualni muzej od fotografija i uspomena. Digitalni kustos pomoći će ti pripremiti muzejske kartice i predložiti izložbu.</p>
-                <div className="virtual-museum-hero-badges"><span>📷 Tvoje fotografije</span><span>✦ Digitalni kustos</span><span>🏛️ Tvoja izložba</span></div>
-              </div>
-              <div className="virtual-museum-intro">
-                <div><span className="eyebrow">TVOJ MUZEJ POČINJE OVDJE</span><h2>Od fotografija do izložbe</h2><p>Učitaj jednu ili više fotografija, dodaj priču ako je znaš, a digitalni kustos pripremit će nacrte kartica i prijedlog kako ih predstaviti u virtualnoj izložbi.</p></div>
-                <span className="virtual-museum-emblem" aria-hidden="true">🏛️</span>
-              </div>
-              <MuseumPuterAssistant />
-              <div className="virtual-museum-note"><strong>Ti čuvaš priču. Kustos pomaže oblikovati izložbu.</strong><p>Pregledaj i ispravi svaki prijedlog prije spremanja ili objave. AI ne potvrđuje sam autentičnost, datume ni podrijetlo, a fotografije se ne objavljuju automatski.</p></div>
-              <button type="button" className="outline-button virtual-museum-back" onClick={() => setActiveNav("PatriaSoul")}>← Povratak na zid zajednice</button>
-            </section>
-          )}
-          
+        <section className={`feed-column${profileOpen || (profileViewId && profileViewId !== session?.user?.id) ? " profile-page-open" : ""}`} aria-label="PatriaSoul – Čuvari nasljeđa">
           <section className="welcome-panel" aria-label="Dobrodošlica u PatriaSoul">
             <div className="welcome-photo-layer" aria-hidden="true">
               <img
