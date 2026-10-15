@@ -52,6 +52,21 @@ const exhibits = [
     image: "https://commons.wikimedia.org/wiki/Special:FilePath/Nosnje_Medjimurje_EMZ_300109.jpg",
     source: "https://commons.wikimedia.org/wiki/File:Nosnje_Medjimurje_EMZ_300109.jpg",
     sourceLabel: "Wikimedia Commons · zapis datoteke", credit: "Roberta F.", license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/"
+  },
+  {
+    id: "paska-cipka", title: "Paška čipka", period: "Tradicijska čipkarska vještina · otok Pag", type: "Nematerijalna baština",
+    description: "Paška čipka jedna je od prepoznatljivih hrvatskih tradicija izrade čipke iglom. Predmet u vitrini predstavlja uzorak čipke kao tekstilni izložak; nije digitalni sken pojedinačnog povijesnog primjerka.",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Pa%C5%A1ka_%C4%8Dipka_-_izlo%C5%A1ci.2.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Pa%C5%A1ka_%C4%8Dipka_-_izlo%C5%A1ci.2.jpg",
+    sourceLabel: "Wikimedia Commons · izlošci paške čipke", credit: "Silverije", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+    relatedSources: [{ label: "UNESCO · lacemaking in Croatia", url: "https://ich.unesco.org/", kind: "Međunarodni registar nematerijalne baštine" }]
+  },
+  {
+    id: "zagorske-igracke", title: "Tradicijska drvena igračka", period: "Tradicijska izrada · Hrvatsko zagorje", type: "Obrt i svakodnevni život",
+    description: "Ručно izrađene i oslikane drvene igračke dio su tradicije Hrvatskog zagorja. Ovaj 3D prikaz stilizirana je replika drvene zviždaljke/igračke, dok povezana fotografija dokumentira tradiciju izrade u Kumrovcu.",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Croatia-00671_-_Toy_Maker%27s_House_%289370325327%29.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Croatia-00671_-_Toy_Maker%27s_House_%289370325327%29.jpg",
+    sourceLabel: "Wikimedia Commons · tradicijska izrada igračaka", credit: "Podaci i licenca navedeni na stranici datoteke", license: "Provjeriti na izvornoj stranici prije daljnjeg korištenja", licenseUrl: "https://commons.wikimedia.org/wiki/File:Croatia-00671_-_Toy_Maker%27s_House_%289370325327%29.jpg"
   }
 ];
 
@@ -158,6 +173,26 @@ function MuseumScene({ onSelect }) {
         add(new THREE.TorusGeometry(.32,.022,8,40),reliefDark,x,1.08,z+.06);
         add(new THREE.BoxGeometry(.07,.4,.035),reliefDark,x,1.08,z+.07);
         add(new THREE.BoxGeometry(.3,.07,.035),reliefDark,x,1.08,z+.07);
+      } else if (i === 5) {
+        // Paška čipka: three-dimensional lace-like textile pattern held in a small display frame.
+        const frameMat = new THREE.MeshStandardMaterial({ color: "#b99a58", metalness: .45, roughness: .4 });
+        add(new THREE.BoxGeometry(.92, .92, .055), frameMat, x, 1.22, z);
+        add(new THREE.BoxGeometry(.82, .82, .045), new THREE.MeshStandardMaterial({ color: "#e8ddc4", roughness: 1 }), x, 1.22, z+.04);
+        const laceMat = new THREE.MeshStandardMaterial({ color: "#f7f0df", roughness: .95 });
+        for (let n=0;n<8;n++) {
+          const a=n*Math.PI/4;
+          const loop=new THREE.Mesh(new THREE.TorusGeometry(.19,.022,6,24),laceMat);
+          loop.position.set(x+Math.cos(a)*.17,1.22+Math.sin(a)*.17,z+.085);
+          loop.scale.set(.62,1.0,1); loop.userData.exhibitId=item.id; scene.add(loop); clickable.push(loop);
+        }
+        add(new THREE.TorusGeometry(.11,.025,6,24),laceMat,x,1.22,z+.09);
+      } else if (i === 6) {
+        // Traditional painted wooden toy: turned body, tapered ends and colored rings.
+        const toyWood = new THREE.MeshStandardMaterial({ color: "#d4a35d", roughness: .72 });
+        add(new THREE.CylinderGeometry(.14,.2,.52,12),toyWood,x,1.12,z,1,1,1,Math.PI/2);
+        add(new THREE.ConeGeometry(.17,.32,12),toyWood,x,1.52,z,1,1,1,Math.PI);
+        add(new THREE.ConeGeometry(.14,.28,12),toyWood,x,.78,z);
+        for(let n=0;n<3;n++) add(new THREE.TorusGeometry(.15,.025,6,24),new THREE.MeshStandardMaterial({color:["#b73b32","#e4c44e","#3d7956"][n],roughness:.65}),x,1.03+n*.09,z+.16,1,.8,1);
       } else {
         // Tradicijska nošnja kao mali trodimenzionalni kostimirani model.
         add(new THREE.SphereGeometry(.12,18,14),limestone,x,1.9,z);
