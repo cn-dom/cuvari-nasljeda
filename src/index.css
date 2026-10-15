@@ -1568,3 +1568,39 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
 .post-share-options button:hover,.post-share-options button:focus-visible{border-color:#6d9ed3;background:#edf5ff;transform:translateY(-1px)}
 .post-share-menu>small{display:block;margin-top:11px;color:var(--muted,#718096);font-size:10px;line-height:1.55}
 @media(max-width:560px){.post-share-menu{padding:11px}.post-share-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.post-share-options button{justify-content:flex-start;min-width:0;padding:10px 8px;font-size:10px}}
+
+
+/* PatriaSoul — moderni uređivač profila */
+.profile-cover-strip{display:flex;align-items:center;gap:12px;margin:-20px -20px 20px;padding:20px 22px;min-height:94px;color:#fff;background:linear-gradient(115deg,#102744 0%,#174c78 56%,#176a91 100%);border-radius:13px 13px 0 0;position:relative;overflow:hidden}
+.profile-cover-strip:after{content:"";position:absolute;width:190px;height:190px;right:-48px;top:-100px;border:1px solid #ffffff26;border-radius:50%;box-shadow:0 0 0 20px #ffffff08,0 0 0 42px #ffffff06}
+.profile-cover-strip>span:first-child{font-size:27px;filter:drop-shadow(0 2px 6px #0004)}
+.profile-cover-strip>div{display:flex;flex-direction:column;gap:5px;z-index:1}
+.profile-cover-strip strong{font-size:11px;letter-spacing:1.5px}
+.profile-cover-strip small{color:#d7e7f4;font-size:12px}
+.profile-cover-star{margin-left:auto;color:#f2c66d;font-size:26px;z-index:1}
+.profile-editor-intro{display:grid;grid-template-columns:148px minmax(0,1fr);gap:20px;align-items:center;margin:0 0 22px;padding:18px;border:1px solid #e5ebf1;border-radius:14px;background:linear-gradient(135deg,#f8fbfe,#f1f6fb)}
+.profile-avatar-editor{display:flex;align-items:center;flex-direction:column;gap:8px;text-align:center}
+.profile-avatar-large{width:92px!important;height:92px!important;min-width:92px;border:3px solid #fff!important;box-shadow:0 4px 18px #17314a20;font-size:27px!important}
+.profile-avatar-large img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.profile-upload-button{display:inline-flex;align-items:center;justify-content:center;padding:7px 10px;border:1px solid #c8d8e6;border-radius:999px;background:#fff;color:#174a70;font-size:11px;font-weight:800;cursor:pointer;transition:background .18s,border-color .18s}
+.profile-upload-button:hover{background:#eaf4fb;border-color:#87abc7}
+.profile-file-input{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;clip-path:inset(50%)}
+.profile-avatar-editor>small{max-width:145px;color:#77889a;font-size:10px;line-height:1.45}
+.profile-completion{min-width:0}
+.profile-completion>.eyebrow{color:#47718f;font-size:10px;letter-spacing:1.3px}
+.profile-completion>strong{display:block;margin:6px 0 3px;color:#163651;font-size:27px;line-height:1.1}
+.profile-completion>p{margin:0 0 12px;color:#6f7f8f;font-size:12px;line-height:1.5}
+.profile-progress-track{height:6px;overflow:hidden;border-radius:99px;background:#dce7f0}
+.profile-progress-track span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#c53d4c,#e2a949,#2e8bb5);transition:width .25s ease}
+.profile-edit-form{gap:9px}
+.profile-edit-form label:not(.profile-upload-button){margin-top:4px;font-weight:750;color:#243b50}
+.profile-edit-form input:not([type=file]),.profile-edit-form textarea{border-radius:10px!important;border-color:#d9e3eb!important;transition:border-color .18s,box-shadow .18s}
+.profile-edit-form input:focus,.profile-edit-form textarea:focus{outline:none;border-color:#5b9ac3!important;box-shadow:0 0 0 3px #5b9ac320}
+.profile-preview-card{display:flex;gap:12px;align-items:flex-start;margin:8px 0 4px;padding:14px;border:1px solid #e3eaf0;border-radius:12px;background:#fbfdff}
+.profile-preview-icon{display:grid;place-items:center;flex:0 0 30px;height:30px;border-radius:9px;background:#e8f2fa;color:#205c82;font-size:17px}
+.profile-preview-card>div{min-width:0}
+.profile-preview-card strong{display:block;color:#1c3349;font-size:13px;overflow-wrap:anywhere}
+.profile-preview-card small{display:block;margin-top:2px;color:#39769b;font-size:11px}
+.profile-preview-card p{margin:7px 0 0;color:#697b8c;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.profile-save-button{margin-top:5px;min-height:46px;letter-spacing:.1px;box-shadow:0 6px 16px #153b5917}
+@media(max-width:520px){.profile-panel{padding:15px}.profile-cover-strip{margin:-15px -15px 16px;padding:17px 16px;min-height:84px}.profile-editor-intro{grid-template-columns:1fr;gap:16px;padding:15px}.profile-avatar-editor{gap:7px}.profile-completion{text-align:center}.profile-progress-track{max-width:260px;margin:0 auto}.profile-completion>p{margin-bottom:9px}}
