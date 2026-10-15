@@ -118,36 +118,55 @@ function MuseumScene({ onSelect }) {
       caseGlass.position.set(x, 1.2, z); scene.add(caseGlass);
       const top = new THREE.Mesh(new THREE.BoxGeometry(2.45, .09, 1.65), gold);
       top.position.set(x, 1.94, z); scene.add(top);
-      // Keep the symbolic 3D object as a small secondary element, and display the real source photograph in the vitrine.
-      const object = i === 0
-        ? new THREE.Mesh(new THREE.SphereGeometry(.28, 28, 18), objectMaterials[i])
-        : i === 1
-          ? new THREE.Mesh(new THREE.BoxGeometry(.48, .56, .12), objectMaterials[i])
-          : i === 2
-            ? new THREE.Mesh(new THREE.TorusKnotGeometry(.22, .075, 90, 12), objectMaterials[i])
-            : i === 3
-              ? new THREE.Mesh(new THREE.CylinderGeometry(.28, .28, .09, 36), objectMaterials[i])
-              : new THREE.Mesh(new THREE.ConeGeometry(.26, .58, 5), objectMaterials[i]);
-      object.position.set(x - .53, .98, z); object.castShadow = true; object.userData.exhibitId = item.id; scene.add(object); clickable.push(object);
-
-      // A vertical image panel sits inside the glass case. The source photo is the primary exhibit image.
-      const imageFrame = new THREE.Mesh(new THREE.BoxGeometry(1.08, .96, .055), gold);
-      imageFrame.position.set(x + .43, 1.22, z + .57); scene.add(imageFrame);
-      const imageMaterial = new THREE.MeshBasicMaterial({ color: 0xe7dfcd, side: THREE.DoubleSide });
-      const imagePanel = new THREE.Mesh(new THREE.PlaneGeometry(1.0, .88), imageMaterial);
-      imagePanel.position.set(x + .43, 1.22, z + .535); imagePanel.userData.exhibitId = item.id; scene.add(imagePanel); clickable.push(imagePanel);
-      const loader = new THREE.TextureLoader();
-      loader.setCrossOrigin("anonymous");
-      loader.load(item.image, texture => {
-        texture.colorSpace = THREE.SRGBColorSpace;
-        texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-        imageMaterial.map = texture;
-        imageMaterial.color.set(0xffffff);
-        imageMaterial.needsUpdate = true;
-      }, undefined, () => {
-        // Keep the framed panel visible if a remote source blocks texture loading.
-        imageMaterial.color.set(0x9a8b70);
-      });
+      // Modelirani 3D izlošci — nema više smeđe zamjenske plohe ni ravnog foto-panela.
+      const clay = new THREE.MeshStandardMaterial({ color: "#78452f", roughness: .82 });
+      const limestone = new THREE.MeshStandardMaterial({ color: "#b6a88c", roughness: .96 });
+      const reliefDark = new THREE.MeshStandardMaterial({ color: "#514331", roughness: .9 });
+      const coinGold = new THREE.MeshStandardMaterial({ color: "#b69a58", metalness: .7, roughness: .3 });
+      const garment = new THREE.MeshStandardMaterial({ color: "#7d2928", roughness: .95 });
+      const add = (geometry, material, px, py, pz, sx=1, sy=1, sz=1, rz=0) => {
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(px, py, pz); mesh.scale.set(sx, sy, sz); mesh.rotation.z = rz;
+        mesh.castShadow = true; mesh.receiveShadow = true; mesh.userData.exhibitId = item.id;
+        scene.add(mesh); clickable.push(mesh); return mesh;
+      };
+      if (i === 0) {
+        // Vučedolska keramička ptica: tijelo, vrat, glava, kljun, rep i ukrasni prstenovi.
+        add(new THREE.SphereGeometry(.34, 28, 20), clay, x-.12, 1.02, z, 1.25, .78, .78);
+        add(new THREE.CylinderGeometry(.09, .13, .55, 16), clay, x+.2, 1.42, z, 1, 1, 1, -.24);
+        add(new THREE.SphereGeometry(.16, 20, 16), clay, x+.34, 1.7, z);
+        add(new THREE.ConeGeometry(.065, .19, 8), reliefDark, x+.49, 1.7, z, 1, 1, 1, -Math.PI/2);
+        add(new THREE.ConeGeometry(.16, .3, 7), clay, x-.51, 1.04, z, 1, 1, .7, Math.PI/2);
+        for (let n=0;n<3;n++) add(new THREE.TorusGeometry(.28+n*.035,.014,6,36),reliefDark,x-.12,.91+n*.1,z,1.15,.75,.8);
+        add(new THREE.CylinderGeometry(.025,.035,.18,8),reliefDark,x-.2,.68,z);
+        add(new THREE.CylinderGeometry(.025,.035,.18,8),reliefDark,x+.02,.68,z);
+      } else if (i === 1) {
+        // Kamena ploča nepravilnog obrisa s reljefno naznačenim redovima natpisa.
+        const shape = new THREE.Shape();
+        shape.moveTo(-.48,-.65); shape.lineTo(.4,-.7); shape.lineTo(.54,-.4); shape.lineTo(.48,.55); shape.lineTo(.25,.7); shape.lineTo(-.45,.65); shape.lineTo(-.56,.25); shape.closePath();
+        const slab = new THREE.Mesh(new THREE.ExtrudeGeometry(shape,{depth:.16,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.025,bevelThickness:.025}),limestone);
+        slab.position.set(x,1.15,z); slab.castShadow=true; slab.userData.exhibitId=item.id; scene.add(slab); clickable.push(slab);
+        for(let n=0;n<8;n++) for(let k=0;k<3;k++) add(new THREE.BoxGeometry(.2,.018,.025),reliefDark,x-.22+k*.2,1.65-n*.145,z+.1,1,1,1,(n%2?.1:-.1));
+      } else if (i === 2) {
+        // Kameni ulomak s izdignutim pleternim vrpcama.
+        add(new THREE.BoxGeometry(1.02,1.12,.16),limestone,x,1.15,z);
+        const paths=[[[-.38,.82],[-.15,1.45],[.15,.82],[.38,1.45]],[[-.38,1.45],[-.15,.82],[.15,1.45],[.38,.82]]];
+        paths.forEach(points=>{const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(x+p[0],p[1],z+.12)));const mesh=new THREE.Mesh(new THREE.TubeGeometry(curve,36,.045,8,false),reliefDark);mesh.userData.exhibitId=item.id;scene.add(mesh);clickable.push(mesh);});
+      } else if (i === 3) {
+        // Novac s izdignutim rubom i križem.
+        add(new THREE.CylinderGeometry(.4,.4,.1,48),coinGold,x,1.08,z,1,1,1,Math.PI/2);
+        add(new THREE.TorusGeometry(.32,.022,8,40),reliefDark,x,1.08,z+.06);
+        add(new THREE.BoxGeometry(.07,.4,.035),reliefDark,x,1.08,z+.07);
+        add(new THREE.BoxGeometry(.3,.07,.035),reliefDark,x,1.08,z+.07);
+      } else {
+        // Tradicijska nošnja kao mali trodimenzionalni kostimirani model.
+        add(new THREE.SphereGeometry(.12,18,14),limestone,x,1.9,z);
+        add(new THREE.CylinderGeometry(.12,.15,.35,16),limestone,x,1.65,z);
+        add(new THREE.CylinderGeometry(.15,.4,.78,24,1,true),garment,x,1.12,z);
+        add(new THREE.CylinderGeometry(.4,.42,.08,24),garment,x,.72,z);
+        add(new THREE.CylinderGeometry(.045,.055,.42,10),limestone,x-.2,1.38,z,1,1,1,-.2);
+        add(new THREE.CylinderGeometry(.045,.055,.42,10),limestone,x+.2,1.38,z,1,1,1,.2);
+      }
       const label = new THREE.Mesh(new THREE.PlaneGeometry(2.1, .5), new THREE.MeshBasicMaterial({ map: createLabelTexture(item.title), side: THREE.DoubleSide }));
       label.position.set(x, .64, z + .82); label.rotation.x = -.08; scene.add(label);
       const light = new THREE.SpotLight(0xffdf9a, 38, 8, Math.PI / 5, .45, 1.2);
