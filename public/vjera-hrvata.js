@@ -24,7 +24,7 @@ document.querySelectorAll(".prayer-item").forEach(button=>button.addEventListene
 const weekday=["nedjelja","ponedjeljak","utorak","srijeda","četvrtak","petak","subota"][new Date(today.iso+"T12:00:00+02:00").getDay()];
 const slug=weekday+"-"+Number(today.day)+"-"+Number(today.month)+"-"+today.year;
 const setText=(id,text)=>{const el=document.getElementById(id);if(el)el.textContent=text;};
-const clean=s=>String(s||"").replace(/\[([^\]]+)\]\([^)]+\)/g,"$1").replace(/[]/g," ").replace(/[*_>#`]/g,"").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#39;|&apos;/g,"'").replace(/\s+/g," ").trim();
+const clean=s=>String(s||"").replace(/\[([^\]]+)\]\([^)]+\)/g,"$1").replace(/[]/g," ").replace(/\b(?:U kalendaru|Podijelite|Markdown)\b/gi," ").replace(/[*_>#`]/g,"").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#39;|&apos;/g,"'").replace(/\s+/g," ").trim();
 const findSection=(source,heading)=>{
  const escaped=heading.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
  const re=new RegExp("(?:^|\\n)#{1,5}\\s*"+escaped+"\\s*:?\\s*\\n([\\s\\S]*?)(?=\\n#{1,5}\\s|$)","i");
@@ -59,9 +59,9 @@ const loadLiturgy=async()=>{
      const normalized=dateMatch[0].replace(/\s/g,"").replace(/,/g,"").replace(/\.$/,"");
      if(!normalized.includes(expected))throw new Error("Izvor je vratio podatke za drugi datum.");
    }
-   const headingIndex=raw.search(/#{1,6}\s*Evanđelje\s*:?\s*(?:\n|$)/i);
+   const headingMatch=raw.match(/^\s*#{1,6}\s*Evanđelje\b[^\n]*$/im);\n   const headingIndex=headingMatch?raw.indexOf(headingMatch[0]):-1;
    if(headingIndex<0)throw new Error("U zapisu nije pronađeno poglavlje Evanđelje.");
-   let section=raw.slice(headingIndex).replace(/^#{1,6}\s*Evanđelje\s*:?\s*/i,"");
+   let section=raw.slice(headingIndex).replace(/^\s*#{1,6}\s*Evanđelje\b[^\n]*\n?/i,"");
    section=section.split(/\n#{1,6}\s*(?:Izvor|Poveznice|Napomene)\b/i)[0];
    // Očisti navigaciju i kontaktne podatke koje izvor može dodati iza Evanđelja.
    const lines=section.split(/\n+/).map(clean).filter(Boolean)
