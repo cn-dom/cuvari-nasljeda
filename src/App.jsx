@@ -164,6 +164,18 @@ function App() {
   const [authBusy, setAuthBusy] = useState(false);
   const [authMessage, setAuthMessage] = useState("");
   const [session, setSession] = useState(null);
+
+  // The login panel is rendered inline farther down the page; bring it into view when requested.
+  useEffect(() => {
+    if (!authOpen) return undefined;
+    const frame = window.requestAnimationFrame(() => {
+      const panel = document.querySelector(".auth-layout-card");
+      if (!panel) return;
+      panel.scrollIntoView({ behavior: "smooth", block: "center" });
+      panel.querySelector("input")?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [authOpen]);
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [profileUsername, setProfileUsername] = useState("");
@@ -346,6 +358,22 @@ function App() {
   }, [session?.user?.id]);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const oauthError = params.get("error_description") || params.get("error");
+    if (!oauthError) return;
+    const normalized = oauthError.replace(/\+/g, " ");
+    setAuthOpen(true);
+    setAuthMode("login");
+    setAuthMessage(/access_denied/i.test(normalized)
+      ? "Google prijava je otkazana ili nije odobrena."
+      : "Google prijava nije dovršena. Provjeri postavke Google pružatelja i dopuštene povratne adrese u Supabaseu.");
+    params.delete("error");
+    params.delete("error_description");
+    const query = params.toString();
+    window.history.replaceState({}, "", window.location.pathname + (query ? `?${query}` : "") + window.location.hash);
+  }, []);
+
+  useEffect(() => {
     if (!supabase) return undefined;
     supabase.auth.getSession().then(({ data, error }) => {
       if (error) setAuthMessage("Sesiju nije moguće učitati. Pokušaj ponovno.");
@@ -374,6 +402,31 @@ function App() {
     setNotice("PatriaSoul ti je pripremio objavu rezultata. Provjeri tekst i klikni „Objavi” kada budeš spreman/spremna.");
     window.history.replaceState({}, "", window.location.pathname + window.location.hash);
   }, []);
+
+  async function signInWithGoogle() {
+    if (!supabase || !isSupabaseConfigured) {
+      setAuthMessage("Prijava trenutačno nije dostupna jer veza s uslugom za račune nije postavljena.");
+      return;
+    }
+    setAuthBusy(true);
+    setAuthMessage("");
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: window.location.origin },
+      });
+      if (error) throw error;
+    } catch (error) {
+      const rawMessage = String(error?.message || "");
+      const message = /provider is not enabled|unsupported provider/i.test(rawMessage)
+        ? "Prijava Googleom još nije uključena u postavkama autentifikacije. Potrebno je omogućiti Google pružatelja u Supabaseu."
+        : /redirect|url.*not allowed|unauthorized domain/i.test(rawMessage)
+          ? "Adresa ove stranice nije dopuštena za povratak nakon Google prijave. Provjeri URL-ove preusmjeravanja u Supabase Auth postavkama."
+          : rawMessage || "Prijava Googleom nije uspjela. Pokušaj ponovno.";
+      setAuthMessage(message);
+      setAuthBusy(false);
+    }
+  }
 
   async function submitAuth(event) {
     event.preventDefault();
@@ -2592,6 +2645,15 @@ function App() {
                   <strong>Testna veza još nije postavljena.</strong>
                   <span>Obrazac je pripremljen, ali prijava neće slati podatke dok se ne postave VITE_SUPABASE_URL i VITE_SUPABASE_PUBLISHABLE_KEY za zasebni testni projekt.</span>
                 </div>
+              )}
+              {authMode !== "reset" && (
+                <>
+                  <button type="button" className="auth-google-button" onClick={signInWithGoogle} disabled={!isSupabaseConfigured || authBusy}>
+                    <span className="auth-google-mark" aria-hidden="true">G</span>
+                    {authBusy ? "Povezivanje…" : authMode === "register" ? "Nastavi s Googleom" : "Prijavi se Googleom"}
+                  </button>
+                  <div className="auth-divider"><span>ili e-poštom</span></div>
+                </>
               )}
               <form className="auth-form" onSubmit={submitAuth}>
                 <label htmlFor="auth-email">E-pošta</label>

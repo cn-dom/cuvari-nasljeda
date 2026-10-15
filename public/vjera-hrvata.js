@@ -40,7 +40,8 @@ const loadSaintFallback=async()=>{
    setText("saint-description","Spomendan i imendani prema "+data.source+".");
    setText("gospel-response","Evanđelje se trenutačno ne može dohvatiti; podatak o svecu učitan je zasebno iz katoličkog kalendara.");
  }catch(error){
-   await loadSaintFallback();
+   setText("saint-heading","Podatak trenutačno nije dostupan");
+   setText("saint-description","Provjereni katolički kalendar trenutačno nije dostupan. Pokušaj ponovno kasnije.");
    console.warn("PatriaSoul saint fallback:",error);
  }
 };
@@ -101,7 +102,8 @@ const loadLiturgy=async()=>{
    if(gospelText)gospelText.textContent="PatriaSoul nije uspio učitati potvrđeni tekst iz liturgijskog izvora. Pokušat će se ponovno pri sljedećem otvaranju stranice.";
    setText("gospel-response","Izvor liturgije trenutačno nije dostupan. Pokušaj ponovno kasnije.");
    setText("saint-heading","Podatak trenutačno nije dostupan");
-   setText("saint-description","Svetac ili spomendan prikazat će se čim provjereni liturgijski kalendar bude dostupan.");
+   setText("saint-description","Učitavam podatak iz zasebnog katoličkog kalendara.");
+   await loadSaintFallback();
    console.warn("PatriaSoul liturgy load:",error);
  }
 };
