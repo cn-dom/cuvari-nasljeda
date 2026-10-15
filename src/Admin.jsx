@@ -26,6 +26,7 @@ function dateLabel(value) {
 
 export default function Admin() {
   const [session, setSession] = useState(null);
+  const [profileRole, setProfileRole] = useState("member");
   const [authReady, setAuthReady] = useState(false);
   const [activeModule, setActiveModule] = useState("overview");
   const [rows, setRows] = useState([]);
@@ -52,6 +53,25 @@ export default function Admin() {
   }, []);
 
   const isOwner = (session?.user?.email || "").trim().toLowerCase() === OWNER_EMAIL;
+  const isAdmin = isOwner || profileRole === "admin";
+  const canModerate = isAdmin || profileRole === "moderator";
+  const visibleModules = modules.filter(item => {
+    if (isOwner) return true;
+    if (profileRole === "admin") return item.id !== "groups";
+    if (profileRole === "moderator") return ["overview", "posts", "reports", "comments"].includes(item.id);
+    return false;
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadRole() {
+      if (!supabase || !session?.user?.id) { setProfileRole("member"); return; }
+      const { data } = await supabase.from("profiles").select("role").eq("id", session.user.id).maybeSingle();
+      if (!cancelled) setProfileRole(data?.role || "member");
+    }
+    loadRole();
+    return () => { cancelled = true; };
+  }, [session?.user?.id]);
 
   useEffect(() => {
     let cancelled = false;
@@ -59,7 +79,7 @@ export default function Admin() {
       setRows([]);
       setError("");
       setNotice("");
-      if (!isOwner || !supabase) { setDbStatus("nije"); return; }
+      if (!canModerate || !supabase || !visibleModules.some(item => item.id === activeModule)) { setDbStatus("nije"); setBusy(false); return; }
       setDbStatus("provjera");
       if (activeModule === "overview") {
         setBusy(true);
@@ -132,7 +152,7 @@ export default function Admin() {
     }
     loadModule();
     return () => { cancelled = true; };
-  }, [activeModule, isOwner, refreshKey]);
+  }, [activeModule, canModerate, visibleModules, refreshKey]);
 
   async function recordAdminAction(action, entityType, entityId, summary) {
     const { error: auditError } = await supabase.rpc("admin_log_event", {
@@ -230,7 +250,7 @@ export default function Admin() {
     setNotice("Objava je uklonjena, a prijava označena kao obrađena." + (logged ? "" : " Napomena: zapisnik radnje nije spremljen."));
   }
 
-  const current = modules.find(item => item.id === activeModule) || modules[0];
+  const current = visibleModules.find(item => item.id === activeModule) || visibleModules[0] || modules[0];
   const filteredRows = rows.filter(row => {
     const matchesQuery = JSON.stringify(row).toLowerCase().includes(query.toLowerCase());
     const matchesReportStatus = activeModule !== "reports" || reportStatusFilter === "all" || row.status === reportStatusFilter;
@@ -238,15 +258,15 @@ export default function Admin() {
   });
 
   if (!authReady) return <main className="admin-page"><div className="admin-loading">Provjeravam pristup vlasnika…</div></main>;
-  if (!isOwner) return <main className="admin-page"><section className="admin-access-denied"><span className="admin-eyebrow">PATRiASOUL · SIGURNOST</span><h1>Pristup odbijen</h1><p>Ova stranica dostupna je samo vlasniku mreže.</p><a className="admin-button" href="/">Povratak na mrežu</a></section></main>;
+  if (!canModerate) return <main className="admin-page"><section className="admin-access-denied"><span className="admin-eyebrow">PATRiASOUL · SIGURNOST</span><h1>Pristup odbijen</h1><p>Ovaj prostor dostupan je samo ovlaštenim moderatorima i administratorima.</p><a className="admin-button" href="/">Povratak na mrežu</a></section></main>;
 
   return <main className="admin-page">
     <header className="admin-topbar">
       <a className="admin-brand" href="/" aria-label="Povratak na Čuvare nasljeđa"><img src="/assets/images/1000000982.png" alt="" /><span><strong>PatriaSoul</strong><small>ČUVARI NASLJEĐA · ADMINISTRACIJA</small></span></a>
-      <div className="admin-top-actions"><span className="admin-owner-pill">✓ VLASNIK</span><span className="admin-owner-email">{session?.user?.email}</span><a href="/ai-centar.html" className="admin-back-link">✦ PatriaSoul Centar</a><a href="/" className="admin-back-link">← Povratak na mrežu</a></div>
+      <div className="admin-top-actions"><span className="admin-owner-pill">✓ {isOwner ? "VLASNIK" : profileRole === "admin" ? "ADMINISTRATOR" : "MODERATOR"}</span><span className="admin-owner-email">{session?.user?.email}</span><a href="/ai-centar.html" className="admin-back-link">✦ PatriaSoul Centar</a><a href="/" className="admin-back-link">← Povratak na mrežu</a></div>
     </header>
     <div className="admin-layout">
-      <aside className="admin-sidebar"><span className="admin-eyebrow">UPRAVLJANJE MREŽOM</span><h2>Administracija</h2><p>Odaberi jednu stavku. Detalji se otvaraju u radnom prostoru, bez gomilanja sadržaja na jednoj stranici.</p><div className="admin-side-nav">{modules.map(item => <button key={item.id} type="button" onClick={() => { setActiveModule(item.id); setQuery(""); setReportStatusFilter("all"); }} className={activeModule === item.id ? "selected" : ""}><span>{item.icon}</span><span>{item.title}</span><small>{item.status === "Sljedeća faza" ? "U pripremi" : "Otvori"}</small></button>)}</div><div className="admin-sidebar-foot">Prijavljen vlasnik<br/><strong>{session?.user?.email}</strong></div></aside>
+      <aside className="admin-sidebar"><span className="admin-eyebrow">UPRAVLJANJE MREŽOM</span><h2>Administracija</h2><p>Odaberi jednu stavku. Detalji se otvaraju u radnom prostoru, bez gomilanja sadržaja na jednoj stranici.</p><div className="admin-side-nav">{visibleModules.map(item => <button key={item.id} type="button" onClick={() => { setActiveModule(item.id); setQuery(""); setReportStatusFilter("all"); }} className={activeModule === item.id ? "selected" : ""}><span>{item.icon}</span><span>{item.title}</span><small>{item.status === "Sljedeća faza" ? "U pripremi" : "Otvori"}</small></button>)}</div><div className="admin-sidebar-foot">Prijavljen vlasnik<br/><strong>{session?.user?.email}</strong></div></aside>
       <section className="admin-workspace">
         <div className="admin-page-heading"><div><span className="admin-eyebrow">{current.group}</span><h1>{current.title}</h1><p>{current.description}</p></div><div className="admin-heading-actions"><button type="button" className="admin-button secondary" onClick={() => setRefreshKey(value => value + 1)}>↻ Osvježi</button><button type="button" className="admin-button secondary" onClick={() => { setActiveModule("overview"); setQuery(""); setReportStatusFilter("all"); }}>Pregled sustava</button></div></div>
         {notice && <div className="admin-notice" role="status">{notice}<button type="button" onClick={() => setNotice("")} aria-label="Zatvori poruku">×</button></div>}
