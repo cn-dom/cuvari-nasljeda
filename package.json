@@ -22,7 +22,8 @@
     "tailwindcss": "3.4.17",
     "postcss": "8.4.49",
     "autoprefixer": "10.4.20",
-    "@heyputer/puter.js": "^2.6.4"
+    "@heyputer/puter.js": "^2.6.4",
+    "three": "^0.180.0"
   },
   "devDependencies": {}
 }
