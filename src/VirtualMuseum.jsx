@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { puter } from "@heyputer/puter.js";
 import * as THREE from "three";
+import { supabase } from "./lib/supabase.js";
 import "./virtual-museum.css";
 
 const exhibits = [
@@ -146,6 +147,7 @@ export default function VirtualMuseum() {
   const [imagePreview, setImagePreview] = useState("");
   const [aiDraft, setAiDraft] = useState("");
   const [busy, setBusy] = useState(false);
+  const [saveBusy, setSaveBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const selected = exhibits.find(item => item.id === selectedId) || exhibits[0];
 
@@ -162,6 +164,35 @@ export default function VirtualMuseum() {
     } catch (error) {
       setNotice("Puter AI nije dostupan trenutačno. "+(error?.message || "Pokušaj ponovno."));
     } finally { setBusy(false); }
+  }
+
+  async function savePrivateDraft() {
+    if (!supabase) { setNotice("Supabase nije konfiguriran u ovoj aplikaciji."); return; }
+    setSaveBusy(true); setNotice("");
+    try {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      const user = sessionData?.session?.user;
+      if (!user) { setNotice("Za spremanje privatnog nacrta prijavi se u Čuvare nasljeđa, a zatim se vrati u muzej."); return; }
+      let imagePath = null;
+      if (imageFile) {
+        const safeName = imageFile.name.replace(/[^a-zA-Z0-9._-]/g, "-").slice(-100) || "predmet.jpg";
+        imagePath = user.id + "/" + crypto.randomUUID() + "-" + safeName;
+        const { error: uploadError } = await supabase.storage.from("virtual-museum-user-items").upload(imagePath, imageFile, { contentType: imageFile.type, upsert: false });
+        if (uploadError) throw uploadError;
+      }
+      const { error: insertError } = await supabase.from("museum_user_drafts").insert({
+        owner_id: user.id, title: title.trim(), category, story: story.trim(),
+        ai_draft: aiDraft || null, image_path: imagePath, status: "draft"
+      });
+      if (insertError) {
+        if (imagePath) await supabase.storage.from("virtual-museum-user-items").remove([imagePath]);
+        throw insertError;
+      }
+      setNotice("Privatni nacrt spremljen. Vidljiv je samo tebi; javna objava nije izvršena.");
+    } catch (error) {
+      setNotice("Nacrt nije spremljen. Provjeri je li migracija Virtualnog muzeja primijenjena u Supabaseu. " + (error?.message || ""));
+    } finally { setSaveBusy(false); }
   }
 
   return <main className="virtual-museum-page">
@@ -190,7 +221,7 @@ export default function VirtualMuseum() {
         <p className="museum-privacy-note">Ovo je prva faza: nacrt se ne objavljuje javno i još se ne sprema u Supabase. AI može pogriješiti; činjenice i prava na fotografiju treba provjeriti.</p>
       </form>
       {notice && <p className="museum-notice" role="status">{notice}</p>}
-      {aiDraft && <section className="museum-ai-draft"><div><span>AI NACRT · POTREBNA PROVJERA</span><button type="button" onClick={()=>{navigator.clipboard?.writeText(aiDraft);setNotice("Nacrt je kopiran ako preglednik dopušta pristup međuspremniku.");}}>Kopiraj nacrt</button></div><pre>{aiDraft}</pre></section>}
+      {aiDraft && <section className="museum-ai-draft"><div><span>AI NACRT · POTREBNA PROVJERA</span><div className="museum-draft-actions"><button type="button" onClick={()=>{navigator.clipboard?.writeText(aiDraft);setNotice("Nacrt je kopiran ako preglednik dopušta pristup međuspremniku.");}}>Kopiraj nacrt</button><button type="button" disabled={saveBusy} onClick={savePrivateDraft}>{saveBusy?"Spremam…":"Spremi privatni nacrt"}</button></div></div><pre>{aiDraft}</pre></section>}
     </section>}
     <footer className="museum-footer">Virtualni muzej PatriaSoul · Povijesne činjenice moraju imati provjerljive izvore · AI ilustracije nikad se ne označavaju kao izvorne povijesne fotografije.</footer>
   </main>;
