@@ -2177,6 +2177,9 @@ function App() {
           </section>
           <section className="side-section sidebar-nav-section today-sidebar-section">
             <h3>ISTRAŽI HRVATSKU</h3>
+            <button type="button" className={activeNav === "Virtualni muzej" ? "side-link selected virtual-museum-sidebar-link" : "side-link virtual-museum-sidebar-link"} onClick={() => { setProfileOpen(false); setProfileViewId(null); setActiveNav("Virtualni muzej"); }} aria-current={activeNav === "Virtualni muzej" ? "page" : undefined}>
+              <span className="side-icon" aria-hidden="true">🏛️</span><span className="side-link-label">Virtualni muzej</span><span className="today-sidebar-arrow" aria-hidden="true">↗</span>
+            </button>
             <a className="side-link today-sidebar-link" href="/na-danasnji-dan.html" title="Otvori povijesne događaje za odabrani datum">
               <span className="side-icon" aria-hidden="true">📅</span><span className="side-link-label">Na današnji dan</span><span className="today-sidebar-arrow" aria-hidden="true">↗</span>
             </a>
@@ -2236,7 +2239,29 @@ function App() {
           <p className="sidebar-foot">PatriaSoul · Znanje. Ponos. Nasljeđe.</p>
         </aside>
 
-        <section className={profileOpen || (profileViewId && profileViewId !== session?.user?.id) ? "feed-column profile-page-open" : "feed-column"} aria-label="PatriaSoul – Čuvari nasljeđa">
+        <section className={`feed-column${profileOpen || (profileViewId && profileViewId !== session?.user?.id) ? " profile-page-open" : ""}${activeNav === "Virtualni muzej" ? " virtual-museum-open" : ""}`} aria-label="PatriaSoul – Čuvari nasljeđa">
+          {activeNav === "Virtualni muzej" && (
+            <section className="virtual-museum-panel card" aria-labelledby="virtual-museum-title">
+              <div className="virtual-museum-hero">
+                <span className="eyebrow">PATRiASOUL · DIGITALNA BAŠTINA</span>
+                <h1 id="virtual-museum-title">Virtualni muzej Hrvatske</h1>
+                <p>Mjesto gdje predmeti, dokumenti, fotografije i sjećanja pričaju priču o hrvatskoj prošlosti.</p>
+                <div className="virtual-museum-hero-badges"><span>✦ Povijest</span><span>▧ Predmeti</span><span>⌕ Istraživanje</span></div>
+              </div>
+              <div className="virtual-museum-intro"><div><span className="eyebrow">ISTRAŽI ZBIRKE</span><h2>Baština koja živi</h2><p>Od najstarijih tragova života do priča koje čuvaju obitelji i lokalne zajednice.</p></div><span className="virtual-museum-emblem" aria-hidden="true">🏛️</span></div>
+              <div className="virtual-museum-grid">
+                <article className="virtual-museum-card museum-history"><span className="virtual-museum-icon">⌛</span><small>ZBIRKA 01</small><h3>Stari vijek i arheologija</h3><p>Arheološki nalazi, antički gradovi i tragovi života na hrvatskom prostoru.</p><span className="virtual-museum-status">Zbirka u pripremi</span></article>
+                <article className="virtual-museum-card museum-documents"><span className="virtual-museum-icon">📜</span><small>ZBIRKA 02</small><h3>Dokumenti i isprave</h3><p>Povelje, pisma, zemljovidi i zapisi koji svjedoče o prošlim vremenima.</p><span className="virtual-museum-status">Zbirka u pripremi</span></article>
+                <article className="virtual-museum-card museum-traditions"><span className="virtual-museum-icon">🧵</span><small>ZBIRKA 03</small><h3>Narodna baština</h3><p>Narodna nošnja, običaji, rukotvorine, glazba i umijeća naših krajeva.</p><span className="virtual-museum-status">Zbirka u pripremi</span></article>
+                <article className="virtual-museum-card museum-memory"><span className="virtual-museum-icon">🕯️</span><small>ZBIRKA 04</small><h3>Sjećanje i svjedočanstva</h3><p>Obiteljske uspomene, povijesne fotografije i provjerena svjedočanstva.</p><span className="virtual-museum-status">Zbirka u pripremi</span></article>
+                <article className="virtual-museum-card museum-places"><span className="virtual-museum-icon">🏰</span><small>ZBIRKA 05</small><h3>Gradovi i spomenici</h3><p>Tvrđave, crkve, stari gradovi i mjesta važna za hrvatsku povijest.</p><span className="virtual-museum-status">Zbirka u pripremi</span></article>
+                <article className="virtual-museum-card museum-people"><span className="virtual-museum-icon">🖼️</span><small>ZBIRKA 06</small><h3>Ljudi i velikani</h3><p>Život i rad osoba koje su oblikovale hrvatsku kulturu, znanost i društvo.</p><span className="virtual-museum-status">Zbirka u pripremi</span></article>
+              </div>
+              <div className="virtual-museum-note"><strong>Čuvamo baštinu odgovorno.</strong><p>Svaki budući muzejski zapis treba imati opis, provenijenciju i pouzdane izvore. Zbirke se neće prikazivati kao dovršene dok stvarni predmeti i podaci ne budu uneseni i provjereni.</p></div>
+              <button type="button" className="outline-button virtual-museum-back" onClick={() => setActiveNav("PatriaSoul")}>← Povratak na zid zajednice</button>
+            </section>
+          )}
+          
           <section className="welcome-panel" aria-label="Dobrodošlica u PatriaSoul">
             <div className="welcome-photo-layer" aria-hidden="true">
               <img
