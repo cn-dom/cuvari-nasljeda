@@ -2086,3 +2086,21 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
 @media (prefers-reduced-motion: reduce) {
   .auth-layout-card .auth-submit { transition: none; }
 }
+
+
+/* Klasa koju postavlja useIsMobile: dodatno prilagođavanje dodirnim uređajima. */
+.app-shell.is-mobile .global-search-result {
+  min-height: 46px;
+}
+.app-shell.is-mobile .side-link,
+.app-shell.is-mobile .topnav-link,
+.app-shell.is-mobile .top-actions button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.app-shell.is-mobile .left-sidebar .side-section:not(.blocked-members-section) {
+  scrollbar-width: none;
+}
+.app-shell.is-mobile .left-sidebar .side-section:not(.blocked-members-section)::-webkit-scrollbar {
+  display: none;
+}
