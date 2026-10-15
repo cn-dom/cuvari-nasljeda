@@ -58,3 +58,13 @@
   .museum-saved-heading, .museum-saved-draft { align-items: stretch; flex-direction: column; }
   .museum-saved-actions { justify-content: flex-start; }
 }
+
+
+/* Curated scholarly sources for museum exhibits */
+.museum-related-sources{margin:1.2rem 0 0;padding:1rem 1.1rem;border:1px solid rgba(190,157,91,.25);border-radius:10px;background:rgba(12,13,11,.35);max-width:900px}
+.museum-related-sources h4{margin:0 0 .75rem;color:#d9c18a;font-size:.95rem;font-weight:700}
+.museum-related-sources ul{list-style:none;margin:0;padding:0;display:grid;gap:.65rem}
+.museum-related-sources li{display:grid;gap:.18rem;padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.museum-related-sources li:last-child{border-bottom:0;padding-bottom:0}
+.museum-related-sources a{color:#e4cd91;text-decoration:underline;text-decoration-color:rgba(228,205,145,.4);text-underline-offset:3px}
+.museum-related-sources span{color:#a9a293;font-size:.78rem;line-height:1.45}
