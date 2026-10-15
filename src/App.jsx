@@ -22,16 +22,16 @@ const normalizeUsername = (value) => String(value || "").trim().replace(/^@/, ""
 const normalizeSearchText = (value) => String(value || "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase("hr").trim();
 
 function getPostLink(text) {
-  const match = String(text || "").match(/https?:\\/\\/[^\\s<>"']+/i);
+  const match = String(text || "").match(/https?:\/\/[^\s<>"']+/i);
   if (!match) return null;
   const rawUrl = match[0].replace(/[),.!?;]+$/, "");
   try {
     const url = new URL(rawUrl);
     if (!["http:", "https:"].includes(url.protocol)) return null;
-    const host = url.hostname.replace(/^www\\./i, "");
-    const isTikTok = /(^|\\.)tiktok\\.com$/i.test(url.hostname);
-    const isYouTube = /(^|\\.)(youtube\\.com|youtu\\.be)$/i.test(url.hostname);
-    const isInstagram = /(^|\\.)instagram\\.com$/i.test(url.hostname);
+    const host = url.hostname.replace(/^www\./i, "");
+    const isTikTok = /(^|\.)tiktok\.com$/i.test(url.hostname);
+    const isYouTube = /(^|\.)(youtube\.com|youtu\.be)$/i.test(url.hostname);
+    const isInstagram = /(^|\.)instagram\.com$/i.test(url.hostname);
     return { href: url.href, host, isTikTok, isYouTube, isInstagram };
   } catch {
     return null;
