@@ -2168,7 +2168,7 @@ function App() {
           </section>
           <section className="side-section sidebar-nav-section">
             <h3>MOJA ZAJEDNICA</h3>
-            {navItems.filter((item) => ["PatriaSoul", "Kviz", "Forum", "Stranice", "Čuvari nasljeđa", "Grupe"].includes(item.label)).map((item) => (
+            {navItems.filter((item) => ["PatriaSoul", "Kviz", "Forum", "Stranice", "Virtualni muzej", "Čuvari nasljeđa", "Grupe"].includes(item.label)).map((item) => (
               <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => item.label === "Kviz" ? (window.location.href = "/kviz/") : item.label === "Forum" ? (window.location.href = "/forum.html") : item.label === "Stranice" ? (window.location.href = "/stranice.html") : item.label === "Virtualni muzej" ? (window.location.href = "/virtualni-muzej.html") : setActiveNav(item.label)}>
                 <span className="side-icon">{item.icon}</span><span className="side-link-label">{item.label}</span>
                 {item.label === "Čuvari nasljeđa" && <span className="side-count">{memberDirectory.length || ""}</span>}
