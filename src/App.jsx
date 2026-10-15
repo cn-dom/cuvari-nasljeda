@@ -148,6 +148,10 @@ function App() {
   const [profileCoverUrl, setProfileCoverUrl] = useState("");
   const [profileCoverFile, setProfileCoverFile] = useState(null);
   const [profileCoverPreview, setProfileCoverPreview] = useState("");
+  const [profileViewId, setProfileViewId] = useState(null);
+  const [profileViewData, setProfileViewData] = useState(null);
+  const [profileViewPosts, setProfileViewPosts] = useState([]);
+  const [profileViewBusy, setProfileViewBusy] = useState(false);
   const [profileBusy, setProfileBusy] = useState(false);
   const [profileMessage, setProfileMessage] = useState("");
   const [reportPost, setReportPost] = useState(null);
@@ -513,6 +517,58 @@ function App() {
     loadProfile();
     return () => { cancelled = true; };
   }, [session?.user?.id]);
+
+  useEffect(() => {
+    if (!profileViewId || profileViewId === session?.user?.id || !supabase) return undefined;
+    let cancelled = false;
+    async function loadMemberProfile() {
+      setProfileViewBusy(true);
+      setProfileViewData(null);
+      setProfileViewPosts([]);
+      const [{ data: profile, error: profileError }, { data: rows, error: postsError }] = await Promise.all([
+        supabase.from("profiles").select("id, display_name, username, bio, avatar_url, cover_url").eq("id", profileViewId).maybeSingle(),
+        supabase.from("posts").select("id, author_id, body, image_path, created_at, profiles:profiles!posts_author_id_fkey(display_name, username, avatar_url, cover_url)").eq("author_id", profileViewId).order("created_at", { ascending: false }).limit(100),
+      ]);
+      if (cancelled) return;
+      if (profileError || !profile) {
+        setProfileViewData(null);
+        setProfileViewBusy(false);
+        setNotice("Profil člana nije dostupan ili nema dopušten pristup.");
+        return;
+      }
+      setProfileViewData(profile);
+      if (postsError) {
+        setProfileViewPosts([]);
+        setNotice("Profil je otvoren, ali objave se ne mogu učitati. Provjeri RLS pravila za tablicu posts.");
+      } else {
+        const mapped = await Promise.all((rows || []).map(async (row) => {
+          let imageUrl = "";
+          if (row.image_path) {
+            const { data: signedImage } = await supabase.storage.from("community-images").createSignedUrl(row.image_path, 60 * 60);
+            imageUrl = signedImage?.signedUrl || "";
+          }
+          const name = row.profiles?.display_name || row.profiles?.username || "Čuvar nasljeđa";
+          return { id: row.id, authorId: row.author_id, author: name, handle: "@" + (normalizeUsername(row.profiles?.username) || "clan"), initials: name.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN", avatarUrl: row.profiles?.avatar_url || "", time: new Date(row.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" }), text: row.body || "", imageUrl };
+        }));
+        if (!cancelled) setProfileViewPosts(mapped);
+      }
+      if (!cancelled) setProfileViewBusy(false);
+    }
+    loadMemberProfile();
+    return () => { cancelled = true; };
+  }, [profileViewId, session?.user?.id, feedRefreshKey]);
+
+  function openMemberProfile(memberId) {
+    if (!memberId) return;
+    if (memberId === session?.user?.id) {
+      setProfileViewId(null);
+      setProfileOpen(true);
+    } else {
+      setProfileOpen(false);
+      setProfileViewId(memberId);
+    }
+    setActiveNav("PatriaSoul");
+  }
 
   async function saveProfile(event) {
     event.preventDefault();
@@ -2060,7 +2116,7 @@ function App() {
         <div className="top-actions">
           {session ? (
             <div className="auth-session-actions">
-              <button className="profile-open-button" onClick={() => { setProfileOpen(true); setProfileMessage(""); }}><span className="profile-mini-avatar">{profileAvatarUrl ? <img src={profileAvatarUrl} alt="" /> : (session.user?.user_metadata?.display_name || session.user?.email || "Č").slice(0, 1).toLocaleUpperCase("hr")}</span><span className="auth-user-label">{session.user?.user_metadata?.display_name || session.user?.email || "Moj profil"}</span><span className="profile-open-label">Moj profil</span></button>
+              <button className="profile-open-button" onClick={() => { setProfileViewId(null); setProfileOpen(true); setProfileMessage(""); }}><span className="profile-mini-avatar">{profileAvatarUrl ? <img src={profileAvatarUrl} alt="" /> : (session.user?.user_metadata?.display_name || session.user?.email || "Č").slice(0, 1).toLocaleUpperCase("hr")}</span><span className="auth-user-label">{session.user?.user_metadata?.display_name || session.user?.email || "Moj profil"}</span><span className="profile-open-label">Moj profil</span></button>
               <button className="login-button" onClick={signOut}>Odjava</button>
             </div>
           ) : (
@@ -2169,7 +2225,7 @@ function App() {
           <p className="sidebar-foot">PatriaSoul · Znanje. Ponos. Nasljeđe.</p>
         </aside>
 
-        <section className={profileOpen ? "feed-column profile-page-open" : "feed-column"} aria-label="PatriaSoul – Čuvari nasljeđa">
+        <section className={profileOpen || (profileViewId && profileViewId !== session?.user?.id) ? "feed-column profile-page-open" : "feed-column"} aria-label="PatriaSoul – Čuvari nasljeđa">
           <section className="welcome-panel" aria-label="Dobrodošlica u PatriaSoul">
             <div className="welcome-photo-layer" aria-hidden="true">
               <img
@@ -2328,6 +2384,28 @@ function App() {
                   </article>
                 )) : <div className="profile-empty-posts"><span>✦</span><strong>Ovdje će se prikazivati tvoje objave</strong><p>Kada nešto objaviš na zidu zajednice, automatski će se pojaviti i na tvom profilu.</p><button type="button" className="outline-button" onClick={() => { setProfileOpen(false); setActiveNav("PatriaSoul"); document.getElementById("post-draft")?.focus(); }}>＋ Napiši prvu objavu</button></div>}
               </section>
+            </section>
+          )}
+
+          {profileViewId && profileViewId !== session?.user?.id && (
+            <section className="profile-panel card profile-page" aria-labelledby="member-profile-title">
+              <div className="profile-cover-photo" style={{ backgroundImage: profileViewData?.cover_url ? `url("${profileViewData.cover_url}")` : undefined }}>
+                {!profileViewData?.cover_url && <div className="profile-cover-default"><span>🇭🇷</span><strong>ČUVAR NASLJEĐA</strong><small>Priče, uspomene i zajedništvo.</small></div>}
+              </div>
+              <div className="profile-page-toolbar">
+                <div><span className="eyebrow">PROFIL ČUVARA NASLJEĐA</span><h2 id="member-profile-title">{profileViewData?.display_name || (profileViewBusy ? "Učitavanje profila…" : "Profil nije dostupan")}</h2><p className="profile-email">@{normalizeUsername(profileViewData?.username) || "clan"}</p></div>
+                <button type="button" className="outline-button" onClick={() => { setProfileViewId(null); setActiveNav("PatriaSoul"); }}>← Zid zajednice</button>
+              </div>
+              {profileViewBusy ? <p className="profile-hint">Učitavam profil i objave…</p> : profileViewData && <>
+                <div className="profile-identity-row">
+                  <div className="profile-avatar-editor"><Avatar initials={(profileViewData.display_name || profileViewData.username || "Č").slice(0,1).toLocaleUpperCase("hr")} src={profileViewData.avatar_url || ""} variant="profile-avatar-large" /></div>
+                  <div className="profile-completion"><span className="eyebrow">O MENI</span><strong>{profileViewData.display_name || "Čuvar nasljeđa"}</strong><small>@{normalizeUsername(profileViewData.username) || "clan"}</small><p>{profileViewData.bio || "Ovaj član još nije dodao opis profila."}</p></div>
+                </div>
+                <section className="profile-posts-section">
+                  <div className="profile-posts-heading"><div><span className="eyebrow">OBJAVE ČLANA</span><h3>Sve objave</h3><p>Objave koje je član podijelio na zidu zajednice.</p></div><span className="profile-post-count">{profileViewPosts.length}</span></div>
+                  {profileViewPosts.length ? profileViewPosts.map((post) => <article className="profile-post-item" key={post.id}><div className="profile-post-meta"><Avatar initials={post.initials} src={post.avatarUrl} /><div><strong>{post.author}</strong><small>{post.time}</small></div></div>{post.text && <p>{post.text}</p>}{post.imageUrl && <img className="profile-post-image" src={post.imageUrl} alt="Fotografija uz objavu" loading="lazy" />}</article>) : <div className="profile-empty-posts"><span>✦</span><strong>Još nema objava</strong><p>Kada ovaj član nešto objavi na zidu, prikazat će se ovdje.</p></div>}
+                </section>
+              </>}
             </section>
           )}
 
@@ -2743,9 +2821,9 @@ function App() {
                   <button type="button" className="avatar avatar-community avatar-community-image" onClick={() => setBrandImageOpen(true)} aria-label="Otvori grb PatriaSoul">
                     <img src="/assets/images/PATRIA_SOUL_ORIGINAL_ISPRAVLJEN_GRB.png" alt="" />
                   </button>
-                ) : <Avatar initials={post.initials} src={post.avatarUrl} />}
+                ) : <button type="button" className="post-author-profile-button" onClick={() => openMemberProfile(post.authorId)} aria-label={"Otvori profil člana " + post.author}><Avatar initials={post.initials} src={post.avatarUrl} /></button>}
                 <div className="post-author">
-                  <strong>{post.author}</strong>
+                  <button type="button" className="post-author-name-button" onClick={() => openMemberProfile(post.authorId)}>{post.author}</button>
                   <span>{post.handle} <b>·</b> {post.time}</span>
                 </div>
                 <div className="post-menu">
