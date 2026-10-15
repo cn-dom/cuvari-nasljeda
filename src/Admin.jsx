@@ -152,7 +152,7 @@ export default function Admin() {
     }
     loadModule();
     return () => { cancelled = true; };
-  }, [activeModule, canModerate, visibleModules, refreshKey]);
+  }, [activeModule, canModerate, profileRole, isOwner, refreshKey]);
 
   async function recordAdminAction(action, entityType, entityId, summary) {
     const { error: auditError } = await supabase.rpc("admin_log_event", {
