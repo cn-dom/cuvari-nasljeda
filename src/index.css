@@ -1658,3 +1658,255 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
 .post-author-profile-button:focus-visible,.post-author-name-button:focus-visible { outline:2px solid #7ec8f3; outline-offset:3px; }
 .post-author-name-button { display:inline; padding:0; border:0; background:transparent; color:inherit; font:inherit; font-weight:800; text-align:left; cursor:pointer; }
 .post-author-name-button:hover { color:#8fc9ff; }
+
+
+/* Čuvari nasljeđa — elegantne kartice članova, lagani 3D i statusne značke */
+.member-directory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 245px), 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+.member-directory-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  padding: 16px;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid rgba(115, 157, 196, .23);
+  border-radius: 17px;
+  background: radial-gradient(ellipse at 10% 0%, rgba(56, 117, 166, .16), transparent 58%), linear-gradient(145deg, rgba(17, 37, 59, .98), rgba(8, 21, 36, .98));
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .12), inset 0 1px 0 rgba(255, 255, 255, .035);
+  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
+}
+.member-directory-card::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -68px;
+  right: -52px;
+  width: 150px;
+  height: 150px;
+  border: 1px solid rgba(143, 201, 255, .11);
+  border-radius: 50%;
+  box-shadow: 0 0 0 17px rgba(143, 201, 255, .025), 0 0 0 35px rgba(143, 201, 255, .018);
+  pointer-events: none;
+}
+.member-directory-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(111, 183, 232, .48);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, .22), 0 0 0 1px rgba(94, 164, 214, .05);
+}
+.member-directory-card:focus-within {
+  border-color: #77b8e4;
+  box-shadow: 0 0 0 3px rgba(119, 184, 228, .15);
+}
+.member-directory-card.member-card-online {
+  border-color: rgba(79, 199, 151, .35);
+  background: radial-gradient(ellipse at 0% 0%, rgba(52, 168, 123, .12), transparent 58%), linear-gradient(145deg, rgba(17, 39, 58, .99), rgba(8, 21, 36, .99));
+}
+.member-card-topline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px;
+  min-height: 22px;
+}
+.member-identity-badge, .member-active-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 850;
+  line-height: 1.25;
+  letter-spacing: .065em;
+}
+.member-identity-badge {
+  color: #d8e9f7;
+  border: 1px solid rgba(126, 171, 207, .25);
+  background: rgba(45, 79, 109, .3);
+}
+.member-identity-badge span {
+  color: #edc875;
+  font-size: 11px;
+}
+.member-active-badge {
+  color: #9ae8c7;
+  border: 1px solid rgba(79, 199, 151, .28);
+  background: rgba(34, 122, 89, .17);
+  letter-spacing: 0;
+  animation: member-badge-enter .28s ease-out both;
+}
+.member-active-badge i, .member-presence-status i {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.member-active-online i, .member-presence-status.online i {
+  box-shadow: 0 0 0 3px rgba(79, 199, 151, .12);
+  animation: member-online-pulse 2.2s ease-out infinite;
+}
+.member-active-recent {
+  color: #e8cc8b;
+  border-color: rgba(232, 204, 139, .25);
+  background: rgba(145, 105, 40, .14);
+}
+.member-card-profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  min-width: 0;
+  padding: 2px 0 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.member-card-profile-trigger > .avatar {
+  flex: 0 0 66px;
+  width: 66px;
+  height: 66px;
+  min-width: 66px;
+  border: 2px solid rgba(144, 194, 229, .65);
+  box-shadow: 0 0 0 4px rgba(88, 147, 191, .1), 0 8px 18px rgba(0, 0, 0, .24);
+  transition: transform .22s ease, box-shadow .22s ease;
+}
+.member-directory-card:hover .member-card-profile-trigger > .avatar {
+  transform: translateY(-1px) scale(1.035);
+  box-shadow: 0 0 0 5px rgba(88, 147, 191, .14), 0 10px 22px rgba(0, 0, 0, .28);
+}
+.member-card-profile-trigger:focus-visible {
+  outline: 2px solid #8fc9ff;
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+.member-directory-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.member-directory-info > strong {
+  max-width: 100%;
+  color: #f1f6fc;
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+.member-card-handle {
+  max-width: 100%;
+  color: #8fc9ff;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.member-directory-info .member-presence-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  padding: 4px 7px;
+  border: 1px solid rgba(144, 165, 186, .16);
+  border-radius: 999px;
+  color: #a8b8c8;
+  background: rgba(255, 255, 255, .035);
+  font-size: 10px;
+  line-height: 1.25;
+}
+.member-directory-info .member-presence-status.online {
+  color: #8fe0bb;
+  border-color: rgba(79, 199, 151, .24);
+  background: rgba(34, 122, 89, .12);
+}
+.member-directory-info .member-presence-status.recent {
+  color: #e6c781;
+  border-color: rgba(232, 204, 139, .2);
+}
+.member-directory-info .member-presence-status.offline i {
+  opacity: .55;
+}
+.member-card-bio {
+  display: -webkit-box;
+  width: 100%;
+  margin-top: 2px;
+  overflow: hidden;
+  color: #b4c3d2;
+  font-size: 11px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+.member-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(133, 169, 203, .14);
+}
+.member-card-view-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-height: 37px;
+  padding: 8px 10px;
+  border: 1px solid rgba(103, 164, 208, .32);
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(34, 82, 120, .62), rgba(22, 52, 79, .82));
+  color: #e1f2ff;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+.member-card-view-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(143, 201, 255, .65);
+  background: linear-gradient(135deg, rgba(44, 105, 151, .75), rgba(24, 63, 96, .9));
+}
+.member-card-actions .post-menu-button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  margin: 0;
+  padding: 7px 9px;
+  border-radius: 9px;
+  font-size: 10px;
+}
+@keyframes member-online-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(79, 199, 151, .32); }
+  65% { box-shadow: 0 0 0 5px rgba(79, 199, 151, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(79, 199, 151, 0); }
+}
+@keyframes member-badge-enter {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .member-directory-card, .member-card-profile-trigger > .avatar, .member-card-view-button { transition: none !important; }
+  .member-active-badge, .member-active-online i, .member-presence-status.online i { animation: none !important; }
+}
+@media (max-width: 560px) {
+  .member-directory-grid { grid-template-columns: minmax(0, 1fr); gap: 11px; }
+  .member-directory-card { padding: 14px; border-radius: 14px; }
+  .member-card-profile-trigger > .avatar { flex-basis: 58px; width: 58px; height: 58px; min-width: 58px; }
+  .member-card-actions .post-menu-button { padding-inline: 8px; }
+}
