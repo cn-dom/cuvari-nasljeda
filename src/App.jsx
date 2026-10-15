@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 import FloatingGlobalChat from "./FloatingGlobalChat.jsx";
 
@@ -113,6 +114,7 @@ function App() {
     return () => document.removeEventListener("pointerdown", closeEmojiPicker);
   }, [emojiPickerOpen]);
   const [notice, setNotice] = useState("");
+  const [highScoreCelebration, setHighScoreCelebration] = useState(false);
   const [brandImageOpen, setBrandImageOpen] = useState(false);
   const [feedFilter, setFeedFilter] = useState("Sve objave");
   const [feedSearch, setFeedSearch] = useState("");
@@ -287,6 +289,7 @@ function App() {
     const title = params.get("title") || "PatriaSoul kviz";
     if (!Number.isFinite(score) || !Number.isFinite(total) || total < 1 || score < 0 || score > total) return;
     const percentage = Math.round((score / total) * 100);
+    setHighScoreCelebration(percentage >= 90);
     const timeText = Number.isFinite(seconds) && seconds >= 0 ? ` Vrijeme: ${seconds} sekundi.` : "";
     setDraft(`🎯 Upravo sam odigrao/la ${title} na PatriaSoul kvizu i ostvario/la rezultat ${score}/${total} (${percentage}%).${timeText} Znanje. Ponos. Nasljeđe. 🇭🇷`);
     setActiveNav("PatriaSoul");
@@ -2175,8 +2178,8 @@ function App() {
               <p>Mjesto za ljude koji čuvaju priče, običaje i uspomene — i prenose ih novim naraštajima.</p>
               <div className="community-topic-tags"><span>Baština</span><span>Povijest</span><span>Zajedništvo</span></div>
               <div className="community-stats">
-                <div><strong>{postCount}</strong><span>objava</span></div>
-                <div><strong>{groupChats.length}</strong><span>grupa</span></div>
+                <div><strong><motion.span key={postCount} initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 260, damping: 22 }}>{postCount}</motion.span></strong><span>objava</span></div>
+                <div><strong><motion.span key={groupChats.length} initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 260, damping: 22 }}>{groupChats.length}</motion.span></strong><span>grupa</span></div>
               </div>
               <button type="button" className="community-profile-action" onClick={() => { setActiveNav("PatriaSoul"); if (session?.user?.id) { document.getElementById("post-draft")?.focus(); } else { setAuthOpen(true); setAuthMode("login"); setAuthMessage("Prijavi se ili izradi račun kako bi podijelio/la svoju priču."); } }}>＋ Podijeli priču</button>
             </div>
@@ -2336,9 +2339,10 @@ function App() {
           )}
 
           {notice && (
-            <div className="notice" role="status">
+            <div className={`notice${highScoreCelebration ? " notice-celebration" : ""}`} role="status">
               <span>{notice}</span>
-              <button aria-label="Zatvori obavijest" onClick={() => setNotice("")}>×</button>
+              <button aria-label="Zatvori obavijest" onClick={() => { setNotice(""); setHighScoreCelebration(false); }}>×</button>
+              {highScoreCelebration && <span className="celebration-fireworks" aria-hidden="true">{Array.from({ length: 18 }, (_, i) => <i key={i} style={{ "--spark-angle": `${i * 20}deg`, "--spark-distance": `${26 + (i % 4) * 12}px`, "--spark-delay": `${(i % 3) * 45}ms` }} />)}</span>}
             </div>
           )}
 
@@ -2858,9 +2862,12 @@ function App() {
           <section className="feed-controls card" aria-label="Pretraživanje i filtriranje zida">
             <label className="sr-only" htmlFor="feed-search">Pretraži objave</label>
             <input id="feed-search" className="feed-search" type="search" value={feedSearch} onChange={(event) => { setFeedSearch(event.target.value); setFeedFilter("Sve objave"); }} placeholder="Pretraži objave, članove i teme…" />
-            <div className="feed-filter-list" aria-label="Filtriraj objave">
+            <div className="feed-filter-list" aria-label="Filtriraj objave" role="tablist">
               {["Sve objave", "BAŠTINA", "OBITELJSKE PRIČE", "POVIJEST"].map((filter) => (
-                <button key={filter} type="button" className={feedFilter === filter ? "feed-filter active" : "feed-filter"} onClick={() => setFeedFilter(filter)} aria-pressed={feedFilter === filter}>{filter}</button>
+                <button key={filter} type="button" role="tab" className={feedFilter === filter ? "feed-filter active" : "feed-filter"} onClick={() => setFeedFilter(filter)} aria-pressed={feedFilter === filter} aria-selected={feedFilter === filter}>
+                  {feedFilter === filter && <motion.span className="feed-filter-highlight" layoutId="feed-filter-highlight" transition={{ type: "spring", stiffness: 360, damping: 30 }} aria-hidden="true" />}
+                  <span className="feed-filter-label">{filter}</span>
+                </button>
               ))}
             </div>
           </section>
