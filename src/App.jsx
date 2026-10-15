@@ -2400,7 +2400,7 @@ function App() {
               </div>
               <section className="profile-earned-badges">
                 <h3>Tvoje osvojene značke</h3>
-                <BadgeRow badgeKeys={(badgeRowsByUser[session.user.id] || []).map((row) => row.badge_key)} />
+                {Object.prototype.hasOwnProperty.call(badgeRowsByUser, session.user.id) ? <BadgeRow badgeKeys={(badgeRowsByUser[session.user.id] || []).map((row) => row.badge_key)} /> : <p className="heritage-badges-empty">Učitavam značke…</p>}
                 <button type="button" className="outline-button" onClick={() => { setProfileOpen(false); setActiveNav("Značke"); }}>Pregledaj sve značke →</button>
               </section>
               <form className="auth-form profile-edit-form" onSubmit={saveProfile}>
@@ -2446,7 +2446,7 @@ function App() {
                 </div>
                 <section className="profile-earned-badges">
                   <h3>Osvojene značke</h3>
-                  <BadgeRow badgeKeys={(badgeRowsByUser[profileViewData.id] || []).map((row) => row.badge_key)} />
+                  {Object.prototype.hasOwnProperty.call(badgeRowsByUser, profileViewData.id) ? <BadgeRow badgeKeys={(badgeRowsByUser[profileViewData.id] || []).map((row) => row.badge_key)} /> : <p className="heritage-badges-empty">Značke trenutačno nisu dostupne.</p>}
                 </section>
                 <section className="profile-posts-section">
                   <div className="profile-posts-heading"><div><span className="eyebrow">OBJAVE ČLANA</span><h3>Sve objave</h3><p>Objave koje je član podijelio na zidu zajednice.</p></div><span className="profile-post-count">{profileViewPosts.length}</span></div>
@@ -2730,7 +2730,7 @@ function App() {
                           <Avatar initials={initials} src={member.avatar_url} />
                           <span className="member-directory-info"><strong>{displayName}</strong><span className="member-card-handle">@{normalizeUsername(member.username) || "clan"}</span><span className={"member-presence-status " + presence.state}><i aria-hidden="true" />{presence.label}</span><span className="member-card-bio">{member.bio || "Ovaj član još nije dodao opis profila."}</span></span>
                         </button>
-                        <div className="member-card-badges"><BadgeRow badgeKeys={(badgeRowsByUser[member.id] || []).map((row) => row.badge_key)} compact limit={2} /></div>
+                        <div className="member-card-badges">{Object.prototype.hasOwnProperty.call(badgeRowsByUser, member.id) ? <BadgeRow badgeKeys={(badgeRowsByUser[member.id] || []).map((row) => row.badge_key)} compact limit={2} /> : <span className="heritage-badges-empty compact">Učitavam značke…</span>}</div>
                         <div className="member-card-actions"><button type="button" className="member-card-view-button" onClick={() => openMemberProfile(member.id)}>Pogledaj profil <span aria-hidden="true">↗</span></button><button type="button" className="post-menu-button danger" disabled={blockBusyId === member.id} onClick={() => toggleBlockMember({ authorId: member.id, author: displayName, handle: "@" + (normalizeUsername(member.username) || "clan") })}>{isBlocked ? "Odblokiraj" : "Blokiraj"}</button></div>
                       </article>;
                     })}</div> : <p className="directory-empty">Nema članova koji odgovaraju pretrazi.</p>;
