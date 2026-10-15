@@ -2149,3 +2149,55 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
   .sidebar-foot > p { display: none; }
   .install-app-button { width: 100%; min-height: 48px; justify-content: center; }
 }
+
+
+/* Vidljiva instalacija aplikacije u gornjoj traci */
+.top-actions { display: flex; align-items: center; gap: 9px; }
+.topbar-install-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-height: 38px; padding: 0 12px; border: 1px solid #245273; border-radius: 10px;
+  color: #e8f4ff; background: #102b43; font-size: 11px; font-weight: 800;
+  white-space: nowrap; cursor: pointer; box-shadow: 0 2px 8px #0b203312;
+}
+.topbar-install-button > span:first-child { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; color: #fff; background: #087df5; font-size: 17px; line-height: 1; }
+.topbar-install-button:hover { background: #16415f; border-color: #1687ff; }
+@media (max-width: 720px) {
+  .top-actions { gap: 5px; }
+  .topbar-install-button { min-height: 34px; padding: 0 8px; gap: 5px; font-size: 10px; }
+}
+@media (max-width: 390px) {
+  .topbar-install-button { padding: 0 6px; }
+  .topbar-install-button > span:first-child { width: 18px; height: 18px; }
+}
+
+/* Značke se otvaraju kao prozor koji se zatvara klikom izvan sadržaja ili na × */
+.badge-overlay-backdrop {
+  position: fixed; inset: 0; z-index: 1200; display: flex; align-items: center; justify-content: center;
+  padding: clamp(8px, 2.5vw, 28px); background: rgba(5, 14, 25, .76);
+  backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+}
+.badge-overlay-dialog {
+  position: relative; width: min(1040px, 100%); max-height: min(90dvh, 940px);
+  overflow: auto; overscroll-behavior: contain; padding: clamp(12px, 2vw, 22px);
+  border: 1px solid #cbd5e1; border-radius: 17px; background: #f8fafc;
+  box-shadow: 0 24px 80px #0007;
+}
+.badge-overlay-toolbar {
+  position: sticky; top: calc(-1 * clamp(12px, 2vw, 22px)); z-index: 5;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin: calc(-1 * clamp(12px, 2vw, 22px)) calc(-1 * clamp(12px, 2vw, 22px)) 12px;
+  padding: 10px 14px; color: #dcecff; background: #10253b; border-bottom: 1px solid #29445f;
+  font-size: 11px; font-weight: 800; letter-spacing: .04em;
+}
+.badge-overlay-close {
+  display: grid; place-items: center; flex: 0 0 34px; width: 34px; height: 34px;
+  border: 1px solid #54718c; border-radius: 9px; color: #fff; background: #1b3b57;
+  font-size: 25px; line-height: 1; cursor: pointer;
+}
+.badge-overlay-close:hover { background: #a52b3b; border-color: #e76a78; }
+.badge-overlay-dialog .heritage-badge-showcase { padding: 4px 0 0; }
+@media (max-width: 600px) {
+  .badge-overlay-backdrop { padding: 0; align-items: stretch; }
+  .badge-overlay-dialog { width: 100%; max-height: 100dvh; border-radius: 0; padding: 12px; }
+  .badge-overlay-toolbar { top: -12px; margin: -12px -12px 10px; padding: 9px 12px; }
+}
