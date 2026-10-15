@@ -2680,10 +2680,16 @@ function App() {
                     return filtered.length ? <div className="member-directory-grid">{filtered.map((member) => {
                       const displayName = member.display_name || member.username || "Čuvar nasljeđa";
                       const initials = displayName.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN";
-                      return <article className="member-directory-card" key={member.id}>
-                        <Avatar initials={initials} src={member.avatar_url} />
-                        <div className="member-directory-info"><strong>{displayName}</strong><span>@{normalizeUsername(member.username) || "clan"}</span><span className={"member-presence-status " + getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).state}><i aria-hidden="true" />{getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).label}</span><p>{member.bio || "Ovaj član još nije dodao opis profila."}</p></div>
-                        <button type="button" className="post-menu-button danger" disabled={blockBusyId === member.id} onClick={() => toggleBlockMember({ authorId: member.id, author: displayName, handle: "@" + (normalizeUsername(member.username) || "clan") })}>{blockedMembers.some((blocked) => blocked.id === member.id) ? "Odblokiraj" : "Blokiraj"}</button>
+                      const presence = getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at);
+                      const isActiveMember = presence.state === "online" || presence.state === "recent";
+                      const isBlocked = blockedMembers.some((blocked) => blocked.id === member.id);
+                      return <article className={"member-directory-card member-card-" + presence.state} key={member.id}>
+                        <div className="member-card-topline"><span className="member-identity-badge"><span aria-hidden="true">✦</span> ČUVAR NASLJEĐA</span>{isActiveMember && <span className={"member-active-badge member-active-" + presence.state}><i aria-hidden="true" />{presence.state === "online" ? "Aktivan sada" : "Nedavno aktivan"}</span>}</div>
+                        <button type="button" className="member-card-profile-trigger" onClick={() => openMemberProfile(member.id)} aria-label={"Otvori profil člana " + displayName}>
+                          <Avatar initials={initials} src={member.avatar_url} />
+                          <span className="member-directory-info"><strong>{displayName}</strong><span className="member-card-handle">@{normalizeUsername(member.username) || "clan"}</span><span className={"member-presence-status " + presence.state}><i aria-hidden="true" />{presence.label}</span><span className="member-card-bio">{member.bio || "Ovaj član još nije dodao opis profila."}</span></span>
+                        </button>
+                        <div className="member-card-actions"><button type="button" className="member-card-view-button" onClick={() => openMemberProfile(member.id)}>Pogledaj profil <span aria-hidden="true">↗</span></button><button type="button" className="post-menu-button danger" disabled={blockBusyId === member.id} onClick={() => toggleBlockMember({ authorId: member.id, author: displayName, handle: "@" + (normalizeUsername(member.username) || "clan") })}>{isBlocked ? "Odblokiraj" : "Blokiraj"}</button></div>
                       </article>;
                     })}</div> : <p className="directory-empty">Nema članova koji odgovaraju pretrazi.</p>;
                   })()}
