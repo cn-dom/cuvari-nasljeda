@@ -15,14 +15,7 @@ const navItems = [
   { icon: "🔔", label: "Obavijesti" },
 ];
 
-const museumCollections = [
-  { id: "history", number: "01", icon: "⌛", title: "Stari vijek i arheologija", description: "Arheološki nalazi, antički gradovi i tragovi života na hrvatskom prostoru.", scope: ["Prapovijesne kulture i arheološka nalazišta", "Rimski gradovi, amfiteatri i svakodnevni život", "Predmeti uz opis nalazišta, razdoblja i ustanove koja ih čuva"], institutions: [{ name: "Arheološki muzej u Zagrebu", url: "https://www.amz.hr/" }, { name: "Arheološki muzej Istre", url: "https://www.ami-pula.hr/" }] },
-  { id: "documents", number: "02", icon: "📜", title: "Dokumenti i isprave", description: "Povelje, pisma, zemljovidi i zapisi koji svjedoče o prošlim vremenima.", scope: ["Povelje, rukopisi i povijesna korespondencija", "Stari zemljovidi i dokumenti državnih ustanova", "Transkripcija ili objašnjenje uz datum, autora i provenijenciju"], institutions: [{ name: "Hrvatski državni arhiv", url: "https://www.arhiv.hr/" }, { name: "Hrvatska akademija znanosti i umjetnosti", url: "https://www.info.hazu.hr/" }] },
-  { id: "traditions", number: "03", icon: "🧵", title: "Narodna baština", description: "Narodna nošnja, običaji, rukotvorine, glazba i umijeća naših krajeva.", scope: ["Tradicionalna odjeća, nakit i tekstil", "Običaji, pjesme, plesovi i godišnji ciklusi", "Zavičajni zapisi uz navođenje zajednice i mjesta"], institutions: [{ name: "Etnografski muzej Zagreb", url: "https://emz.hr/" }, { name: "Ministarstvo kulture i medija – nematerijalna baština", url: "https://min-kulture.gov.hr/" }] },
-  { id: "memory", number: "04", icon: "🕯️", title: "Sjećanje i svjedočanstva", description: "Obiteljske uspomene, povijesne fotografije i pažljivo provjerena svjedočanstva.", scope: ["Obiteljske fotografije s poznatim datumom i mjestom", "Usmena povijest uz suglasnost kazivača", "Sjećanja razdvojena od potvrđenih povijesnih činjenica"], institutions: [{ name: "Hrvatski povijesni muzej", url: "https://www.hismus.hr/" }, { name: "Hrvatski državni arhiv", url: "https://www.arhiv.hr/" }] },
-  { id: "places", number: "05", icon: "🏰", title: "Gradovi i spomenici", description: "Tvrđave, crkve, stari gradovi i mjesta važna za hrvatsku povijest.", scope: ["Povijesne jezgre, utvrde i sakralna baština", "Arhitektura, graditeljske faze i obnova", "Lokacija, datacija i službeni registar kulturnog dobra"], institutions: [{ name: "Registar kulturnih dobara RH", url: "https://registar.kulturnadobra.hr/" }, { name: "Ministarstvo kulture i medija", url: "https://min-kulture.gov.hr/" }] },
-  { id: "people", number: "06", icon: "🖼️", title: "Ljudi i velikani", description: "Život i rad osoba koje su oblikovale hrvatsku kulturu, znanost i društvo.", scope: ["Biografske kronologije s provjerljivim datumima", "Doprinos kulturi, znanosti, umjetnosti i javnom životu", "Citati samo kada je izvor moguće provjeriti"], institutions: [{ name: "Hrvatska enciklopedija", url: "https://www.enciklopedija.hr/" }, { name: "Hrvatska akademija znanosti i umjetnosti", url: "https://www.info.hazu.hr/" }] },
-];
+const museumCollections = [];
 
 const OWNER_EMAIL = "patriasoul@protonmail.com";
 const normalizeUsername = (value) => String(value || "").trim().replace(/^@/, "").toLowerCase();
@@ -2256,35 +2249,15 @@ function App() {
               <div className="virtual-museum-hero">
                 <span className="eyebrow">PATRiASOUL · DIGITALNA BAŠTINA</span>
                 <h1 id="virtual-museum-title">Virtualni muzej PatriaSoul</h1>
-                <p>Mjesto gdje predmeti, dokumenti, fotografije i sjećanja pričaju priču o hrvatskoj prošlosti.</p>
-                <div className="virtual-museum-hero-badges"><span>✦ Povijest</span><span>▧ Predmeti</span><span>⌕ Istraživanje</span></div>
+                <p>Stvori svoj virtualni muzej od fotografija i uspomena. Digitalni kustos pomoći će ti pripremiti muzejske kartice i predložiti izložbu.</p>
+                <div className="virtual-museum-hero-badges"><span>📷 Tvoje fotografije</span><span>✦ Digitalni kustos</span><span>🏛️ Tvoja izložba</span></div>
               </div>
-              <div className="virtual-museum-intro"><div><span className="eyebrow">ISTRAŽI ZBIRKE</span><h2>Baština koja živi</h2><p>Od najstarijih tragova života do priča koje čuvaju obitelji i lokalne zajednice.</p></div><span className="virtual-museum-emblem" aria-hidden="true">🏛️</span></div>
-              {museumCollectionId ? (() => {
-                const collection = museumCollections.find((item) => item.id === museumCollectionId);
-                if (!collection) return null;
-                return <section className="virtual-museum-detail" aria-live="polite">
-                  <div className="virtual-museum-detail-heading">
-                    <button type="button" className="virtual-museum-back" onClick={() => setMuseumCollectionId(null)}>← Sve zbirke</button>
-                    <span className="eyebrow">ZBIRKA {collection.number} · VIRTUALNI MUZEJ HRVATSKE</span>
-                    <div className="virtual-museum-detail-title"><span aria-hidden="true">{collection.icon}</span><div><h2>{collection.title}</h2><p>{collection.description}</p></div></div>
-                  </div>
-                  <div className="virtual-museum-detail-content">
-                    <section className="museum-detail-section"><span className="eyebrow">ŠTO ĆEŠ OVDJE PRONAĆI</span><h3>Teme zbirke</h3><ul>{collection.scope.map((item) => <li key={item}>{item}</li>)}</ul></section>
-                    <section className="museum-detail-section museum-source-section"><span className="eyebrow">PROVJERENI POLAZNI IZVORI</span><h3>Ustanove za daljnje istraživanje</h3><p>Ove poveznice vode na ustanove i službene portale. Pojedini muzejski predmeti bit će objavljeni tek nakon provjere njihovih podataka i prava korištenja fotografija.</p><div className="museum-institution-list">{collection.institutions.map((institution) => <a key={institution.url} href={institution.url} target="_blank" rel="noreferrer"><span>{institution.name}</span><span aria-hidden="true">↗</span></a>)}</div></section>
-                    <div className="virtual-museum-editorial-note"><strong>Kako provjeravamo zapise</strong><p>Svaki predmet treba imati naziv, dataciju ili razdoblje, mjesto ili provenijenciju, čuvarsku ustanovu te izvor podataka. Fotografije se objavljuju samo uz odgovarajuću dozvolu ili jasne uvjete korištenja.</p></div>
-                  </div>
-                </section>;
-              })() : (<div className="virtual-museum-grid">
-                <button type="button" className="virtual-museum-card museum-history" onClick={() => setMuseumCollectionId("history")} aria-label="Otvori zbirku: Stari vijek i arheologija"><span className="virtual-museum-icon">⌛</span><small>ZBIRKA 01</small><h3>Stari vijek i arheologija</h3><p>Arheološki nalazi, antički gradovi i tragovi života na hrvatskom prostoru.</p><span className="virtual-museum-status">Otvori zbirku <span aria-hidden="true">↗</span></span></button>
-                <button type="button" className="virtual-museum-card museum-documents" onClick={() => setMuseumCollectionId("documents")} aria-label="Otvori zbirku: Dokumenti i isprave"><span className="virtual-museum-icon">📜</span><small>ZBIRKA 02</small><h3>Dokumenti i isprave</h3><p>Povelje, pisma, zemljovidi i zapisi koji svjedoče o prošlim vremenima.</p><span className="virtual-museum-status">Otvori zbirku <span aria-hidden="true">↗</span></span></button>
-                <button type="button" className="virtual-museum-card museum-traditions" onClick={() => setMuseumCollectionId("traditions")} aria-label="Otvori zbirku: Narodna baština"><span className="virtual-museum-icon">🧵</span><small>ZBIRKA 03</small><h3>Narodna baština</h3><p>Narodna nošnja, običaji, rukotvorine, glazba i umijeća naših krajeva.</p><span className="virtual-museum-status">Otvori zbirku <span aria-hidden="true">↗</span></span></button>
-                <button type="button" className="virtual-museum-card museum-memory" onClick={() => setMuseumCollectionId("memory")} aria-label="Otvori zbirku: Sjećanje i svjedočanstva"><span className="virtual-museum-icon">🕯️</span><small>ZBIRKA 04</small><h3>Sjećanje i svjedočanstva</h3><p>Obiteljske uspomene, povijesne fotografije i provjerena svjedočanstva.</p><span className="virtual-museum-status">Otvori zbirku <span aria-hidden="true">↗</span></span></button>
-                <button type="button" className="virtual-museum-card museum-places" onClick={() => setMuseumCollectionId("places")} aria-label="Otvori zbirku: Gradovi i spomenici"><span className="virtual-museum-icon">🏰</span><small>ZBIRKA 05</small><h3>Gradovi i spomenici</h3><p>Tvrđave, crkve, stari gradovi i mjesta važna za hrvatsku povijest.</p><span className="virtual-museum-status">Otvori zbirku <span aria-hidden="true">↗</span></span></button>
-                <button type="button" className="virtual-museum-card museum-people" onClick={() => setMuseumCollectionId("people")} aria-label="Otvori zbirku: Ljudi i velikani"><span className="virtual-museum-icon">🖼️</span><small>ZBIRKA 06</small><h3>Ljudi i velikani</h3><p>Život i rad osoba koje su oblikovale hrvatsku kulturu, znanost i društvo.</p><span className="virtual-museum-status">Otvori zbirku <span aria-hidden="true">↗</span></span></button>
-              </div>)}
-              <MuseumPuterAssistant collection={museumCollections.find((item) => item.id === museumCollectionId) || null} />
-              <div className="virtual-museum-note"><strong>Čuvamo baštinu odgovorno.</strong><p>Svaki budući muzejski zapis treba imati opis, provenijenciju i pouzdane izvore. Zbirke se neće prikazivati kao dovršene dok stvarni predmeti i podaci ne budu uneseni i provjereni.</p></div>
+              <div className="virtual-museum-intro">
+                <div><span className="eyebrow">TVOJ MUZEJ POČINJE OVDJE</span><h2>Od fotografija do izložbe</h2><p>Učitaj jednu ili više fotografija, dodaj priču ako je znaš, a digitalni kustos pripremit će nacrte kartica i prijedlog kako ih predstaviti u virtualnoj izložbi.</p></div>
+                <span className="virtual-museum-emblem" aria-hidden="true">🏛️</span>
+              </div>
+              <MuseumPuterAssistant collection={null} />
+              <div className="virtual-museum-note"><strong>Ti čuvaš priču. Kustos pomaže oblikovati izložbu.</strong><p>Pregledaj i ispravi svaki prijedlog prije spremanja ili objave. AI ne potvrđuje sam autentičnost, datume ni podrijetlo, a fotografije se ne objavljuju automatski.</p></div>
               <button type="button" className="outline-button virtual-museum-back" onClick={() => setActiveNav("PatriaSoul")}>← Povratak na zid zajednice</button>
             </section>
           )}
