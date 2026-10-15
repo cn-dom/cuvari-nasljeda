@@ -590,6 +590,7 @@ function App() {
       setProfileAvatarUrl(nextAvatarUrl || "");
       setProfileAvatarFile(null);
       setProfileAvatarPreview("");
+      setFeedRefreshKey((current) => current + 1);
       setProfileMessage("Profil je spremljen u bazi zajednice.");
     } catch (error) {
       const constraint = String(error?.message || "") + " " + String(error?.details || "") + " " + String(error?.hint || "");
@@ -2263,7 +2264,7 @@ function App() {
                   <Avatar initials={(profileName || profileUsername || session.user?.email || "Č").slice(0, 1).toLocaleUpperCase("hr")} src={profileAvatarPreview || profileAvatarUrl} variant="profile-avatar-large" />
                   <label className="profile-upload-button" htmlFor="profile-avatar-file">＋ Promijeni sliku</label>
                   <input id="profile-avatar-file" className="profile-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (!file) return; if (!file.type.startsWith("image/")) { setProfileMessage("Odaberi slikovnu datoteku."); event.target.value = ""; return; } if (file.size > 10 * 1024 * 1024) { setProfileMessage("Slika profila može imati najviše 10 MB."); event.target.value = ""; return; } if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) { setProfileMessage("Podržani formati su JPG, PNG, WebP i GIF."); event.target.value = ""; return; } setProfileAvatarFile(file); setProfileAvatarPreview(URL.createObjectURL(file)); setProfileMessage(""); }} />
-                  <small>JPG, PNG, WebP ili GIF · do 10 MB</small>
+                  <small>JPG, PNG, WebP ili GIF · do 10 MB. Slika profila vidljiva je osobama koje mogu vidjeti tvoj profil.</small>
                 </div>
                 <div className="profile-completion">
                   <span className="eyebrow">TVOJ PROFIL</span>
