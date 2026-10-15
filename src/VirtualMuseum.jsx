@@ -178,6 +178,10 @@ export default function VirtualMuseum() {
   const [aiDraft, setAiDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [saveBusy, setSaveBusy] = useState(false);
+  const [draftsBusy, setDraftsBusy] = useState(false);
+  const [savedDrafts, setSavedDrafts] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [existingImagePath, setExistingImagePath] = useState(null);
   const [notice, setNotice] = useState("");
   const selected = exhibits.find(item => item.id === selectedId) || exhibits[0];
 
@@ -196,33 +200,99 @@ export default function VirtualMuseum() {
     } finally { setBusy(false); }
   }
 
-  async function savePrivateDraft() {
-    if (!supabase) { setNotice("Supabase nije konfiguriran u ovoj aplikaciji."); return; }
-    setSaveBusy(true); setNotice("");
+  async function getCurrentUser() {
+    if (!supabase) throw new Error("Supabase nije konfiguriran.");
+    const { data, error } = await supabase.auth.getSession();
+    if (error) throw error;
+    if (!data?.session?.user) throw new Error("Za privatne nacrte prvo se prijavi u Čuvare nasljeđa.");
+    return data.session.user;
+  }
+
+  async function loadSavedDrafts() {
+    setDraftsBusy(true);
     try {
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) throw sessionError;
-      const user = sessionData?.session?.user;
-      if (!user) { setNotice("Za spremanje privatnog nacrta prijavi se u Čuvare nasljeđa, a zatim se vrati u muzej."); return; }
-      let imagePath = null;
+      const user = await getCurrentUser();
+      const { data, error } = await supabase.from("museum_user_drafts")
+        .select("id,title,category,story,ai_draft,image_path,status,created_at,updated_at")
+        .eq("owner_id", user.id).order("updated_at", { ascending: false });
+      if (error) throw error;
+      setSavedDrafts(data || []);
+    } catch (error) {
+      setNotice("Privatne nacrte nije moguće učitati. " + (error?.message || ""));
+    } finally { setDraftsBusy(false); }
+  }
+
+  async function openSavedDraft(draft) {
+    setEditingId(draft.id);
+    setTitle(draft.title || "");
+    setCategory(draft.category || "Obiteljska baština");
+    setStory(draft.story || "");
+    setAiDraft(draft.ai_draft || "");
+    setExistingImagePath(draft.image_path || null);
+    setImageFile(null);
+    setImagePreview("");
+    setNotice("Uređuješ privatni nacrt. Promjene neće biti javno objavljene.");
+    setActiveTab("create");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function resetDraftEditor() {
+    setEditingId(null); setExistingImagePath(null);
+    setTitle(""); setCategory("Obiteljska baština"); setStory("");
+    setAiDraft(""); setImageFile(null); setImagePreview("");
+    setNotice("Otvoren je novi nacrt.");
+  }
+
+  async function savePrivateDraft() {
+    setSaveBusy(true); setNotice("");
+    let uploadedPath = null;
+    try {
+      const user = await getCurrentUser();
+      let imagePath = existingImagePath;
       if (imageFile) {
         const safeName = imageFile.name.replace(/[^a-zA-Z0-9._-]/g, "-").slice(-100) || "predmet.jpg";
-        imagePath = user.id + "/" + crypto.randomUUID() + "-" + safeName;
-        const { error: uploadError } = await supabase.storage.from("virtual-museum-user-items").upload(imagePath, imageFile, { contentType: imageFile.type, upsert: false });
+        uploadedPath = user.id + "/" + crypto.randomUUID() + "-" + safeName;
+        const { error: uploadError } = await supabase.storage.from("virtual-museum-user-items")
+          .upload(uploadedPath, imageFile, { contentType: imageFile.type, upsert: false });
         if (uploadError) throw uploadError;
+        imagePath = uploadedPath;
       }
-      const { error: insertError } = await supabase.from("museum_user_drafts").insert({
-        owner_id: user.id, title: title.trim(), category, story: story.trim(),
-        ai_draft: aiDraft || null, image_path: imagePath, status: "draft"
-      });
-      if (insertError) {
-        if (imagePath) await supabase.storage.from("virtual-museum-user-items").remove([imagePath]);
-        throw insertError;
+      const payload = {
+        title: title.trim(), category, story: story.trim(),
+        ai_draft: aiDraft || null, image_path: imagePath, status: "draft",
+        updated_at: new Date().toISOString()
+      };
+      const result = editingId
+        ? await supabase.from("museum_user_drafts").update(payload).eq("id", editingId).eq("owner_id", user.id).select("id").single()
+        : await supabase.from("museum_user_drafts").insert({ ...payload, owner_id: user.id }).select("id").single();
+      if (result.error) throw result.error;
+      if (imageFile && existingImagePath) {
+        await supabase.storage.from("virtual-museum-user-items").remove([existingImagePath]);
       }
+      setEditingId(result.data?.id || editingId);
+      setExistingImagePath(imagePath);
+      setImageFile(null); setImagePreview("");
       setNotice("Privatni nacrt spremljen. Vidljiv je samo tebi; javna objava nije izvršena.");
+      await loadSavedDrafts();
     } catch (error) {
-      setNotice("Nacrt nije spremljen. Provjeri je li migracija Virtualnog muzeja primijenjena u Supabaseu. " + (error?.message || ""));
+      if (uploadedPath) await supabase.storage.from("virtual-museum-user-items").remove([uploadedPath]);
+      setNotice("Nacrt nije spremljen. " + (error?.message || "Provjeri Supabase konfiguraciju."));
     } finally { setSaveBusy(false); }
+  }
+
+  async function deleteSavedDraft(draft) {
+    if (!window.confirm("Trajno izbrisati ovaj privatni nacrt?")) return;
+    try {
+      const user = await getCurrentUser();
+      const { error } = await supabase.from("museum_user_drafts").delete().eq("id", draft.id).eq("owner_id", user.id);
+      if (error) throw error;
+      if (draft.image_path) await supabase.storage.from("virtual-museum-user-items").remove([draft.image_path]);
+      setSavedDrafts(items => items.filter(item => item.id !== draft.id));
+      if (editingId === draft.id) resetDraftEditor();
+      setNotice("Privatni nacrt izbrisan.");
+    } catch (error) {
+      setNotice("Nacrt nije izbrisan. " + (error?.message || ""));
+    }
   }
 
   return <main className="virtual-museum-page">
@@ -233,7 +303,7 @@ export default function VirtualMuseum() {
     </header>
     <nav className="museum-tabs" aria-label="Dijelovi virtualnog muzeja">
       <button className={activeTab==="explore"?"active":""} onClick={()=>setActiveTab("explore")}>🏛 Istraži muzej</button>
-      <button className={activeTab==="create"?"active":""} onClick={()=>setActiveTab("create")}>✧ Izradi svoj primjerak</button>
+      <button className={activeTab==="create"?"active":""} onClick={()=>{setActiveTab("create");loadSavedDrafts();}}>✧ Izradi svoj primjerak</button>
     </nav>
     {activeTab === "explore" ? <section className="museum-explore">
       <div className="museum-scene-heading"><div><span>STALNA IZLOŽBA · RADNA VERZIJA</span><h2>Galerija hrvatske baštine</h2></div><p>W / A / S / D za kretanje · desni klik + pomak miša za pogled · klikni predmet za detalje</p></div>
@@ -248,10 +318,14 @@ export default function VirtualMuseum() {
         {imagePreview && <img className="museum-upload-preview" src={imagePreview} alt="Pregled učitane fotografije" />}
         <label>Što znaš o predmetu?<textarea value={story} onChange={e=>setStory(e.target.value)} rows={5} maxLength={5000} placeholder="Odakle potječe, kome je pripadao, što ti je o njemu poznato..." required /></label>
         <button type="submit" disabled={busy}>{busy?"AI priprema nacrt…":"✧ Pripremi nacrt uz Puter AI"}</button>
-        <p className="museum-privacy-note">Ovo je prva faza: nacrt se ne objavljuje javno i još se ne sprema u Supabase. AI može pogriješiti; činjenice i prava na fotografiju treba provjeriti.</p>
+        <p className="museum-privacy-note">Nacrt se sprema privatno u tvoj račun i ne objavljuje se javno. AI može pogriješiti; činjenice i prava na fotografiju treba provjeriti.</p>
       </form>
       {notice && <p className="museum-notice" role="status">{notice}</p>}
-      {aiDraft && <section className="museum-ai-draft"><div><span>AI NACRT · POTREBNA PROVJERA</span><div className="museum-draft-actions"><button type="button" onClick={()=>{navigator.clipboard?.writeText(aiDraft);setNotice("Nacrt je kopiran ako preglednik dopušta pristup međuspremniku.");}}>Kopiraj nacrt</button><button type="button" disabled={saveBusy} onClick={savePrivateDraft}>{saveBusy?"Spremam…":"Spremi privatni nacrt"}</button></div></div><pre>{aiDraft}</pre></section>}
+      {aiDraft && <section className="museum-ai-draft"><div><span>AI NACRT · POTREBNA PROVJERA</span><div className="museum-draft-actions"><button type="button" onClick={()=>{navigator.clipboard?.writeText(aiDraft);setNotice("Nacrt je kopiran ako preglednik dopušta pristup međuspremniku.");}}>Kopiraj nacrt</button><button type="button" disabled={saveBusy} onClick={savePrivateDraft}>{saveBusy?"Spremam…":editingId?"Spremi promjene":"Spremi privatni nacrt"}</button>{editingId && <button type="button" onClick={resetDraftEditor}>Novi nacrt</button>}</div></div><pre>{aiDraft}</pre></section>}
+      <section className="museum-saved-drafts">
+        <div className="museum-saved-heading"><div><span>MOJA ZBIRKA</span><h3>Privatni nacrti</h3><p>Samo ti možeš vidjeti, uređivati ili izbrisati ove zapise.</p></div><button type="button" onClick={loadSavedDrafts} disabled={draftsBusy}>{draftsBusy?"Učitavam…":"Osvježi"}</button></div>
+        {draftsBusy ? <p>Učitavam tvoje nacrte…</p> : savedDrafts.length === 0 ? <p className="museum-empty-drafts">Još nema spremljenih nacrta. Izradi prvi iznad.</p> : <div className="museum-draft-list">{savedDrafts.map(draft => <article className="museum-saved-draft" key={draft.id}><div><strong>{draft.title}</strong><span>{draft.category} · {new Date(draft.updated_at || draft.created_at).toLocaleDateString("hr-HR")}</span><small>{draft.image_path ? "Fotografija priložena" : "Bez fotografije"} · Privatno</small></div><div className="museum-saved-actions"><button type="button" onClick={()=>openSavedDraft(draft)}>Otvori / uredi</button><button type="button" onClick={()=>deleteSavedDraft(draft)}>Izbriši</button></div></article>)}</div>}
+      </section>
     </section>}
     <footer className="museum-footer">Virtualni muzej PatriaSoul · Povijesne činjenice moraju imati provjerljive izvore · AI ilustracije nikad se ne označavaju kao izvorne povijesne fotografije.</footer>
   </main>;
