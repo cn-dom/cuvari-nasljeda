@@ -1658,3 +1658,100 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
 .post-author-profile-button:focus-visible,.post-author-name-button:focus-visible { outline:2px solid #7ec8f3; outline-offset:3px; }
 .post-author-name-button { display:inline; padding:0; border:0; background:transparent; color:inherit; font:inherit; font-weight:800; text-align:left; cursor:pointer; }
 .post-author-name-button:hover { color:#8fc9ff; }
+
+
+/* PatriaSoul social wall refinement — inspired by modern SupaSocial layouts.
+   Visual-only overrides: existing React actions, data model and Supabase policies stay intact. */
+.feed-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.post-card {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 0;
+  padding: 19px 20px 0;
+  border: 1px solid rgba(105, 157, 199, .23);
+  border-radius: 19px;
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(38, 103, 153, .13), transparent 42%),
+    linear-gradient(145deg, #0b2034 0%, #071727 76%);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .19), inset 0 1px 0 rgba(255,255,255,.025);
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.post-card:hover {
+  border-color: rgba(111, 181, 231, .42);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, .24), 0 0 0 1px rgba(65, 142, 201, .05);
+}
+.post-header {
+  gap: 12px;
+  align-items: center;
+  padding-bottom: 13px;
+}
+.post-author strong {
+  color: #f2f7fd;
+  font-size: 13px;
+  font-weight: 750;
+}
+.post-author span {
+  color: #91abc2;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.post-card .avatar {
+  flex-shrink: 0;
+  border: 2px solid rgba(108, 177, 226, .38);
+  box-shadow: 0 0 0 3px rgba(73, 139, 191, .08);
+}
+.post-card img {
+  max-width: 100%;
+}
+.post-card :is(img.post-image, .post-image img, .post-media img, .post-attachment img, .post-link-preview img) {
+  display: block;
+  width: 100%;
+  max-height: 540px;
+  object-fit: cover;
+  border-radius: 13px;
+}
+.post-card :is(p, .post-text, .post-content) {
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.post-actions {
+  margin-top: 10px;
+  padding: 9px 0 11px;
+  border-top: 1px solid rgba(104, 153, 190, .16);
+  gap: 7px;
+}
+.post-actions button {
+  min-height: 38px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: #a9c1d7;
+  background: rgba(255,255,255,.025);
+  transition: background .18s ease, color .18s ease, border-color .18s ease;
+}
+.post-actions button:hover {
+  color: #f3f8ff;
+  background: rgba(65, 142, 201, .14);
+  border-color: rgba(94, 163, 215, .2);
+}
+.post-card :is(input, textarea) {
+  border-color: rgba(103, 155, 195, .25);
+  border-radius: 12px;
+  background: rgba(3, 15, 27, .62);
+  color: #edf6ff;
+}
+.post-card :is(input, textarea)::placeholder { color: #7893aa; }
+.feed-column .card,
+.feed-column .post-composer,
+.feed-column [class*="composer"] {
+  border-radius: 18px;
+}
+@media (max-width: 680px) {
+  .feed-column { gap: 12px; }
+  .post-card { padding: 15px 14px 0; border-radius: 16px; }
+  .post-actions { gap: 4px; }
+  .post-actions button { min-height: 36px; padding-inline: 5px; font-size: 12px; }
+}
