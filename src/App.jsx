@@ -2283,7 +2283,7 @@ function App() {
                 <button type="button" className="virtual-museum-card museum-places" onClick={() => setMuseumCollectionId("places")} aria-label="Otvori zbirku: Gradovi i spomenici"><span className="virtual-museum-icon">🏰</span><small>ZBIRKA 05</small><h3>Gradovi i spomenici</h3><p>Tvrđave, crkve, stari gradovi i mjesta važna za hrvatsku povijest.</p><span className="virtual-museum-status">Otvori zbirku <span aria-hidden="true">↗</span></span></button>
                 <button type="button" className="virtual-museum-card museum-people" onClick={() => setMuseumCollectionId("people")} aria-label="Otvori zbirku: Ljudi i velikani"><span className="virtual-museum-icon">🖼️</span><small>ZBIRKA 06</small><h3>Ljudi i velikani</h3><p>Život i rad osoba koje su oblikovale hrvatsku kulturu, znanost i društvo.</p><span className="virtual-museum-status">Otvori zbirku <span aria-hidden="true">↗</span></span></button>
               </div>
-              </div>}
+              }
               <MuseumPuterAssistant collection={museumCollections.find((item) => item.id === museumCollectionId) || null} />
               <div className="virtual-museum-note"><strong>Čuvamo baštinu odgovorno.</strong><p>Svaki budući muzejski zapis treba imati opis, provenijenciju i pouzdane izvore. Zbirke se neće prikazivati kao dovršene dok stvarni predmeti i podaci ne budu uneseni i provjereni.</p></div>
               <button type="button" className="outline-button virtual-museum-back" onClick={() => setActiveNav("PatriaSoul")}>← Povratak na zid zajednice</button>
