@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 import FloatingGlobalChat from "./FloatingGlobalChat.jsx";
+import MuseumPuterAssistant from "./VirtualMuseumPuter.jsx";
 
 const navItems = [
   { icon: "⌂", label: "PatriaSoul" },
@@ -2254,7 +2255,7 @@ function App() {
             <section className="virtual-museum-panel card" aria-labelledby="virtual-museum-title">
               <div className="virtual-museum-hero">
                 <span className="eyebrow">PATRiASOUL · DIGITALNA BAŠTINA</span>
-                <h1 id="virtual-museum-title">Virtualni muzej Hrvatske</h1>
+                <h1 id="virtual-museum-title">Virtualni muzej PatriaSoul</h1>
                 <p>Mjesto gdje predmeti, dokumenti, fotografije i sjećanja pričaju priču o hrvatskoj prošlosti.</p>
                 <div className="virtual-museum-hero-badges"><span>✦ Povijest</span><span>▧ Predmeti</span><span>⌕ Istraživanje</span></div>
               </div>
@@ -2283,6 +2284,7 @@ function App() {
                 <button type="button" className="virtual-museum-card museum-people" onClick={() => setMuseumCollectionId("people")} aria-label="Otvori zbirku: Ljudi i velikani"><span className="virtual-museum-icon">🖼️</span><small>ZBIRKA 06</small><h3>Ljudi i velikani</h3><p>Život i rad osoba koje su oblikovale hrvatsku kulturu, znanost i društvo.</p><span className="virtual-museum-status">Otvori zbirku <span aria-hidden="true">↗</span></span></button>
               </div>
               </div>}
+              <MuseumPuterAssistant collection={museumCollections.find((item) => item.id === museumCollectionId) || null} />
               <div className="virtual-museum-note"><strong>Čuvamo baštinu odgovorno.</strong><p>Svaki budući muzejski zapis treba imati opis, provenijenciju i pouzdane izvore. Zbirke se neće prikazivati kao dovršene dok stvarni predmeti i podaci ne budu uneseni i provjereni.</p></div>
               <button type="button" className="outline-button virtual-museum-back" onClick={() => setActiveNav("PatriaSoul")}>← Povratak na zid zajednice</button>
             </section>
