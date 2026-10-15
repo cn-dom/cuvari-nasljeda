@@ -88,3 +88,30 @@
 .fgc-admin-report-actions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
 .fgc-admin-report-actions button.quiet { border-color: #3a4b5b; color: #a9bdce; background: transparent; }
 .fgc-admin-report-actions button:disabled, .fgc-admin-reports-heading button:disabled { opacity: .5; }
+
+
+/* Status odvojene pretplate za zahtjeve prijateljstva u stvarnom vremenu. */
+.fgc-realtime-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  color: #8a96a5;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.fgc-realtime-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.fgc-realtime-status.connected { color: #25845a; }
+.fgc-realtime-status.connecting { color: #b58a35; }
+.fgc-realtime-status.error { color: #b51224; }
+@media (prefers-reduced-motion: reduce) {
+  .fgc-realtime-status { transition: none !important; }
+}
