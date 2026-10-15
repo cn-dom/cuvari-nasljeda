@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 import FloatingGlobalChat from "./FloatingGlobalChat.jsx";
+import BadgeShowcase, { BadgeRow } from "./HeritageBadges.jsx";
 import { useIsMobile } from "./hooks/use-mobile.js";
 
 const navItems = [
@@ -10,6 +11,7 @@ const navItems = [
   { icon: "▤", label: "Forum" },
   { icon: "▣", label: "Stranice" },
   { icon: "🏛️", label: "Virtualni muzej" },
+  { icon: "🏅", label: "Značke" },
   { icon: "👥", label: "Čuvari nasljeđa" },
   { icon: "▦", label: "Grupe" },
   { icon: "▣", label: "Događaji" },
@@ -120,7 +122,7 @@ function App() {
   const [communityHelpAdReports, setCommunityHelpAdReports] = useState([]);
   const [communityHelpAdReportsLoading, setCommunityHelpAdReportsLoading] = useState(false);
   const communityActionPage = new URLSearchParams(window.location.search).get("zajedno");
-  const [activeNav, setActiveNav] = useState("PatriaSoul");
+  const [activeNav, setActiveNav] = useState(new URLSearchParams(window.location.search).get("section") === "Značke" ? "Značke" : "PatriaSoul");
   const [liked, setLiked] = useState([]);
   const [reactionsByPost, setReactionsByPost] = useState({});
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
@@ -186,6 +188,7 @@ function App() {
   const [feedRefreshKey, setFeedRefreshKey] = useState(0);
   const [blockBusyId, setBlockBusyId] = useState(null);
   const [memberDirectory, setMemberDirectory] = useState([]);
+  const [badgeRowsByUser, setBadgeRowsByUser] = useState({});
   const [memberDirectoryQuery, setMemberDirectoryQuery] = useState("");
   const [memberDirectoryBusy, setMemberDirectoryBusy] = useState(false);
   const [memberPresence, setMemberPresence] = useState([]);
@@ -562,6 +565,8 @@ function App() {
         return;
       }
       setProfileViewData(profile);
+      const { data: memberBadgeRows, error: memberBadgeError } = await supabase.rpc("get_public_member_badges", { p_user_ids: [profileViewId] });
+      if (!cancelled && !memberBadgeError) setBadgeRowsByUser((current) => ({ ...current, [profileViewId]: memberBadgeRows || [] }));
       if (postsError) {
         setProfileViewPosts([]);
         setNotice("Profil je otvoren, ali objave se ne mogu učitati. Provjeri RLS pravila za tablicu posts.");
@@ -842,6 +847,17 @@ function App() {
         setMemberDirectory([]);
       } else {
         setMemberDirectory((data || []).filter((member) => !blockedMembers.some((blocked) => blocked.id === member.id)));
+        if (data?.length) {
+          const { data: badgeRows, error: badgeError } = await supabase.rpc("get_public_member_badges", { p_user_ids: data.map((member) => member.id) });
+          if (!cancelled && !badgeError) {
+            setBadgeRowsByUser((current) => {
+              const next = { ...current };
+              for (const member of data) next[member.id] = [];
+              for (const row of badgeRows || []) next[row.user_id] = [...(next[row.user_id] || []), row];
+              return next;
+            });
+          }
+        }
       }
       const { data: presenceRows, error: presenceError } = await supabase
         .from("member_presence").select("user_id, last_seen_at, show_activity");
@@ -2229,8 +2245,8 @@ function App() {
           </section>
           <section className="side-section sidebar-nav-section">
             <h3>MOJA ZAJEDNICA</h3>
-            {navItems.filter((item) => ["PatriaSoul", "Kviz", "Forum", "Stranice", "Virtualni muzej", "Čuvari nasljeđa", "Grupe"].includes(item.label)).map((item) => (
-              <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => item.label === "Kviz" ? (window.location.href = "/kviz/") : item.label === "Forum" ? (window.location.href = "/forum.html") : item.label === "Stranice" ? (window.location.href = "/stranice.html") : item.label === "Virtualni muzej" ? (window.location.href = "/virtualni-muzej.html") : setActiveNav(item.label)}>
+            {navItems.filter((item) => ["PatriaSoul", "Kviz", "Forum", "Stranice", "Virtualni muzej", "Čuvari nasljeđa", "Grupe", "Značke"].includes(item.label)).map((item) => (
+              <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => item.label === "Kviz" ? (window.location.href = "/kviz/") : item.label === "Forum" ? (window.location.href = "/forum.html") : item.label === "Stranice" ? (window.location.href = "/stranice.html") : item.label === "Virtualni muzej" ? (window.location.href = "/virtualni-muzej.html") : item.label === "Značke" ? setActiveNav("Značke") : setActiveNav(item.label)}>
                 <span className="side-icon">{item.icon}</span><span className="side-link-label">{item.label}</span>
                 {item.label === "Čuvari nasljeđa" && <span className="side-count">{memberDirectory.length || ""}</span>}
                 {item.label === "Grupe" && <span className="side-count">{groupChats.length || ""}</span>}
@@ -2434,6 +2450,11 @@ function App() {
                 </div>
                 <div className="profile-completion"><span className="eyebrow">TVOJ PROFIL</span><strong>{profileName.trim() || "Ime za prikaz"}</strong><small>@{profileUsername.trim().replace(/^@/, "") || "korisnicko_ime"}</small><p>{profileBio.trim() || "Dodaj kratki opis kako bi te zajednica lakše upoznala."}</p></div>
               </div>
+              <section className="profile-earned-badges">
+                <h3>Tvoje osvojene značke</h3>
+                {Object.prototype.hasOwnProperty.call(badgeRowsByUser, session.user.id) ? <BadgeRow badgeKeys={(badgeRowsByUser[session.user.id] || []).map((row) => row.badge_key)} /> : <p className="heritage-badges-empty">Učitavam značke…</p>}
+                <button type="button" className="outline-button" onClick={() => { setProfileOpen(false); setActiveNav("Značke"); }}>Pregledaj sve značke →</button>
+              </section>
               <form className="auth-form profile-edit-form" onSubmit={saveProfile}>
                 <div className="profile-form-heading"><h3>Uredi podatke profila</h3><span>Promjene se spremaju u Supabase</span></div>
                 <label htmlFor="profile-name">Ime za prikaz</label>
@@ -2475,6 +2496,10 @@ function App() {
                   <div className="profile-avatar-editor"><Avatar initials={(profileViewData.display_name || profileViewData.username || "Č").slice(0,1).toLocaleUpperCase("hr")} src={profileViewData.avatar_url || ""} variant="profile-avatar-large" /></div>
                   <div className="profile-completion"><span className="eyebrow">O MENI</span><strong>{profileViewData.display_name || "Čuvar nasljeđa"}</strong><small>@{normalizeUsername(profileViewData.username) || "clan"}</small><p>{profileViewData.bio || "Ovaj član još nije dodao opis profila."}</p></div>
                 </div>
+                <section className="profile-earned-badges">
+                  <h3>Osvojene značke</h3>
+                  {Object.prototype.hasOwnProperty.call(badgeRowsByUser, profileViewData.id) ? <BadgeRow badgeKeys={(badgeRowsByUser[profileViewData.id] || []).map((row) => row.badge_key)} /> : <p className="heritage-badges-empty">Značke trenutačno nisu dostupne.</p>}
+                </section>
                 <section className="profile-posts-section">
                   <div className="profile-posts-heading"><div><span className="eyebrow">OBJAVE ČLANA</span><h3>Sve objave</h3><p>Objave koje je član podijelio na zidu zajednice.</p></div><span className="profile-post-count">{profileViewPosts.length}</span></div>
                   {profileViewPosts.length ? profileViewPosts.map((post) => <article className="profile-post-item" key={post.id}><div className="profile-post-meta"><Avatar initials={post.initials} src={post.avatarUrl} /><div><strong>{post.author}</strong><small>{post.time}</small></div></div>{post.text && <p>{post.text}</p>}{post.imageUrl && <img className="profile-post-image" src={post.imageUrl} alt="Fotografija uz objavu" loading="lazy" />}</article>) : <div className="profile-empty-posts"><span>✦</span><strong>Još nema objava</strong><p>Kada ovaj član nešto objavi na zidu, prikazat će se ovdje.</p></div>}
@@ -2724,6 +2749,14 @@ function App() {
                   </div>
                 </>
               )}
+            </section>
+          )}
+
+          {activeNav === "Značke" && (
+            <section className="card" style={{ padding: 20 }}>
+              {session?.user?.id
+                ? <BadgeShowcase earnedKeys={(badgeRowsByUser[session.user.id] || []).map((row) => row.badge_key)} showLocked />
+                : <div className="directory-empty"><h2>Značke PatriaSoul</h2><p>Prijavi se kako bi vidio/la svoj napredak i sve dostupne značke.</p><button type="button" className="primary-button" onClick={() => { setAuthMode("login"); setAuthOpen(true); }}>Prijava / Registracija</button></div>}
             </section>
           )}
 
