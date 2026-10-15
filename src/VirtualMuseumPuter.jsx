@@ -93,7 +93,7 @@ export default function MuseumPuterAssistant({ collection }) {
     <p className="museum-puter-privacy">Sadržaj koji pošalješ Puteru obrađuje vanjska AI usluga. Ne šalji privatne podatke. AI nacrti se ne spremaju automatski u Supabase i ne objavljuju se bez tvoje provjere.</p>
     {error && <div className="museum-puter-message error" role="alert">{error}</div>}
     {status && <div className="museum-puter-message" role="status">{status}</div>}
-    {busy && <div className="museum-puter-busy"><LoaderCircle size={18} className="museum-puter-spin" /> Puter AI priprema muzejski nacrt…</div>}
+    {busy && <div className="museum-puter-busy"><LoaderCircle size={18} className="museum-puter-spin" /> Digitalni kustos PatriaSoul priprema nacrt…</div>}
     {result && <section className="museum-puter-result" aria-label="AI nacrt"><div className="museum-puter-result-head"><strong>Radni nacrt · nije potvrđen muzejski zapis</strong><button type="button" onClick={copyResult}><Copy size={15} /> Kopiraj nacrt</button></div><pre>{result}</pre></section>}
   </section>;
 }
