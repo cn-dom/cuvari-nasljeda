@@ -164,6 +164,18 @@ function App() {
   const [authBusy, setAuthBusy] = useState(false);
   const [authMessage, setAuthMessage] = useState("");
   const [session, setSession] = useState(null);
+
+  // The login panel is rendered inline farther down the page; bring it into view when requested.
+  useEffect(() => {
+    if (!authOpen) return undefined;
+    const frame = window.requestAnimationFrame(() => {
+      const panel = document.querySelector(".auth-layout-card");
+      if (!panel) return;
+      panel.scrollIntoView({ behavior: "smooth", block: "center" });
+      panel.querySelector("input")?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [authOpen]);
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [profileUsername, setProfileUsername] = useState("");
