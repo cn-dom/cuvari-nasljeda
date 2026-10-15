@@ -14,10 +14,15 @@ const exhibits = [
   },
   {
     id: "bascanska", title: "Bašćanska ploča", period: "oko 1100. godine", type: "Glagoljica",
-    description: "Kameni natpis iz crkve sv. Lucije u Jurandvoru na otoku Krku, važan spomenik hrvatske glagoljske i jezične povijesti. Ova fotografija služi za upoznavanje s predmetom; nije 3D snimka izvornika.",
-    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Bascanska_ploca.jpg",
-    source: "https://commons.wikimedia.org/wiki/File:Bascanska_ploca.jpg",
-    sourceLabel: "Wikimedia Commons · zapis datoteke", credit: "Neoneo13", license: "Javno vlasništvo prema oznaci autora na Wikimedia Commonsu", licenseUrl: "https://commons.wikimedia.org/wiki/File:Bascanska_ploca.jpg"
+    description: "Bašćanska ploča je vapnenački natpis nastao oko 1100. godine, pronađen u crkvi sv. Lucije u Jurandvoru na Krku. Izvorno je bila dio kamene pregrade između prezbiterija i crkvene lađe. Natpis je pisan prijelaznim oblikom glagoljice i bilježi darovanje zemlje kralja Zvonimira. Izvorna ploča čuva se u palači Hrvatske akademije znanosti i umjetnosti u Zagrebu; u crkvi sv. Lucije nalazi se replika. Ovdje je fotografija objavljena u Hrvatskoj enciklopediji, a ne 3D snimka izvornika.",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Ba%C5%A1ka_tablet.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Ba%C5%A1ka_tablet.jpg",
+    sourceLabel: "Wikimedia Commons · fotografija iz Hrvatske enciklopedije", credit: "Hrvatska enciklopedija", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+    relatedSources: [
+      { label: "Hrvatska enciklopedija · Bašćanska ploča", url: "https://enciklopedija.hr/clanak/bascanska-ploca", kind: "Stručna enciklopedijska natuknica" },
+      { label: "Hrvatska enciklopedija · Glagoljica", url: "https://enciklopedija.hr/clanak/glagoljica", kind: "Pregled pisma i njegova razvoja" },
+      { label: "Glagoljica.hr · digitalna zbirka glagoljskih natpisa", url: "https://glagoljica.hr/", kind: "Digitalna zbirka nacionalne knjižnice" }
+    ]
   },
   {
     id: "pleter", title: "Hrvatski pleter", period: "Predromanika · rani srednji vijek", type: "Kamena plastika",
