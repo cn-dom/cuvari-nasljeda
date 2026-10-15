@@ -1286,7 +1286,7 @@ export default function App() {
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Sljedeća značka</p>
                 {nextBadge ? <><p className="mt-1 font-bold">{nextBadge[1]} · razina {nextBadge[0]}</p><p className="mt-1 text-sm text-muted-foreground">Još ${xpToNextBadge} XP do nove značke.</p></> : <><p className="mt-1 font-bold text-accent">🛡️ Čuvar nasljeđa</p><p className="mt-1 text-sm text-muted-foreground">Najviša PatriaSoul značka.</p></>}
               </div>
-              <a href="/" className="mt-4 inline-flex items-center rounded-lg border border-[#c6a96c]/50 px-4 py-2 text-sm font-bold text-accent hover:bg-secondary">Otvori sve značke PatriaSoul →</a>
+              <a href="/?section=Značke" className="mt-4 inline-flex items-center rounded-lg border border-[#c6a96c]/50 px-4 py-2 text-sm font-bold text-accent hover:bg-secondary">Otvori sve značke PatriaSoul →</a>
             </div>
           </div>
 
