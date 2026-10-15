@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 .virtual-museum-page{min-height:100vh;background:#151613;color:#eee7d8;padding:clamp(16px,3vw,42px);font-family:Inter,system-ui,sans-serif}
 .museum-header,.museum-explore,.museum-create,.museum-footer{max-width:1280px;margin:0 auto}
 .museum-back{display:inline-block;color:#d7c18a;text-decoration:none;margin-bottom:26px;font-size:.9rem}
