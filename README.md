@@ -37,9 +37,10 @@ Svaki vanjski projekt ili komponenta mora imati zasebno provjerenu licencu. Za p
 
 ## Sigurnost
 
-- Za testiranje koristiti isključivo zaseban Supabase projekt.
-- Ne povezivati razvojnu aplikaciju s postojećim PatriaSoul bazama tijekom početnog razvoja.
-- Ne pokretati migracije, `db:push` ili seed nad postojećim bazama.
+- Razvojne migracije prvo testirati na zasebnoj kopiji baze.
+- Prije produkcijske migracije potvrditi ciljnu Supabase instancu, sigurnosnu kopiju i plan povratka.
+- Ne pokretati `db:push`, seed ni prijenos podataka naslijepo nad postojećim bazama.
+- Provjeriti da URL u aktivnom Cloudflare Workeru odgovara namjerno odabranoj bazi.
 - Ne spremati API ključeve, tokene ni druge tajne u repozitorij.
 - Provjeriti RLS, autentikaciju, uloge, CORS, pohranu fotografija i moderiranje.
 - U pregledniku koristiti samo javni/publishable Supabase ključ; tajne ostaju u sigurnim Cloudflare secrets.
@@ -47,6 +48,7 @@ Svaki vanjski projekt ili komponenta mora imati zasebno provjerenu licencu. Za p
 ## Dokumentacija
 
 - [Arhitektura i fazni plan](./docs/ARHITEKTURA-I-PLAN.md)
+- [Tehnička provjera Supabase integracije](./docs/STATUS-TEHNICKE-PROVJERE.md)
 - [Pregled kandidatskog projekta OpenSourceCommunity](./docs/PROVJERA-IZVORA.md)
 - [Evidencija licence kandidata](./licenses/OPEN-SOURCE-COMMUNITY-NON-COMMERCIAL-LICENSE.txt)
 
