@@ -24,3 +24,20 @@
 .museum-puter-result-head button{padding:7px 10px;font-size:.8rem}
 .museum-puter-result pre{max-height:650px;overflow:auto;margin:0;padding:16px;white-space:pre-wrap;overflow-wrap:anywhere;color:#e0e8f2;font:inherit;font-size:.9rem;line-height:1.7}
 @media(max-width:640px){.museum-puter{padding:16px;margin:22px 0}.museum-puter-heading{gap:10px}.museum-puter-mark{flex-basis:38px;height:38px}.museum-puter-actions{display:grid;grid-template-columns:1fr}.museum-puter-action{width:100%;box-sizing:border-box}.museum-puter-result-head{align-items:flex-start;flex-direction:column}.museum-puter-result-head button{align-self:flex-start}}
+
+.museum-memory-upload{margin-top:24px;padding:18px;border:1px solid rgba(218,178,91,.28);border-radius:14px;background:rgba(3,11,21,.52)}
+.museum-memory-title-row{display:flex;align-items:flex-start;gap:11px;color:#e5c16f}
+.museum-memory-title-row h3{margin:0 0 6px;color:#fff;font-size:1.12rem}
+.museum-memory-title-row p{margin:0;color:#bdc9d9;line-height:1.55}
+.museum-memory-file{display:block;box-sizing:border-box;width:100%;padding:10px;border:1px dashed #52647a;border-radius:10px;background:#081321;color:#e7edf5}
+.museum-memory-preview{display:flex;align-items:center;gap:13px;margin-top:12px;padding:10px;border-radius:10px;background:#101f32}
+.museum-memory-preview img{width:104px;height:90px;object-fit:cover;border-radius:8px}
+.museum-memory-preview div{display:flex;flex-direction:column;gap:6px;min-width:0}
+.museum-memory-preview strong{overflow-wrap:anywhere;color:#f2f5fa}
+.museum-memory-preview small{color:#9cacc0}
+.museum-memory-remove{align-self:flex-start;border:0;background:transparent;color:#f0b4b4;text-decoration:underline;cursor:pointer;padding:0}
+.museum-memory-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.museum-memory-fields label{display:block;color:#bdc9d9;font-size:.88rem}
+.museum-memory-fields .museum-puter-input{display:block;margin-top:7px}
+.museum-memory-upload>.museum-puter-action{margin-top:13px}
+@media(max-width:640px){.museum-memory-upload{padding:13px}.museum-memory-fields{grid-template-columns:1fr}.museum-memory-preview img{width:82px;height:82px}}
