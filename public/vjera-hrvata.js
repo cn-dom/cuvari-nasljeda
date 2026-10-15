@@ -22,7 +22,7 @@ if(date)date.textContent=new Intl.DateTimeFormat("hr-HR",{timeZone:"Europe/Zagre
 for(const [id,value] of [["faith-verse","„"+item.verse+"”"],["faith-reference",item.ref],["faith-reflection",item.reflection],["faith-question",item.question]]){const el=document.getElementById(id);if(el)el.textContent=value;}
 document.querySelectorAll(".prayer-item").forEach(button=>button.addEventListener("click",()=>{const expanded=button.getAttribute("aria-expanded")==="true";button.setAttribute("aria-expanded",String(!expanded));const mark=button.querySelector(":scope > b");if(mark)mark.textContent=expanded?"＋":"−";}));
 const weekday=["nedjelja","ponedjeljak","utorak","srijeda","četvrtak","petak","subota"][new Date(today.iso+"T12:00:00+02:00").getDay()];
-const slug=weekday+"-"+Number(today.day)+"-"+Number(today.month)+"-"+today.year;
+const slug=({nedjelja:"nedjelja",ponedjeljak:"ponedjeljak",utorak:"utorak",srijeda:"srijeda",četvrtak:"cetvrtak",petak:"petak",subota:"subota"})[weekday]+"-"+Number(today.day)+"-"+Number(today.month)+"-"+today.year;
 const setText=(id,text)=>{const el=document.getElementById(id);if(el)el.textContent=text;};
 const clean=s=>String(s||"").replace(/\[([^\]]+)\]\([^)]+\)/g,"$1").replace(/[]/g," ").replace(/\b(?:U kalendaru|Podijelite|Markdown)\b/gi," ").replace(/[*_>#`]/g,"").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#39;|&apos;/g,"'").replace(/\s+/g," ").trim();
 const findSection=(source,heading)=>{
@@ -36,8 +36,9 @@ const loadSaintFallback=async()=>{
    if(!response.ok)throw new Error("Kalendar HTTP "+response.status);
    const data=await response.json();
    if(!data.names||!data.source)throw new Error("Nedostaje provjereni zapis sveca.");
-   setText("saint-heading",data.names);
-   setText("saint-description","Spomendan i imendani prema "+data.source+".");
+   const names=String(data.names).split(/\s*,\s*/).map(name=>name.replace(/[.;]+$/,"").trim()).filter(Boolean);
+   setText("saint-heading",names[0]||"Liturgijski spomendan");
+   setText("saint-description",(names.length>1?"Imendani: "+names.slice(1).join(", ")+". ":"")+"Spomendan prema "+data.source+".");
    setText("gospel-response","Evanđelje se trenutačno ne može dohvatiti; podatak o svecu učitan je zasebno iz katoličkog kalendara.");
  }catch(error){
    setText("saint-heading","Podatak trenutačno nije dostupan");
