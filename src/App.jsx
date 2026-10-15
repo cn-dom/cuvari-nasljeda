@@ -2817,7 +2817,7 @@ function App() {
 
           {activeNav === "Značke" && (
             <div className="badge-overlay-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setActiveNav("PatriaSoul"); }}>
-              <section className="badge-overlay-dialog card" role="dialog" aria-modal="true" aria-labelledby="badge-overlay-title">
+              <section className="badge-overlay-dialog card" role="dialog" aria-modal="true" aria-label="Značke čuvara nasljeđa">
                 <div className="badge-overlay-toolbar">
                   <span>PatriaSoul · Postignuća</span>
                   <button type="button" className="badge-overlay-close" aria-label="Zatvori značke" onClick={() => setActiveNav("PatriaSoul")}>×</button>
