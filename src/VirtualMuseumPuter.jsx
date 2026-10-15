@@ -30,7 +30,13 @@ export default function MuseumPuterAssistant({ collection }) {
   async function runTask(taskId) {
     if (busy) return;
     const userTopic = topic.trim();
-    if (taskId === "review" && !draft.trim()) {
+    const userDraft = draft.trim();
+    const sensitivePatterns = [/(?:sb_secret_|service_role|github_pat_|gh[pousr]_[A-Za-z0-9_]{20,}|sk_live_|sk_test_)/i, /(?:api[_ -]?key|access[_ -]?token|refresh[_ -]?token|lozinka|password|tajni[_ -]?ključ|tajni[_ -]?kljuc)\\s*[:=]\\s*\\S+/i, /eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}/];
+    if (sensitivePatterns.some((pattern) => pattern.test(userTopic) || pattern.test(userDraft))) {
+      setError("Slanje je zaustavljeno jer tekst možda sadrži ključ, token ili lozinku. Ukloni osjetljive podatke prije slanja Puteru.");
+      return;
+    }
+    if (taskId === "review" && !userDraft) {
       setError("Najprije zalijepi muzejski zapis koji želiš provjeriti.");
       return;
     }
@@ -45,7 +51,7 @@ export default function MuseumPuterAssistant({ collection }) {
     } else if (taskId === "exhibition") {
       instruction = "Izradi nacrt virtualne izložbe za Virtualni muzej PatriaSoul. Zbirka: " + collectionName + ". Opseg: " + collectionScope + ". Tema: " + (userTopic || "predloži prikladnu tematsku izložbu") + ". Daj naslov, uvodni tekst, 5 do 7 odjeljaka, prijedloge vrsta eksponata, kratke natpise, prijelaze između odjeljaka i popis činjenica koje kustos mora potvrditi. Ne izmišljaj da predmeti već postoje u našoj zbirci.";
     } else {
-      instruction = "Pregledaj nacrt muzejskog zapisa za Virtualni muzej PatriaSoul. Zbirka: " + collectionName + ". Tema: " + (userTopic || "nije dodatno navedena") + ". ZADATAK: " + draft.trim() + ". Vrati: (1) tvrdnje koje trebaju izvor, (2) moguće netočnosti ili nejasnoće, (3) nedostajuće metapodatke, (4) preporučene vrste pouzdanih izvora, (5) urednički dotjeranu verziju koja ne dodaje neprovjerene činjenice, (6) odluku: spremno za ljudsku provjeru / potrebno dopuniti. Ne potvrđuj autentičnost samo na temelju teksta.";
+      instruction = "Pregledaj nacrt muzejskog zapisa za Virtualni muzej PatriaSoul. Zbirka: " + collectionName + ". Tema: " + (userTopic || "nije dodatno navedena") + ". ZADATAK: " + userDraft + ". Vrati: (1) tvrdnje koje trebaju izvor, (2) moguće netočnosti ili nejasnoće, (3) nedostajuće metapodatke, (4) preporučene vrste pouzdanih izvora, (5) urednički dotjeranu verziju koja ne dodaje neprovjerene činjenice, (6) odluku: spremno za ljudsku provjeru / potrebno dopuniti. Ne potvrđuj autentičnost samo na temelju teksta.";
     }
     try {
       const reply = await puter.ai.chat([
