@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build && npm run build:quiz",
     "preview": "vite preview",
-    "build:quiz": "vite build kviz --config kviz/vite.config.js"
+    "build:quiz": "vite build kviz --config kviz/vite.config.js",
+    "test:browser": "node scripts/browser-smoke.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.3",
@@ -25,5 +26,7 @@
     "@heyputer/puter.js": "^2.6.4",
     "three": "^0.180.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "playwright": "^1.56.1"
+  }
 }
