@@ -3,6 +3,7 @@ import { puter } from "@heyputer/puter.js";
 import * as THREE from "three";
 import { supabase } from "./lib/supabase.js";
 import "./virtual-museum.css";
+import { BadgeRow, getBadge } from "./HeritageBadges.jsx";
 
 const exhibits = [
   {
@@ -296,7 +297,37 @@ export default function VirtualMuseum() {
   const [existingImagePath, setExistingImagePath] = useState(null);
   const [existingImagePreview, setExistingImagePreview] = useState("");
   const [notice, setNotice] = useState("");
+  const [museumBadgeKeys, setMuseumBadgeKeys] = useState([]);
   const selected = exhibits.find(item => item.id === selectedId) || exhibits[0];
+
+  useEffect(() => {
+    if (!supabase) return undefined;
+    let cancelled = false;
+    async function loadBadges() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || cancelled) return;
+      const { data, error } = await supabase.rpc("get_public_member_badges", { p_user_ids: [user.id] });
+      if (!cancelled && !error) setMuseumBadgeKeys((data || []).map((row) => row.badge_key));
+    }
+    loadBadges();
+    return () => { cancelled = true; };
+  }, []);
+
+  async function trackExhibitVisit(exhibitId) {
+    setSelectedId(exhibitId);
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data, error } = await supabase.rpc("record_museum_exhibit_visit", { p_exhibit_id: exhibitId });
+    if (error) {
+      setNotice("Predmet je otvoren, ali se napredak znački nije spremio. Provjeri je li migracija shared_heritage_badges primijenjena.");
+      return;
+    }
+    const { data: badgeRows, error: badgeError } = await supabase.rpc("get_public_member_badges", { p_user_ids: [user.id] });
+    if (!badgeError) setMuseumBadgeKeys((badgeRows || []).map((row) => row.badge_key));
+    const newBadges = (data?.new_badges || []).map(getBadge).filter(Boolean);
+    if (newBadges.length) setNotice("Osvojena nova značka: " + newBadges.map((badge) => badge.name).join(", ") + "!");
+  }
 
   async function prepareDraft(event) {
     event.preventDefault();
@@ -426,7 +457,12 @@ export default function VirtualMuseum() {
     </nav>
     {activeTab === "explore" ? <section className="museum-explore">
       <div className="museum-scene-heading"><div><span>STALNA IZLOŽBA · RADNA VERZIJA</span><h2>Galerija hrvatske baštine</h2></div><p>W / A / S / D za kretanje · desni klik + pomak miša za pogled · klikni predmet za detalje</p></div>
-      <MuseumScene onSelect={setSelectedId} />
+      <MuseumScene onSelect={trackExhibitVisit} />
+      <section className="museum-earned-badges">
+        <h3>Tvoje značke PatriaSoul</h3>
+        <p>Istraživanjem stvarnih predmeta u 3D dvorani otključavaš muzejske značke. Napredak se sprema uz tvoj račun.</p>
+        <BadgeRow badgeKeys={museumBadgeKeys} />
+      </section>
       <div className="museum-exhibit-detail"><span>{selected.type} · {selected.period}</span><h3>{selected.title}</h3>{selected.image && <figure className="museum-source-figure"><img src={selected.image} alt={selected.title} loading="lazy" onError={e=>{e.currentTarget.hidden=true;}} /><figcaption>{selected.credit} · {selected.license}</figcaption></figure>}{selected.secondaryImage && <figure className="museum-source-figure"><img src={selected.secondaryImage} alt={selected.secondaryLabel || "Dodatni prikaz"} loading="lazy" onError={e=>{e.currentTarget.hidden=true;}} /><figcaption>{selected.secondaryLabel} · {selected.secondaryCredit} · {selected.secondaryLicense}</figcaption></figure>}<p>{selected.description}</p><div className="museum-source-links"><a href={selected.source} target="_blank" rel="noreferrer">{selected.sourceLabel} ↗</a><a href={selected.licenseUrl} target="_blank" rel="noreferrer">Licenca i uvjeti korištenja ↗</a>{selected.secondarySource && <a href={selected.secondarySource} target="_blank" rel="noreferrer">Izvor grafičke sheme ↗</a>}</div>{selected.relatedSources && <section className="museum-related-sources"><h4>Za daljnje čitanje</h4><ul>{selected.relatedSources.map(item => <li key={item.url}><a href={item.url} target="_blank" rel="noreferrer">{item.label} ↗</a><span>{item.kind}</span></li>)}</ul></section>}<p className="museum-disclaimer">Fotografija kamenog reljefa, grafička shema i simbolični 3D model nisu isti prikaz. Podatke o predmetu i licencu provjeri na izvornim stranicama prije prerade ili ponovne objave.</p></div>
     </section> : <section className="museum-create">
       <div className="museum-create-intro"><span>TVOJA ZBIRKA · PATRIASOUL DIGITALNI KURSOR</span><h2>PatriaSoul Digitalni Kursor</h2><p>Dodaj fotografiju ili uspomenu i opiši što znaš. Digitalni Kursor pomoći će ti pripremiti muzejski nacrt, a ti ostaješ autor priče i odlučuješ što dalje.</p></div>

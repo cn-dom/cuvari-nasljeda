@@ -1276,16 +1276,17 @@ export default function App() {
             <div className="p-6">
               <div className="flex items-center justify-between text-xs font-semibold">
                 <span>Napredak prema sljedećoj razini</span>
-                <span className="text-accent">{playerLevel >= 100 ? "Maksimalna razina" : "${xpIntoLevel} / 100 XP"}</span>
+                <span className="text-accent">{playerLevel >= 100 ? "Maksimalna razina" : `${xpIntoLevel} / 100 XP`}</span>
               </div>
               <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-secondary">
-                <div className="h-full rounded-full bg-accent transition-all" style={{ width: "${playerLevel >= 100 ? 100 : xpIntoLevel}%" }} />
+                <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${playerLevel >= 100 ? 100 : xpIntoLevel}%` }} />
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">{playerLevel >= 100 ? "Dosegnuo si najvišu PatriaSoul značku — Čuvar nasljeđa." : "Još ${xpToNextLevel} XP do razine ${playerLevel + 1}."}</p>
+              <p className="mt-2 text-xs text-muted-foreground">{playerLevel >= 100 ? "Dosegnuo si najvišu PatriaSoul značku — Čuvar nasljeđa." : `Još ${xpToNextLevel} XP do razine ${playerLevel + 1}.`}</p>
               <div className="mt-5 rounded-xl border border-border bg-secondary/40 p-4">
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Sljedeća značka</p>
-                {nextBadge ? <><p className="mt-1 font-bold">{nextBadge[1]} · razina {nextBadge[0]}</p><p className="mt-1 text-sm text-muted-foreground">Još ${xpToNextBadge} XP do nove značke.</p></> : <><p className="mt-1 font-bold text-accent">🛡️ Čuvar nasljeđa</p><p className="mt-1 text-sm text-muted-foreground">Najviša PatriaSoul značka.</p></>}
+                {nextBadge ? <><p className="mt-1 font-bold">{nextBadge[1]} · razina {nextBadge[0]}</p><p className="mt-1 text-sm text-muted-foreground">`Još ${xpToNextBadge} XP do nove značke.`</p></> : <><p className="mt-1 font-bold text-accent">🛡️ Čuvar nasljeđa</p><p className="mt-1 text-sm text-muted-foreground">Najviša PatriaSoul značka.</p></>}
               </div>
+              <a href="/?section=Značke" className="mt-4 inline-flex items-center rounded-lg border border-[#c6a96c]/50 px-4 py-2 text-sm font-bold text-accent hover:bg-secondary">Otvori sve značke PatriaSoul →</a>
             </div>
           </div>
 
