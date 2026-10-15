@@ -101,7 +101,7 @@ function App() {
   const [communityHelpAdReports, setCommunityHelpAdReports] = useState([]);
   const [communityHelpAdReportsLoading, setCommunityHelpAdReportsLoading] = useState(false);
   const communityActionPage = new URLSearchParams(window.location.search).get("zajedno");
-  const [activeNav, setActiveNav] = useState("PatriaSoul");
+  const [activeNav, setActiveNav] = useState(new URLSearchParams(window.location.search).get("section") === "Značke" ? "Značke" : "PatriaSoul");
   const [liked, setLiked] = useState([]);
   const [reactionsByPost, setReactionsByPost] = useState({});
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
@@ -2693,9 +2693,11 @@ function App() {
             </section>
           )}
 
-          {activeNav === "Značke" && session?.user?.id && (
+          {activeNav === "Značke" && (
             <section className="card" style={{ padding: 20 }}>
-              <BadgeShowcase earnedKeys={(badgeRowsByUser[session.user.id] || []).map((row) => row.badge_key)} showLocked />
+              {session?.user?.id
+                ? <BadgeShowcase earnedKeys={(badgeRowsByUser[session.user.id] || []).map((row) => row.badge_key)} showLocked />
+                : <div className="directory-empty"><h2>Značke PatriaSoul</h2><p>Prijavi se kako bi vidio/la svoj napredak i sve dostupne značke.</p><button type="button" className="primary-button" onClick={() => { setAuthMode("login"); setAuthOpen(true); }}>Prijava / Registracija</button></div>}
             </section>
           )}
 
