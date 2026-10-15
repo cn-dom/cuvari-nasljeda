@@ -1,4 +1,4 @@
-const CACHE_NAME = "patriasoul-app-v4";
+const CACHE_NAME = "patriasoul-app-v5";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/assets/images/1000000982.png"];
 
 self.addEventListener("install", (event) => {
