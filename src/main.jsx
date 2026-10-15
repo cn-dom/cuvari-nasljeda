@@ -1,12 +1,12 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
-import Admin from "./Admin.jsx";
-import Forum from "./Forum.jsx";
-import Pages from "./Pages.jsx";
-import Events from "./Events.jsx";
-import AICenter from "./AICenter.jsx";
-import VirtualMuseum from "./VirtualMuseum.jsx";
+const Admin = lazy(() => import("./Admin.jsx"));
+const Forum = lazy(() => import("./Forum.jsx"));
+const Pages = lazy(() => import("./Pages.jsx"));
+const Events = lazy(() => import("./Events.jsx"));
+const AICenter = lazy(() => import("./AICenter.jsx"));
+const VirtualMuseum = lazy(() => import("./VirtualMuseum.jsx"));
 import "./index.css";
 
 const route = window.location.pathname.replace(/\/$/, "");
@@ -26,6 +26,8 @@ const Screen = route === "/virtualni-muzej.html"
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <Screen />
+    <Suspense fallback={<main className="route-loading" role="status" aria-live="polite">Učitavanje PatriaSoula…</main>}>
+      <Screen />
+    </Suspense>
   </React.StrictMode>
 );
