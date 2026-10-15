@@ -189,7 +189,7 @@ export default function VirtualMuseum() {
   async function prepareDraft(event) {
     event.preventDefault();
     if (!title.trim() || !story.trim()) { setNotice("Unesi naziv i ono što znaš o predmetu."); return; }
-    if (!window.confirm("Podaci koje uneseš i odabrana fotografija mogu biti poslani Puter AI usluzi radi izrade nacrta. Ne šalji tuđe privatne fotografije ili osjetljive podatke bez dopuštenja. Nastaviti?")) return;
+    if (!window.confirm("Podaci koje uneseš i odabrana fotografija mogu biti poslani PatriaSoul Digitalnom Kursoru (AI usluga koju omogućuje Puter) radi izrade nacrta. Ne šalji tuđe privatne fotografije ili osjetljive podatke bez dopuštenja. Nastaviti?")) return;
     setBusy(true); setNotice("");
     try {
       const prompt = "Pomozi pripremiti nacrt muzejskog zapisa na hrvatskom. Ne izmišljaj činjenice i jasno odvoji korisnikovo svjedočanstvo od provjerene povijesti. Ne predstavljaj zaključke kao činjenice. Vrati naslov, kratki opis, što još treba provjeriti, moguće ključne riječi i vrste pouzdanih izvora koje treba potražiti. Kategorija: "+category+". Naziv: "+title.trim()+". Podaci vlasnika: "+story.trim()+". Ako nema izvora, jasno napiši da povijesni navodi nisu potvrđeni.";
@@ -197,7 +197,7 @@ export default function VirtualMuseum() {
       setAiDraft(typeof reply === "string" ? reply : (reply?.message?.content || reply?.text || JSON.stringify(reply)));
       setNotice("AI je pripremio nacrt. Provjeri ga prije spremanja ili javne objave.");
     } catch (error) {
-      setNotice("Puter AI nije dostupan trenutačno. "+(error?.message || "Pokušaj ponovno."));
+      setNotice("PatriaSoul Digitalni Kursor trenutačno nije dostupan. "+(error?.message || "Pokušaj ponovno."));
     } finally { setBusy(false); }
   }
 
@@ -310,14 +310,14 @@ export default function VirtualMuseum() {
     </header>
     <nav className="museum-tabs" aria-label="Dijelovi virtualnog muzeja">
       <button className={activeTab==="explore"?"active":""} onClick={()=>setActiveTab("explore")}>🏛 Istraži muzej</button>
-      <button className={activeTab==="create"?"active":""} onClick={()=>{setActiveTab("create");loadSavedDrafts();}}>✧ Izradi svoj primjerak</button>
+      <button className={activeTab==="create"?"active":""} onClick={()=>{setActiveTab("create");loadSavedDrafts();}}>✧ Digitalni Kursor</button>
     </nav>
     {activeTab === "explore" ? <section className="museum-explore">
       <div className="museum-scene-heading"><div><span>STALNA IZLOŽBA · RADNA VERZIJA</span><h2>Galerija hrvatske baštine</h2></div><p>W / A / S / D za kretanje · desni klik + pomak miša za pogled · klikni predmet za detalje</p></div>
       <MuseumScene onSelect={setSelectedId} />
       <div className="museum-exhibit-detail"><span>{selected.type} · {selected.period}</span><h3>{selected.title}</h3>{selected.image && <figure className="museum-source-figure"><img src={selected.image} alt={selected.title} loading="lazy" onError={e=>{e.currentTarget.hidden=true;}} /><figcaption>{selected.credit} · {selected.license}</figcaption></figure>}<p>{selected.description}</p><div className="museum-source-links"><a href={selected.source} target="_blank" rel="noreferrer">{selected.sourceLabel} ↗</a><a href={selected.licenseUrl} target="_blank" rel="noreferrer">Licenca i uvjeti korištenja ↗</a></div><p className="museum-disclaimer">Važno: prikazana fotografija i simbolični 3D model nisu isto. Provjeri metapodatke i licencu izvornog zapisa prije preuzimanja, prerade ili ponovne objave.</p></div>
     </section> : <section className="museum-create">
-      <div className="museum-create-intro"><span>TVA ZBIRKA · AI POMOĆNIK</span><h2>Izradi svoj muzejski primjerak</h2><p>Dodaj fotografiju ili uspomenu i opiši što znaš. Puter AI pripremit će nacrt, a ti ostaješ autor priče i odlučuješ što dalje.</p></div>
+      <div className="museum-create-intro"><span>TVOJA ZBIRKA · PATRIASOUL DIGITALNI KURSOR</span><h2>PatriaSoul Digitalni Kursor</h2><p>Dodaj fotografiju ili uspomenu i opiši što znaš. Digitalni Kursor pomoći će ti pripremiti muzejski nacrt, a ti ostaješ autor priče i odlučuješ što dalje.</p></div>
       <form className="museum-create-form" onSubmit={prepareDraft}>
         <label>Naziv predmeta<input value={title} onChange={e=>setTitle(e.target.value)} maxLength={140} placeholder="Npr. Djedov stari alat" required /></label>
         <label>Kategorija<select value={category} onChange={e=>setCategory(e.target.value)}><option>Obiteljska baština</option><option>Arheologija i povijest</option><option>Tradicijski predmeti</option><option>Fotografije i dokumenti</option><option>Lokalne priče i običaji</option></select></label>
@@ -325,7 +325,7 @@ export default function VirtualMuseum() {
         {imagePreview && <img className="museum-upload-preview" src={imagePreview} alt="Pregled nove fotografije" />}
         {!imagePreview && existingImagePreview && <div className="museum-existing-image"><img className="museum-upload-preview" src={existingImagePreview} alt="Fotografija spremljena uz privatni nacrt" /><small>Trenutačno spremljena fotografija. Odaberi novu samo ako je želiš zamijeniti.</small></div>}
         <label>Što znaš o predmetu?<textarea value={story} onChange={e=>setStory(e.target.value)} rows={5} maxLength={5000} placeholder="Odakle potječe, kome je pripadao, što ti je o njemu poznato..." required /></label>
-        <button type="submit" disabled={busy}>{busy?"AI priprema nacrt…":"✧ Pripremi nacrt uz Puter AI"}</button>
+        <button type="submit" disabled={busy}>{busy?"AI priprema nacrt…":"✧ Pokreni Digitalni Kursor"}</button>
         <p className="museum-privacy-note">Nacrt se sprema privatno u tvoj račun i ne objavljuje se javno. AI može pogriješiti; činjenice i prava na fotografiju treba provjeriti.</p>
       </form>
       {notice && <p className="museum-notice" role="status">{notice}</p>}
