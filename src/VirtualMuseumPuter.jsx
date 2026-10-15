@@ -31,7 +31,7 @@ export default function MuseumPuterAssistant({ collection }) {
     if (busy) return;
     const userTopic = topic.trim();
     const userDraft = draft.trim();
-    const sensitivePatterns = [/(?:sb_secret_|service_role|github_pat_|gh[pousr]_[A-Za-z0-9_]{20,}|sk_live_|sk_test_)/i, /(?:api[_ -]?key|access[_ -]?token|refresh[_ -]?token|lozinka|password|tajni[_ -]?ključ|tajni[_ -]?kljuc)\\s*[:=]\\s*\\S+/i, /eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}/];
+    const sensitivePatterns = [/(?:sb_secret_|service_role|github_pat_|gh[pousr]_[A-Za-z0-9_]{20,}|sk_live_|sk_test_)/i, /(?:api[_ -]?key|access[_ -]?token|refresh[_ -]?token|lozinka|password|tajni[_ -]?ključ|tajni[_ -]?kljuc)\s*[:=]\s*\S+/i, /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/];
     if (sensitivePatterns.some((pattern) => pattern.test(userTopic) || pattern.test(userDraft))) {
       setError("Slanje je zaustavljeno jer tekst možda sadrži ključ, token ili lozinku. Ukloni osjetljive podatke prije slanja Puteru.");
       return;
