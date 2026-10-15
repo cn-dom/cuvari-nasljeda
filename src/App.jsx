@@ -21,6 +21,23 @@ const OWNER_EMAIL = "patriasoul@protonmail.com";
 const normalizeUsername = (value) => String(value || "").trim().replace(/^@/, "").toLowerCase();
 const normalizeSearchText = (value) => String(value || "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase("hr").trim();
 
+function getPostLink(text) {
+  const match = String(text || "").match(/https?:\\/\\/[^\\s<>"']+/i);
+  if (!match) return null;
+  const rawUrl = match[0].replace(/[),.!?;]+$/, "");
+  try {
+    const url = new URL(rawUrl);
+    if (!["http:", "https:"].includes(url.protocol)) return null;
+    const host = url.hostname.replace(/^www\\./i, "");
+    const isTikTok = /(^|\\.)tiktok\\.com$/i.test(url.hostname);
+    const isYouTube = /(^|\\.)(youtube\\.com|youtu\\.be)$/i.test(url.hostname);
+    const isInstagram = /(^|\\.)instagram\\.com$/i.test(url.hostname);
+    return { href: url.href, host, isTikTok, isYouTube, isInstagram };
+  } catch {
+    return null;
+  }
+}
+
 function BrandMark() {
   return <img className="brand-mark" src="/assets/images/1000000982.png" alt="" aria-hidden="true" />;
 }
@@ -2927,21 +2944,22 @@ function App() {
                   <span className="heritage-art-bottom">PATRIA SOUL</span>
                 </div>
               )}
+              {(() => {
+                const link = getPostLink(post.text);
+                if (!link) return null;
+                const label = link.isTikTok ? "TikTok" : link.isYouTube ? "YouTube" : link.isInstagram ? "Instagram" : link.host;
+                const symbol = link.isTikTok ? "♪" : link.isYouTube ? "▶" : link.isInstagram ? "◎" : "↗";
+                const subtitle = link.isTikTok ? "Videozapisi i priče zajednice" : link.isYouTube ? "Videozapis na YouTubeu" : link.isInstagram ? "Objava na Instagramu" : "Otvori poveznicu";
+                return (
+                  <a className={`post-link-card ${link.isTikTok ? "post-link-tiktok" : ""} ${link.isYouTube ? "post-link-youtube" : ""}`} href={link.href} target="_blank" rel="noopener noreferrer">
+                    <span className="post-link-art" aria-hidden="true"><span className="post-link-orbit" /><strong>{symbol}</strong><small>PATRIASOUL · ČUVARI NASLJEĐA</small></span>
+                    <span className="post-link-info"><span className="post-link-domain">{label}</span><strong>{link.host}</strong><small>{subtitle}</small><span className="post-link-open">Otvori poveznicu <b aria-hidden="true">↗</b></span></span>
+                  </a>
+                );
+              })()}
               <div className="post-metrics">
-                <span>♥ {post.likes} podrške</span>
-                <span>{post.comments || 0} komentara</span>
-              </div>
-              <div className="post-reactions" aria-label="Reakcije na objavu">
-                {[
-                  { emoji: "❤️", label: "Sviđa mi se" },
-                  { emoji: "🇭🇷", label: "Domoljublje" },
-                  { emoji: "🙏", label: "Zahvalnost" },
-                  { emoji: "👏", label: "Podrška" },
-                ].map((reaction) => (
-                  <button key={reaction.emoji} type="button" className={reactionsByPost[post.id] === reaction.emoji ? "reaction-chip selected" : "reaction-chip"} aria-pressed={reactionsByPost[post.id] === reaction.emoji} aria-label={reaction.label} onClick={() => toggleReaction(post.id, reaction.emoji)}>
-                    <span>{reaction.emoji}</span><small>{reaction.label}</small>
-                  </button>
-                ))}
+                <span><strong>{post.likes || 0}</strong> podrške</span>
+                <span><strong>{post.comments || 0}</strong> komentara</span>
               </div>
               <div className="post-actions">
                 <button className={liked.includes(post.id) ? "post-action liked" : "post-action"} onClick={() => toggleLike(post.id)}>
