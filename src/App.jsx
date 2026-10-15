@@ -143,6 +143,8 @@ function App() {
   const [profileUsername, setProfileUsername] = useState("");
   const [profileBio, setProfileBio] = useState("");
   const [profileAvatarUrl, setProfileAvatarUrl] = useState("");
+  const [profileAvatarFile, setProfileAvatarFile] = useState(null);
+  const [profileAvatarPreview, setProfileAvatarPreview] = useState("");
   const [profileBusy, setProfileBusy] = useState(false);
   const [profileMessage, setProfileMessage] = useState("");
   const [reportPost, setReportPost] = useState(null);
@@ -478,7 +480,9 @@ function App() {
       setProfileName(metadata.display_name || "");
       setProfileUsername(normalizeUsername(metadata.username));
       setProfileBio(metadata.bio || "");
-      setProfileAvatarUrl("");
+      setProfileAvatarUrl(metadata.avatar_url || "");
+      setProfileAvatarFile(null);
+      setProfileAvatarPreview("");
       if (!supabase || !session?.user?.id) return;
       const { data, error } = await supabase
         .from("profiles")
@@ -549,16 +553,43 @@ function App() {
         return;
       }
 
+      let nextAvatarUrl = profileAvatarUrl;
+      if (profileAvatarFile) {
+        if (!profileAvatarFile.type.startsWith("image/")) {
+          setProfileMessage("Odaberi slikovnu datoteku.");
+          return;
+        }
+        if (profileAvatarFile.size > 10 * 1024 * 1024) {
+          setProfileMessage("Slika profila može imati najviše 10 MB.");
+          return;
+        }
+        const extension = ({ "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" })[profileAvatarFile.type];
+        if (!extension) {
+          setProfileMessage("Podržani formati su JPG, PNG, WebP i GIF.");
+          return;
+        }
+        const objectPath = `${session.user.id}/profile-avatar-${Date.now()}.${extension}`;
+        const { error: uploadError } = await supabase.storage
+          .from("community-images")
+          .upload(objectPath, profileAvatarFile, { upsert: true, contentType: profileAvatarFile.type, cacheControl: "3600" });
+        if (uploadError) throw uploadError;
+        const { data: publicImage } = supabase.storage.from("community-images").getPublicUrl(objectPath);
+        nextAvatarUrl = publicImage?.publicUrl || nextAvatarUrl;
+      }
       const { error } = await supabase.from("profiles").upsert({
         id: session.user.id,
         display_name: cleanDisplayName,
         username: cleanUsername || null,
         bio: profileBio.trim(),
+        avatar_url: nextAvatarUrl || null,
         updated_at: new Date().toISOString(),
       }, { onConflict: "id" });
       if (error) throw error;
       setProfileUsername(cleanUsername);
       setProfileName(cleanDisplayName);
+      setProfileAvatarUrl(nextAvatarUrl || "");
+      setProfileAvatarFile(null);
+      setProfileAvatarPreview("");
       setProfileMessage("Profil je spremljen u bazi zajednice.");
     } catch (error) {
       const constraint = String(error?.message || "") + " " + String(error?.details || "") + " " + String(error?.hint || "");
@@ -2218,6 +2249,7 @@ function App() {
 
           {profileOpen && session && (
             <section className="profile-panel card" aria-labelledby="profile-title">
+              <div className="profile-cover-strip"><span>🇭🇷</span><div><strong>ČUVAR NASLJEĐA</strong><small>Tvoj identitet. Tvoja priča. Naša zajednica.</small></div><span className="profile-cover-star">✦</span></div>
               <div className="auth-panel-heading">
                 <div>
                   <span className="eyebrow">MOJ RAČUN</span>
@@ -2226,7 +2258,21 @@ function App() {
                 </div>
                 <button type="button" className="auth-close" aria-label="Zatvori profil" onClick={() => setProfileOpen(false)}>×</button>
               </div>
-              <form className="auth-form" onSubmit={saveProfile}>
+              <div className="profile-editor-intro">
+                <div className="profile-avatar-editor">
+                  <Avatar initials={(profileName || profileUsername || session.user?.email || "Č").slice(0, 1).toLocaleUpperCase("hr")} src={profileAvatarPreview || profileAvatarUrl} variant="profile-avatar-large" />
+                  <label className="profile-upload-button" htmlFor="profile-avatar-file">＋ Promijeni sliku</label>
+                  <input id="profile-avatar-file" className="profile-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (!file) return; if (!file.type.startsWith("image/")) { setProfileMessage("Odaberi slikovnu datoteku."); event.target.value = ""; return; } if (file.size > 10 * 1024 * 1024) { setProfileMessage("Slika profila može imati najviše 10 MB."); event.target.value = ""; return; } if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) { setProfileMessage("Podržani formati su JPG, PNG, WebP i GIF."); event.target.value = ""; return; } setProfileAvatarFile(file); setProfileAvatarPreview(URL.createObjectURL(file)); setProfileMessage(""); }} />
+                  <small>JPG, PNG, WebP ili GIF · do 10 MB</small>
+                </div>
+                <div className="profile-completion">
+                  <span className="eyebrow">TVOJ PROFIL</span>
+                  <strong>{[profileName.trim(), profileUsername.trim(), profileBio.trim(), profileAvatarFile || profileAvatarUrl].filter(Boolean).length}/4</strong>
+                  <p>{[profileName.trim(), profileUsername.trim(), profileBio.trim(), profileAvatarFile || profileAvatarUrl].filter(Boolean).length === 4 ? "Profil je spreman za predstavljanje." : "Dodaj nekoliko detalja da te zajednica lakše upozna."}</p>
+                  <div className="profile-progress-track"><span style={{ width: `${[profileName.trim(), profileUsername.trim(), profileBio.trim(), profileAvatarFile || profileAvatarUrl].filter(Boolean).length * 25}%` }} /></div>
+                </div>
+              </div>
+              <form className="auth-form profile-edit-form" onSubmit={saveProfile}>
                 <label htmlFor="profile-name">Ime za prikaz</label>
                 <input id="profile-name" value={profileName} onChange={(event) => setProfileName(event.target.value)} maxLength={60} placeholder="Kako da te zajednica oslovljava?" />
                 <label htmlFor="profile-username">Korisničko ime</label>
@@ -2235,7 +2281,8 @@ function App() {
                 <label htmlFor="profile-bio">O meni</label>
                 <textarea id="profile-bio" className="profile-bio-input" value={profileBio} onChange={(event) => setProfileBio(event.target.value)} maxLength={240} rows={3} placeholder="Napiši nekoliko riječi o svojim interesima…" />
                 <small className="profile-hint">{profileBio.length}/240 znakova</small>
-                <button className="auth-submit" type="submit" disabled={profileBusy}>{profileBusy ? "Spremanje…" : "Spremi profil"}</button>
+                <div className="profile-preview-card"><span className="profile-preview-icon">✦</span><div><strong>{profileName.trim() || "Ime za prikaz"}</strong><small>{profileUsername.trim() ? `@${profileUsername.trim().replace(/^@/, "")}` : "@tvoje_korisnicko_ime"}</small><p>{profileBio.trim() || "Ovdje će se prikazati tvoja kratka priča i interesi."}</p></div></div>
+                <button className="auth-submit profile-save-button" type="submit" disabled={profileBusy}>{profileBusy ? "Spremanje…" : "✓  Spremi profil"}</button>
               </form>
               {profileMessage && <p className="auth-message" role="status">{profileMessage}</p>}
               <p className="auth-footnote">Ovi podaci služe za prikaz profila. Korisnički metapodaci nisu dokaz ovlasti; prava pristupa moraju se provoditi pravilima baze.</p>
