@@ -20,11 +20,14 @@ const exhibits = [
     sourceLabel: "Wikimedia Commons · zapis datoteke", credit: "Neoneo13", license: "Javno vlasništvo prema oznaci autora na Wikimedia Commonsu", licenseUrl: "https://commons.wikimedia.org/wiki/File:Bascanska_ploca.jpg"
   },
   {
-    id: "pleter", title: "Hrvatski pleter", period: "Srednji vijek · ornamentika", type: "Kamena plastika",
-    description: "Pleter je isprepleteni ukrasni motiv koji se pojavljuje u različitim umjetničkim i kamenoklesarskim tradicijama. Ovdje je prikazana grafička shema motiva, a ne konkretan arheološki nalaz.",
-    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Pleter_dvobojni.svg",
-    source: "https://commons.wikimedia.org/wiki/File:Pleter_dvobojni.svg",
-    sourceLabel: "Wikimedia Commons · zapis datoteke", credit: "Autor naveden na stranici datoteke", license: "CC BY-SA (točnu inačicu provjeriti na izvornoj stranici)", licenseUrl: "https://commons.wikimedia.org/wiki/File:Pleter_dvobojni.svg"
+    id: "pleter", title: "Hrvatski pleter", period: "Predromanika · rani srednji vijek", type: "Kamena plastika",
+    description: "Hrvatski pleter prepoznatljiv je ukrasni motiv starohrvatske predromaničke umjetnosti. Isprepletene vrpce tvore geometrijske uzorke koji su ukrašavali kamene dijelove crkava i crkvenog namještaja, među ostalim oltarne pregrade, prozore i zabate. Sačuvani reljefi svjedoče o umijeću klesara i likovnoj kulturi ranoga srednjeg vijeka na hrvatskom prostoru. Fotografija reljefa i grafička shema prikazuju dvije različite stvari.",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Plutej_iz_Sv._Nediljice.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Plutej_iz_Sv._Nediljice.jpg",
+    sourceLabel: "Wikimedia Commons · kameni reljef", credit: "croatia.eu · Le pays et ses habitants (navedeno na stranici datoteke)", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+    secondaryImage: "https://commons.wikimedia.org/wiki/Special:FilePath/Pleter_dvobojni.svg",
+    secondarySource: "https://commons.wikimedia.org/wiki/File:Pleter_dvobojni.svg",
+    secondaryCredit: "MaGa", secondaryLicense: "CC BY-SA 4.0", secondaryLabel: "Grafička shema ornamenta"
   },
   {
     id: "novac", title: "Slavonski banovac", period: "Srednji vijek · 13. stoljeće", type: "Numizmatika",
@@ -340,7 +343,7 @@ export default function VirtualMuseum() {
     {activeTab === "explore" ? <section className="museum-explore">
       <div className="museum-scene-heading"><div><span>STALNA IZLOŽBA · RADNA VERZIJA</span><h2>Galerija hrvatske baštine</h2></div><p>W / A / S / D za kretanje · desni klik + pomak miša za pogled · klikni predmet za detalje</p></div>
       <MuseumScene onSelect={setSelectedId} />
-      <div className="museum-exhibit-detail"><span>{selected.type} · {selected.period}</span><h3>{selected.title}</h3>{selected.image && <figure className="museum-source-figure"><img src={selected.image} alt={selected.title} loading="lazy" onError={e=>{e.currentTarget.hidden=true;}} /><figcaption>{selected.credit} · {selected.license}</figcaption></figure>}<p>{selected.description}</p><div className="museum-source-links"><a href={selected.source} target="_blank" rel="noreferrer">{selected.sourceLabel} ↗</a><a href={selected.licenseUrl} target="_blank" rel="noreferrer">Licenca i uvjeti korištenja ↗</a></div><p className="museum-disclaimer">Važno: prikazana fotografija i simbolični 3D model nisu isto. Provjeri metapodatke i licencu izvornog zapisa prije preuzimanja, prerade ili ponovne objave.</p></div>
+      <div className="museum-exhibit-detail"><span>{selected.type} · {selected.period}</span><h3>{selected.title}</h3>{selected.image && <figure className="museum-source-figure"><img src={selected.image} alt={selected.title} loading="lazy" onError={e=>{e.currentTarget.hidden=true;}} /><figcaption>{selected.credit} · {selected.license}</figcaption></figure>}{selected.secondaryImage && <figure className="museum-source-figure"><img src={selected.secondaryImage} alt={selected.secondaryLabel || "Dodatni prikaz"} loading="lazy" onError={e=>{e.currentTarget.hidden=true;}} /><figcaption>{selected.secondaryLabel} · {selected.secondaryCredit} · {selected.secondaryLicense}</figcaption></figure>}<p>{selected.description}</p><div className="museum-source-links"><a href={selected.source} target="_blank" rel="noreferrer">{selected.sourceLabel} ↗</a><a href={selected.licenseUrl} target="_blank" rel="noreferrer">Licenca i uvjeti korištenja ↗</a>{selected.secondarySource && <a href={selected.secondarySource} target="_blank" rel="noreferrer">Izvor grafičke sheme ↗</a>}</div><p className="museum-disclaimer">Fotografija kamenog reljefa, grafička shema i simbolični 3D model nisu isti prikaz. Podatke o predmetu i licencu provjeri na izvornim stranicama prije prerade ili ponovne objave.</p></div>
     </section> : <section className="museum-create">
       <div className="museum-create-intro"><span>TVOJA ZBIRKA · PATRIASOUL DIGITALNI KURSOR</span><h2>PatriaSoul Digitalni Kursor</h2><p>Dodaj fotografiju ili uspomenu i opiši što znaš. Digitalni Kursor pomoći će ti pripremiti muzejski nacrt, a ti ostaješ autor priče i odlučuješ što dalje.</p></div>
       <form className="museum-create-form" onSubmit={prepareDraft}>
