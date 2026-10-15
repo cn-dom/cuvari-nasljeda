@@ -70,7 +70,7 @@ export default {
       }
 
       const slug = url.searchParams.get("slug") || "";
-      if (!/^(ponedjeljak|utorak|srijeda|četvrtak|petak|subota|nedjelja)-\d{1,2}-\d{1,2}-\d{4}$/.test(slug)) {
+      if (!/^(ponedjeljak|utorak|srijeda|četvrtak|cetvrtak|petak|subota|nedjelja)-\d{1,2}-\d{1,2}-\d{4}$/.test(slug)) {
         return Response.json({ error: "Neispravan datum liturgije." }, { status: 400 });
       }
 
