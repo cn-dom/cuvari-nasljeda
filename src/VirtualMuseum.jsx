@@ -182,6 +182,7 @@ export default function VirtualMuseum() {
   const [savedDrafts, setSavedDrafts] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [existingImagePath, setExistingImagePath] = useState(null);
+  const [existingImagePreview, setExistingImagePreview] = useState("");
   const [notice, setNotice] = useState("");
   const selected = exhibits.find(item => item.id === selectedId) || exhibits[0];
 
@@ -229,6 +230,11 @@ export default function VirtualMuseum() {
     setStory(draft.story || "");
     setAiDraft(draft.ai_draft || "");
     setExistingImagePath(draft.image_path || null);
+    setExistingImagePreview("");
+    if (draft.image_path && supabase) {
+      const { data } = await supabase.storage.from("virtual-museum-user-items").createSignedUrl(draft.image_path, 300);
+      setExistingImagePreview(data?.signedUrl || "");
+    }
     setImageFile(null);
     setImagePreview("");
     setNotice("Uređuješ privatni nacrt. Promjene neće biti javno objavljene.");
@@ -237,7 +243,7 @@ export default function VirtualMuseum() {
   }
 
   function resetDraftEditor() {
-    setEditingId(null); setExistingImagePath(null);
+    setEditingId(null); setExistingImagePath(null); setExistingImagePreview("");
     setTitle(""); setCategory("Obiteljska baština"); setStory("");
     setAiDraft(""); setImageFile(null); setImagePreview("");
     setNotice("Otvoren je novi nacrt.");
@@ -271,6 +277,7 @@ export default function VirtualMuseum() {
       }
       setEditingId(result.data?.id || editingId);
       setExistingImagePath(imagePath);
+      setExistingImagePreview("");
       setImageFile(null); setImagePreview("");
       setNotice("Privatni nacrt spremljen. Vidljiv je samo tebi; javna objava nije izvršena.");
       await loadSavedDrafts();
@@ -315,7 +322,8 @@ export default function VirtualMuseum() {
         <label>Naziv predmeta<input value={title} onChange={e=>setTitle(e.target.value)} maxLength={140} placeholder="Npr. Djedov stari alat" required /></label>
         <label>Kategorija<select value={category} onChange={e=>setCategory(e.target.value)}><option>Obiteljska baština</option><option>Arheologija i povijest</option><option>Tradicijski predmeti</option><option>Fotografije i dokumenti</option><option>Lokalne priče i običaji</option></select></label>
         <label>Fotografija (neobavezno)<input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>{const f=e.target.files?.[0];if(f&&f.size>10*1024*1024){setNotice("Fotografija mora biti manja od 10 MB.");e.target.value="";return;}setImageFile(f||null);setImagePreview(f?URL.createObjectURL(f):"");}} /><small>Najviše 10 MB. Učitana slika ostaje u ovom prozoru dok je ne pošalješ AI-ju.</small></label>
-        {imagePreview && <img className="museum-upload-preview" src={imagePreview} alt="Pregled učitane fotografije" />}
+        {imagePreview && <img className="museum-upload-preview" src={imagePreview} alt="Pregled nove fotografije" />}
+        {!imagePreview && existingImagePreview && <div className="museum-existing-image"><img className="museum-upload-preview" src={existingImagePreview} alt="Fotografija spremljena uz privatni nacrt" /><small>Trenutačno spremljena fotografija. Odaberi novu samo ako je želiš zamijeniti.</small></div>}
         <label>Što znaš o predmetu?<textarea value={story} onChange={e=>setStory(e.target.value)} rows={5} maxLength={5000} placeholder="Odakle potječe, kome je pripadao, što ti je o njemu poznato..." required /></label>
         <button type="submit" disabled={busy}>{busy?"AI priprema nacrt…":"✧ Pripremi nacrt uz Puter AI"}</button>
         <p className="museum-privacy-note">Nacrt se sprema privatno u tvoj račun i ne objavljuje se javno. AI može pogriješiti; činjenice i prava na fotografiju treba provjeriti.</p>
