@@ -17,6 +17,7 @@ const navItems = [
 
 const OWNER_EMAIL = "patriasoul@protonmail.com";
 const normalizeUsername = (value) => String(value || "").trim().replace(/^@/, "").toLowerCase();
+const normalizeSearchText = (value) => String(value || "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase("hr").trim();
 
 function BrandMark() {
   return <img className="brand-mark" src="/assets/images/1000000982.png" alt="" aria-hidden="true" />;
@@ -1616,9 +1617,10 @@ function App() {
 
   const postCount = useMemo(() => posts.length, [posts]);
   const visiblePosts = useMemo(() => posts.filter((post) => {
-    const matchesFilter = feedFilter === "Sve objave" || post.tag.toLocaleLowerCase("hr").includes(feedFilter.toLocaleLowerCase("hr"));
-    const query = feedSearch.trim().toLocaleLowerCase("hr");
-    const matchesSearch = !query || `${post.author} ${post.handle} ${post.tag} ${post.text}`.toLocaleLowerCase("hr").includes(query);
+    const postTag = String(post.tag || "");
+    const matchesFilter = feedFilter === "Sve objave" || normalizeSearchText(postTag).includes(normalizeSearchText(feedFilter));
+    const query = normalizeSearchText(feedSearch);
+    const matchesSearch = !query || normalizeSearchText(`${post.author || ""} ${post.handle || ""} ${postTag} ${post.text || ""}`).includes(query);
     return matchesFilter && matchesSearch;
   }), [posts, feedFilter, feedSearch]);
 
@@ -2104,7 +2106,7 @@ function App() {
             aria-label="Pretraži objave i članove"
             placeholder="Pretraži objave, članove i grupe…"
             value={feedSearch}
-            onChange={(event) => { setFeedSearch(event.target.value); setActiveNav("PatriaSoul"); }}
+            onChange={(event) => { setFeedSearch(event.target.value); setFeedFilter("Sve objave"); setActiveNav("PatriaSoul"); }}
           />
           {feedSearch && <button className="global-search-clear" type="button" aria-label="Očisti pretragu" onClick={() => setFeedSearch("")}>×</button>}
         </div>
@@ -2818,7 +2820,7 @@ function App() {
 
           <section className="feed-controls card" aria-label="Pretraživanje i filtriranje zida">
             <label className="sr-only" htmlFor="feed-search">Pretraži objave</label>
-            <input id="feed-search" className="feed-search" type="search" value={feedSearch} onChange={(event) => setFeedSearch(event.target.value)} placeholder="Pretraži priče, članove i teme…" />
+            <input id="feed-search" className="feed-search" type="search" value={feedSearch} onChange={(event) => { setFeedSearch(event.target.value); setFeedFilter("Sve objave"); }} placeholder="Pretraži objave, članove i teme…" />
             <div className="feed-filter-list" aria-label="Filtriraj objave">
               {["Sve objave", "BAŠTINA", "OBITELJSKE PRIČE", "POVIJEST"].map((filter) => (
                 <button key={filter} type="button" className={feedFilter === filter ? "feed-filter active" : "feed-filter"} onClick={() => setFeedFilter(filter)} aria-pressed={feedFilter === filter}>{filter}</button>
