@@ -74,7 +74,7 @@ export default function MuseumPuterAssistant() {
         .insert({
           owner_id: user.id,
           title: museumTitle,
-          description: memoryStory.trim(),
+          description: memoryStory.trim().slice(0, 1200),
           introduction: result.trim().slice(0, 3000),
           ai_draft: result.trim(),
           status: "review"
@@ -184,7 +184,7 @@ export default function MuseumPuterAssistant() {
     const remaining = Math.max(0, 10 - memoryImages.length);
     const selected = files.slice(0, remaining);
     if (!selected.length) { setError("Možeš učitati najviše 10 fotografija odjednom."); event.target.value = ""; return; }
-    if (selected.some((file) => !file.type.startsWith("image/"))) { setError("Odaberi samo slikovne datoteke."); event.target.value = ""; return; }
+    if (selected.some((file) => !["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"].includes(file.type))) { setError("Podržane su JPG, PNG, WebP, GIF i AVIF slike."); event.target.value = ""; return; }
     if (selected.some((file) => file.size > 10 * 1024 * 1024)) { setError("Svaka fotografija može imati najviše 10 MB."); event.target.value = ""; return; }
     Promise.all(selected.map((file) => new Promise((resolve, reject) => {
       const reader = new FileReader();
