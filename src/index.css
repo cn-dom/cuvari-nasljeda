@@ -2128,3 +2128,24 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
   .post-link-art { min-height: 135px; }
   .post-link-info { padding: 13px 14px; }
 }
+
+
+/* Nenametljiva PWA instalacija u lijevom izborniku */
+.sidebar-foot { display: grid; gap: 10px; }
+.sidebar-foot > p { margin: 0; }
+.install-app-button {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 12px;
+  text-align: left; color: #dceeff; background: linear-gradient(135deg, #0c2942, #0a1b2c);
+  border: 1px solid #245273; border-radius: 11px; cursor: pointer;
+  transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+.install-app-button:hover { border-color: #1687ff; background: #103653; transform: translateY(-1px); }
+.install-app-icon { display: grid; place-items: center; flex: 0 0 32px; width: 32px; height: 32px; border-radius: 9px; color: #fff; background: #087df5; font-size: 22px; font-weight: 700; }
+.install-app-button > span:last-child { display: grid; gap: 4px; min-width: 0; }
+.install-app-button strong { font-size: 11px; font-weight: 800; }
+.install-app-button small { color: #8faec9; font-size: 9px; }
+@media (max-width: 720px) {
+  .left-sidebar > .sidebar-foot { display: grid; width: 100%; margin: 4px 0 0; padding: 0 0 4px; }
+  .sidebar-foot > p { display: none; }
+  .install-app-button { width: 100%; min-height: 48px; justify-content: center; }
+}
