@@ -39,7 +39,7 @@ export default function MuseumPuterAssistant({ collection }) {
     const userDraft = draft.trim();
     const sensitivePatterns = [/(?:sb_secret_|service_role|github_pat_|gh[pousr]_[A-Za-z0-9_]{20,}|sk_live_|sk_test_)/i, /(?:api[_ -]?key|access[_ -]?token|refresh[_ -]?token|lozinka|password|tajni[_ -]?ključ|tajni[_ -]?kljuc)\s*[:=]\s*\S+/i, /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/];
     if (sensitivePatterns.some((pattern) => pattern.test(userTopic) || pattern.test(userDraft))) {
-      setError("Slanje je zaustavljeno jer tekst možda sadrži ključ, token ili lozinku. Ukloni osjetljive podatke prije slanja Puteru.");
+      setError("Slanje je zaustavljeno jer tekst možda sadrži lozinku ili druge povjerljive podatke. Ukloni ih prije slanja AI asistentu.");
       return;
     }
     if (taskId === "review" && !userDraft) {
@@ -65,9 +65,9 @@ export default function MuseumPuterAssistant({ collection }) {
         { role: "user", content: instruction }
       ]);
       setResult(responseText(reply));
-      setStatus("Nacrt je pripremljen. Nije spremljen ni objavljen; prije korištenja provjeri činjenice, izvore i prava na materijale.");
+      setStatus("Nacrt je spreman za pregled. Još nije dodan u muzejsku zbirku niti je javno objavljen. Provjeri činjenice, izvore i prava na materijale.");
     } catch (err) {
-      setError("Puter AI trenutačno nije dostupan. Ako se traži, prijavi se u Puter pa pokušaj ponovno. " + (err?.message || ""));
+      setError("AI asistent trenutačno nije dostupan. Pokušaj ponovno za nekoliko trenutaka. " + (err?.message || ""));
     } finally {
       setBusy(false);
     }
@@ -79,7 +79,7 @@ export default function MuseumPuterAssistant({ collection }) {
     if (!file.type.startsWith("image/")) { setError("Odaberi slikovnu datoteku."); event.target.value = ""; return; }
     if (file.size > 10 * 1024 * 1024) { setError("Najveća dopuštena veličina slike je 10 MB."); event.target.value = ""; return; }
     const reader = new FileReader();
-    reader.onload = () => { setMemoryImage({ name: file.name, dataUrl: String(reader.result || "") }); setError(""); setStatus("Slika je učitana u preglednik, ali još nije spremljena ni poslana AI usluzi."); };
+    reader.onload = () => { setMemoryImage({ name: file.name, dataUrl: String(reader.result || "") }); setError(""); setStatus("Fotografija je spremna za pregled. Još nije poslana na AI analizu niti dodana u muzejsku zbirku."); };
     reader.onerror = () => setError("Slika se nije mogla učitati. Pokušaj ponovno.");
     reader.readAsDataURL(file);
   }
@@ -95,9 +95,9 @@ export default function MuseumPuterAssistant({ collection }) {
         { role: "user", content: "Pripremi nacrt muzejske kartice za fotografiju/uspomenu. Tekst dobiven analizom slike (može biti netočan): " + String(imageNotes || "Nije dobiven tekstualni opis.") + "\\nPodaci korisnika:\\n" + (context || "Nije dodan kontekst.") + "\\nVrati: neutralan opis vidljivog sadržaja, predloženi naslov, korisnikov kontekst označen kao nepotvrđeno svjedočanstvo, moguću zbirku, nedostajuće metapodatke, pitanja za korisnika, što se ne može zaključiti samo iz slike te napomenu o pravima i privatnosti. Ne pretvaraj pretpostavke u činjenice." }
       ]);
       setResult(responseText(reply));
-      setStatus("AI je pripremio nacrt. Fotografija nije spremljena ni objavljena; provjeri opis, prava i privatnost prije daljnjeg korištenja.");
+      setStatus("AI je pripremio prijedlog opisa. Fotografija nije dodana u muzejsku zbirku niti je javno objavljena. Provjeri opis, prava i privatnost prije daljnjeg korištenja.");
     } catch (err) {
-      setError("AI analiza slike nije uspjela. Provjeri prijavu u Puter i pokušaj ponovno. " + (err?.message || ""));
+      setError("Analiza fotografije trenutačno nije uspjela. Pokušaj ponovno za nekoliko trenutaka. " + (err?.message || ""));
     } finally { setMemoryBusy(false); }
   }
 
@@ -105,7 +105,7 @@ export default function MuseumPuterAssistant({ collection }) {
     if (!result) return;
     try {
       await navigator.clipboard.writeText(result);
-      setStatus("AI nacrt kopiran je u međuspremnik. Još nije spremljen u muzej.");
+      setStatus("Nacrt je kopiran. Još nije dodan u muzejsku zbirku.");
       setError("");
     } catch {
       setError("Kopiranje nije uspjelo. Označi tekst nacrta i kopiraj ga ručno.");
@@ -122,8 +122,8 @@ export default function MuseumPuterAssistant({ collection }) {
     <div className="museum-puter-actions">
       {tasks.map((task) => { const Icon = task.icon; return <button type="button" key={task.id} onClick={() => runTask(task.id)} disabled={busy} className="museum-puter-action"><Icon size={17} />{task.label}</button>; })}
     </div>
-    <label className="museum-puter-label" htmlFor="museum-puter-draft">Nacrt zapisa za pregled (koristi se uz „Provjeri muzejski zapis”)</label>
-    <textarea id="museum-puter-draft" className="museum-puter-textarea" value={draft} onChange={(event) => setDraft(event.target.value)} maxLength={8000} rows={4} placeholder="Zalijepi opis predmeta ili dokumenta koji želiš urednički pregledati…" />
+    <label className="museum-puter-label" htmlFor="museum-puter-draft">Tekst za urednički pregled (uz „Provjeri muzejski zapis”)</label>
+    <textarea id="museum-puter-draft" className="museum-puter-textarea" value={draft} onChange={(event) => setDraft(event.target.value)} maxLength={8000} rows={4} placeholder="Ovdje možeš zalijepiti opis predmeta ili dokumenta za pregled…" />
     <section className="museum-memory-upload" aria-labelledby="museum-memory-title">
       <div className="museum-memory-title-row"><ImagePlus size={20} /><div><h3 id="museum-memory-title">Dodaj svoju uspomenu</h3><p>Učitaj fotografiju i zatraži pomoć AI kustosa pri pripremi muzejske kartice.</p></div></div>
       <label className="museum-puter-label" htmlFor="museum-memory-file">Fotografija (najviše 10 MB)</label>
@@ -137,12 +137,12 @@ export default function MuseumPuterAssistant({ collection }) {
       <label className="museum-puter-label" htmlFor="museum-memory-story">Priča koju želiš sačuvati</label>
       <textarea id="museum-memory-story" className="museum-puter-textarea" value={memoryStory} onChange={(event) => setMemoryStory(event.target.value)} maxLength={3000} rows={3} placeholder="Što znaš o fotografiji ili predmetu? Nemoj unositi osjetljive osobne podatke." />
       <button type="button" className="museum-puter-action" onClick={analyzeMemoryImage} disabled={!memoryImage || memoryBusy}><ImagePlus size={17} />{memoryBusy ? "AI pregledava sliku…" : "Pomozi mi opisati fotografiju"}</button>
-      <p className="museum-puter-privacy">Slika se šalje vanjskoj Puter AI usluzi tek kada pritisneš gumb. Trenutačno se ne sprema u Supabase i ne šalje automatski uredništvu. Prije javne objave provjeri prava na fotografiju i privatnost prikazanih osoba.</p>
+      <p className="museum-puter-privacy">Fotografija se šalje vanjskoj AI usluzi radi analize tek kada odabereš gumb za pomoć. Ne dodaje se automatski u muzejsku zbirku niti se šalje uredništvu. Prije javne objave provjeri imaš li pravo dijeliti fotografiju i poštuje li se privatnost prikazanih osoba.</p>
     </section>
-    <p className="museum-puter-privacy">Sadržaj koji pošalješ Puteru obrađuje vanjska AI usluga. Ne šalji privatne podatke. AI nacrti se ne spremaju automatski u Supabase i ne objavljuju se bez tvoje provjere.</p>
+    <p className="museum-puter-privacy">Kada zatražiš pomoć, tekst i fotografija koje odabereš obrađuju se putem vanjske AI usluge. Nemoj slati lozinke, osobne dokumente ni druge povjerljive podatke. Prijedlozi se ne dodaju automatski u muzejsku zbirku i ne objavljuju se bez tvoje provjere.</p>
     {error && <div className="museum-puter-message error" role="alert">{error}</div>}
     {status && <div className="museum-puter-message" role="status">{status}</div>}
     {busy && <div className="museum-puter-busy"><LoaderCircle size={18} className="museum-puter-spin" /> Digitalni kustos PatriaSoul priprema nacrt…</div>}
-    {result && <section className="museum-puter-result" aria-label="AI nacrt"><div className="museum-puter-result-head"><strong>Radni nacrt · nije potvrđen muzejski zapis</strong><button type="button" onClick={copyResult}><Copy size={15} /> Kopiraj nacrt</button></div><pre>{result}</pre></section>}
+    {result && <section className="museum-puter-result" aria-label="AI nacrt"><div className="museum-puter-result-head"><strong>Prijedlog za pregled · još nije muzejski zapis</strong><button type="button" onClick={copyResult}><Copy size={15} /> Kopiraj nacrt</button></div><pre>{result}</pre></section>}
   </section>;
 }
