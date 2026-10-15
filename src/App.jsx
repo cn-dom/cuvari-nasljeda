@@ -358,6 +358,22 @@ function App() {
   }, [session?.user?.id]);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const oauthError = params.get("error_description") || params.get("error");
+    if (!oauthError) return;
+    const normalized = oauthError.replace(/\+/g, " ");
+    setAuthOpen(true);
+    setAuthMode("login");
+    setAuthMessage(/access_denied/i.test(normalized)
+      ? "Google prijava je otkazana ili nije odobrena."
+      : "Google prijava nije dovršena. Provjeri postavke Google pružatelja i dopuštene povratne adrese u Supabaseu.");
+    params.delete("error");
+    params.delete("error_description");
+    const query = params.toString();
+    window.history.replaceState({}, "", window.location.pathname + (query ? `?${query}` : "") + window.location.hash);
+  }, []);
+
+  useEffect(() => {
     if (!supabase) return undefined;
     supabase.auth.getSession().then(({ data, error }) => {
       if (error) setAuthMessage("Sesiju nije moguće učitati. Pokušaj ponovno.");
