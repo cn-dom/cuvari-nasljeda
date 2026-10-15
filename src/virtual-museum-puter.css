@@ -41,3 +41,8 @@
 .museum-memory-fields .museum-puter-input{display:block;margin-top:7px}
 .museum-memory-upload>.museum-puter-action{margin-top:13px}
 @media(max-width:640px){.museum-memory-upload{padding:13px}.museum-memory-fields{grid-template-columns:1fr}.museum-memory-preview img{width:82px;height:82px}}
+
+.museum-memory-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
+.museum-memory-gallery .museum-memory-preview{margin-top:0;min-width:0;align-items:flex-start}
+.museum-memory-gallery .museum-memory-preview img{flex:0 0 82px;width:82px;height:82px}
+.museum-memory-gallery .museum-memory-preview div{overflow-wrap:anywhere}
