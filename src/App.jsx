@@ -570,10 +570,10 @@ function App() {
         }
         const objectPath = `${session.user.id}/profile-avatar-${Date.now()}.${extension}`;
         const { error: uploadError } = await supabase.storage
-          .from("community-images")
+          .from("profile-avatars")
           .upload(objectPath, profileAvatarFile, { upsert: true, contentType: profileAvatarFile.type, cacheControl: "3600" });
         if (uploadError) throw uploadError;
-        const { data: publicImage } = supabase.storage.from("community-images").getPublicUrl(objectPath);
+        const { data: publicImage } = supabase.storage.from("profile-avatars").getPublicUrl(objectPath);
         nextAvatarUrl = publicImage?.publicUrl || nextAvatarUrl;
       }
       const { error } = await supabase.from("profiles").upsert({
