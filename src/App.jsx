@@ -387,6 +387,31 @@ function App() {
     window.history.replaceState({}, "", window.location.pathname + window.location.hash);
   }, []);
 
+  async function signInWithGoogle() {
+    if (!supabase || !isSupabaseConfigured) {
+      setAuthMessage("Prijava trenutačno nije dostupna jer veza s uslugom za račune nije postavljena.");
+      return;
+    }
+    setAuthBusy(true);
+    setAuthMessage("");
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: window.location.origin },
+      });
+      if (error) throw error;
+    } catch (error) {
+      const rawMessage = String(error?.message || "");
+      const message = /provider is not enabled|unsupported provider/i.test(rawMessage)
+        ? "Prijava Googleom još nije uključena u postavkama autentifikacije. Potrebno je omogućiti Google pružatelja u Supabaseu."
+        : /redirect|url.*not allowed|unauthorized domain/i.test(rawMessage)
+          ? "Adresa ove stranice nije dopuštena za povratak nakon Google prijave. Provjeri URL-ove preusmjeravanja u Supabase Auth postavkama."
+          : rawMessage || "Prijava Googleom nije uspjela. Pokušaj ponovno.";
+      setAuthMessage(message);
+      setAuthBusy(false);
+    }
+  }
+
   async function submitAuth(event) {
     event.preventDefault();
     if (!supabase || !isSupabaseConfigured) {
@@ -2604,6 +2629,15 @@ function App() {
                   <strong>Testna veza još nije postavljena.</strong>
                   <span>Obrazac je pripremljen, ali prijava neće slati podatke dok se ne postave VITE_SUPABASE_URL i VITE_SUPABASE_PUBLISHABLE_KEY za zasebni testni projekt.</span>
                 </div>
+              )}
+              {authMode !== "reset" && (
+                <>
+                  <button type="button" className="auth-google-button" onClick={signInWithGoogle} disabled={!isSupabaseConfigured || authBusy}>
+                    <span className="auth-google-mark" aria-hidden="true">G</span>
+                    {authBusy ? "Povezivanje…" : authMode === "register" ? "Nastavi s Googleom" : "Prijavi se Googleom"}
+                  </button>
+                  <div className="auth-divider"><span>ili e-poštom</span></div>
+                </>
               )}
               <form className="auth-form" onSubmit={submitAuth}>
                 <label htmlFor="auth-email">E-pošta</label>
