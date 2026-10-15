@@ -37,3 +37,18 @@ Povezani plan zabrana, tehničkih mjera P0/P1/P2 i testnih slučajeva nalazi se 
 2. Otvoriti /ai-centar.html i testirati Puter prijavu, odgovor na pitanje, novu sesiju, čitanje naglas, analizu slike i greške usluge.
 3. Provjeriti mobilni izgled i da portal/kviz rade kad AI nije dostupan.
 4. Tek nakon provjere odlučiti treba li povezati AI s postojećim kvizom, arhivom baštine ili administratorskim pregledom.
+
+
+## Dodatak: Puter AI u Virtualnom muzeju PatriaSoul
+
+Komponenta `src/VirtualMuseumPuter.jsx` dostupna je unutar sučelja Virtualnog muzeja PatriaSoul. Može pripremiti:
+- 5–8 ideja za muzejske zapise i popis podataka za provjeru;
+- nacrt virtualne tematske izložbe;
+- urednički pregled zalijepljenog nacrta muzejskog zapisa.
+
+### Granice ove faze
+- AI stvara samo tekstualne nacrte; ne dodaje automatski predmete, slike ili zapise u Supabase.
+- Nema automatske objave. Čovjek mora potvrditi činjenice, izvore, provenijenciju i prava na fotografije.
+- Sučelje upozorava da se sadržaj šalje vanjskoj Puter AI usluzi i zaustavlja slanje kada prepozna česte obrasce tajnih ključeva ili tokena.
+- Puterova prijava, kvote i dostupnost modela ovise o samoj usluzi.
+- Produkcijski build i Cloudflare deploy moraju se provjeriti zasebno nakon ovih izmjena.
