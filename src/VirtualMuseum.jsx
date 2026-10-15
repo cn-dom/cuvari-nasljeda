@@ -118,16 +118,36 @@ function MuseumScene({ onSelect }) {
       caseGlass.position.set(x, 1.2, z); scene.add(caseGlass);
       const top = new THREE.Mesh(new THREE.BoxGeometry(2.45, .09, 1.65), gold);
       top.position.set(x, 1.94, z); scene.add(top);
+      // Keep the symbolic 3D object as a small secondary element, and display the real source photograph in the vitrine.
       const object = i === 0
-        ? new THREE.Mesh(new THREE.SphereGeometry(.47, 28, 18), objectMaterials[i])
+        ? new THREE.Mesh(new THREE.SphereGeometry(.28, 28, 18), objectMaterials[i])
         : i === 1
-          ? new THREE.Mesh(new THREE.BoxGeometry(.75, .9, .2), objectMaterials[i])
+          ? new THREE.Mesh(new THREE.BoxGeometry(.48, .56, .12), objectMaterials[i])
           : i === 2
-            ? new THREE.Mesh(new THREE.TorusKnotGeometry(.34, .12, 90, 12), objectMaterials[i])
+            ? new THREE.Mesh(new THREE.TorusKnotGeometry(.22, .075, 90, 12), objectMaterials[i])
             : i === 3
-              ? new THREE.Mesh(new THREE.CylinderGeometry(.43, .43, .12, 36), objectMaterials[i])
-              : new THREE.Mesh(new THREE.ConeGeometry(.4, .9, 5), objectMaterials[i]);
-      object.position.set(x, 1.02, z); object.castShadow = true; object.userData.exhibitId = item.id; scene.add(object); clickable.push(object);
+              ? new THREE.Mesh(new THREE.CylinderGeometry(.28, .28, .09, 36), objectMaterials[i])
+              : new THREE.Mesh(new THREE.ConeGeometry(.26, .58, 5), objectMaterials[i]);
+      object.position.set(x - .53, .98, z); object.castShadow = true; object.userData.exhibitId = item.id; scene.add(object); clickable.push(object);
+
+      // A vertical image panel sits inside the glass case. The source photo is the primary exhibit image.
+      const imageFrame = new THREE.Mesh(new THREE.BoxGeometry(1.08, .96, .055), gold);
+      imageFrame.position.set(x + .43, 1.22, z + .57); scene.add(imageFrame);
+      const imageMaterial = new THREE.MeshBasicMaterial({ color: 0xe7dfcd, side: THREE.DoubleSide });
+      const imagePanel = new THREE.Mesh(new THREE.PlaneGeometry(1.0, .88), imageMaterial);
+      imagePanel.position.set(x + .43, 1.22, z + .535); imagePanel.userData.exhibitId = item.id; scene.add(imagePanel); clickable.push(imagePanel);
+      const loader = new THREE.TextureLoader();
+      loader.setCrossOrigin("anonymous");
+      loader.load(item.image, texture => {
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        imageMaterial.map = texture;
+        imageMaterial.color.set(0xffffff);
+        imageMaterial.needsUpdate = true;
+      }, undefined, () => {
+        // Keep the framed panel visible if a remote source blocks texture loading.
+        imageMaterial.color.set(0x9a8b70);
+      });
       const label = new THREE.Mesh(new THREE.PlaneGeometry(2.1, .5), new THREE.MeshBasicMaterial({ map: createLabelTexture(item.title), side: THREE.DoubleSide }));
       label.position.set(x, .64, z + .82); label.rotation.x = -.08; scene.add(label);
       const light = new THREE.SpotLight(0xffdf9a, 38, 8, Math.PI / 5, .45, 1.2);
