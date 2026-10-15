@@ -30,6 +30,20 @@ const findSection=(source,heading)=>{
  const re=new RegExp("(?:^|\\n)#{1,5}\\s*"+escaped+"\\s*:?\\s*\\n([\\s\\S]*?)(?=\\n#{1,5}\\s|$)","i");
  const match=source.match(re);return match?match[1].trim():"";
 };
+const loadSaintFallback=async()=>{
+ try{
+   const response=await fetch("/api/saint?date="+encodeURIComponent(today.iso),{headers:{"Accept":"application/json"},cache:"no-store"});
+   if(!response.ok)throw new Error("Kalendar HTTP "+response.status);
+   const data=await response.json();
+   if(!data.names||!data.source)throw new Error("Nedostaje provjereni zapis sveca.");
+   setText("saint-heading",data.names);
+   setText("saint-description","Spomendan i imendani prema "+data.source+".");
+   setText("gospel-response","Evanđelje se trenutačno ne može dohvatiti; podatak o svecu učitan je zasebno iz katoličkog kalendara.");
+ }catch(error){
+   await loadSaintFallback();
+   console.warn("PatriaSoul saint fallback:",error);
+ }
+};
 const loadLiturgy=async()=>{
  const gospelRef=document.getElementById("gospel-reference");
  const gospelText=document.getElementById("gospel-text");
