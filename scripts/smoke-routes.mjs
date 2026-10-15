@@ -10,7 +10,13 @@ const routes = [
   "/na-danasnji-dan.html",
   "/administracija.html",
   "/ai-centar.html",
+  "/virtualni-muzej.html",
+  "/vrijeme.html",
   "/kviz/",
+  "/kviz/hrvatski-kviz/",
+  "/kviz/dnevni-kviz/",
+  "/kviz/gradovi-hrvatske/",
+  "/kviz/brani-svoj-grad/",
 ];
 
 async function request(path) {
@@ -38,6 +44,12 @@ const requiredAssets = [
   "/sw.js",
   "/assets/images/logo%20Patriasoul.png",
   "/assets/images/1000000982.png",
+  "/virtualni-muzej.html",
+  "/vrijeme.html",
+  "/kviz/hrvatski-kviz/",
+  "/kviz/dnevni-kviz/",
+  "/kviz/gradovi-hrvatske/",
+  "/kviz/brani-svoj-grad/",
   "/vjera-hrvata.css",
   "/vjera-hrvata.js",
   "/na-danasnji-dan.css",
@@ -63,4 +75,4 @@ for (const asset of [...new Set(assetPaths)]) {
   console.log(`PASS bundle ${asset}`);
 }
 
-console.log(`Smoke test passed: ${routes.length} routes and ${requiredAssets.length + new Set(assetPaths).size} assets.`);
+console.log(`Smoke test passed: ${routes.length} routes and ${requiredAssets.length + new Set(assetPaths).size} assets. HTTP/build smoke test only; real-browser interaction tests are still needed.`);
