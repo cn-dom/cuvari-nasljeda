@@ -2104,3 +2104,27 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
 .app-shell.is-mobile .left-sidebar .side-section:not(.blocked-members-section)::-webkit-scrollbar {
   display: none;
 }
+
+
+/* Kartica vanjske poveznice na zidu */
+.post-link-card { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); margin: 12px 0 15px; overflow: hidden; border: 1px solid #dfe6ed; border-radius: 13px; background: #fff; color: inherit; text-decoration: none; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.post-link-card:hover { border-color: #9eb6ca; box-shadow: 0 8px 24px #172c4614; transform: translateY(-1px); }
+.post-link-art { min-height: 170px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; overflow: hidden; isolation: isolate; background: linear-gradient(135deg, #132a43, #23577e 65%, #7e2434); color: #fff; }
+.post-link-art::before, .post-link-art::after { content: ""; position: absolute; z-index: -1; width: 190px; height: 190px; border: 1px solid #ffffff38; border-radius: 50%; }
+.post-link-art::before { transform: translate(-30%, -12%); box-shadow: 0 0 0 18px #ffffff08, 0 0 0 38px #ffffff06; }
+.post-link-art::after { transform: translate(42%, 30%); }
+.post-link-art > strong { display: grid; place-items: center; width: 58px; height: 58px; border: 1px solid #ffffff80; border-radius: 18px; background: #ffffff1a; box-shadow: 0 8px 22px #06152345; font-size: 29px; }
+.post-link-art > small { color: #f0d99b; font-size: 7px; font-weight: 800; letter-spacing: .13em; text-align: center; }
+.post-link-info { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; justify-content: center; gap: 7px; padding: 17px; }
+.post-link-domain { color: #9a762d; font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.post-link-info > strong { max-width: 100%; overflow-wrap: anywhere; color: #203a54; font-size: 13px; }
+.post-link-info > small { color: #778493; font-size: 10px; line-height: 1.5; }
+.post-link-open { display: inline-flex; align-items: center; gap: 7px; margin-top: 4px; color: #24537d; font-size: 10px; font-weight: 800; }
+.post-link-open b { font-size: 14px; }
+.post-link-tiktok .post-link-art { background: linear-gradient(135deg, #10161e, #263442 62%, #8d2037); }
+.post-link-youtube .post-link-art { background: linear-gradient(135deg, #182b43, #314d68 62%, #a72a35); }
+@media (max-width: 520px) {
+  .post-link-card { grid-template-columns: 1fr; }
+  .post-link-art { min-height: 135px; }
+  .post-link-info { padding: 13px 14px; }
+}
