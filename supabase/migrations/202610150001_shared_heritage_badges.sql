@@ -41,6 +41,7 @@ as $$
 declare
   v_user_id uuid := auth.uid();
   v_count integer;
+  v_rows integer;
   v_new_badges text[] := array[]::text[];
   v_key text;
 begin
@@ -62,16 +63,22 @@ begin
     insert into public.heritage_badge_awards(user_id,badge_key,source)
     values (v_user_id,'museum_first_visit','museum')
     on conflict do nothing;
+    get diagnostics v_rows = row_count;
+    if v_rows > 0 then v_new_badges := array_append(v_new_badges, 'museum_first_visit'); end if;
   end if;
   if v_count >= 3 then
     insert into public.heritage_badge_awards(user_id,badge_key,source)
     values (v_user_id,'museum_3_exhibits','museum')
     on conflict do nothing;
+    get diagnostics v_rows = row_count;
+    if v_rows > 0 then v_new_badges := array_append(v_new_badges, 'museum_3_exhibits'); end if;
   end if;
   if v_count >= 5 then
     insert into public.heritage_badge_awards(user_id,badge_key,source)
     values (v_user_id,'museum_all_exhibits','museum')
     on conflict do nothing;
+    get diagnostics v_rows = row_count;
+    if v_rows > 0 then v_new_badges := array_append(v_new_badges, 'museum_all_exhibits'); end if;
   end if;
 
   v_key := case p_exhibit_id
@@ -84,10 +91,8 @@ begin
   insert into public.heritage_badge_awards(user_id,badge_key,source)
   values (v_user_id,v_key,'museum')
   on conflict do nothing;
-
-  select coalesce(array_agg(a.badge_key), array[]::text[]) into v_new_badges
-  from public.heritage_badge_awards a
-  where a.user_id = v_user_id and a.earned_at >= now() - interval '10 seconds';
+  get diagnostics v_rows = row_count;
+  if v_rows > 0 then v_new_badges := array_append(v_new_badges, v_key); end if;
 
   return jsonb_build_object('visited_count', v_count, 'new_badges', v_new_badges);
 end;
