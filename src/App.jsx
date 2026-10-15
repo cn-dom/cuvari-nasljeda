@@ -238,6 +238,53 @@ function App() {
   const [adminBusy, setAdminBusy] = useState(false);
   const [adminError, setAdminError] = useState("");
   const isOwner = (session?.user?.email || "").trim().toLowerCase() === OWNER_EMAIL;
+  const [installPromptEvent, setInstallPromptEvent] = useState(null);
+  const [isAppInstalled, setIsAppInstalled] = useState(false);
+
+  useEffect(() => {
+    const standaloneQuery = window.matchMedia("(display-mode: standalone)");
+    const syncInstalledState = () => setIsAppInstalled(standaloneQuery.matches || window.navigator.standalone === true);
+    const captureInstallPrompt = (event) => { event.preventDefault(); setInstallPromptEvent(event); };
+    const onInstalled = () => {
+      setIsAppInstalled(true);
+      setInstallPromptEvent(null);
+      setNotice("PatriaSoul — Čuvari nasljeđa uspješno je instaliran.");
+    };
+    syncInstalledState();
+    window.addEventListener("beforeinstallprompt", captureInstallPrompt);
+    window.addEventListener("appinstalled", onInstalled);
+    standaloneQuery.addEventListener?.("change", syncInstalledState);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", captureInstallPrompt);
+      window.removeEventListener("appinstalled", onInstalled);
+      standaloneQuery.removeEventListener?.("change", syncInstalledState);
+    };
+  }, []);
+
+  async function installApp() {
+    if (isAppInstalled) return;
+    if (installPromptEvent) {
+      await installPromptEvent.prompt();
+      const choice = await installPromptEvent.userChoice;
+      if (choice?.outcome === "accepted") setNotice("Instalacija je pokrenuta. Prati upute preglednika.");
+      setInstallPromptEvent(null);
+      return;
+    }
+    if (/iphone|ipad|ipod/i.test(window.navigator.userAgent || "")) {
+      setNotice("Za instalaciju na iPhoneu/iPadu otvori Dijeli u Safariju pa odaberi „Dodaj na početni zaslon”.");
+    } else {
+      setNotice("Za instalaciju otvori izbornik preglednika (⋮ ili ⋯) i odaberi „Instaliraj aplikaciju” ili „Dodaj na početni zaslon”. Ako opcije nema, osvježi stranicu i pokušaj ponovno.");
+    }
+  }
+
+  useEffect(() => {
+    if (activeNav !== "Značke") return undefined;
+    const closeBadgesOnEscape = (event) => {
+      if (event.key === "Escape") setActiveNav("PatriaSoul");
+    };
+    window.addEventListener("keydown", closeBadgesOnEscape);
+    return () => window.removeEventListener("keydown", closeBadgesOnEscape);
+  }, [activeNav]);
 
   function navigateToSection(label) {
     if (!session?.user?.id && label !== "PatriaSoul") {
@@ -2201,6 +2248,7 @@ function App() {
           <button className={activeNav === "Obavijesti" ? "topnav-link active" : "topnav-link"} onClick={() => navigateToSection("Obavijesti")} aria-label="Obavijesti">🔔</button>
         </nav>
         <div className="top-actions">
+          {!isAppInstalled && <button type="button" className="topbar-install-button" onClick={installApp} aria-label="Instaliraj PatriaSoul — Čuvari nasljeđa"><span aria-hidden="true">↓</span><span>Instaliraj</span></button>}
           {session ? (
             <div className="auth-session-actions">
               <button className="profile-open-button" onClick={() => { setProfileViewId(null); setProfileOpen(true); setProfileMessage(""); }}><span className="profile-mini-avatar">{profileAvatarUrl ? <img src={profileAvatarUrl} alt="" /> : (session.user?.user_metadata?.display_name || session.user?.email || "Č").slice(0, 1).toLocaleUpperCase("hr")}</span><span className="auth-user-label">{session.user?.user_metadata?.display_name || session.user?.email || "Moj profil"}</span><span className="profile-open-label">Moj profil</span></button>
@@ -2320,7 +2368,13 @@ function App() {
             <p><span>✦</span> Obitelj</p>
             <p><span>✦</span> Domovina</p>
           </section>
-          <p className="sidebar-foot">PatriaSoul · Znanje. Ponos. Nasljeđe.</p>
+          <div className="sidebar-foot">
+            <p>PatriaSoul · Znanje. Ponos. Nasljeđe.</p>
+            {!isAppInstalled && <button type="button" className="install-app-button" onClick={installApp} aria-label="Instaliraj PatriaSoul — Čuvari nasljeđa">
+              <span className="install-app-icon" aria-hidden="true">↓</span>
+              <span><strong>Instaliraj aplikaciju</strong><small>Mobitel · Laptop · Računalo</small></span>
+            </button>}
+          </div>
         </aside>
 
         <section className={`feed-column${profileOpen || (profileViewId && profileViewId !== session?.user?.id) ? " profile-page-open" : ""}`} aria-label="PatriaSoul – Čuvari nasljeđa">
@@ -2762,11 +2816,17 @@ function App() {
           )}
 
           {activeNav === "Značke" && (
-            <section className="card" style={{ padding: 20 }}>
-              {session?.user?.id
-                ? <BadgeShowcase earnedKeys={(badgeRowsByUser[session.user.id] || []).map((row) => row.badge_key)} showLocked />
-                : <div className="directory-empty"><h2>Značke PatriaSoul</h2><p>Prijavi se kako bi vidio/la svoj napredak i sve dostupne značke.</p><button type="button" className="primary-button" onClick={() => { setAuthMode("login"); setAuthOpen(true); }}>Prijava / Registracija</button></div>}
-            </section>
+            <div className="badge-overlay-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setActiveNav("PatriaSoul"); }}>
+              <section className="badge-overlay-dialog card" role="dialog" aria-modal="true" aria-label="Značke čuvara nasljeđa">
+                <div className="badge-overlay-toolbar">
+                  <span>PatriaSoul · Postignuća</span>
+                  <button type="button" className="badge-overlay-close" aria-label="Zatvori značke" onClick={() => setActiveNav("PatriaSoul")}>×</button>
+                </div>
+                {session?.user?.id
+                  ? <BadgeShowcase earnedKeys={(badgeRowsByUser[session.user.id] || []).map((row) => row.badge_key)} showLocked />
+                  : <div className="directory-empty"><h2 id="badge-overlay-title">Značke PatriaSoul</h2><p>Prijavi se kako bi vidio/la svoj napredak i sve dostupne značke.</p><button type="button" className="primary-button" onClick={() => { setAuthMode("login"); setAuthOpen(true); }}>Prijava / Registracija</button></div>}
+              </section>
+            </div>
           )}
 
           {activeNav === "Čuvari nasljeđa" && (
