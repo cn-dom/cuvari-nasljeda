@@ -2255,7 +2255,7 @@ function App() {
               <button className="login-button" onClick={signOut}>Odjava</button>
             </div>
           ) : (
-            <button className="login-button" onClick={() => navigateToSection("PatriaSoul")}>PatriaSoul</button>
+            <button className="login-button" onClick={() => { setAuthMode("login"); setAuthMessage(""); setAuthOpen(true); }}>Prijava</button>
           )}
         </div>
       </header>
