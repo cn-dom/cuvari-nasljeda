@@ -238,6 +238,44 @@ function App() {
   const [adminBusy, setAdminBusy] = useState(false);
   const [adminError, setAdminError] = useState("");
   const isOwner = (session?.user?.email || "").trim().toLowerCase() === OWNER_EMAIL;
+  const [installPromptEvent, setInstallPromptEvent] = useState(null);
+  const [isAppInstalled, setIsAppInstalled] = useState(false);
+
+  useEffect(() => {
+    const standaloneQuery = window.matchMedia("(display-mode: standalone)");
+    const syncInstalledState = () => setIsAppInstalled(standaloneQuery.matches || window.navigator.standalone === true);
+    const captureInstallPrompt = (event) => { event.preventDefault(); setInstallPromptEvent(event); };
+    const onInstalled = () => {
+      setIsAppInstalled(true);
+      setInstallPromptEvent(null);
+      setNotice("PatriaSoul — Čuvari nasljeđa uspješno je instaliran.");
+    };
+    syncInstalledState();
+    window.addEventListener("beforeinstallprompt", captureInstallPrompt);
+    window.addEventListener("appinstalled", onInstalled);
+    standaloneQuery.addEventListener?.("change", syncInstalledState);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", captureInstallPrompt);
+      window.removeEventListener("appinstalled", onInstalled);
+      standaloneQuery.removeEventListener?.("change", syncInstalledState);
+    };
+  }, []);
+
+  async function installApp() {
+    if (isAppInstalled) return;
+    if (installPromptEvent) {
+      await installPromptEvent.prompt();
+      const choice = await installPromptEvent.userChoice;
+      if (choice?.outcome === "accepted") setNotice("Instalacija je pokrenuta. Prati upute preglednika.");
+      setInstallPromptEvent(null);
+      return;
+    }
+    if (/iphone|ipad|ipod/i.test(window.navigator.userAgent || "")) {
+      setNotice("Za instalaciju na iPhoneu/iPadu otvori Dijeli u Safariju pa odaberi „Dodaj na početni zaslon”.");
+    } else {
+      setNotice("Za instalaciju otvori izbornik preglednika (⋮ ili ⋯) i odaberi „Instaliraj aplikaciju” ili „Dodaj na početni zaslon”. Ako opcije nema, osvježi stranicu i pokušaj ponovno.");
+    }
+  }
 
   function navigateToSection(label) {
     if (!session?.user?.id && label !== "PatriaSoul") {
@@ -2320,7 +2358,13 @@ function App() {
             <p><span>✦</span> Obitelj</p>
             <p><span>✦</span> Domovina</p>
           </section>
-          <p className="sidebar-foot">PatriaSoul · Znanje. Ponos. Nasljeđe.</p>
+          <div className="sidebar-foot">
+            <p>PatriaSoul · Znanje. Ponos. Nasljeđe.</p>
+            {!isAppInstalled && <button type="button" className="install-app-button" onClick={installApp} aria-label="Instaliraj PatriaSoul — Čuvari nasljeđa">
+              <span className="install-app-icon" aria-hidden="true">↓</span>
+              <span><strong>Instaliraj aplikaciju</strong><small>Mobitel · Laptop · Računalo</small></span>
+            </button>}
+          </div>
         </aside>
 
         <section className={`feed-column${profileOpen || (profileViewId && profileViewId !== session?.user?.id) ? " profile-page-open" : ""}`} aria-label="PatriaSoul – Čuvari nasljeđa">
