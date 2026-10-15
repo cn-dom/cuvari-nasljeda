@@ -49,7 +49,7 @@ export default {
         const body = htmlToText(await upstream.text());
         const sectionMatch = body.match(/Sveci i imendani\s*([\s\S]*?)(?=\n(?:####\s*)?Ukratko\b|$)/i);
         const section = sectionMatch?.[1]?.replace(/\s+/g, " ").trim() || "";
-        const names = section.replace(/^(?:Koji se sveci slave i tko ima imendan[^?]*\?\s*)/i, "").trim();
+        const names = section.replace(/^(?:Koji se sveci slave i tko ima imendan[^?]*\?\s*)/i, "").replace(/\b(?:U kalendaru|Podijelite|Markdown)\b/gi, " ").replace(/\s+/g, " ").replace(/[|•·]+$/g, "").trim();
         if (names.length < 3 || names.length > 240) throw new Error("Kalendar ne sadrži očekivani popis svetaca.");
 
         return Response.json(
