@@ -26,7 +26,7 @@ try {
       `${request.url()}: ${request.failure()?.errorText || "request failed"}`
     ));
     // External APIs are not part of this render smoke test; keep it deterministic.
-    await page.route(/^https?:\\/\\/(?!127\\.0\\.0\\.1)(?!localhost)/, route => route.abort());
+    await page.route(url => { const parsed = new URL(url); return ["http:", "https:"].includes(parsed.protocol) && !["127.0.0.1", "localhost"].includes(parsed.hostname); }, route => route.abort());
     try {
       const response = await page.goto(new URL(route, base).href, { waitUntil: "domcontentloaded", timeout: 20000 });
       assert.ok(response && response.status() === 200, `${route}: expected HTTP 200`);
