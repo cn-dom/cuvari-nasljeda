@@ -2013,7 +2013,7 @@ function App() {
   }
 
   return (
-    <div className={`app-shell${isMobile ? " is-mobile" : ""}`}
+    <div className={`app-shell${isMobile ? " is-mobile" : ""}`}>
       {["trebam-pomoc", "pruzi-ruku"].includes(communityActionPage) && (
         <section className="community-action-page" aria-labelledby="community-action-heading">
           <div className="community-action-topbar">
