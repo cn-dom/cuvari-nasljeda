@@ -26,6 +26,44 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    if (url.pathname === "/api/saint") {
+      if (request.method !== "GET") {
+        return new Response("Method not allowed", { status: 405, headers: { Allow: "GET" } });
+      }
+
+      const date = url.searchParams.get("date") || "";
+      if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)) {
+        return Response.json({ error: "Neispravan datum sveca dana." }, { status: 400 });
+      }
+
+      try {
+        const upstream = await fetch("https://katolicki-kalendar.verbum.hr/kalendar/" + date + "/", {
+          headers: {
+            "Accept": "text/html",
+            "User-Agent": "Mozilla/5.0 (compatible; PatriaSoulCalendar/1.0)"
+          },
+          cf: { cacheTtl: 3600, cacheEverything: true }
+        });
+        if (!upstream.ok) throw new Error("Kalendar HTTP " + upstream.status);
+
+        const body = htmlToText(await upstream.text());
+        const sectionMatch = body.match(/Sveci i imendani\\s*([\\s\\S]*?)(?=\\n(?:####\\s*)?Ukratko\\b|$)/i);
+        const section = sectionMatch?.[1]?.replace(/\\s+/g, " ").trim() || "";
+        const names = section.replace(/^(?:Koji se sveci slave i tko ima imendan[^?]*\\?\\s*)/i, "").trim();
+        if (names.length < 3 || names.length > 240) throw new Error("Kalendar ne sadrži očekivani popis svetaca.");
+
+        return Response.json(
+          { date, names, source: "Katolički kalendar Verbum", sourceUrl: "https://katolicki-kalendar.verbum.hr/kalendar/" + date + "/" },
+          { headers: { "Cache-Control": "public, max-age=1800, s-maxage=3600", "X-Content-Type-Options": "nosniff" } }
+        );
+      } catch {
+        return Response.json(
+          { error: "Katolički kalendar trenutačno nije dostupan." },
+          { status: 502, headers: { "Cache-Control": "no-store" } }
+        );
+      }
+    }
+
     if (url.pathname === "/api/liturgy") {
       if (request.method !== "GET") {
         return new Response("Method not allowed", { status: 405, headers: { Allow: "GET" } });
