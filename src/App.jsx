@@ -277,6 +277,15 @@ function App() {
     }
   }
 
+  useEffect(() => {
+    if (activeNav !== "Značke") return undefined;
+    const closeBadgesOnEscape = (event) => {
+      if (event.key === "Escape") setActiveNav("PatriaSoul");
+    };
+    window.addEventListener("keydown", closeBadgesOnEscape);
+    return () => window.removeEventListener("keydown", closeBadgesOnEscape);
+  }, [activeNav]);
+
   function navigateToSection(label) {
     if (!session?.user?.id && label !== "PatriaSoul") {
       setAuthMode("login");
@@ -2239,6 +2248,7 @@ function App() {
           <button className={activeNav === "Obavijesti" ? "topnav-link active" : "topnav-link"} onClick={() => navigateToSection("Obavijesti")} aria-label="Obavijesti">🔔</button>
         </nav>
         <div className="top-actions">
+          {!isAppInstalled && <button type="button" className="topbar-install-button" onClick={installApp} aria-label="Instaliraj PatriaSoul — Čuvari nasljeđa"><span aria-hidden="true">↓</span><span>Instaliraj</span></button>}
           {session ? (
             <div className="auth-session-actions">
               <button className="profile-open-button" onClick={() => { setProfileViewId(null); setProfileOpen(true); setProfileMessage(""); }}><span className="profile-mini-avatar">{profileAvatarUrl ? <img src={profileAvatarUrl} alt="" /> : (session.user?.user_metadata?.display_name || session.user?.email || "Č").slice(0, 1).toLocaleUpperCase("hr")}</span><span className="auth-user-label">{session.user?.user_metadata?.display_name || session.user?.email || "Moj profil"}</span><span className="profile-open-label">Moj profil</span></button>
@@ -2806,11 +2816,17 @@ function App() {
           )}
 
           {activeNav === "Značke" && (
-            <section className="card" style={{ padding: 20 }}>
-              {session?.user?.id
-                ? <BadgeShowcase earnedKeys={(badgeRowsByUser[session.user.id] || []).map((row) => row.badge_key)} showLocked />
-                : <div className="directory-empty"><h2>Značke PatriaSoul</h2><p>Prijavi se kako bi vidio/la svoj napredak i sve dostupne značke.</p><button type="button" className="primary-button" onClick={() => { setAuthMode("login"); setAuthOpen(true); }}>Prijava / Registracija</button></div>}
-            </section>
+            <div className="badge-overlay-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setActiveNav("PatriaSoul"); }}>
+              <section className="badge-overlay-dialog card" role="dialog" aria-modal="true" aria-labelledby="badge-overlay-title">
+                <div className="badge-overlay-toolbar">
+                  <span>PatriaSoul · Postignuća</span>
+                  <button type="button" className="badge-overlay-close" aria-label="Zatvori značke" onClick={() => setActiveNav("PatriaSoul")}>×</button>
+                </div>
+                {session?.user?.id
+                  ? <BadgeShowcase earnedKeys={(badgeRowsByUser[session.user.id] || []).map((row) => row.badge_key)} showLocked />
+                  : <div className="directory-empty"><h2 id="badge-overlay-title">Značke PatriaSoul</h2><p>Prijavi se kako bi vidio/la svoj napredak i sve dostupne značke.</p><button type="button" className="primary-button" onClick={() => { setAuthMode("login"); setAuthOpen(true); }}>Prijava / Registracija</button></div>}
+              </section>
+            </div>
           )}
 
           {activeNav === "Čuvari nasljeđa" && (
