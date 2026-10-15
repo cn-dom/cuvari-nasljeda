@@ -1,0 +1,28 @@
+import { useMemo, useState } from "react";
+import "./Museum.css";
+
+const hero = "https://images.unsplash.com/photo-1566127992631-137a642a90f4?auto=format&fit=crop&w=2000&q=85";
+const topics = ["Sve zbirke", "Obitelj", "Povijest", "Tradicija", "Fotografije", "Vjera", "Prirodna baština", "Dijaspora"];
+const sample = [
+ {title:"Stare fotografije moga kraja",category:"Fotografije",owner:"Primjer zbirke člana",desc:"Fotografije i sjećanja koja čuvaju priču jednog mjesta.",image:"https://images.unsplash.com/photo-1543857778-c4a1a3e0b2eb?auto=format&fit=crop&w=900&q=80",privacy:"Svi članovi"},
+ {title:"Tradicija i običaji",category:"Tradicija",owner:"Primjer zbirke člana",desc:"Običaji, nošnje i vještine koje se prenose generacijama.",image:"https://images.unsplash.com/photo-1604917877934-07d8d248d396?auto=format&fit=crop&w=900&q=80",privacy:"Prijatelji"},
+ {title:"Stari gradovi i utvrde",category:"Povijest",owner:"Primjer zbirke člana",desc:"Tragovi prošlosti u hrvatskim gradovima i mjestima.",image:"https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=900&q=80",privacy:"Svi članovi"},
+ {title:"Obiteljske uspomene",category:"Obitelj",owner:"Privatna zbirka — primjer",desc:"Obiteljske priče i uspomene čuvane za buduće naraštaje.",image:"https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=900&q=80",privacy:"Samo ja"}
+];
+export default function Museum(){
+ const [query,setQuery]=useState(""); const [topic,setTopic]=useState("Sve zbirke"); const [opened,setOpened]=useState(null);
+ const items=useMemo(()=>sample.filter(x=>(topic==="Sve zbirke"||x.category===topic)&&[x.title,x.owner,x.desc,x.category].join(" ").toLocaleLowerCase("hr").includes(query.toLocaleLowerCase("hr"))),[query,topic]);
+ return <main className="virtual-museum">
+  <header className="vm-top"><a className="vm-brand" href="/"><span className="vm-emblem">♜</span><span><b>Čuvari nasljeđa</b><small>Naša prošlost · Naša budućnost</small></span></a><label className="vm-search">⌕ <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Pretraži zbirke, predmete ili članove…" /></label><a className="vm-back" href="/">← Zajednica</a></header>
+  <section className="vm-hero" style={{backgroundImage:"linear-gradient(90deg,rgba(5,17,32,.95),rgba(5,17,32,.66) 48%,rgba(5,17,32,.08)),url("+hero+")"}}>
+   <div className="vm-hero-copy"><span className="vm-kicker">ČUVAJMO USPOMENE · DIJELIMO PRIČE</span><h1>Virtualni muzej članova</h1><h2>Svaka zbirka ima svoju priču.</h2><p>Otkrij obiteljske uspomene, povijesne predmete, stare fotografije i priče članova koje čuvaju naše zajedničko nasljeđe.</p><button onClick={()=>document.getElementById("vm-zbirke")?.scrollIntoView({behavior:"smooth"})}>♜ Započni obilazak　›</button></div><div className="vm-hero-stamp">HRVATSKA<br/>POVIJEST<br/><i>IDENTITET</i><span>✦</span></div>
+  </section>
+  <section className="vm-content" id="vm-zbirke"><div className="vm-heading"><div><span className="vm-kicker">ISTRAŽI I OTKRIJ</span><h2>Zbirke članova</h2><p>Izaberi temu, otvori zbirku i kreni od izloška do izloška.</p></div><span className="vm-total">{items.length} zbirke</span></div>
+   <nav className="vm-topics" aria-label="Tematske dvorane">{topics.map(t=><button key={t} className={topic===t?"active":""} onClick={()=>setTopic(t)}>{t}</button>)}</nav>
+   <div className="vm-grid">{items.map(x=><button className="vm-card" key={x.title} onClick={()=>setOpened(x)}><span className="vm-card-image" style={{backgroundImage:"linear-gradient(0deg,rgba(3,13,26,.82),transparent 75%),url("+x.image+")"}}><span className="vm-privacy">{x.privacy==="Samo ja"?"🔒":x.privacy==="Prijatelji"?"♧":"◎"} {x.privacy}</span></span><span className="vm-card-copy"><small>{x.category.toLocaleUpperCase("hr")}</small><b>{x.title}</b><span>{x.desc}</span><em>◉ {x.owner}</em><strong>Otvori zbirku　→</strong></span></button>)}</div>
+   {items.length===0&&<p className="vm-empty">Nema zbirki za odabranu temu ili pojam.</p>}
+  </section>
+  <section className="vm-bottom"><article><span className="vm-kicker">TVOJE NASLJEĐE</span><h2>Svaka uspomena zaslužuje svoje mjesto.</h2><p>Članovi će moći stvarati zbirke, dodavati fotografije i priče te za svaku zbirku odabrati tko je može vidjeti.</p><span className="vm-soon">Stvaranje zbirki povezujemo sa sigurnom pohranom</span></article><article><span className="vm-kicker">PUT KROZ MUZEJ</span><h2>Obilazak bez beskonačnog zida</h2><p>Tematske dvorane vode te od zbirke do zbirke. Svaki izložak dobit će svoju priču, izvore, fotografije i prostor za komentare.</p><div className="vm-route">Ulaz　→　Dvorana　→　Zbirka　→　Izložak</div></article></section>
+  {opened&&<div className="vm-overlay" onClick={()=>setOpened(null)}><section className="vm-dialog" role="dialog" aria-modal="true" aria-label={opened.title} onClick={e=>e.stopPropagation()}><button className="vm-close" onClick={()=>setOpened(null)} aria-label="Zatvori">×</button><span className="vm-kicker">MUZEJSKA ZBIRKA</span><h2>{opened.title}</h2><p>{opened.desc}</p><p>Vlasnik: {opened.owner}</p><p>Privatnost: <b>{opened.privacy}</b></p><div className="vm-notice">Ovo su ogledni prikazi dizajna, ne stvarne korisničke zbirke. Prije objave povezujemo muzej sa Supabaseom i provjeravamo prava pristupa.</div><button className="vm-action" onClick={()=>setOpened(null)}>Natrag u muzej</button></section></div>}
+ </main>
+}
