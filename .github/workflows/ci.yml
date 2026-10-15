@@ -29,6 +29,8 @@ jobs:
           node --check public/na-danasnji-dan.js
       - name: Provjeri produkcijsku izgradnju
         run: npm run build
+      - name: Instaliraj Chromium za testove u pregledniku
+        run: npx playwright install --with-deps chromium
       - name: Pokreni lokalni pregled izgrađene aplikacije
         run: |
           npm run preview -- --host 127.0.0.1 --port 4173 --strictPort > /tmp/cuvari-preview.log 2>&1 &
@@ -39,6 +41,7 @@ jobs:
             sleep 1
           done
           node scripts/smoke-routes.mjs
+          npm run test:browser
   deploy:
     name: Objavi na Cloudflare Workers
     needs: build
