@@ -19,6 +19,7 @@ export default function FloatingGlobalChat({ supabase, session, onLoginRequest }
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState("");
   const [friendRequests, setFriendRequests] = useState([]);
+  const [friendsRealtimeStatus, setFriendsRealtimeStatus] = useState("disconnected");
   const [isModerator, setIsModerator] = useState(false);
   const [adminReportsOpen, setAdminReportsOpen] = useState(false);
   const [adminReports, setAdminReports] = useState([]);
@@ -106,17 +107,49 @@ export default function FloatingGlobalChat({ supabase, session, onLoginRequest }
     loadPreferences();
     loadMessages();
     loadFriendRequests();
-    const channel = supabase.channel("community-global-chat-live")
+    const chatChannel = supabase.channel("community-global-chat-live-" + userId)
       .on("postgres_changes", { event: "*", schema: "public", table: "community_global_chat_messages" }, () => {
         if (alive) loadMessages();
       })
-      .on("postgres_changes", { event: "*", schema: "public", table: "community_friend_requests" }, () => {
+      .subscribe();
+
+    // Odvojena pretplata za zahtjeve prijateljstva: status kanala prati se
+    // zasebno, a nakon ponovnog povezivanja ponovno dohvaćamo trenutno stanje.
+    const friendsChannel = supabase.channel("community-friends-live-" + userId)
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "community_friend_requests",
+        filter: "sender_id=eq." + userId,
+      }, () => {
         if (alive) loadFriendRequests();
       })
-      .subscribe();
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "community_friend_requests",
+        filter: "recipient_id=eq." + userId,
+      }, () => {
+        if (alive) loadFriendRequests();
+      })
+      .subscribe((status) => {
+        if (!alive) return;
+        if (status === "SUBSCRIBED") {
+          setFriendsRealtimeStatus("connected");
+          loadFriendRequests();
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          setFriendsRealtimeStatus("error");
+        } else if (status === "CLOSED") {
+          setFriendsRealtimeStatus("disconnected");
+        } else if (status === "SUBSCRIBING") {
+          setFriendsRealtimeStatus("connecting");
+        }
+      });
     return () => {
       alive = false;
-      supabase.removeChannel(channel);
+      setFriendsRealtimeStatus("disconnected");
+      supabase.removeChannel(chatChannel);
+      supabase.removeChannel(friendsChannel);
     };
   }, [supabase, userId, loadMessages, loadFriendRequests]);
 
