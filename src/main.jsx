@@ -6,10 +6,13 @@ import Forum from "./Forum.jsx";
 import Pages from "./Pages.jsx";
 import Events from "./Events.jsx";
 import AICenter from "./AICenter.jsx";
+import VirtualMuseum from "./VirtualMuseum.jsx";
 import "./index.css";
 
 const route = window.location.pathname.replace(/\/$/, "");
-const Screen = route === "/ai-centar.html"
+const Screen = route === "/virtualni-muzej.html"
+  ? VirtualMuseum
+  : route === "/ai-centar.html"
   ? AICenter
   : route === "/administracija.html"
   ? Admin
