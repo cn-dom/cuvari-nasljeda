@@ -53,7 +53,7 @@ export default function MuseumPuterAssistant() {
   }, []);
 
   async function saveMuseum() {
-    if (saving || !memoryImages.length || !result.trim()) return;
+    if (saving || (!memoryImages.length && !openedMuseum) || !result.trim()) return;
     if (!isSupabaseConfigured || !supabase) {
       setError("Spremanje nije dostupno jer Supabase nije konfiguriran.");
       return;
@@ -69,6 +69,27 @@ export default function MuseumPuterAssistant() {
       const user = authData?.user;
       if (!user) throw new Error("Za spremanje vlastitog muzeja moraš biti prijavljen/a.");
       const museumTitle = memoryTitle.trim() || "Moj virtualni muzej";
+      if (openedMuseum?.id) {
+        const { data: updatedMuseum, error: updateError } = await supabase
+          .from("virtual_museums")
+          .update({
+            title: museumTitle,
+            description: memoryStory.trim().slice(0, 1200),
+            introduction: result.trim().slice(0, 3000),
+            ai_draft: result.trim(),
+            status: "review",
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", openedMuseum.id)
+          .select("id, title, description, introduction, ai_draft, status, created_at, updated_at")
+          .single();
+        if (updateError) throw updateError;
+        setSavedMuseums((previous) => previous.map((item) => item.id === updatedMuseum.id ? updatedMuseum : item));
+        setOpenedMuseum((previous) => previous ? { ...previous, ...updatedMuseum } : previous);
+        setStatus("Izmjene tvog privatnog muzeja spremljene su. Muzej i fotografije nisu javno objavljeni.");
+        return;
+      }
+      if (!memoryImages.length) throw new Error("Dodaj barem jednu fotografiju za stvaranje novog muzeja.");
       const { data: museum, error: museumError } = await supabase
         .from("virtual_museums")
         .insert({
@@ -144,6 +165,7 @@ export default function MuseumPuterAssistant() {
         return { ...item, signedUrl: urlError ? "" : data?.signedUrl || "" };
       }));
       setOpenedMuseum({ ...museum, items: itemsWithUrls });
+      setMemoryImages([]);
       setResult(museum.ai_draft || "");
       setMemoryTitle(museum.title || "");
       setMemoryStory(museum.description || "");
@@ -258,7 +280,7 @@ export default function MuseumPuterAssistant() {
     {error && <div className="museum-puter-message error" role="alert">{error}</div>}
     {status && <div className="museum-puter-message" role="status">{status}</div>}
     {busy && <div className="museum-puter-busy"><LoaderCircle size={18} className="museum-puter-spin" /> Digitalni kustos PatriaSoul priprema nacrt…</div>}
-    {result && <section className="museum-puter-result" aria-label="AI nacrt"><div className="museum-puter-result-head"><strong>Prijedlog za pregled · još nije javno objavljen</strong><div className="museum-puter-actions"><button type="button" onClick={copyResult}><Copy size={15} /> Kopiraj nacrt</button><button type="button" onClick={saveMuseum} disabled={saving || !memoryImages.length}><Save size={15} />{saving ? "Spremam muzej…" : "Spremi moj muzej"}</button></div></div><textarea className="museum-puter-result-editor" aria-label="Uredi nacrt virtualnog muzeja" value={result} onChange={(event) => setResult(event.target.value)} maxLength={30000} rows={14} /></section>}
+    {result && <section className="museum-puter-result" aria-label="AI nacrt"><div className="museum-puter-result-head"><strong>Prijedlog za pregled · još nije javno objavljen</strong><div className="museum-puter-actions"><button type="button" onClick={copyResult}><Copy size={15} /> Kopiraj nacrt</button><button type="button" onClick={saveMuseum} disabled={saving || (!memoryImages.length && !openedMuseum)}><Save size={15} />{saving ? "Spremam…" : openedMuseum ? "Spremi izmjene" : "Spremi moj muzej"}</button></div></div><textarea className="museum-puter-result-editor" aria-label="Uredi nacrt virtualnog muzeja" value={result} onChange={(event) => setResult(event.target.value)} maxLength={30000} rows={14} /></section>}
 
     <section className="museum-saved-list" aria-labelledby="museum-saved-title">
       <div className="museum-memory-title-row"><FolderOpen size={20} /><div><h3 id="museum-saved-title">Moji spremljeni muzeji</h3><p>Privatni nacrti spremljeni na tvom računu.</p></div></div>
@@ -273,7 +295,7 @@ export default function MuseumPuterAssistant() {
         <div className="museum-puter-result-head"><strong>{openedMuseum.title}</strong><button type="button" onClick={() => setOpenedMuseum(null)}>Zatvori</button></div>
         <p>{openedMuseum.description || "Nije dodana osobna priča."}</p>
         <div className="museum-memory-gallery">{(openedMuseum.items || []).map((item) => <div className="museum-memory-preview" key={item.id}>{item.signedUrl ? <img src={item.signedUrl} alt={item.title} /> : <span aria-hidden="true">📷</span>}<div><strong>{item.title}</strong><small>{[item.place, item.date_label].filter(Boolean).join(" · ") || "Podaci nisu navedeni"}</small></div></div>)}</div>
-        <p className="museum-puter-privacy">AI nacrt je prikazan iznad. Uređene izmjene nacrta zasad se ne zapisuju natrag u postojeći muzej; možeš kopirati tekst ili pripremiti novi nacrt.</p>
+        <p className="museum-puter-privacy">Možeš urediti naziv, osobnu priču i AI nacrt u poljima iznad, a zatim odabrati „Spremi izmjene”. Fotografije ostaju privatne.</p>
       </div>}
     </section>
   </section>;
