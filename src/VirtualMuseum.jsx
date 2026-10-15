@@ -192,7 +192,7 @@ export default function VirtualMuseum() {
     setBusy(true); setNotice("");
     try {
       const prompt = "Pomozi pripremiti nacrt muzejskog zapisa na hrvatskom. Ne izmišljaj činjenice i jasno odvoji korisnikovo svjedočanstvo od provjerene povijesti. Ne predstavljaj zaključke kao činjenice. Vrati naslov, kratki opis, što još treba provjeriti, moguće ključne riječi i vrste pouzdanih izvora koje treba potražiti. Kategorija: "+category+". Naziv: "+title.trim()+". Podaci vlasnika: "+story.trim()+". Ako nema izvora, jasno napiši da povijesni navodi nisu potvrđeni.";
-      const reply = imageFile ? await puter.ai.chat(prompt, { attachments: [imageFile] }) : await puter.ai.chat(prompt);
+      const reply = imageFile ? await puter.ai.chat(prompt, imageFile) : await puter.ai.chat(prompt);
       setAiDraft(typeof reply === "string" ? reply : (reply?.message?.content || reply?.text || JSON.stringify(reply)));
       setNotice("AI je pripremio nacrt. Provjeri ga prije spremanja ili javne objave.");
     } catch (error) {
