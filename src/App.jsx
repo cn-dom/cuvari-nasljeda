@@ -193,6 +193,15 @@ function App() {
   const [memberDirectoryBusy, setMemberDirectoryBusy] = useState(false);
   const [memberPresence, setMemberPresence] = useState([]);
   const [showActivity, setShowActivity] = useState(true);
+
+  useEffect(() => {
+    if (!session?.user?.id || !supabase) return undefined;
+    let cancelled = false;
+    supabase.rpc("get_public_member_badges", { p_user_ids: [session.user.id] }).then(({ data, error }) => {
+      if (!cancelled && !error) setBadgeRowsByUser((current) => ({ ...current, [session.user.id]: data || [] }));
+    });
+    return () => { cancelled = true; };
+  }, [session?.user?.id]);
   const [presenceBusy, setPresenceBusy] = useState(false);
   const [mentionMembers, setMentionMembers] = useState([]);
   const [mentionBusy, setMentionBusy] = useState(false);
@@ -2784,7 +2793,7 @@ function App() {
                       const initials = displayName.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN";
                       return <article className="member-directory-card" key={member.id}>
                         <Avatar initials={initials} src={member.avatar_url} />
-                        <div className="member-directory-info"><strong>{displayName}</strong><span>@{normalizeUsername(member.username) || "clan"}</span><span className={"member-presence-status " + getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).state}><i aria-hidden="true" />{getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).label}</span><p>{member.bio || "Ovaj član još nije dodao opis profila."}</p></div>
+                        <div className="member-directory-info"><strong>{displayName}</strong><span>@{normalizeUsername(member.username) || "clan"}</span><span className={"member-presence-status " + getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).state}><i aria-hidden="true" />{getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).label}</span><p>{member.bio || "Ovaj član još nije dodao opis profila."}</p><div className="member-card-badges"><BadgeRow badgeKeys={(badgeRowsByUser[member.id] || []).map((row) => row.badge_key)} compact /></div></div>
                         <button type="button" className="post-menu-button danger" disabled={blockBusyId === member.id} onClick={() => toggleBlockMember({ authorId: member.id, author: displayName, handle: "@" + (normalizeUsername(member.username) || "clan") })}>{blockedMembers.some((blocked) => blocked.id === member.id) ? "Odblokiraj" : "Blokiraj"}</button>
                       </article>;
                     })}</div> : <p className="directory-empty">Nema članova koji odgovaraju pretrazi.</p>;
