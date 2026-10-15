@@ -5,11 +5,41 @@ import { supabase } from "./lib/supabase.js";
 import "./virtual-museum.css";
 
 const exhibits = [
-  { id: "vucedol", title: "Vučedolska kultura", period: "3. tisućljeće pr. Kr.", type: "Arheologija", description: "Početna tema za istraživanje eneolitičke kulture uz Dunav. Konkretan predmet i dataciju potrebno je potvrditi muzejskim ili znanstvenim izvorom.", source: "https://www.vucedol.hr/" },
-  { id: "bascanska", title: "Bašćanska ploča", period: "oko 1100. godine", type: "Glagoljica", description: "Jedan od najpoznatijih spomenika hrvatske pismenosti. Prikaz u ovoj dvorani je simboličan; nije 3D rekonstrukcija izvornika.", source: "https://www.enciklopedija.hr/" },
-  { id: "pleter", title: "Hrvatski pleter", period: "rani srednji vijek", type: "Kamena plastika", description: "Pleterna ornamentika pojavljuje se na brojnim ranosrednjovjekovnim kamenim spomenicima. Za svaki budući zapis dodaje se konkretan izvor.", source: "https://www.enciklopedija.hr/" },
-  { id: "novac", title: "Povijesni novac", period: "različita razdoblja", type: "Numizmatika", description: "Tematska vitrina za novac i monetarnu povijest. Ne prikazuje se kao autentičan povijesni primjerak dok se ne odabere dokumentirani predmet.", source: "https://www.hnb.hr/" },
-  { id: "nosnja", title: "Tradicijska nošnja", period: "regionalna baština", type: "Etnografija", description: "Prostor za predstavljanje regionalnih tekstilnih tradicija uz jasno navođenje kraja, razdoblja, autora fotografije i prava korištenja.", source: "https://www.emz.hr/" }
+  {
+    id: "vucedol", title: "Vučedolska keramička golubica", period: "Eneolitik · približno 3. tisućljeće pr. Kr.", type: "Arheologija",
+    description: "Keramička posuda u obliku ptice, poznata kao vučedolska golubica. U stručnim tumačenjima predmet se naziva i jarebicom; zato naziv i interpretaciju treba navoditi uz izvor, a ne kao jedinu moguću interpretaciju.",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Vucedol_Culture_ceramic_dove_maximized.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Vucedol_Culture_ceramic_dove_maximized.jpg",
+    sourceLabel: "Wikimedia Commons · zapis datoteke", credit: "LZMK (podaci navedeni na stranici datoteke)", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  {
+    id: "bascanska", title: "Bašćanska ploča", period: "oko 1100. godine", type: "Glagoljica",
+    description: "Kameni natpis iz crkve sv. Lucije u Jurandvoru na otoku Krku, važan spomenik hrvatske glagoljske i jezične povijesti. Ova fotografija služi za upoznavanje s predmetom; nije 3D snimka izvornika.",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Bascanska_ploca.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Bascanska_ploca.jpg",
+    sourceLabel: "Wikimedia Commons · zapis datoteke", credit: "Neoneo13", license: "Javno vlasništvo prema oznaci autora na Wikimedia Commonsu", licenseUrl: "https://commons.wikimedia.org/wiki/File:Bascanska_ploca.jpg"
+  },
+  {
+    id: "pleter", title: "Hrvatski pleter", period: "Srednji vijek · ornamentika", type: "Kamena plastika",
+    description: "Pleter je isprepleteni ukrasni motiv koji se pojavljuje u različitim umjetničkim i kamenoklesarskim tradicijama. Ovdje je prikazana grafička shema motiva, a ne konkretan arheološki nalaz.",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Pleter_dvobojni.svg",
+    source: "https://commons.wikimedia.org/wiki/File:Pleter_dvobojni.svg",
+    sourceLabel: "Wikimedia Commons · zapis datoteke", credit: "Autor naveden na stranici datoteke", license: "CC BY-SA (točnu inačicu provjeriti na izvornoj stranici)", licenseUrl: "https://commons.wikimedia.org/wiki/File:Pleter_dvobojni.svg"
+  },
+  {
+    id: "novac", title: "Slavonski banovac", period: "Srednji vijek · 13. stoljeće", type: "Numizmatika",
+    description: "Primjerak slavonskog banovca zabilježen u kategoriji numizmatike Gradskog muzeja Sombor. Fotografija je ilustrativan prikaz predmeta iz susjedne regionalne povijesti; konačni opis treba dopuniti kataloškim podacima muzeja.",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Gradski_muzej_Sombor_-_numizmatika,_Slavonski_Banovac_13._vek.jpg",
+    source: "https://commons.wikimedia.org/wiki/Category:Exhibits_of_the_Town_Museum_of_Sombor",
+    sourceLabel: "Wikimedia Commons · zbirka muzejskih predmeta", credit: "Autor i licenca provjeravaju se na stranici konkretne datoteke", license: "Provjeriti prije daljnjeg korištenja", licenseUrl: "https://commons.wikimedia.org/wiki/Category:Exhibits_of_the_Town_Museum_of_Sombor"
+  },
+  {
+    id: "nosnja", title: "Međimurska tradicijska nošnja", period: "Etnografska baština · Međimurje", type: "Etnografija",
+    description: "Fotografija nošnji iz Međimurja povezana je s Etnografskim muzejom u Zagrebu. Odjevne predmete treba opisivati u regionalnom kontekstu, bez pretpostavke da jedna fotografija predstavlja sve inačice nošnje.",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Nosnje_Medjimurje_EMZ_300109.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Nosnje_Medjimurje_EMZ_300109.jpg",
+    sourceLabel: "Wikimedia Commons · zapis datoteke", credit: "Roberta F.", license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/"
+  }
 ];
 
 function createLabelTexture(title) {
@@ -208,7 +238,7 @@ export default function VirtualMuseum() {
     {activeTab === "explore" ? <section className="museum-explore">
       <div className="museum-scene-heading"><div><span>STALNA IZLOŽBA · RADNA VERZIJA</span><h2>Galerija hrvatske baštine</h2></div><p>W / A / S / D za kretanje · desni klik + pomak miša za pogled · klikni predmet za detalje</p></div>
       <MuseumScene onSelect={setSelectedId} />
-      <div className="museum-exhibit-detail"><span>{selected.type} · {selected.period}</span><h3>{selected.title}</h3><p>{selected.description}</p><a href={selected.source} target="_blank" rel="noreferrer">Potraži izvor ↗</a><p className="museum-disclaimer">Prototip: vitrine i modeli su simbolični. Zapisi su početne teme, ne konačno provjerene muzejske katalogizacije.</p></div>
+      <div className="museum-exhibit-detail"><span>{selected.type} · {selected.period}</span><h3>{selected.title}</h3>{selected.image && <figure className="museum-source-figure"><img src={selected.image} alt={selected.title} loading="lazy" onError={e=>{e.currentTarget.hidden=true;}} /><figcaption>{selected.credit} · {selected.license}</figcaption></figure>}<p>{selected.description}</p><div className="museum-source-links"><a href={selected.source} target="_blank" rel="noreferrer">{selected.sourceLabel} ↗</a><a href={selected.licenseUrl} target="_blank" rel="noreferrer">Licenca i uvjeti korištenja ↗</a></div><p className="museum-disclaimer">Važno: prikazana fotografija i simbolični 3D model nisu isto. Provjeri metapodatke i licencu izvornog zapisa prije preuzimanja, prerade ili ponovne objave.</p></div>
     </section> : <section className="museum-create">
       <div className="museum-create-intro"><span>TVA ZBIRKA · AI POMOĆNIK</span><h2>Izradi svoj muzejski primjerak</h2><p>Dodaj fotografiju ili uspomenu i opiši što znaš. Puter AI pripremit će nacrt, a ti ostaješ autor priče i odlučuješ što dalje.</p></div>
       <form className="museum-create-form" onSubmit={prepareDraft}>
