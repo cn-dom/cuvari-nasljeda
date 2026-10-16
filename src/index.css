@@ -2362,3 +2362,45 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
 .member-directory-card button:hover {
   background: rgba(44, 119, 183, .48);
 }
+
+
+/* Čuvari nasljeđa: tamna zaglavna kartica, brojač članova i polja za upis */
+.member-directory.card {
+  background: linear-gradient(145deg, #10253b, #0b1b2c) !important;
+  border-color: rgba(91, 160, 219, .38) !important;
+  color: #f4f8ff !important;
+}
+.member-directory .member-directory-heading h2 {
+  color: #ffffff !important;
+}
+.member-directory .member-directory-heading p {
+  color: #c4d4e5 !important;
+}
+.member-directory .member-directory-count {
+  background: rgba(37, 105, 160, .28) !important;
+  border: 1px solid rgba(120, 185, 235, .45) !important;
+  color: #ffffff !important;
+}
+.member-directory input:not([type="checkbox"]),
+.member-directory textarea,
+.member-directory select,
+.member-directory .member-search input,
+.member-directory input[type="search"] {
+  background: #0b1b2c !important;
+  color: #f4f8ff !important;
+  border: 1px solid rgba(120, 170, 210, .55) !important;
+}
+.member-directory input::placeholder,
+.member-directory textarea::placeholder {
+  color: #a9bed2 !important;
+  opacity: 1;
+}
+.member-directory input[type="checkbox"] {
+  accent-color: #2588d8;
+}
+.member-directory label,
+.member-directory .activity-visibility,
+.member-directory .member-directory-search,
+.member-directory .member-search {
+  color: #e3edf8 !important;
+}
