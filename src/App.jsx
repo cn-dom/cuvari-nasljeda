@@ -288,13 +288,25 @@ function App() {
 
 
   useEffect(() => {
-    if (!session?.user?.id || !supabase) return undefined;
+    const userId = session?.user?.id;
+    if (!userId || !supabase) return undefined;
     let cancelled = false;
-    supabase.rpc("get_public_member_badges", { p_user_ids: [session.user.id] }).then(({ data, error }) => {
-      if (!cancelled && !error) setBadgeRowsByUser((current) => ({ ...current, [session.user.id]: data || [] }));
-    });
-    return () => { cancelled = true; };
-  }, [session?.user?.id]);
+    const refreshOwnBadges = async () => {
+      const { data, error } = await supabase.rpc("get_public_member_badges", { p_user_ids: [userId] });
+      if (!cancelled && !error) setBadgeRowsByUser((current) => ({ ...current, [userId]: data || [] }));
+    };
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") refreshOwnBadges();
+    };
+    refreshOwnBadges();
+    window.addEventListener("focus", refreshOwnBadges);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", refreshOwnBadges);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
+  }, [session?.user?.id, feedRefreshKey]);
   const [presenceBusy, setPresenceBusy] = useState(false);
   const [mentionMembers, setMentionMembers] = useState([]);
   const [mentionBusy, setMentionBusy] = useState(false);
