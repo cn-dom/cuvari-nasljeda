@@ -164,6 +164,8 @@ function App() {
   const [authBusy, setAuthBusy] = useState(false);
   const [authMessage, setAuthMessage] = useState("");
   const [session, setSession] = useState(null);
+  const [profileLoadedForUserId, setProfileLoadedForUserId] = useState(null);
+  const [nicknamePromptedForUserId, setNicknamePromptedForUserId] = useState(null);
 
   // The login panel is rendered inline farther down the page; bring it into view when requested.
   useEffect(() => {
@@ -381,6 +383,14 @@ function App() {
     });
     const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession);
+      if (nextSession?.user) {
+        setAuthOpen(false);
+        setAuthMessage("");
+      } else {
+        setProfileLoadedForUserId(null);
+        setNicknamePromptedForUserId(null);
+        setProfileOpen(false);
+      }
     });
     return () => data.subscription.unsubscribe();
   }, []);
@@ -457,6 +467,7 @@ function App() {
         setAuthMessage(data.session
           ? "Registracija je uspješna. Sada si prijavljen/a."
           : "Registracija je zaprimljena. Ako je potvrda e-pošte uključena, otvori poruku za potvrdu računa.");
+        if (data.session) setAuthOpen(false);
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: authEmail.trim(),
@@ -464,6 +475,7 @@ function App() {
         });
         if (error) throw error;
         setAuthMessage("Uspješna prijava.");
+        setAuthOpen(false);
       }
     } catch (error) {
       setAuthMessage(error?.message || "Prijava nije uspjela. Provjeri podatke i pokušaj ponovno.");
@@ -620,6 +632,7 @@ function App() {
   useEffect(() => {
     let cancelled = false;
     async function loadProfile() {
+      setProfileLoadedForUserId(null);
       const metadata = session?.user?.user_metadata || {};
       setProfileName(metadata.display_name || "");
       setProfileUsername(normalizeUsername(metadata.username));
@@ -640,6 +653,7 @@ function App() {
       if (error) {
         // Keep the account metadata as an editing fallback, but never claim the DB profile loaded.
         setProfileMessage("Profilna tablica nije dostupna ili nema dopušten pristup. Provjeri primijenjeni SQL nacrt i RLS pravila.");
+        setProfileLoadedForUserId(session.user.id);
         return;
       }
       if (data) {
@@ -650,10 +664,22 @@ function App() {
         setProfileCoverUrl(data.cover_url || "");
         setProfileMessage("");
       }
+      setProfileLoadedForUserId(session.user.id);
     }
     loadProfile();
     return () => { cancelled = true; };
   }, [session?.user?.id]);
+
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (!userId || profileLoadedForUserId !== userId || !supabase) return;
+    if (profileUsername.trim() || nicknamePromptedForUserId === userId) return;
+    setNicknamePromptedForUserId(userId);
+    setProfileViewId(null);
+    setProfileOpen(true);
+    setProfileMessage("Dobro došao/la u PatriaSoul! Odaberi nadimak za svoj profil kako bi te drugi članovi mogli prepoznati.");
+    setAuthOpen(false);
+  }, [session?.user?.id, profileLoadedForUserId, profileUsername, nicknamePromptedForUserId]);
 
   useEffect(() => {
     if (!profileViewId || profileViewId === session?.user?.id || !supabase) return undefined;
@@ -714,6 +740,10 @@ function App() {
     if (!supabase || !session?.user) return;
     const cleanUsername = profileUsername.trim().replace(/^@/, "").toLowerCase();
     const cleanDisplayName = profileName.trim();
+    if (nicknamePromptedForUserId === session.user.id && !cleanUsername) {
+      setProfileMessage("Prije nastavka odaberi nadimak za svoj profil.");
+      return;
+    }
     if (cleanUsername && !/^[a-z0-9_.-]{3,24}$/.test(cleanUsername)) {
       setProfileMessage("Korisničko ime mora imati 3–24 znaka: slova, brojeve, točku, crticu ili podvlaku.");
       return;
@@ -808,6 +838,7 @@ function App() {
       if (error) throw error;
       setProfileUsername(cleanUsername);
       setProfileName(cleanDisplayName);
+      setNicknamePromptedForUserId(null);
       setProfileAvatarUrl(nextAvatarUrl || "");
       setProfileCoverUrl(nextCoverUrl || "");
       setProfileAvatarFile(null);
