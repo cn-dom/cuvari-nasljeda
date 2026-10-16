@@ -21,7 +21,7 @@ const navItems = [
 
 const OWNER_EMAIL = "patriasoul@protonmail.com";
 const normalizeUsername = (value) => String(value || "").trim().replace(/^@/, "").toLowerCase();
-const normalizeSearchText = (value) => String(value || "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase("hr").trim();
+const normalizeSearchText = (value) => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("hr").trim();
 
 function getPostLink(text) {
   const match = String(text || "").match(/https?:\/\/[^\s<>"']+/i);
@@ -1130,7 +1130,7 @@ function App() {
   useEffect(() => {
     let cancelled = false;
     async function loadMemberDirectory() {
-      if ((!["Čuvari nasljeđa", "Poruke"].includes(activeNav) && !memberQuickListOpen) || !supabase || !session?.user?.id) return;
+      if ((!["Čuvari nasljeđa", "Poruke"].includes(activeNav) && !memberQuickListOpen && !feedSearch.trim()) || !supabase || !session?.user?.id) return;
       setMemberDirectoryBusy(true);
       // Supabase/PostgREST returns a limited page of rows per request.
       // Fetch successive pages so the directory is not capped at the first 100 members.
@@ -1186,7 +1186,7 @@ function App() {
     }
     loadMemberDirectory();
     return () => { cancelled = true; };
-  }, [activeNav, session?.user?.id, blockedMembers, memberQuickListOpen]);
+  }, [activeNav, session?.user?.id, blockedMembers, memberQuickListOpen, Boolean(feedSearch.trim())]);
 
   useEffect(() => {
     if (!supabase || !session?.user?.id) return undefined;
@@ -1310,7 +1310,7 @@ function App() {
   useEffect(() => {
     let cancelled = false;
     async function loadMessages() {
-      if (activeNav !== "Poruke" || !supabase || !session?.user?.id) return;
+      if ((activeNav !== "Poruke" && !feedSearch.trim()) || !supabase || !session?.user?.id) return;
       setMessagesBusy(true);
       const { data, error } = await supabase
         .from("private_messages")
@@ -1345,7 +1345,7 @@ function App() {
     }
     loadMessages();
     return () => { cancelled = true; };
-  }, [activeNav, session?.user?.id]);
+  }, [activeNav, session?.user?.id, Boolean(feedSearch.trim())]);
 
   useEffect(() => {
     let cancelled = false;
