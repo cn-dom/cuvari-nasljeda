@@ -306,7 +306,7 @@ function App() {
       window.removeEventListener("focus", refreshOwnBadges);
       document.removeEventListener("visibilitychange", refreshWhenVisible);
     };
-  }, [session?.user?.id, feedRefreshKey]);
+  }, [session?.user?.id, feedRefreshKey, activeNav, profileOpen]);
   const [presenceBusy, setPresenceBusy] = useState(false);
   const [mentionMembers, setMentionMembers] = useState([]);
   const [mentionBusy, setMentionBusy] = useState(false);
