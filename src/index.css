@@ -2326,3 +2326,39 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
   color: #718096;
   font-size: 10px;
 }
+
+
+/* Čuvari nasljeđa: kartice članova bez bijele podloge i s jasnim kontrastom */
+.member-directory-card {
+  background: linear-gradient(145deg, rgba(15, 35, 58, .96), rgba(10, 24, 42, .98)) !important;
+  border: 1px solid rgba(91, 160, 219, .38) !important;
+  color: #f4f8ff !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .16);
+}
+.member-directory-card .member-directory-info strong {
+  color: #ffffff !important;
+  font-size: 13px;
+}
+.member-directory-card .member-directory-info span {
+  color: #b8cce2 !important;
+}
+.member-directory-card .member-directory-info p {
+  color: #e0eaf6 !important;
+}
+.member-directory-card .member-directory-info .member-badge,
+.member-directory-card .member-directory-info [class*="badge"] {
+  color: #eaf4ff !important;
+}
+.member-directory-card button {
+  color: #ffffff;
+}
+.member-directory-card .outline-button,
+.member-directory-card button[class*="friend"],
+.member-directory-card button[class*="block"] {
+  background: rgba(34, 93, 145, .32);
+  border-color: rgba(130, 190, 240, .48);
+  color: #ffffff;
+}
+.member-directory-card button:hover {
+  background: rgba(44, 119, 183, .48);
+}
