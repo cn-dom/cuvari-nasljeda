@@ -51,35 +51,66 @@ function Avatar({ initials, variant = "", src = "" }) {
 }
 
 function WeatherSidebar() {
-  const [weather, setWeather] = useState({ loading: true, temp: null, code: null, city: "Zagreb" });
+  const cities = [
+    { city: "Zagreb", latitude: 45.815, longitude: 15.982 },
+    { city: "Split", latitude: 43.508, longitude: 16.440 },
+    { city: "Rijeka", latitude: 45.327, longitude: 14.442 },
+    { city: "Osijek", latitude: 45.555, longitude: 18.695 },
+    { city: "Zadar", latitude: 44.119, longitude: 15.231 },
+    { city: "Dubrovnik", latitude: 42.650, longitude: 18.094 },
+    { city: "Pula", latitude: 44.866, longitude: 13.849 },
+    { city: "Varaždin", latitude: 46.305, longitude: 16.337 },
+  ];
+  const [cityIndex, setCityIndex] = useState(0);
+  const [weather, setWeather] = useState({ loading: true, temp: null, code: null, city: cities[0].city });
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setCityIndex((current) => (current + 1) % cities.length);
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
+    const city = cities[cityIndex];
     async function loadWeather() {
+      setWeather({ loading: true, temp: null, code: null, city: city.city });
       try {
-        const response = await fetch("https://api.open-meteo.com/v1/forecast?latitude=45.815&longitude=15.982&current=temperature_2m,weather_code&timezone=Europe%2FZagreb", { cache: "no-store" });
+        const params = new URLSearchParams({
+          latitude: String(city.latitude),
+          longitude: String(city.longitude),
+          current: "temperature_2m,weather_code",
+          timezone: "Europe/Zagreb",
+        });
+        const response = await fetch("https://api.open-meteo.com/v1/forecast?" + params.toString(), { cache: "no-store" });
         if (!response.ok) throw new Error("Weather request failed");
         const data = await response.json();
-        if (!cancelled) setWeather({ loading: false, temp: Math.round(data.current.temperature_2m), code: data.current.weather_code, city: "Zagreb" });
+        if (!cancelled) setWeather({ loading: false, temp: Math.round(data.current.temperature_2m), code: data.current.weather_code, city: city.city });
       } catch {
-        if (!cancelled) setWeather({ loading: false, temp: null, code: null, city: "Zagreb" });
+        if (!cancelled) setWeather({ loading: false, temp: null, code: null, city: city.city });
       }
     }
     loadWeather();
     return () => { cancelled = true; };
-  }, []);
+  }, [cityIndex]);
+
   const descriptions = {0:"Vedro",1:"Pretežno vedro",2:"Djelomično oblačno",3:"Oblačno",45:"Magla",48:"Magla",51:"Rosulja",53:"Rosulja",55:"Jaka rosulja",61:"Slaba kiša",63:"Kiša",65:"Jaka kiša",71:"Slab snijeg",73:"Snijeg",75:"Jak snijeg",80:"Pljuskovi",81:"Pljuskovi",82:"Jaki pljuskovi",95:"Grmljavina",96:"Grmljavina i tuča",99:"Jaka grmljavina i tuča"};
   const symbols = {0:"☀️",1:"🌤️",2:"⛅",3:"☁️",45:"🌫️",48:"🌫️",51:"🌦️",53:"🌦️",55:"🌧️",61:"🌦️",63:"🌧️",65:"🌧️",71:"🌨️",73:"❄️",75:"❄️",80:"🌦️",81:"🌧️",82:"⛈️",95:"⛈️",96:"⛈️",99:"⛈️"};
-  return <section className="right-card card weather-sidebar-card">
+  return <section className="right-card card weather-sidebar-card" aria-live="polite">
     <div className="right-card-title"><h3>VRIJEME U HRVATSKOJ</h3><span>☀</span></div>
     <div className="weather-sidebar-main">
       <span className="weather-sidebar-symbol" aria-hidden="true">{weather.loading ? "…" : (symbols[weather.code] || "🌦️")}</span>
       <div><strong>{weather.temp === null ? (weather.loading ? "Učitavanje…" : "Podaci nedostupni") : `${weather.temp}°C`}</strong><small>{weather.city} · {weather.loading ? "Dohvaćam prognozu" : (descriptions[weather.code] || "Trenutačni uvjeti")}</small></div>
     </div>
+    <div className="weather-sidebar-rotation" aria-label={`Grad ${cityIndex + 1} od ${cities.length}`}>
+      {cities.map((city, index) => <span key={city.city} className={index === cityIndex ? "active" : ""} title={city.city} />)}
+      <small>Grad se mijenja svakih 5 sekundi</small>
+    </div>
     <a className="weather-sidebar-link" href="/vrijeme.html">Cijela prognoza <span aria-hidden="true">→</span></a>
     <small className="weather-sidebar-source">Podaci: Open-Meteo</small>
   </section>;
 }
-
 function FaithSidebar() {
   const dailyWords = [
     { verse: "Bog je ljubav.", reference: "1 Iv 4, 8", reflection: "Ljubav se vidi u strpljenju, pažnji i djelima kojima drugome olakšamo dan." },
