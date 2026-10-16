@@ -2,9 +2,10 @@ import { supabase } from "./supabase";
 
 export async function startQuizAttempt({ quizType, category = null, citySlug = null }) {
   if (!supabase) throw new Error("Supabase nije konfiguriran.");
+  const normalizedCategory = category === "domovinski-rat" ? "domovinski_rat" : category;
   const { data, error } = await supabase.rpc("start_quiz_attempt", {
     p_quiz_type: quizType,
-    p_category: category,
+    p_category: normalizedCategory,
     p_city_slug: citySlug,
   });
   if (error) throw error;
