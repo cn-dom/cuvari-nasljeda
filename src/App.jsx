@@ -211,6 +211,13 @@ function App() {
   const [friendActionBusyId, setFriendActionBusyId] = useState(null);
   const [memberQuickListOpen, setMemberQuickListOpen] = useState(false);
   const [memberQuickQuery, setMemberQuickQuery] = useState("");
+  const [messageQuickOpen, setMessageQuickOpen] = useState(false);
+  const [notificationQuickOpen, setNotificationQuickOpen] = useState(false);
+  const [messageQuickItems, setMessageQuickItems] = useState([]);
+  const [messageQuickMembers, setMessageQuickMembers] = useState([]);
+  const [notificationQuickItems, setNotificationQuickItems] = useState([]);
+  const [notificationUnreadCount, setNotificationUnreadCount] = useState(0);
+  const [messageUnreadCount, setMessageUnreadCount] = useState(0);
   const [memberPresence, setMemberPresence] = useState([]);
   const [showActivity, setShowActivity] = useState(true);
 
@@ -227,6 +234,26 @@ function App() {
       document.removeEventListener("keydown", closeMemberQuickList);
     };
   }, [memberQuickListOpen]);
+
+  useEffect(() => {
+    if (!messageQuickOpen && !notificationQuickOpen) return undefined;
+    const closeQuickPanels = (event) => {
+      if (!event.target.closest?.(".header-quick-wrap")) {
+        setMessageQuickOpen(false);
+        setNotificationQuickOpen(false);
+      }
+      if (event.key === "Escape") {
+        setMessageQuickOpen(false);
+        setNotificationQuickOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", closeQuickPanels);
+    document.addEventListener("keydown", closeQuickPanels);
+    return () => {
+      document.removeEventListener("pointerdown", closeQuickPanels);
+      document.removeEventListener("keydown", closeQuickPanels);
+    };
+  }, [messageQuickOpen, notificationQuickOpen]);
 
 
   useEffect(() => {
@@ -1170,6 +1197,86 @@ function App() {
 
   useEffect(() => {
     let cancelled = false;
+    async function loadHeaderUnreadCounts() {
+      if (!supabase || !session?.user?.id) {
+        setMessageUnreadCount(0);
+        setNotificationUnreadCount(0);
+        return;
+      }
+      const userId = session.user.id;
+      const [messageResult, allResult] = await Promise.all([
+        supabase.from("notifications").select("id", { count: "exact", head: true })
+          .eq("recipient_id", userId).eq("type", "private_message").is("read_at", null),
+        supabase.from("notifications").select("id", { count: "exact", head: true })
+          .eq("recipient_id", userId).is("read_at", null),
+      ]);
+      if (cancelled) return;
+      if (!messageResult.error) setMessageUnreadCount(messageResult.count || 0);
+      if (!allResult.error) setNotificationUnreadCount(allResult.count || 0);
+    }
+    loadHeaderUnreadCounts();
+    if (!supabase || !session?.user?.id) return () => { cancelled = true; };
+    const channel = supabase.channel("header-unread-counts-" + session.user.id)
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: "recipient_id=eq." + session.user.id }, () => {
+        loadHeaderUnreadCounts();
+      }).subscribe();
+    return () => { cancelled = true; supabase.removeChannel(channel); };
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadQuickMessages() {
+      if (!messageQuickOpen || !supabase || !session?.user?.id) return;
+      const userId = session.user.id;
+      const { data, error } = await supabase
+        .from("private_messages")
+        .select("id, sender_id, recipient_id, body, created_at, updated_at, reply_to_id")
+        .or("sender_id.eq." + userId + ",recipient_id.eq." + userId)
+        .order("created_at", { ascending: false })
+        .limit(40);
+      if (cancelled) return;
+      if (error) {
+        setMessageQuickItems([]);
+        return;
+      }
+      const rows = data || [];
+      setMessageQuickItems(rows);
+      const ids = [...new Set(rows.map((message) => message.sender_id === userId ? message.recipient_id : message.sender_id).filter((id) => id && id !== userId))];
+      if (!ids.length) { setMessageQuickMembers([]); return; }
+      const { data: profiles, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, display_name, username, avatar_url")
+        .in("id", ids);
+      if (!cancelled) setMessageQuickMembers(profileError ? [] : (profiles || []).filter((member) => !blockedMembers.some((blocked) => blocked.id === member.id)));
+    }
+    loadQuickMessages();
+    return () => { cancelled = true; };
+  }, [messageQuickOpen, session?.user?.id, blockedMembers]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadQuickNotifications() {
+      if (!notificationQuickOpen || !supabase || !session?.user?.id) return;
+      const userId = session.user.id;
+      const [{ data, error }, unreadResult] = await Promise.all([
+        supabase.from("notifications")
+          .select("id, actor_id, type, title, body, reference_id, created_at, read_at")
+          .eq("recipient_id", userId)
+          .order("created_at", { ascending: false })
+          .limit(8),
+        supabase.from("notifications").select("id", { count: "exact", head: true })
+          .eq("recipient_id", userId).is("read_at", null),
+      ]);
+      if (cancelled) return;
+      setNotificationQuickItems(error ? [] : (data || []));
+      if (!unreadResult.error) setNotificationUnreadCount(unreadResult.count || 0);
+    }
+    loadQuickNotifications();
+    return () => { cancelled = true; };
+  }, [notificationQuickOpen, session?.user?.id]);
+
+  useEffect(() => {
+    let cancelled = false;
     async function loadMessages() {
       if (activeNav !== "Poruke" || !supabase || !session?.user?.id) return;
       setMessagesBusy(true);
@@ -1282,10 +1389,14 @@ function App() {
       return false;
     }
     setNotifications((current) => current.map((item) => item.id === notification.id ? { ...item, read_at: readAt } : item));
+    setNotificationQuickItems((current) => current.map((item) => item.id === notification.id ? { ...item, read_at: readAt } : item));
+    setNotificationUnreadCount((current) => Math.max(0, current - 1));
+    if (notification.type === "private_message") setMessageUnreadCount((current) => Math.max(0, current - 1));
     return true;
   }
 
   async function openNotification(notification) {
+    setNotificationQuickOpen(false);
     if (notification?.type === "private_message") {
       if (!notification.read_at) await markNotificationRead(notification);
       if (notification.actor_id && notification.actor_id !== session?.user?.id) {
@@ -1296,6 +1407,7 @@ function App() {
       return;
     }
     if (!notification?.read_at) await markNotificationRead(notification);
+    setActiveNav("Obavijesti");
   }
 
   useEffect(() => {
@@ -1879,6 +1991,16 @@ function App() {
     });
     return [...latestByMember.values()].sort((a, b) => new Date(b.latest.created_at) - new Date(a.latest.created_at));
   }, [messages, session?.user?.id]);
+  const messageQuickConversations = useMemo(() => {
+    if (!session?.user?.id) return [];
+    const latestByMember = new Map();
+    messageQuickItems.forEach((message) => {
+      const otherId = message.sender_id === session.user.id ? message.recipient_id : message.sender_id;
+      if (otherId && !latestByMember.has(otherId)) latestByMember.set(otherId, { memberId: otherId, latest: message });
+    });
+    return [...latestByMember.values()].slice(0, 7);
+  }, [messageQuickItems, session?.user?.id]);
+
   const activeConversationMessages = useMemo(() => {
     if (!session?.user?.id || !messageRecipient) return [];
     return messages.filter((message) =>
@@ -2466,8 +2588,39 @@ function App() {
               </>}
             </div>}
           </div>
-          <button className={activeNav === "Poruke" ? "topnav-link active" : "topnav-link"} onClick={() => navigateToSection("Poruke")} aria-label="Poruke">✉</button>
-          <button className={activeNav === "Obavijesti" ? "topnav-link active" : "topnav-link"} onClick={() => navigateToSection("Obavijesti")} aria-label="Obavijesti">🔔</button>
+          <div className="header-quick-wrap">
+            <button type="button" className={(messageQuickOpen || activeNav === "Poruke") ? "topnav-link active" : "topnav-link"} onClick={() => { setMessageQuickOpen((open) => !open); setNotificationQuickOpen(false); setMemberQuickListOpen(false); }} aria-label="Brzi pregled poruka" aria-expanded={messageQuickOpen} aria-haspopup="dialog">✉{messageUnreadCount > 0 && <span className="member-quick-badge">{messageUnreadCount > 99 ? "99+" : messageUnreadCount}</span>}</button>
+            {messageQuickOpen && <div className="header-quick-popover" role="dialog" aria-label="Najnovije poruke">
+              <div className="header-quick-heading"><div><strong>Poruke</strong><small>Najnoviji privatni razgovori</small></div><button type="button" className="member-quick-close" aria-label="Zatvori poruke" onClick={() => setMessageQuickOpen(false)}>×</button></div>
+              {!session?.user?.id ? <div className="member-quick-empty">Prijavi se za privatne poruke.<button type="button" className="primary-button" onClick={() => { setMessageQuickOpen(false); setAuthMode("login"); setAuthMessage(""); setAuthOpen(true); }}>Prijava</button></div> : messageQuickConversations.length ? <div className="header-quick-list">
+                {messageQuickConversations.map(({ memberId, latest }) => {
+                  const member = messageQuickMembers.find((item) => item.id === memberId);
+                  const name = member?.display_name || member?.username || "Čuvar nasljeđa";
+                  const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN";
+                  return <button type="button" className="header-quick-row" key={memberId} onClick={async () => { setMessageRecipient(memberId); setActiveNav("Poruke"); setMessageQuickOpen(false); const unreadForMember = notificationQuickItems.filter((item) => item.type === "private_message" && !item.read_at && item.actor_id === memberId); for (const item of unreadForMember) await markNotificationRead(item); }}>
+                    <Avatar initials={initials} src={member?.avatar_url || ""} />
+                    <span className="header-quick-row-copy"><strong>{name}</strong><small>{latest.body || "Poslana je poruka"}</small></span>
+                    <time>{new Date(latest.created_at).toLocaleDateString("hr-HR", { day: "2-digit", month: "2-digit" })}</time>
+                  </button>;
+                })}
+              </div> : <p className="member-quick-empty">Poruke su prazne. Kad ti netko pošalje privatnu poruku, razgovor će se pojaviti ovdje.</p>}
+              <button type="button" className="member-quick-all" onClick={() => { setMessageQuickOpen(false); navigateToSection("Poruke"); }}>Otvori sve poruke <span aria-hidden="true">→</span></button>
+            </div>}
+          </div>
+          <div className="header-quick-wrap">
+            <button type="button" className={(notificationQuickOpen || activeNav === "Obavijesti") ? "topnav-link active" : "topnav-link"} onClick={() => { setNotificationQuickOpen((open) => !open); setMessageQuickOpen(false); setMemberQuickListOpen(false); }} aria-label="Brzi pregled obavijesti" aria-expanded={notificationQuickOpen} aria-haspopup="dialog">🔔{notificationUnreadCount > 0 && <span className="member-quick-badge">{notificationUnreadCount > 99 ? "99+" : notificationUnreadCount}</span>}</button>
+            {notificationQuickOpen && <div className="header-quick-popover" role="dialog" aria-label="Najnovije obavijesti">
+              <div className="header-quick-heading"><div><strong>Obavijesti</strong><small>{notificationUnreadCount} nepročitanih</small></div><button type="button" className="member-quick-close" aria-label="Zatvori obavijesti" onClick={() => setNotificationQuickOpen(false)}>×</button></div>
+              {!session?.user?.id ? <div className="member-quick-empty">Prijavi se za pregled obavijesti.<button type="button" className="primary-button" onClick={() => { setNotificationQuickOpen(false); setAuthMode("login"); setAuthMessage(""); setAuthOpen(true); }}>Prijava</button></div> : notificationQuickItems.length ? <div className="header-quick-list">
+                {notificationQuickItems.map((notification) => <button type="button" className={notification.read_at ? "header-quick-row notification-quick-row" : "header-quick-row notification-quick-row unread"} key={notification.id} onClick={() => openNotification(notification)}>
+                  <span className="header-quick-notification-icon">{notification.type === "private_message" ? "✉" : "•"}</span>
+                  <span className="header-quick-row-copy"><strong>{notification.title || "Nova obavijest"}</strong><small>{notification.body || "Imaš novu aktivnost u zajednici."}</small></span>
+                  <time>{new Date(notification.created_at).toLocaleDateString("hr-HR", { day: "2-digit", month: "2-digit" })}</time>
+                </button>)}
+              </div> : <p className="member-quick-empty">Nemate novih obavijesti.</p>}
+              <button type="button" className="member-quick-all" onClick={() => { setNotificationQuickOpen(false); navigateToSection("Obavijesti"); }}>Otvori sve obavijesti <span aria-hidden="true">→</span></button>
+            </div>}
+          </div>
         </nav>
         <div className="top-actions">
           {!isAppInstalled && <button type="button" className="topbar-install-button" onClick={installApp} aria-label="Instaliraj PatriaSoul — Čuvari nasljeđa"><span aria-hidden="true">↓</span><span>Instaliraj</span></button>}
@@ -2541,18 +2694,11 @@ function App() {
 
           <section className="side-section sidebar-nav-section">
             <h3>RAZGOVORI</h3>
-            {navItems.filter((item) => ["Poruke", "Obavijesti"].includes(item.label)).map((item) => {
-              const unreadNotifications = notifications.filter((notification) => !notification.read_at);
-              const unreadMessages = unreadNotifications.filter((notification) => notification.type === "private_message").length;
-              const unreadGroups = Object.values(groupUnreadCounts).reduce((sum, count) => sum + (Number(count) || 0), 0);
-              const badgeCount = item.label === "Poruke" ? unreadMessages : unreadNotifications.length;
-              const badgeLabel = item.label === "Poruke" ? "nepročitanih obavijesti o porukama" : "nepročitanih obavijesti";
-              return <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => navigateToSection(item.label)}>
+            {navItems.filter((item) => ["Poruke", "Obavijesti"].includes(item.label)).map((item) => (
+              <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => navigateToSection(item.label)}>
                 <span className="side-icon">{item.icon}</span><span className="side-link-label">{item.label}</span>
-                {item.label === "Poruke" && unreadGroups > 0 && <span className="side-count group-side-count" title={unreadGroups + " nepročitanih grupnih poruka"}>＋{unreadGroups > 99 ? "99+" : unreadGroups}</span>}
-                {badgeCount > 0 && <span className="side-count side-count-badge" aria-label={badgeCount + " " + badgeLabel}>{badgeCount > 99 ? "99+" : badgeCount}</span>}
-              </button>;
-            })}
+              </button>
+            ))}
             {navItems.filter((item) => item.label === "Događaji").map((item) => <button key={item.label} className="side-link" onClick={() => { window.location.href = "/dogadaji.html"; }}><span className="side-icon">{item.icon}</span><span className="side-link-label">{item.label}</span><span className="side-count">Kalendar</span></button>)}
           </section>
 
