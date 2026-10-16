@@ -164,6 +164,8 @@ function App() {
   const [authBusy, setAuthBusy] = useState(false);
   const [authMessage, setAuthMessage] = useState("");
   const [session, setSession] = useState(null);
+  const [profileLoadedForUserId, setProfileLoadedForUserId] = useState(null);
+  const [nicknamePromptedForUserId, setNicknamePromptedForUserId] = useState(null);
 
   // The login panel is rendered inline farther down the page; bring it into view when requested.
   useEffect(() => {
@@ -203,6 +205,10 @@ function App() {
   const [badgeRowsByUser, setBadgeRowsByUser] = useState({});
   const [memberDirectoryQuery, setMemberDirectoryQuery] = useState("");
   const [memberDirectoryBusy, setMemberDirectoryBusy] = useState(false);
+  const [friendRequests, setFriendRequests] = useState([]);
+  const [friendships, setFriendships] = useState([]);
+  const [friendRefreshKey, setFriendRefreshKey] = useState(0);
+  const [friendActionBusyId, setFriendActionBusyId] = useState(null);
   const [memberPresence, setMemberPresence] = useState([]);
   const [showActivity, setShowActivity] = useState(true);
 
@@ -381,6 +387,14 @@ function App() {
     });
     const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession);
+      if (nextSession?.user) {
+        setAuthOpen(false);
+        setAuthMessage("");
+      } else {
+        setProfileLoadedForUserId(null);
+        setNicknamePromptedForUserId(null);
+        setProfileOpen(false);
+      }
     });
     return () => data.subscription.unsubscribe();
   }, []);
@@ -457,6 +471,7 @@ function App() {
         setAuthMessage(data.session
           ? "Registracija je uspješna. Sada si prijavljen/a."
           : "Registracija je zaprimljena. Ako je potvrda e-pošte uključena, otvori poruku za potvrdu računa.");
+        if (data.session) setAuthOpen(false);
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: authEmail.trim(),
@@ -464,6 +479,7 @@ function App() {
         });
         if (error) throw error;
         setAuthMessage("Uspješna prijava.");
+        setAuthOpen(false);
       }
     } catch (error) {
       setAuthMessage(error?.message || "Prijava nije uspjela. Provjeri podatke i pokušaj ponovno.");
@@ -620,6 +636,7 @@ function App() {
   useEffect(() => {
     let cancelled = false;
     async function loadProfile() {
+      setProfileLoadedForUserId(null);
       const metadata = session?.user?.user_metadata || {};
       setProfileName(metadata.display_name || "");
       setProfileUsername(normalizeUsername(metadata.username));
@@ -640,6 +657,7 @@ function App() {
       if (error) {
         // Keep the account metadata as an editing fallback, but never claim the DB profile loaded.
         setProfileMessage("Profilna tablica nije dostupna ili nema dopušten pristup. Provjeri primijenjeni SQL nacrt i RLS pravila.");
+        setProfileLoadedForUserId(session.user.id);
         return;
       }
       if (data) {
@@ -650,10 +668,22 @@ function App() {
         setProfileCoverUrl(data.cover_url || "");
         setProfileMessage("");
       }
+      setProfileLoadedForUserId(session.user.id);
     }
     loadProfile();
     return () => { cancelled = true; };
   }, [session?.user?.id]);
+
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (!userId || profileLoadedForUserId !== userId || !supabase) return;
+    if (profileUsername.trim() || nicknamePromptedForUserId === userId) return;
+    setNicknamePromptedForUserId(userId);
+    setProfileViewId(null);
+    setProfileOpen(true);
+    setProfileMessage("Dobro došao/la u PatriaSoul! Odaberi nadimak za svoj profil kako bi te drugi članovi mogli prepoznati.");
+    setAuthOpen(false);
+  }, [session?.user?.id, profileLoadedForUserId, profileUsername, nicknamePromptedForUserId]);
 
   useEffect(() => {
     if (!profileViewId || profileViewId === session?.user?.id || !supabase) return undefined;
@@ -714,6 +744,10 @@ function App() {
     if (!supabase || !session?.user) return;
     const cleanUsername = profileUsername.trim().replace(/^@/, "").toLowerCase();
     const cleanDisplayName = profileName.trim();
+    if (nicknamePromptedForUserId === session.user.id && !cleanUsername) {
+      setProfileMessage("Prije nastavka odaberi nadimak za svoj profil.");
+      return;
+    }
     if (cleanUsername && !/^[a-z0-9_.-]{3,24}$/.test(cleanUsername)) {
       setProfileMessage("Korisničko ime mora imati 3–24 znaka: slova, brojeve, točku, crticu ili podvlaku.");
       return;
@@ -808,6 +842,7 @@ function App() {
       if (error) throw error;
       setProfileUsername(cleanUsername);
       setProfileName(cleanDisplayName);
+      setNicknamePromptedForUserId(null);
       setProfileAvatarUrl(nextAvatarUrl || "");
       setProfileCoverUrl(nextCoverUrl || "");
       setProfileAvatarFile(null);
@@ -832,6 +867,102 @@ function App() {
     } finally {
       setProfileBusy(false);
     }
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadFriendConnections() {
+      if (!supabase || !session?.user?.id) {
+        setFriendRequests([]);
+        setFriendships([]);
+        return;
+      }
+      const userId = session.user.id;
+      const [requestsResult, friendshipsResult] = await Promise.all([
+        supabase.from("community_friend_requests")
+          .select("id, sender_id, recipient_id, status, created_at")
+          .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`)
+          .order("created_at", { ascending: false }),
+        supabase.from("community_friendships")
+          .select("user_low, user_high")
+          .or(`user_low.eq.${userId},user_high.eq.${userId}`)
+      ]);
+      if (cancelled) return;
+      if (requestsResult.error || friendshipsResult.error) {
+        setFriendRequests([]);
+        setFriendships([]);
+        if (activeNav === "Čuvari nasljeđa") setNotice("Zahtjevi za prijateljstvo trenutačno nisu dostupni. Provjeri SQL pravila za community_friend_requests i community_friendships.");
+        return;
+      }
+      setFriendRequests(requestsResult.data || []);
+      setFriendships(friendshipsResult.data || []);
+    }
+    loadFriendConnections();
+    return () => { cancelled = true; };
+  }, [session?.user?.id, friendRefreshKey]);
+
+  function friendStateFor(memberId) {
+    const userId = session?.user?.id;
+    if (!userId || !memberId || memberId === userId) return "self";
+    if (friendships.some((row) =>
+      (row.user_low === userId && row.user_high === memberId) ||
+      (row.user_high === userId && row.user_low === memberId)
+    )) return "friends";
+    const incoming = friendRequests.find((row) =>
+      row.sender_id === memberId && row.recipient_id === userId && row.status === "pending"
+    );
+    if (incoming) return "incoming";
+    const outgoing = friendRequests.find((row => row.sender_id === userId && row.recipient_id === memberId));
+    if (outgoing?.status === "pending") return "sent";
+    if (outgoing?.status === "declined") return "declined";
+    return "none";
+  }
+
+  async function sendFriendRequest(member) {
+    const userId = session?.user?.id;
+    if (!userId || !supabase || !member?.id || member.id === userId || friendStateFor(member.id) !== "none") return;
+    setFriendActionBusyId(member.id);
+    const { error } = await supabase.from("community_friend_requests").insert({ sender_id: userId, recipient_id: member.id, status: "pending" });
+    setFriendActionBusyId(null);
+    if (error) {
+      setNotice(error.code === "23505"
+        ? "Zahtjev za ovu osobu već postoji. Osvježi stranicu i provjeri njegov status."
+        : "Zahtjev nije poslan. Provjeri vezu s bazom i pravila za zahtjeve za prijateljstvo.");
+      return;
+    }
+    setNotice(`Zahtjev za prijateljstvo poslan je članu ${member.display_name || member.username || "zajednice"}.`);
+    setFriendRefreshKey((value) => value + 1);
+  }
+
+  async function respondToFriendRequest(request, status) {
+    const userId = session?.user?.id;
+    if (!userId || !supabase || !request?.id || request.recipient_id !== userId || !["accepted", "declined"].includes(status)) return;
+    setFriendActionBusyId(request.sender_id);
+    const { error } = await supabase.from("community_friend_requests")
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq("id", request.id).eq("recipient_id", userId).eq("status", "pending");
+    setFriendActionBusyId(null);
+    if (error) {
+      setNotice("Zahtjev nije mogao biti obrađen. Osvježi stranicu i pokušaj ponovno.");
+      return;
+    }
+    setNotice(status === "accepted" ? "Zahtjev je prihvaćen. Sada ste prijatelji!" : "Zahtjev za prijateljstvo je odbijen.");
+    setFriendRefreshKey((value) => value + 1);
+  }
+
+  function renderFriendAction(member) {
+    if (!member?.id || !session?.user?.id || member.id === session.user.id) return null;
+    const state = friendStateFor(member.id);
+    const busy = friendActionBusyId === member.id;
+    const incoming = friendRequests.find((row) => row.sender_id === member.id && row.recipient_id === session.user.id && row.status === "pending");
+    if (state === "friends") return <span className="friend-action-state is-friends">✓ Prijatelji</span>;
+    if (state === "sent") return <span className="friend-action-state is-pending">⌛ Zahtjev poslan</span>;
+    if (state === "declined") return <span className="friend-action-state is-declined">Zahtjev odbijen</span>;
+    if (state === "incoming" && incoming) return <div className="friend-action-group">
+      <button type="button" className="friend-action-button primary" disabled={busy} onClick={() => respondToFriendRequest(incoming, "accepted")}>{busy ? "..." : "Prihvati"}</button>
+      <button type="button" className="friend-action-button secondary" disabled={busy} onClick={() => respondToFriendRequest(incoming, "declined")}>Odbij</button>
+    </div>;
+    return <button type="button" className="friend-action-button primary" disabled={busy} onClick={() => sendFriendRequest(member)}>{busy ? "Šaljem…" : "＋ Dodaj za prijatelja"}</button>;
   }
 
   async function toggleBlockMember(post) {
@@ -2566,25 +2697,28 @@ function App() {
                 </div>
                 <div className="profile-completion"><span className="eyebrow">TVOJ PROFIL</span><strong>{profileName.trim() || "Ime za prikaz"}</strong><small>@{profileUsername.trim().replace(/^@/, "") || "korisnicko_ime"}</small><p>{profileBio.trim() || "Dodaj kratki opis kako bi te zajednica lakše upoznala."}</p></div>
               </div>
-              <section className="profile-earned-badges">
+              <section className="profile-settings-card">
+              <form className="auth-form profile-edit-form" onSubmit={saveProfile}>
+                <div className="profile-form-heading"><div><span className="eyebrow">POSTAVKE PROFILA</span><h3>Osnovni podaci</h3><p>Promijeni kako te drugi članovi vide na PatriaSoulu.</p></div></div>
+                <label htmlFor="profile-name">Ime za prikaz</label>
+                <small className="profile-hint profile-field-help">Ime koje se prikazuje uz tvoje objave i komentare.</small>
+                <input id="profile-name" value={profileName} onChange={(event) => setProfileName(event.target.value)} maxLength={60} required placeholder="Kako da te zajednica oslovljava?" />
+                <label htmlFor="profile-username">Nadimak / korisničko ime</label>
+                <input id="profile-username" value={profileUsername} onChange={(event) => setProfileUsername(event.target.value)} maxLength={24} autoComplete="username" placeholder="npr. cuvar_bastine" />
+                <small className="profile-hint profile-field-help">Tvoj jedinstveni @nadimak na PatriaSoulu. 3–24 znaka: slova, brojevi, točka, crtica ili podvlaka.</small>
+                <label htmlFor="profile-bio">Kratko o meni <span className="profile-optional">(nije obavezno)</span></label>
+                <textarea id="profile-bio" className="profile-bio-input" value={profileBio} onChange={(event) => setProfileBio(event.target.value)} maxLength={240} rows={3} placeholder="Napiši nekoliko riječi o svojim interesima…" />
+                <small className="profile-hint">{profileBio.length}/240 znakova</small>
+                <button className="auth-submit profile-save-button" type="submit" disabled={profileBusy}>{profileBusy ? "Spremanje…" : "Spremi promjene"}</button>
+              </form>
+              </section>
+              {profileMessage && <p className="auth-message" role="status">{profileMessage}</p>}
+                            <section className="profile-earned-badges">
                 <h3>Tvoje osvojene značke</h3>
                 {Object.prototype.hasOwnProperty.call(badgeRowsByUser, session.user.id) ? <BadgeRow badgeKeys={(badgeRowsByUser[session.user.id] || []).map((row) => row.badge_key)} /> : <p className="heritage-badges-empty">Učitavam značke…</p>}
                 <button type="button" className="outline-button" onClick={() => { setProfileOpen(false); setActiveNav("Značke"); }}>Pregledaj sve značke →</button>
               </section>
-              <form className="auth-form profile-edit-form" onSubmit={saveProfile}>
-                <div className="profile-form-heading"><h3>Uredi podatke profila</h3><span>Promjene se spremaju u Supabase</span></div>
-                <label htmlFor="profile-name">Ime za prikaz</label>
-                <input id="profile-name" value={profileName} onChange={(event) => setProfileName(event.target.value)} maxLength={60} required placeholder="Kako da te zajednica oslovljava?" />
-                <label htmlFor="profile-username">Korisničko ime</label>
-                <input id="profile-username" value={profileUsername} onChange={(event) => setProfileUsername(event.target.value)} maxLength={24} autoComplete="username" placeholder="npr. cuvar_bastine" />
-                <small className="profile-hint">3–24 znaka; slova, brojevi, točka, crtica ili podvlaka.</small>
-                <label htmlFor="profile-bio">O meni</label>
-                <textarea id="profile-bio" className="profile-bio-input" value={profileBio} onChange={(event) => setProfileBio(event.target.value)} maxLength={240} rows={3} placeholder="Napiši nekoliko riječi o svojim interesima…" />
-                <small className="profile-hint">{profileBio.length}/240 znakova</small>
-                <button className="auth-submit profile-save-button" type="submit" disabled={profileBusy}>{profileBusy ? "Spremanje…" : "✓ Spremi promjene profila"}</button>
-              </form>
-              {profileMessage && <p className="auth-message" role="status">{profileMessage}</p>}
-              <section className="profile-posts-section" aria-labelledby="profile-posts-title">
+<section className="profile-posts-section" aria-labelledby="profile-posts-title">
                 <div className="profile-posts-heading"><div><span className="eyebrow">TVOJE OBJAVE</span><h3 id="profile-posts-title">Sve moje objave</h3><p>Objave su zajedničke: ovdje i na zidu zajednice prikazuje se isti zapis.</p></div><span className="profile-post-count">{posts.filter((post) => post.authorId === session.user.id).length}</span></div>
                 {posts.filter((post) => post.authorId === session.user.id).length ? posts.filter((post) => post.authorId === session.user.id).map((post) => (
                   <article className="profile-post-item" key={post.id}>
@@ -2610,7 +2744,7 @@ function App() {
               {profileViewBusy ? <p className="profile-hint">Učitavam profil i objave…</p> : profileViewData && <>
                 <div className="profile-identity-row">
                   <div className="profile-avatar-editor"><Avatar initials={(profileViewData.display_name || profileViewData.username || "Č").slice(0,1).toLocaleUpperCase("hr")} src={profileViewData.avatar_url || ""} variant="profile-avatar-large" /></div>
-                  <div className="profile-completion"><span className="eyebrow">O MENI</span><strong>{profileViewData.display_name || "Čuvar nasljeđa"}</strong><small>@{normalizeUsername(profileViewData.username) || "clan"}</small><p>{profileViewData.bio || "Ovaj član još nije dodao opis profila."}</p></div>
+                  <div className="profile-completion"><span className="eyebrow">O MENI</span><strong>{profileViewData.display_name || "Čuvar nasljeđa"}</strong><small>@{normalizeUsername(profileViewData.username) || "clan"}</small><p>{profileViewData.bio || "Ovaj član još nije dodao opis profila."}</p>{renderFriendAction(profileViewData)}</div>
                 </div>
                 <section className="profile-earned-badges">
                   <h3>Osvojene značke</h3>
@@ -2916,7 +3050,7 @@ function App() {
                       return <article className="member-directory-card" key={member.id}>
                         <Avatar initials={initials} src={member.avatar_url} />
                         <div className="member-directory-info"><strong>{displayName}</strong><span>@{normalizeUsername(member.username) || "clan"}</span><span className={"member-presence-status " + getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).state}><i aria-hidden="true" />{getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).label}</span><p>{member.bio || "Ovaj član još nije dodao opis profila."}</p><div className="member-card-badges"><BadgeRow badgeKeys={(badgeRowsByUser[member.id] || []).map((row) => row.badge_key)} compact /></div></div>
-                        <button type="button" className="post-menu-button danger" disabled={blockBusyId === member.id} onClick={() => toggleBlockMember({ authorId: member.id, author: displayName, handle: "@" + (normalizeUsername(member.username) || "clan") })}>{blockedMembers.some((blocked) => blocked.id === member.id) ? "Odblokiraj" : "Blokiraj"}</button>
+                        <div className="member-directory-actions">{renderFriendAction(member)}<button type="button" className="post-menu-button danger" disabled={blockBusyId === member.id} onClick={() => toggleBlockMember({ authorId: member.id, author: displayName, handle: "@" + (normalizeUsername(member.username) || "clan") })}>{blockedMembers.some((blocked) => blocked.id === member.id) ? "Odblokiraj" : "Blokiraj"}</button></div>
                       </article>;
                     })}</div> : <p className="directory-empty">Nema članova koji odgovaraju pretrazi.</p>;
                   })()}
