@@ -2694,18 +2694,11 @@ function App() {
 
           <section className="side-section sidebar-nav-section">
             <h3>RAZGOVORI</h3>
-            {navItems.filter((item) => ["Poruke", "Obavijesti"].includes(item.label)).map((item) => {
-              const unreadNotifications = notifications.filter((notification) => !notification.read_at);
-              const unreadMessages = unreadNotifications.filter((notification) => notification.type === "private_message").length;
-              const unreadGroups = Object.values(groupUnreadCounts).reduce((sum, count) => sum + (Number(count) || 0), 0);
-              const badgeCount = item.label === "Poruke" ? unreadMessages : unreadNotifications.length;
-              const badgeLabel = item.label === "Poruke" ? "nepročitanih obavijesti o porukama" : "nepročitanih obavijesti";
-              return <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => navigateToSection(item.label)}>
+            {navItems.filter((item) => ["Poruke", "Obavijesti"].includes(item.label)).map((item) => (
+              <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => navigateToSection(item.label)}>
                 <span className="side-icon">{item.icon}</span><span className="side-link-label">{item.label}</span>
-                {item.label === "Poruke" && unreadGroups > 0 && <span className="side-count group-side-count" title={unreadGroups + " nepročitanih grupnih poruka"}>＋{unreadGroups > 99 ? "99+" : unreadGroups}</span>}
-                {badgeCount > 0 && <span className="side-count side-count-badge" aria-label={badgeCount + " " + badgeLabel}>{badgeCount > 99 ? "99+" : badgeCount}</span>}
-              </button>;
-            })}
+              </button>
+            ))}
             {navItems.filter((item) => item.label === "Događaji").map((item) => <button key={item.label} className="side-link" onClick={() => { window.location.href = "/dogadaji.html"; }}><span className="side-icon">{item.icon}</span><span className="side-link-label">{item.label}</span><span className="side-count">Kalendar</span></button>)}
           </section>
 
