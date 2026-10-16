@@ -21,7 +21,7 @@ const navItems = [
 
 const OWNER_EMAIL = "patriasoul@protonmail.com";
 const normalizeUsername = (value) => String(value || "").trim().replace(/^@/, "").toLowerCase();
-const normalizeSearchText = (value) => String(value || "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase("hr").trim();
+const normalizeSearchText = (value) => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("hr").trim();
 
 function getPostLink(text) {
   const match = String(text || "").match(/https?:\/\/[^\s<>"']+/i);
@@ -236,15 +236,17 @@ function App() {
   }, [memberQuickListOpen]);
 
   useEffect(() => {
-    if (!messageQuickOpen && !notificationQuickOpen) return undefined;
+    if (!messageQuickOpen && !notificationQuickOpen && !globalSearchOpen) return undefined;
     const closeQuickPanels = (event) => {
       if (!event.target.closest?.(".header-quick-wrap")) {
         setMessageQuickOpen(false);
         setNotificationQuickOpen(false);
+        setGlobalSearchOpen(false);
       }
       if (event.key === "Escape") {
         setMessageQuickOpen(false);
         setNotificationQuickOpen(false);
+        setGlobalSearchOpen(false);
       }
     };
     document.addEventListener("pointerdown", closeQuickPanels);
@@ -253,7 +255,7 @@ function App() {
       document.removeEventListener("pointerdown", closeQuickPanels);
       document.removeEventListener("keydown", closeQuickPanels);
     };
-  }, [messageQuickOpen, notificationQuickOpen]);
+  }, [messageQuickOpen, notificationQuickOpen, globalSearchOpen]);
 
 
   useEffect(() => {
@@ -1130,7 +1132,7 @@ function App() {
   useEffect(() => {
     let cancelled = false;
     async function loadMemberDirectory() {
-      if ((!["Čuvari nasljeđa", "Poruke"].includes(activeNav) && !memberQuickListOpen) || !supabase || !session?.user?.id) return;
+      if ((!["Čuvari nasljeđa", "Poruke"].includes(activeNav) && !memberQuickListOpen && !globalSearchOpen) || !supabase || !session?.user?.id) return;
       setMemberDirectoryBusy(true);
       // Supabase/PostgREST returns a limited page of rows per request.
       // Fetch successive pages so the directory is not capped at the first 100 members.
@@ -1186,7 +1188,7 @@ function App() {
     }
     loadMemberDirectory();
     return () => { cancelled = true; };
-  }, [activeNav, session?.user?.id, blockedMembers, memberQuickListOpen]);
+  }, [activeNav, session?.user?.id, blockedMembers, memberQuickListOpen, globalSearchOpen]);
 
   useEffect(() => {
     if (!supabase || !session?.user?.id) return undefined;
@@ -2558,44 +2560,37 @@ function App() {
             <small>ČUVARI NASLJEĐA</small>
           </span>
         </a>
-        <div className="global-search-wrap">
-          <span className="global-search-icon" aria-hidden="true">⌕</span>
-          <input
-            className="global-search"
-            type="search"
-            aria-label="Globalno pretraživanje objava, članova i grupnih razgovora"
-            placeholder="Pretraži objave, članove i grupe…"
-            value={feedSearch}
-            onFocus={() => setGlobalSearchOpen(true)}
-            onChange={(event) => { setFeedSearch(event.target.value); setFeedFilter("Sve objave"); setActiveNav("PatriaSoul"); setGlobalSearchOpen(true); }}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") setGlobalSearchOpen(false);
-              if (event.key === "Enter" && feedSearch.trim()) { setActiveNav("PatriaSoul"); setGlobalSearchOpen(false); }
-            }}
-          />
-          {feedSearch && <button className="global-search-clear" type="button" aria-label="Očisti pretragu" onClick={() => { setFeedSearch(""); setGlobalSearchOpen(false); }}>×</button>}
-          {globalSearchOpen && feedSearch.trim() && <div className="global-search-results" role="region" aria-label="Rezultati pretraživanja">
-            <div className="global-search-results-heading">Rezultati pretrage <button type="button" onClick={() => setGlobalSearchOpen(false)}>Zatvori</button></div>
-            <section className="global-search-result-section">
-              <strong>Objave</strong>
-              {globalSearchResults.posts.length ? globalSearchResults.posts.map((post) => <button type="button" className="global-search-result" key={post.id} onClick={() => { setFeedSearch(""); setFeedFilter("Sve objave"); setActiveNav("PatriaSoul"); setGlobalSearchOpen(false); window.setTimeout(() => document.getElementById("objava-" + post.id)?.scrollIntoView({ behavior: "smooth", block: "center" }), 80); }}>
-                <span className="global-search-result-icon">▤</span><span><b>{post.author || "Čuvar nasljeđa"}</b><small>{String(post.text || post.tag || "Objava bez teksta").slice(0, 105)}</small></span>
-              </button>) : <p>Nema pronađenih objava.</p>}
-            </section>
-            <section className="global-search-result-section">
-              <strong>Članovi</strong>
-              {globalSearchResults.members.length ? globalSearchResults.members.map((member) => <button type="button" className="global-search-result" key={member.id} onClick={() => { setFeedSearch(""); setGlobalSearchOpen(false); openMemberProfile(member.id); }}>
-                <Avatar initials={(member.display_name || member.username || "ČN").split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN"} src={member.avatar_url || ""} /><span><b>{member.display_name || member.username || "Čuvar nasljeđa"}</b><small>@{normalizeUsername(member.username) || "clan"}{member.bio ? " · " + String(member.bio).slice(0, 70) : ""}</small></span>
-              </button>) : <p>Nema pronađenih članova ili imenik još nije učitan.</p>}
-            </section>
-            <section className="global-search-result-section">
-              <strong>Grupe</strong>
-              {globalSearchResults.groups.length ? globalSearchResults.groups.map((group) => <button type="button" className="global-search-result" key={group.id} onClick={() => { setFeedSearch(""); setActiveNav("Poruke"); setActiveGroupId(group.id); setGlobalSearchOpen(false); }}>
-                <span className="global-search-result-icon">👥</span><span><b>{group.name || "Grupni razgovor"}</b><small>{group.members?.length || 0} članova · grupni razgovor</small></span>
-              </button>) : <p>Nema pronađenih grupa u dostupnim razgovorima.</p>}
-            </section>
-          </div>}
-        </div>
+        <div className="header-quick-wrap search-quick-wrap">
+            <button type="button" className={globalSearchOpen ? "topnav-link active" : "topnav-link"} onClick={() => { setGlobalSearchOpen((open) => !open); setMemberQuickListOpen(false); setMessageQuickOpen(false); setNotificationQuickOpen(false); }} aria-label="Pretraži PatriaSoul" aria-expanded={globalSearchOpen} aria-haspopup="dialog">⌕</button>
+            {globalSearchOpen && <div className="header-quick-popover global-search-popover" role="dialog" aria-label="Pretraživanje PatriaSoul">
+              <div className="header-quick-heading"><div><strong>Pretraži PatriaSoul</strong><small>Članove, objave i grupne razgovore</small></div><button type="button" className="member-quick-close" aria-label="Zatvori pretraživanje" onClick={() => setGlobalSearchOpen(false)}>×</button></div>
+              <div className="global-search-field">
+                <span className="global-search-icon" aria-hidden="true">⌕</span>
+                <input className="global-search" type="search" autoComplete="off" aria-label="Što tražiš?" placeholder="Počni tipkati ime, nadimak ili pojam…" value={feedSearch} onChange={(event) => { setFeedSearch(event.target.value); setFeedFilter("Sve objave"); }} onKeyDown={(event) => { if (event.key === "Escape") setGlobalSearchOpen(false); if (event.key === "Enter" && feedSearch.trim()) { setActiveNav("PatriaSoul"); setGlobalSearchOpen(false); } }} autoFocus />
+                {feedSearch && <button className="global-search-clear" type="button" aria-label="Očisti pretragu" onClick={() => setFeedSearch("")}>×</button>}
+              </div>
+              {!feedSearch.trim() ? <p className="global-search-hint">Upiši dio imena, nadimka ili riječi iz objave. Rezultati se prikazuju dok tipkaš.</p> : <div className="global-search-results" role="region" aria-label="Rezultati pretraživanja">
+                <section className="global-search-result-section">
+                  <strong>Članovi</strong>
+                  {globalSearchResults.members.length ? globalSearchResults.members.map((member) => <button type="button" className="global-search-result" key={member.id} onClick={() => { setFeedSearch(""); setGlobalSearchOpen(false); openMemberProfile(member.id); }}>
+                    <Avatar initials={(member.display_name || member.username || "ČN").split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN"} src={member.avatar_url || ""} /><span><b>{member.display_name || member.username || "Čuvar nasljeđa"}</b><small>@{normalizeUsername(member.username) || "clan"}{member.bio ? " · " + String(member.bio).slice(0, 70) : ""}</small></span>
+                  </button>) : <p>{memberDirectoryBusy ? "Tražim članove…" : "Nema pronađenih članova."}</p>}
+                </section>
+                <section className="global-search-result-section">
+                  <strong>Objave</strong>
+                  {globalSearchResults.posts.length ? globalSearchResults.posts.map((post) => <button type="button" className="global-search-result" key={post.id} onClick={() => { setFeedSearch(""); setFeedFilter("Sve objave"); setActiveNav("PatriaSoul"); setGlobalSearchOpen(false); window.setTimeout(() => document.getElementById("objava-" + post.id)?.scrollIntoView({ behavior: "smooth", block: "center" }), 80); }}>
+                    <span className="global-search-result-icon">▤</span><span><b>{post.author || "Čuvar nasljeđa"}</b><small>{String(post.text || post.tag || "Objava bez teksta").slice(0, 105)}</small></span>
+                  </button>) : <p>Nema pronađenih objava u učitanom zidu.</p>}
+                </section>
+                <section className="global-search-result-section">
+                  <strong>Grupni razgovori</strong>
+                  {globalSearchResults.groups.length ? globalSearchResults.groups.map((group) => <button type="button" className="global-search-result" key={group.id} onClick={() => { setFeedSearch(""); setActiveNav("Poruke"); setActiveGroupId(group.id); setGlobalSearchOpen(false); }}>
+                    <span className="global-search-result-icon">👥</span><span><b>{group.name || "Grupni razgovor"}</b><small>{group.members?.length || 0} članova · grupni razgovor</small></span>
+                  </button>) : <p>Nema pronađenih grupnih razgovora.</p>}
+                </section>
+              </div>}
+            </div>}
+          </div>
         <nav className="topnav" aria-label="Brza navigacija">
           <button className={activeNav === "PatriaSoul" ? "topnav-link active" : "topnav-link"} onClick={() => setActiveNav("PatriaSoul")} aria-label="Početna">⌂</button>
           <div className="member-quick-wrap">

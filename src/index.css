@@ -2294,3 +2294,48 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
 @media (max-width: 560px) {
   .header-quick-popover { position: fixed; top: 62px; right: 10px; width: min(350px, calc(100vw - 20px)); max-height: calc(100dvh - 82px); }
 }
+
+
+/* Brza tražilica u zaglavlju, usklađena s izbornicima poruka i obavijesti. */
+.search-quick-wrap { position: relative; }
+.global-search-popover {
+  right: -38px;
+  width: min(410px, calc(100vw - 24px));
+  max-height: min(76vh, 620px);
+  overflow-y: auto;
+}
+.global-search-field {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  margin: 10px 12px 2px;
+  border: 1px solid #2a4c69;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #081a2b, #061423);
+}
+.global-search-field:focus-within {
+  border-color: #1687f8;
+  box-shadow: 0 0 0 3px #087df51c;
+}
+.global-search-field .global-search-icon { padding-left: 10px; }
+.global-search-field .global-search { min-height: 40px; padding: 0 9px; }
+.global-search-popover .global-search-results {
+  position: static;
+  max-height: none;
+  overflow: visible;
+  padding: 4px 12px 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.global-search-popover .global-search-result-section { padding: 8px 0; }
+.global-search-hint {
+  margin: 10px 14px 14px;
+  color: #a4b8ca;
+  font-size: 12px;
+  line-height: 1.55;
+}
+@media (max-width: 720px) {
+  .global-search-popover { right: -80px; width: min(390px, calc(100vw - 20px)); }
+}
