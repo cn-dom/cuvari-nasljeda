@@ -1119,24 +1119,43 @@ function App() {
     async function loadMemberDirectory() {
       if ((!["Čuvari nasljeđa", "Poruke"].includes(activeNav) && !memberQuickListOpen) || !supabase || !session?.user?.id) return;
       setMemberDirectoryBusy(true);
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, display_name, username, bio, avatar_url, created_at")
-        .neq("id", session.user.id)
-        .order("display_name", { ascending: true })
-        .limit(100);
+      // Supabase/PostgREST returns a limited page of rows per request.
+      // Fetch successive pages so the directory is not capped at the first 100 members.
+      const pageSize = 500;
+      const allMembers = [];
+      let page = 0;
+      let error = null;
+      while (true) {
+        const result = await supabase
+          .from("profiles")
+          .select("id, display_name, username, bio, avatar_url, created_at")
+          .neq("id", session.user.id)
+          .order("display_name", { ascending: true })
+          .order("id", { ascending: true })
+          .range(page * pageSize, (page + 1) * pageSize - 1);
+        if (cancelled) return;
+        if (result.error) {
+          error = result.error;
+          break;
+        }
+        const rows = result.data || [];
+        allMembers.push(...rows);
+        if (rows.length < pageSize) break;
+        page += 1;
+      }
       if (cancelled) return;
       if (error) {
         setNotice("Imenik članova nije dostupan. Provjeri postoji li tablica profiles i jesu li RLS pravila primijenjena.");
         setMemberDirectory([]);
       } else {
-        setMemberDirectory((data || []).filter((member) => !blockedMembers.some((blocked) => blocked.id === member.id)));
-        if (data?.length) {
-          const { data: badgeRows, error: badgeError } = await supabase.rpc("get_public_member_badges", { p_user_ids: data.map((member) => member.id) });
+        const visibleMembers = allMembers.filter((member) => !blockedMembers.some((blocked) => blocked.id === member.id));
+        setMemberDirectory(visibleMembers);
+        if (visibleMembers.length) {
+          const { data: badgeRows, error: badgeError } = await supabase.rpc("get_public_member_badges", { p_user_ids: visibleMembers.map((member) => member.id) });
           if (!cancelled && !badgeError) {
             setBadgeRowsByUser((current) => {
               const next = { ...current };
-              for (const member of data) next[member.id] = [];
+              for (const member of visibleMembers) next[member.id] = [];
               for (const row of badgeRows || []) next[row.user_id] = [...(next[row.user_id] || []), row];
               return next;
             });
