@@ -217,6 +217,7 @@ function App() {
   const [messageQuickMembers, setMessageQuickMembers] = useState([]);
   const [notificationQuickItems, setNotificationQuickItems] = useState([]);
   const [notificationUnreadCount, setNotificationUnreadCount] = useState(0);
+  const [messageUnreadCount, setMessageUnreadCount] = useState(0);
   const [memberPresence, setMemberPresence] = useState([]);
   const [showActivity, setShowActivity] = useState(true);
 
@@ -1196,6 +1197,34 @@ function App() {
 
   useEffect(() => {
     let cancelled = false;
+    async function loadHeaderUnreadCounts() {
+      if (!supabase || !session?.user?.id) {
+        setMessageUnreadCount(0);
+        setNotificationUnreadCount(0);
+        return;
+      }
+      const userId = session.user.id;
+      const [messageResult, allResult] = await Promise.all([
+        supabase.from("notifications").select("id", { count: "exact", head: true })
+          .eq("recipient_id", userId).eq("type", "private_message").is("read_at", null),
+        supabase.from("notifications").select("id", { count: "exact", head: true })
+          .eq("recipient_id", userId).is("read_at", null),
+      ]);
+      if (cancelled) return;
+      if (!messageResult.error) setMessageUnreadCount(messageResult.count || 0);
+      if (!allResult.error) setNotificationUnreadCount(allResult.count || 0);
+    }
+    loadHeaderUnreadCounts();
+    if (!supabase || !session?.user?.id) return () => { cancelled = true; };
+    const channel = supabase.channel("header-unread-counts-" + session.user.id)
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: "recipient_id=eq." + session.user.id }, () => {
+        loadHeaderUnreadCounts();
+      }).subscribe();
+    return () => { cancelled = true; supabase.removeChannel(channel); };
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    let cancelled = false;
     async function loadQuickMessages() {
       if (!messageQuickOpen || !supabase || !session?.user?.id) return;
       const userId = session.user.id;
@@ -1362,6 +1391,7 @@ function App() {
     setNotifications((current) => current.map((item) => item.id === notification.id ? { ...item, read_at: readAt } : item));
     setNotificationQuickItems((current) => current.map((item) => item.id === notification.id ? { ...item, read_at: readAt } : item));
     setNotificationUnreadCount((current) => Math.max(0, current - 1));
+    if (notification.type === "private_message") setMessageUnreadCount((current) => Math.max(0, current - 1));
     return true;
   }
 
@@ -2559,7 +2589,7 @@ function App() {
             </div>}
           </div>
           <div className="header-quick-wrap">
-            <button type="button" className={(messageQuickOpen || activeNav === "Poruke") ? "topnav-link active" : "topnav-link"} onClick={() => { setMessageQuickOpen((open) => !open); setNotificationQuickOpen(false); setMemberQuickListOpen(false); }} aria-label="Brzi pregled poruka" aria-expanded={messageQuickOpen} aria-haspopup="dialog">✉</button>
+            <button type="button" className={(messageQuickOpen || activeNav === "Poruke") ? "topnav-link active" : "topnav-link"} onClick={() => { setMessageQuickOpen((open) => !open); setNotificationQuickOpen(false); setMemberQuickListOpen(false); }} aria-label="Brzi pregled poruka" aria-expanded={messageQuickOpen} aria-haspopup="dialog">✉{messageUnreadCount > 0 && <span className="member-quick-badge">{messageUnreadCount > 99 ? "99+" : messageUnreadCount}</span>}</button>
             {messageQuickOpen && <div className="header-quick-popover" role="dialog" aria-label="Najnovije poruke">
               <div className="header-quick-heading"><div><strong>Poruke</strong><small>Najnoviji privatni razgovori</small></div><button type="button" className="member-quick-close" aria-label="Zatvori poruke" onClick={() => setMessageQuickOpen(false)}>×</button></div>
               {!session?.user?.id ? <div className="member-quick-empty">Prijavi se za privatne poruke.<button type="button" className="primary-button" onClick={() => { setMessageQuickOpen(false); setAuthMode("login"); setAuthMessage(""); setAuthOpen(true); }}>Prijava</button></div> : messageQuickConversations.length ? <div className="header-quick-list">
@@ -2567,13 +2597,13 @@ function App() {
                   const member = messageQuickMembers.find((item) => item.id === memberId);
                   const name = member?.display_name || member?.username || "Čuvar nasljeđa";
                   const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN";
-                  return <button type="button" className="header-quick-row" key={memberId} onClick={() => { setMessageRecipient(memberId); setActiveNav("Poruke"); setMessageQuickOpen(false); }}>
+                  return <button type="button" className="header-quick-row" key={memberId} onClick={async () => { setMessageRecipient(memberId); setActiveNav("Poruke"); setMessageQuickOpen(false); const unreadForMember = notificationQuickItems.filter((item) => item.type === "private_message" && !item.read_at && item.actor_id === memberId); for (const item of unreadForMember) await markNotificationRead(item); }}>
                     <Avatar initials={initials} src={member?.avatar_url || ""} />
                     <span className="header-quick-row-copy"><strong>{name}</strong><small>{latest.body || "Poslana je poruka"}</small></span>
                     <time>{new Date(latest.created_at).toLocaleDateString("hr-HR", { day: "2-digit", month: "2-digit" })}</time>
                   </button>;
                 })}
-              </div> : <p className="member-quick-empty">Još nema privatnih razgovora.</p>}
+              </div> : <p className="member-quick-empty">Poruke su prazne. Kad ti netko pošalje privatnu poruku, razgovor će se pojaviti ovdje.</p>}
               <button type="button" className="member-quick-all" onClick={() => { setMessageQuickOpen(false); navigateToSection("Poruke"); }}>Otvori sve poruke <span aria-hidden="true">→</span></button>
             </div>}
           </div>
@@ -2587,7 +2617,7 @@ function App() {
                   <span className="header-quick-row-copy"><strong>{notification.title || "Nova obavijest"}</strong><small>{notification.body || "Imaš novu aktivnost u zajednici."}</small></span>
                   <time>{new Date(notification.created_at).toLocaleDateString("hr-HR", { day: "2-digit", month: "2-digit" })}</time>
                 </button>)}
-              </div> : <p className="member-quick-empty">Nema novih obavijesti.</p>}
+              </div> : <p className="member-quick-empty">Nemate novih obavijesti.</p>}
               <button type="button" className="member-quick-all" onClick={() => { setNotificationQuickOpen(false); navigateToSection("Obavijesti"); }}>Otvori sve obavijesti <span aria-hidden="true">→</span></button>
             </div>}
           </div>
