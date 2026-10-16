@@ -2597,25 +2597,28 @@ function App() {
                 </div>
                 <div className="profile-completion"><span className="eyebrow">TVOJ PROFIL</span><strong>{profileName.trim() || "Ime za prikaz"}</strong><small>@{profileUsername.trim().replace(/^@/, "") || "korisnicko_ime"}</small><p>{profileBio.trim() || "Dodaj kratki opis kako bi te zajednica lakše upoznala."}</p></div>
               </div>
-              <section className="profile-earned-badges">
+              <section className="profile-settings-card">
+              <form className="auth-form profile-edit-form" onSubmit={saveProfile}>
+                <div className="profile-form-heading"><div><span className="eyebrow">POSTAVKE PROFILA</span><h3>Osnovni podaci</h3><p>Promijeni kako te drugi članovi vide na PatriaSoulu.</p></div></div>
+                <label htmlFor="profile-name">Ime za prikaz</label>
+                <small className="profile-hint profile-field-help">Ime koje se prikazuje uz tvoje objave i komentare.</small>
+                <input id="profile-name" value={profileName} onChange={(event) => setProfileName(event.target.value)} maxLength={60} required placeholder="Kako da te zajednica oslovljava?" />
+                <label htmlFor="profile-username">Nadimak / korisničko ime</label>
+                <input id="profile-username" value={profileUsername} onChange={(event) => setProfileUsername(event.target.value)} maxLength={24} autoComplete="username" placeholder="npr. cuvar_bastine" />
+                <small className="profile-hint profile-field-help">Tvoj jedinstveni @nadimak na PatriaSoulu. 3–24 znaka: slova, brojevi, točka, crtica ili podvlaka.</small>
+                <label htmlFor="profile-bio">Kratko o meni <span className="profile-optional">(nije obavezno)</span></label>
+                <textarea id="profile-bio" className="profile-bio-input" value={profileBio} onChange={(event) => setProfileBio(event.target.value)} maxLength={240} rows={3} placeholder="Napiši nekoliko riječi o svojim interesima…" />
+                <small className="profile-hint">{profileBio.length}/240 znakova</small>
+                <button className="auth-submit profile-save-button" type="submit" disabled={profileBusy}>{profileBusy ? "Spremanje…" : "Spremi promjene"}</button>
+              </form>
+              </section>
+              {profileMessage && <p className="auth-message" role="status">{profileMessage}</p>}
+                            <section className="profile-earned-badges">
                 <h3>Tvoje osvojene značke</h3>
                 {Object.prototype.hasOwnProperty.call(badgeRowsByUser, session.user.id) ? <BadgeRow badgeKeys={(badgeRowsByUser[session.user.id] || []).map((row) => row.badge_key)} /> : <p className="heritage-badges-empty">Učitavam značke…</p>}
                 <button type="button" className="outline-button" onClick={() => { setProfileOpen(false); setActiveNav("Značke"); }}>Pregledaj sve značke →</button>
               </section>
-              <form className="auth-form profile-edit-form" onSubmit={saveProfile}>
-                <div className="profile-form-heading"><h3>Uredi podatke profila</h3><span>Promjene se spremaju u Supabase</span></div>
-                <label htmlFor="profile-name">Ime za prikaz</label>
-                <input id="profile-name" value={profileName} onChange={(event) => setProfileName(event.target.value)} maxLength={60} required placeholder="Kako da te zajednica oslovljava?" />
-                <label htmlFor="profile-username">Korisničko ime</label>
-                <input id="profile-username" value={profileUsername} onChange={(event) => setProfileUsername(event.target.value)} maxLength={24} autoComplete="username" placeholder="npr. cuvar_bastine" />
-                <small className="profile-hint">3–24 znaka; slova, brojevi, točka, crtica ili podvlaka.</small>
-                <label htmlFor="profile-bio">O meni</label>
-                <textarea id="profile-bio" className="profile-bio-input" value={profileBio} onChange={(event) => setProfileBio(event.target.value)} maxLength={240} rows={3} placeholder="Napiši nekoliko riječi o svojim interesima…" />
-                <small className="profile-hint">{profileBio.length}/240 znakova</small>
-                <button className="auth-submit profile-save-button" type="submit" disabled={profileBusy}>{profileBusy ? "Spremanje…" : "✓ Spremi promjene profila"}</button>
-              </form>
-              {profileMessage && <p className="auth-message" role="status">{profileMessage}</p>}
-              <section className="profile-posts-section" aria-labelledby="profile-posts-title">
+<section className="profile-posts-section" aria-labelledby="profile-posts-title">
                 <div className="profile-posts-heading"><div><span className="eyebrow">TVOJE OBJAVE</span><h3 id="profile-posts-title">Sve moje objave</h3><p>Objave su zajedničke: ovdje i na zidu zajednice prikazuje se isti zapis.</p></div><span className="profile-post-count">{posts.filter((post) => post.authorId === session.user.id).length}</span></div>
                 {posts.filter((post) => post.authorId === session.user.id).length ? posts.filter((post) => post.authorId === session.user.id).map((post) => (
                   <article className="profile-post-item" key={post.id}>
