@@ -205,6 +205,10 @@ function App() {
   const [badgeRowsByUser, setBadgeRowsByUser] = useState({});
   const [memberDirectoryQuery, setMemberDirectoryQuery] = useState("");
   const [memberDirectoryBusy, setMemberDirectoryBusy] = useState(false);
+  const [friendRequests, setFriendRequests] = useState([]);
+  const [friendships, setFriendships] = useState([]);
+  const [friendRefreshKey, setFriendRefreshKey] = useState(0);
+  const [friendActionBusyId, setFriendActionBusyId] = useState(null);
   const [memberPresence, setMemberPresence] = useState([]);
   const [showActivity, setShowActivity] = useState(true);
 
@@ -863,6 +867,102 @@ function App() {
     } finally {
       setProfileBusy(false);
     }
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadFriendConnections() {
+      if (!supabase || !session?.user?.id) {
+        setFriendRequests([]);
+        setFriendships([]);
+        return;
+      }
+      const userId = session.user.id;
+      const [requestsResult, friendshipsResult] = await Promise.all([
+        supabase.from("community_friend_requests")
+          .select("id, sender_id, recipient_id, status, created_at")
+          .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`)
+          .order("created_at", { ascending: false }),
+        supabase.from("community_friendships")
+          .select("user_low, user_high")
+          .or(`user_low.eq.${userId},user_high.eq.${userId}`)
+      ]);
+      if (cancelled) return;
+      if (requestsResult.error || friendshipsResult.error) {
+        setFriendRequests([]);
+        setFriendships([]);
+        if (activeNav === "Čuvari nasljeđa") setNotice("Zahtjevi za prijateljstvo trenutačno nisu dostupni. Provjeri SQL pravila za community_friend_requests i community_friendships.");
+        return;
+      }
+      setFriendRequests(requestsResult.data || []);
+      setFriendships(friendshipsResult.data || []);
+    }
+    loadFriendConnections();
+    return () => { cancelled = true; };
+  }, [session?.user?.id, friendRefreshKey]);
+
+  function friendStateFor(memberId) {
+    const userId = session?.user?.id;
+    if (!userId || !memberId || memberId === userId) return "self";
+    if (friendships.some((row) =>
+      (row.user_low === userId && row.user_high === memberId) ||
+      (row.user_high === userId && row.user_low === memberId)
+    )) return "friends";
+    const incoming = friendRequests.find((row) =>
+      row.sender_id === memberId && row.recipient_id === userId && row.status === "pending"
+    );
+    if (incoming) return "incoming";
+    const outgoing = friendRequests.find((row => row.sender_id === userId && row.recipient_id === memberId));
+    if (outgoing?.status === "pending") return "sent";
+    if (outgoing?.status === "declined") return "declined";
+    return "none";
+  }
+
+  async function sendFriendRequest(member) {
+    const userId = session?.user?.id;
+    if (!userId || !supabase || !member?.id || member.id === userId || friendStateFor(member.id) !== "none") return;
+    setFriendActionBusyId(member.id);
+    const { error } = await supabase.from("community_friend_requests").insert({ sender_id: userId, recipient_id: member.id, status: "pending" });
+    setFriendActionBusyId(null);
+    if (error) {
+      setNotice(error.code === "23505"
+        ? "Zahtjev za ovu osobu već postoji. Osvježi stranicu i provjeri njegov status."
+        : "Zahtjev nije poslan. Provjeri vezu s bazom i pravila za zahtjeve za prijateljstvo.");
+      return;
+    }
+    setNotice(`Zahtjev za prijateljstvo poslan je članu ${member.display_name || member.username || "zajednice"}.`);
+    setFriendRefreshKey((value) => value + 1);
+  }
+
+  async function respondToFriendRequest(request, status) {
+    const userId = session?.user?.id;
+    if (!userId || !supabase || !request?.id || request.recipient_id !== userId || !["accepted", "declined"].includes(status)) return;
+    setFriendActionBusyId(request.sender_id);
+    const { error } = await supabase.from("community_friend_requests")
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq("id", request.id).eq("recipient_id", userId).eq("status", "pending");
+    setFriendActionBusyId(null);
+    if (error) {
+      setNotice("Zahtjev nije mogao biti obrađen. Osvježi stranicu i pokušaj ponovno.");
+      return;
+    }
+    setNotice(status === "accepted" ? "Zahtjev je prihvaćen. Sada ste prijatelji!" : "Zahtjev za prijateljstvo je odbijen.");
+    setFriendRefreshKey((value) => value + 1);
+  }
+
+  function renderFriendAction(member) {
+    if (!member?.id || !session?.user?.id || member.id === session.user.id) return null;
+    const state = friendStateFor(member.id);
+    const busy = friendActionBusyId === member.id;
+    const incoming = friendRequests.find((row) => row.sender_id === member.id && row.recipient_id === session.user.id && row.status === "pending");
+    if (state === "friends") return <span className="friend-action-state is-friends">✓ Prijatelji</span>;
+    if (state === "sent") return <span className="friend-action-state is-pending">⌛ Zahtjev poslan</span>;
+    if (state === "declined") return <span className="friend-action-state is-declined">Zahtjev odbijen</span>;
+    if (state === "incoming" && incoming) return <div className="friend-action-group">
+      <button type="button" className="friend-action-button primary" disabled={busy} onClick={() => respondToFriendRequest(incoming, "accepted")}>{busy ? "..." : "Prihvati"}</button>
+      <button type="button" className="friend-action-button secondary" disabled={busy} onClick={() => respondToFriendRequest(incoming, "declined")}>Odbij</button>
+    </div>;
+    return <button type="button" className="friend-action-button primary" disabled={busy} onClick={() => sendFriendRequest(member)}>{busy ? "Šaljem…" : "＋ Dodaj za prijatelja"}</button>;
   }
 
   async function toggleBlockMember(post) {
@@ -2644,7 +2744,7 @@ function App() {
               {profileViewBusy ? <p className="profile-hint">Učitavam profil i objave…</p> : profileViewData && <>
                 <div className="profile-identity-row">
                   <div className="profile-avatar-editor"><Avatar initials={(profileViewData.display_name || profileViewData.username || "Č").slice(0,1).toLocaleUpperCase("hr")} src={profileViewData.avatar_url || ""} variant="profile-avatar-large" /></div>
-                  <div className="profile-completion"><span className="eyebrow">O MENI</span><strong>{profileViewData.display_name || "Čuvar nasljeđa"}</strong><small>@{normalizeUsername(profileViewData.username) || "clan"}</small><p>{profileViewData.bio || "Ovaj član još nije dodao opis profila."}</p></div>
+                  <div className="profile-completion"><span className="eyebrow">O MENI</span><strong>{profileViewData.display_name || "Čuvar nasljeđa"}</strong><small>@{normalizeUsername(profileViewData.username) || "clan"}</small><p>{profileViewData.bio || "Ovaj član još nije dodao opis profila."}</p>{renderFriendAction(profileViewData)}</div>
                 </div>
                 <section className="profile-earned-badges">
                   <h3>Osvojene značke</h3>
@@ -2950,7 +3050,7 @@ function App() {
                       return <article className="member-directory-card" key={member.id}>
                         <Avatar initials={initials} src={member.avatar_url} />
                         <div className="member-directory-info"><strong>{displayName}</strong><span>@{normalizeUsername(member.username) || "clan"}</span><span className={"member-presence-status " + getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).state}><i aria-hidden="true" />{getPresenceStatus(memberPresence.find((row) => row.user_id === member.id)?.last_seen_at).label}</span><p>{member.bio || "Ovaj član još nije dodao opis profila."}</p><div className="member-card-badges"><BadgeRow badgeKeys={(badgeRowsByUser[member.id] || []).map((row) => row.badge_key)} compact /></div></div>
-                        <button type="button" className="post-menu-button danger" disabled={blockBusyId === member.id} onClick={() => toggleBlockMember({ authorId: member.id, author: displayName, handle: "@" + (normalizeUsername(member.username) || "clan") })}>{blockedMembers.some((blocked) => blocked.id === member.id) ? "Odblokiraj" : "Blokiraj"}</button>
+                        <div className="member-directory-actions">{renderFriendAction(member)}<button type="button" className="post-menu-button danger" disabled={blockBusyId === member.id} onClick={() => toggleBlockMember({ authorId: member.id, author: displayName, handle: "@" + (normalizeUsername(member.username) || "clan") })}>{blockedMembers.some((blocked) => blocked.id === member.id) ? "Odblokiraj" : "Blokiraj"}</button></div>
                       </article>;
                     })}</div> : <p className="directory-empty">Nema članova koji odgovaraju pretrazi.</p>;
                   })()}
