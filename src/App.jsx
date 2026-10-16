@@ -146,20 +146,6 @@ function App() {
   const [commentDrafts, setCommentDrafts] = useState({});
   const [editingPostId, setEditingPostId] = useState(null);
   const [editDraft, setEditDraft] = useState("");
-  useEffect(() => {
-    if (!memberQuickListOpen) return undefined;
-    const closeMemberQuickList = (event) => {
-      if (!event.target.closest?.(".member-quick-wrap")) setMemberQuickListOpen(false);
-      if (event.key === "Escape") setMemberQuickListOpen(false);
-    };
-    document.addEventListener("pointerdown", closeMemberQuickList);
-    document.addEventListener("keydown", closeMemberQuickList);
-    return () => {
-      document.removeEventListener("pointerdown", closeMemberQuickList);
-      document.removeEventListener("keydown", closeMemberQuickList);
-    };
-  }, [memberQuickListOpen]);
-
   const [memberPickerOpen, setMemberPickerOpen] = useState(false);
   useEffect(() => {
     if (!memberPickerOpen) return undefined;
@@ -227,6 +213,21 @@ function App() {
   const [memberQuickQuery, setMemberQuickQuery] = useState("");
   const [memberPresence, setMemberPresence] = useState([]);
   const [showActivity, setShowActivity] = useState(true);
+
+  useEffect(() => {
+    if (!memberQuickListOpen) return undefined;
+    const closeMemberQuickList = (event) => {
+      if (!event.target.closest?.(".member-quick-wrap")) setMemberQuickListOpen(false);
+      if (event.key === "Escape") setMemberQuickListOpen(false);
+    };
+    document.addEventListener("pointerdown", closeMemberQuickList);
+    document.addEventListener("keydown", closeMemberQuickList);
+    return () => {
+      document.removeEventListener("pointerdown", closeMemberQuickList);
+      document.removeEventListener("keydown", closeMemberQuickList);
+    };
+  }, [memberQuickListOpen]);
+
 
   useEffect(() => {
     if (!session?.user?.id || !supabase) return undefined;
@@ -1089,7 +1090,7 @@ function App() {
   useEffect(() => {
     let cancelled = false;
     async function loadMemberDirectory() {
-      if (!["Čuvari nasljeđa", "Poruke"].includes(activeNav) || !supabase || !session?.user?.id) return;
+      if ((!["Čuvari nasljeđa", "Poruke"].includes(activeNav) && !memberQuickListOpen) || !supabase || !session?.user?.id) return;
       setMemberDirectoryBusy(true);
       const { data, error } = await supabase
         .from("profiles")
@@ -1126,7 +1127,7 @@ function App() {
     }
     loadMemberDirectory();
     return () => { cancelled = true; };
-  }, [activeNav, session?.user?.id, blockedMembers]);
+  }, [activeNav, session?.user?.id, blockedMembers, memberQuickListOpen]);
 
   useEffect(() => {
     if (!supabase || !session?.user?.id) return undefined;
