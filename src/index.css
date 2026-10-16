@@ -2296,3 +2296,33 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
 @media (max-width: 560px) {
   .header-quick-popover { position: fixed; top: 62px; right: 10px; width: min(350px, calc(100vw - 20px)); max-height: calc(100dvh - 82px); }
 }
+
+
+/* Rotacija gradova u kratkoj prognozi na naslovnici */
+.weather-sidebar-rotation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0 0 10px;
+}
+.weather-sidebar-rotation > span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #b7c8d9;
+  opacity: .45;
+  transition: opacity .2s ease, transform .2s ease, background .2s ease;
+}
+.weather-sidebar-rotation > span.active {
+  background: #1689ed;
+  opacity: 1;
+  transform: scale(1.35);
+}
+.weather-sidebar-rotation small {
+  flex-basis: 100%;
+  margin-top: 2px;
+  color: #718096;
+  font-size: 10px;
+}
