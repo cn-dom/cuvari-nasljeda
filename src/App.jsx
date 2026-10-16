@@ -1445,7 +1445,7 @@ function App() {
   useEffect(() => {
     let cancelled = false;
     async function loadGroupChats() {
-      if (activeNav !== "Poruke" || !supabase || !session?.user?.id) return;
+      if ((activeNav !== "Poruke" && !feedSearch.trim()) || !supabase || !session?.user?.id) return;
       const { data: memberships, error: membershipError } = await supabase
         .from("group_chat_members").select("group_id, role").eq("user_id", session.user.id);
       if (cancelled) return;
@@ -1472,7 +1472,7 @@ function App() {
     }
     loadGroupChats();
     return () => { cancelled = true; };
-  }, [activeNav, session?.user?.id]);
+  }, [activeNav, session?.user?.id, Boolean(feedSearch.trim())]);
 
   useEffect(() => {
     let cancelled = false;
