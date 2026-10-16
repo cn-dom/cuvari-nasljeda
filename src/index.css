@@ -2207,3 +2207,18 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
   .badge-overlay-dialog { width: 100%; max-height: 100dvh; border-radius: 0; padding: 12px; }
   .badge-overlay-toolbar { top: -12px; margin: -12px -12px 10px; padding: 9px 12px; }
 }
+
+
+/* Jednostavnije postavke profila: jasno odvojeno ime za prikaz i jedinstveni nadimak */
+.profile-settings-card{margin:18px 0 22px;padding:clamp(16px,2.5vw,24px);border:1px solid rgba(133,169,203,.24);border-radius:16px;background:linear-gradient(145deg,rgba(13,31,51,.96),rgba(8,21,36,.98));box-shadow:0 12px 32px rgba(0,0,0,.12)}
+.profile-settings-card .profile-edit-form{max-width:680px;gap:8px}
+.profile-settings-card .profile-form-heading{display:block;margin:0 0 10px}
+.profile-settings-card .profile-form-heading .eyebrow{display:block;margin-bottom:6px;color:#7fc4ff;font-size:10px;letter-spacing:.13em}
+.profile-settings-card .profile-form-heading h3{margin:0;color:#f2f7fc;font-size:20px}
+.profile-settings-card .profile-form-heading p{margin:6px 0 8px;color:#9fb4c8;font-size:12px;line-height:1.6}
+.profile-settings-card .profile-edit-form label:not(.profile-upload-button){margin-top:9px;color:#dce8f4;font-size:12px}
+.profile-settings-card .profile-edit-form input:not([type=file]),.profile-settings-card .profile-edit-form textarea{background:#f9fbfd!important;color:#17283a!important;border-color:#cbd8e4!important;min-height:44px}
+.profile-settings-card .profile-field-help{margin-top:-5px;margin-bottom:1px;color:#9bb0c4;font-size:11px;line-height:1.5}
+.profile-settings-card .profile-optional{color:#9bb0c4;font-size:10px;font-weight:500}
+.profile-settings-card .profile-save-button{width:100%;max-width:240px;margin-top:12px;background:linear-gradient(110deg,#17649a,#2786c4);border:1px solid rgba(151,211,255,.22);border-radius:10px}
+@media(max-width:560px){.profile-settings-card{margin:14px 0;padding:15px}.profile-settings-card .profile-save-button{max-width:none}}
