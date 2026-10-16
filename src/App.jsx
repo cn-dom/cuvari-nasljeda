@@ -288,6 +288,7 @@ function App() {
   const [groupMemberToAdd, setGroupMemberToAdd] = useState("");
   const [messageRecipient, setMessageRecipient] = useState("");
   const [messageSearch, setMessageSearch] = useState("");
+  const [messageViewMode, setMessageViewMode] = useState("private");
   const [messageDraft, setMessageDraft] = useState("");
   const [replyingToMessage, setReplyingToMessage] = useState(null);
   const [editingMessageId, setEditingMessageId] = useState(null);
@@ -2635,7 +2636,7 @@ function App() {
         </div>
       </header>
 
-      <main className="page-layout" id="pocetna">
+      <main className={`page-layout${activeNav === "Poruke" ? " messages-page-open" : ""}`} id="pocetna">
         <aside className="left-sidebar">
           <section className="community-card community-profile-card">
             <div className="community-banner"><span>HRVATSKA · POVIJEST · ZAJEDNIŠTVO</span><span className="community-status"><i /> ZAJEDNICA</span></div>
@@ -2745,7 +2746,7 @@ function App() {
           </div>
         </aside>
 
-        <section className={`feed-column${profileOpen || (profileViewId && profileViewId !== session?.user?.id) ? " profile-page-open" : ""}`} aria-label="PatriaSoul – Čuvari nasljeđa">
+        <section className={`feed-column${profileOpen || (profileViewId && profileViewId !== session?.user?.id) ? " profile-page-open" : ""}${activeNav === "Poruke" ? " messages-page-open" : ""}`} aria-label="PatriaSoul – Čuvari nasljeđa">
           <section className="welcome-panel" aria-label="Dobrodošlica u PatriaSoul">
             <div className="welcome-photo-layer" aria-hidden="true">
               <img
@@ -3028,9 +3029,13 @@ function App() {
           )}
 
           {activeNav === "Poruke" && (
-            <section className="private-messages card" aria-labelledby="private-messages-title">
-              <div className="member-directory-heading">
-                <div><span className="eyebrow">RAZGOVORI ČLANOVA</span><h2 id="private-messages-title">Privatne poruke</h2><p>Poruke su vidljive samo pošiljatelju i primatelju kada su sigurnosna pravila baze pravilno primijenjena.</p></div>
+            <section className={`private-messages card ${messageViewMode === "groups" ? "group-messages-active" : "private-messages-active"}`} aria-labelledby="private-messages-title">
+              <div className="member-directory-heading messages-page-heading">
+                <div><span className="eyebrow">RAZGOVORI ČLANOVA</span><h2 id="private-messages-title">Poruke i razgovori</h2><p>Privatni razgovori i grupne poruke na jednom mjestu.</p></div>
+                <div className="message-mode-tabs" role="tablist" aria-label="Vrsta razgovora">
+                  <button type="button" role="tab" aria-selected={messageViewMode === "private"} className={messageViewMode === "private" ? "message-mode-tab active" : "message-mode-tab"} onClick={() => setMessageViewMode("private")}>✉ Privatne poruke</button>
+                  <button type="button" role="tab" aria-selected={messageViewMode === "groups"} className={messageViewMode === "groups" ? "message-mode-tab active" : "message-mode-tab"} onClick={() => setMessageViewMode("groups")}>👥 Grupne poruke <span>{groupChats.length}</span></button>
+                </div>
               </div>
               {!session?.user?.id ? (
                 <div className="directory-empty"><p>Prijavi se za privatne razgovore.</p><button className="primary-button" onClick={() => { setAuthOpen(true); setAuthMessage(""); }}>Prijava / Registracija</button></div>
