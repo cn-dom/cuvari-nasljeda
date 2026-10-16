@@ -146,6 +146,20 @@ function App() {
   const [commentDrafts, setCommentDrafts] = useState({});
   const [editingPostId, setEditingPostId] = useState(null);
   const [editDraft, setEditDraft] = useState("");
+  useEffect(() => {
+    if (!memberQuickListOpen) return undefined;
+    const closeMemberQuickList = (event) => {
+      if (!event.target.closest?.(".member-quick-wrap")) setMemberQuickListOpen(false);
+      if (event.key === "Escape") setMemberQuickListOpen(false);
+    };
+    document.addEventListener("pointerdown", closeMemberQuickList);
+    document.addEventListener("keydown", closeMemberQuickList);
+    return () => {
+      document.removeEventListener("pointerdown", closeMemberQuickList);
+      document.removeEventListener("keydown", closeMemberQuickList);
+    };
+  }, [memberQuickListOpen]);
+
   const [memberPickerOpen, setMemberPickerOpen] = useState(false);
   useEffect(() => {
     if (!memberPickerOpen) return undefined;
@@ -209,6 +223,8 @@ function App() {
   const [friendships, setFriendships] = useState([]);
   const [friendRefreshKey, setFriendRefreshKey] = useState(0);
   const [friendActionBusyId, setFriendActionBusyId] = useState(null);
+  const [memberQuickListOpen, setMemberQuickListOpen] = useState(false);
+  const [memberQuickQuery, setMemberQuickQuery] = useState("");
   const [memberPresence, setMemberPresence] = useState([]);
   const [showActivity, setShowActivity] = useState(true);
 
@@ -2427,7 +2443,28 @@ function App() {
         </div>
         <nav className="topnav" aria-label="Brza navigacija">
           <button className={activeNav === "PatriaSoul" ? "topnav-link active" : "topnav-link"} onClick={() => setActiveNav("PatriaSoul")} aria-label="Početna">⌂</button>
-          <button className={activeNav === "Čuvari nasljeđa" ? "topnav-link active" : "topnav-link"} onClick={() => navigateToSection("Čuvari nasljeđa")} aria-label="Članovi">👥</button>
+          <div className="member-quick-wrap">
+            <button type="button" className={(memberQuickListOpen || activeNav === "Čuvari nasljeđa") ? "topnav-link active member-quick-trigger" : "topnav-link member-quick-trigger"} onClick={() => setMemberQuickListOpen((open) => !open)} aria-label="Otvori popis članova" aria-expanded={memberQuickListOpen} aria-haspopup="dialog">👥{friendRequests.filter((request) => request.recipient_id === session?.user?.id && request.status === "pending").length > 0 && <span className="member-quick-badge">{friendRequests.filter((request) => request.recipient_id === session?.user?.id && request.status === "pending").length}</span>}</button>
+            {memberQuickListOpen && <div className="member-quick-popover" role="dialog" aria-label="Čuvari nasljeđa">
+              <div className="member-quick-heading"><div><strong>Čuvari nasljeđa</strong><small>{memberDirectory.length} članova zajednice</small></div><button type="button" className="member-quick-close" aria-label="Zatvori popis članova" onClick={() => setMemberQuickListOpen(false)}>×</button></div>
+              {!session?.user?.id ? <div className="member-quick-empty">Prijavi se za pregled članova i slanje zahtjeva za prijateljstvo.<button type="button" className="primary-button" onClick={() => { setMemberQuickListOpen(false); setAuthMode("login"); setAuthMessage(""); setAuthOpen(true); }}>Prijava</button></div> : <>
+                <input className="member-quick-search" type="search" aria-label="Pretraži članove" placeholder="Pretraži članove…" value={memberQuickQuery} onChange={(event) => setMemberQuickQuery(event.target.value)} />
+                <div className="member-quick-list">
+                  {memberDirectory.filter((member) => member.id !== session.user.id && `${member.display_name || ""} ${member.username || ""} ${member.bio || ""}`.toLocaleLowerCase("hr").includes(memberQuickQuery.trim().toLocaleLowerCase("hr"))).map((member) => {
+                    const name = member.display_name || member.username || "Čuvar nasljeđa";
+                    const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN";
+                    return <div className="member-quick-row" key={member.id}>
+                      <button type="button" className="member-quick-profile" onClick={() => { setMemberQuickListOpen(false); openMemberProfile(member.id); }}><Avatar initials={initials} src={member.avatar_url || ""} /><span><strong>{name}</strong><small>@{normalizeUsername(member.username) || "clan"}</small></span></button>
+                      <div className="member-quick-action">{renderFriendAction(member)}</div>
+                    </div>;
+                  })}
+                  {!memberDirectoryBusy && !memberDirectory.filter((member) => member.id !== session.user.id && `${member.display_name || ""} ${member.username || ""} ${member.bio || ""}`.toLocaleLowerCase("hr").includes(memberQuickQuery.trim().toLocaleLowerCase("hr"))).length && <p className="member-quick-empty">Nema pronađenih članova.</p>}
+                  {memberDirectoryBusy && <p className="member-quick-empty">Učitavam članove…</p>}
+                </div>
+                <button type="button" className="member-quick-all" onClick={() => { setMemberQuickListOpen(false); navigateToSection("Čuvari nasljeđa"); }}>Prikaži cijeli imenik <span aria-hidden="true">→</span></button>
+              </>}
+            </div>}
+          </div>
           <button className={activeNav === "Poruke" ? "topnav-link active" : "topnav-link"} onClick={() => navigateToSection("Poruke")} aria-label="Poruke">✉</button>
           <button className={activeNav === "Obavijesti" ? "topnav-link active" : "topnav-link"} onClick={() => navigateToSection("Obavijesti")} aria-label="Obavijesti">🔔</button>
         </nav>
