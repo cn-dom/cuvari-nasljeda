@@ -2560,9 +2560,7 @@ function App() {
             <small>ČUVARI NASLJEĐA</small>
           </span>
         </a>
-        <nav className="topnav" aria-label="Brza navigacija">
-          <button className={activeNav === "PatriaSoul" ? "topnav-link active" : "topnav-link"} onClick={() => { setActiveNav("PatriaSoul"); setGlobalSearchOpen(false); }} aria-label="Početna">⌂</button>
-          <div className="header-quick-wrap search-quick-wrap">
+        <div className="header-quick-wrap search-quick-wrap">
             <button type="button" className={globalSearchOpen ? "topnav-link active" : "topnav-link"} onClick={() => { setGlobalSearchOpen((open) => !open); setMemberQuickListOpen(false); setMessageQuickOpen(false); setNotificationQuickOpen(false); }} aria-label="Pretraži PatriaSoul" aria-expanded={globalSearchOpen} aria-haspopup="dialog">⌕</button>
             {globalSearchOpen && <div className="header-quick-popover global-search-popover" role="dialog" aria-label="Pretraživanje PatriaSoul">
               <div className="header-quick-heading"><div><strong>Pretraži PatriaSoul</strong><small>Članove, objave i grupne razgovore</small></div><button type="button" className="member-quick-close" aria-label="Zatvori pretraživanje" onClick={() => setGlobalSearchOpen(false)}>×</button></div>
