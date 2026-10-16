@@ -874,16 +874,26 @@ function App() {
         const { data: publicImage } = supabase.storage.from("profile-covers").getPublicUrl(objectPath);
         nextCoverUrl = publicImage?.publicUrl || nextCoverUrl;
       }
-      const { error } = await supabase.from("profiles").upsert({
-        id: session.user.id,
-        display_name: cleanDisplayName,
-        username: cleanUsername || null,
-        bio: profileBio.trim(),
-        avatar_url: nextAvatarUrl || null,
-        cover_url: nextCoverUrl || null,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "id" });
+      // A profile row is created by the auth-user trigger. Update that row
+      // rather than upserting: INSERT RLS/role guards can reject the attempted
+      // insert branch of an upsert even when the profile already exists.
+      const { data: savedProfile, error } = await supabase
+        .from("profiles")
+        .update({
+          display_name: cleanDisplayName,
+          username: cleanUsername || null,
+          bio: profileBio.trim(),
+          avatar_url: nextAvatarUrl || null,
+          cover_url: nextCoverUrl || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", session.user.id)
+        .select("id, display_name, username, bio, avatar_url, cover_url")
+        .maybeSingle();
       if (error) throw error;
+      if (!savedProfile) {
+        throw new Error("Profil nije pronađen u bazi. Odjavi se i ponovno prijavi kako bi se profil obnovio.");
+      }
       setProfileUsername(cleanUsername);
       setProfileName(cleanDisplayName);
       setNicknamePromptedForUserId(null);
@@ -906,7 +916,10 @@ function App() {
           setProfileMessage("Korisničko ime ili prikazno ime već se koristi. Odaberi drugo.");
         }
       } else {
-        setProfileMessage("Profil nije spremljen. Provjeri podatke i pokušaj ponovno.");
+        const detail = String(error?.message || "").trim();
+        setProfileMessage(detail
+          ? "Profil nije spremljen: " + detail
+          : "Profil nije spremljen zbog neočekivane pogreške. Pokušaj ponovno.");
       }
     } finally {
       setProfileBusy(false);
