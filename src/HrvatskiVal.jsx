@@ -65,9 +65,23 @@ export default function HrvatskiVal() {
             onReady: (event) => {
               const resumeAt = Math.max(0, Number(active.currentTime) || 0);
               if (resumeAt > 0) event.target.seekTo(resumeAt, true);
+              event.target.playVideo();
               saveTimer = window.setInterval(() => {
                 try { savePosition(event.target.getCurrentTime()); } catch { /* Ignore player teardown. */ }
               }, 1000);
+            },
+            onStateChange: (event) => {
+              if (event.data !== window.YT.PlayerState.ENDED) return;
+              try {
+                const stored = JSON.parse(localStorage.getItem(CURRENT_TRACK_KEY) || "null");
+                const queue = Array.isArray(stored?.queue) ? stored.queue : [];
+                const nextIndex = Number(stored?.queueIndex ?? -1) + 1;
+                if (nextIndex >= 0 && nextIndex < queue.length) {
+                  const nextTrack = { ...queue[nextIndex], queue, queueIndex: nextIndex, currentTime: 0 };
+                  localStorage.setItem(CURRENT_TRACK_KEY, JSON.stringify(nextTrack));
+                  setActive(nextTrack);
+                }
+              } catch { /* Ignore malformed queue data. */ }
             }
           }
         });
@@ -139,12 +153,27 @@ export default function HrvatskiVal() {
     (async () => {
       const [likeRes, commentRes] = await Promise.all([
         supabase.from("music_track_likes").select("user_id").eq("track_id", active.id),
-        supabase.from("music_track_comments").select("id, track_id, user_id, content, created_at, profiles(display_name)").eq("track_id", active.id).order("created_at", { ascending: false }).limit(100)
+        supabase.from("music_track_comments").select("id, track_id, user_id, content, created_at").eq("track_id", active.id).order("created_at", { ascending: false }).limit(100)
       ]);
       if (cancelled) return;
       if (!likeRes.error) setLikes(likeRes.data || []);
-      if (!commentRes.error) setComments(commentRes.data || []);
-      if (likeRes.error || commentRes.error) setError("Lajkovi ili komentari nisu dostupni. Provjeri je li migracija Hrvatskog Vala primijenjena u Supabaseu.");
+      if (!commentRes.error) {
+        const userIds = [...new Set((commentRes.data || []).map(comment => comment.user_id).filter(Boolean))];
+        let profileById = {};
+        if (userIds.length) {
+          const { data: profiles } = await supabase.from("profiles").select("id, display_name").in("id", userIds);
+          profileById = Object.fromEntries((profiles || []).map(profile => [profile.id, profile.display_name]));
+        }
+        if (cancelled) return;
+        setComments((commentRes.data || []).map(comment => ({
+          ...comment,
+          profiles: { display_name: profileById[comment.user_id] || "Član PatriaSoula" }
+        })));
+      }
+      if (likeRes.error || commentRes.error) {
+        console.error("Hrvatski Val likes/comments:", likeRes.error || commentRes.error);
+        setError("Lajkovi ili komentari trenutačno nisu dostupni. Pokušaj ponovno.");
+      }
     })();
     return () => { cancelled = true; };
   }, [active?.id, session?.user?.id]);
@@ -156,8 +185,12 @@ export default function HrvatskiVal() {
   }, [tracks, query, view, favorites, history]);
 
   function play(track) {
-    setActive(track);
-    try { localStorage.setItem(CURRENT_TRACK_KEY, JSON.stringify(track)); } catch { /* Storage may be unavailable. */ }
+    const queue = tracks.length ? tracks : [track];
+    const foundIndex = queue.findIndex(item => item.id === track.id);
+    const queueIndex = foundIndex >= 0 ? foundIndex : 0;
+    const preparedTrack = { ...track, queue, queueIndex, currentTime: 0 };
+    setActive(preparedTrack);
+    try { localStorage.setItem(CURRENT_TRACK_KEY, JSON.stringify(preparedTrack)); } catch { /* Storage may be unavailable. */ }
     setPlayerVisible(true); setMinimized(false);
     setHistory(old => [track.id, ...old.filter(id => id !== track.id)].slice(0, 100));
   }
