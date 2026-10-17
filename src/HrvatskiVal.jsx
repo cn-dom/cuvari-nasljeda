@@ -59,6 +59,68 @@ export default function HrvatskiVal() {
         }
       } catch { /* Storage may be unavailable. */ }
     };
+    let advancing = false;
+    const mapSearchItems = (items, categoryName = "Hrvatska glazba") => (Array.isArray(items) ? items : []).map((item) => {
+      const snippet = item.snippet || item;
+      const id = item.id?.videoId || item.youtubeId || item.videoId;
+      if (!id) return null;
+      return {
+        id,
+        title: clean(snippet.title || item.title, 160) || "Pjesma bez naslova",
+        artist: clean(snippet.channelTitle || item.channelTitle || item.artist || "YouTube", 120),
+        description: clean(snippet.description || item.description, 500),
+        thumbnail: snippet.thumbnails?.high?.url || snippet.thumbnails?.medium?.url || `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+        category: categoryName,
+        url: `https://www.youtube.com/watch?v=${id}`
+      };
+    }).filter(Boolean);
+    const findFallbackTrack = async (current) => {
+      const searches = [
+        current?.artist && current.artist !== "YouTube" ? `${current.artist} hrvatske pjesme` : "",
+        "hrvatske domoljubne pjesme klape hrvatska glazba"
+      ].filter(Boolean);
+      for (const term of searches) {
+        try {
+          const response = await fetch(`${ENDPOINT}${ENDPOINT.includes("?") ? "&" : "?"}q=${encodeURIComponent(term)}`);
+          if (!response.ok) continue;
+          const payload = await response.json();
+          const candidates = mapSearchItems(payload.items || payload.results).filter(item => item.id !== current?.id);
+          if (candidates.length) {
+            const sameArtist = candidates.filter(item => normalize(item.artist) === normalize(current?.artist));
+            const pool = sameArtist.length ? sameArtist : candidates;
+            return { ...pool[Math.floor(Math.random() * pool.length)], queue: pool, queueIndex: 0, currentTime: 0 };
+          }
+        } catch { /* Try the next fallback search. */ }
+      }
+      return null;
+    };
+    const advanceNext = async () => {
+      if (advancing || cancelled) return;
+      advancing = true;
+      try {
+        const stored = JSON.parse(localStorage.getItem(CURRENT_TRACK_KEY) || "null") || active;
+        if (stored?.id && stored.id !== active.id) return;
+        const queue = Array.isArray(stored?.queue) ? stored.queue : [];
+        const currentIndex = Number.isInteger(Number(stored?.queueIndex))
+          ? Number(stored.queueIndex)
+          : queue.findIndex(item => item?.id === stored?.id);
+        if (currentIndex >= 0 && currentIndex + 1 < queue.length) {
+          const nextIndex = currentIndex + 1;
+          const nextTrack = { ...queue[nextIndex], queue, queueIndex: nextIndex, currentTime: 0 };
+          localStorage.setItem(CURRENT_TRACK_KEY, JSON.stringify(nextTrack));
+          setActive(nextTrack);
+          setHistory(old => [nextTrack.id, ...old.filter(id => id !== nextTrack.id)].slice(0, 100));
+          return;
+        }
+        const fallback = await findFallbackTrack(stored || active);
+        if (fallback && !cancelled) {
+          localStorage.setItem(CURRENT_TRACK_KEY, JSON.stringify(fallback));
+          setActive(fallback);
+          setHistory(old => [fallback.id, ...old.filter(id => id !== fallback.id)].slice(0, 100));
+        }
+      } catch { /* Ignore malformed queue data or unavailable search. */ }
+      finally { advancing = false; }
+    };
     const attachPlayer = () => {
       if (cancelled || !window.YT || !window.YT.Player || !playerIframeRef.current) return;
       try {
@@ -76,17 +138,8 @@ export default function HrvatskiVal() {
               }, 1000);
             },
             onStateChange: (event) => {
-              if (event.data !== window.YT.PlayerState.ENDED) return;
-              try {
-                const stored = JSON.parse(localStorage.getItem(CURRENT_TRACK_KEY) || "null");
-                const queue = Array.isArray(stored?.queue) ? stored.queue : [];
-                const nextIndex = Number(stored?.queueIndex ?? -1) + 1;
-                if (nextIndex >= 0 && nextIndex < queue.length) {
-                  const nextTrack = { ...queue[nextIndex], queue, queueIndex: nextIndex, currentTime: 0 };
-                  localStorage.setItem(CURRENT_TRACK_KEY, JSON.stringify(nextTrack));
-                  setActive(nextTrack);
-                }
-              } catch { /* Ignore malformed queue data. */ }
+              // YouTube's ENDED state is numeric 0; use the literal as a resilient fallback.
+              if (event.data === (window.YT?.PlayerState?.ENDED ?? 0)) void advanceNext();
             }
           }
         });
