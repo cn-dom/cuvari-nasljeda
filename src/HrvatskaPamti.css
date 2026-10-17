@@ -201,3 +201,47 @@
 .hp-catalog-note{margin:22px 0 0;color:#6a7379;font-size:10px;line-height:1.85}
 .hp-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media(max-width:760px){.hp-catalog-search{padding-top:52px;padding-bottom:52px}.hp-catalog-tools{grid-template-columns:1fr}.hp-catalog-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.hp-catalog-filters button{min-height:42px}.hp-catalog-results{grid-template-columns:1fr}.hp-catalog-result{padding:18px}}
+
+
+/* Hrvatska pamti — registar lokacija stradanja */
+.hp-register-page{background:#081522}
+.hp-register-hero{padding:clamp(56px,9vw,120px) clamp(24px,10vw,160px) 66px;background:radial-gradient(ellipse at 78% 22%,rgba(44,91,119,.36),transparent 44%),linear-gradient(135deg,#081522,#10283a 70%,#0b1a28);border-bottom:1px solid var(--hp-line)}
+.hp-register-hero h1{font:500 clamp(48px,7vw,92px)/.98 "Cormorant Garamond",Georgia,serif;letter-spacing:-.035em;margin:24px 0}
+.hp-register-hero h1 em{font-weight:400;color:#e3b6a4}
+.hp-register-hero>p{max-width:780px;color:#c4d0d9;font-size:14px;line-height:1.95}
+.hp-register-stats{display:flex;flex-wrap:wrap;gap:12px;margin-top:42px}
+.hp-register-stats>div{min-width:160px;max-width:240px;padding:18px 22px;border:1px solid var(--hp-line);background:rgba(4,14,23,.3);display:flex;flex-direction:column;gap:8px}
+.hp-register-stats strong{font:500 34px "Cormorant Garamond",Georgia,serif;color:#e7c8b8}
+.hp-register-stats span{font-size:10px;line-height:1.6;color:#aebdc8}
+.hp-register-content{padding:76px clamp(24px,8vw,120px) 90px;background:#f1eee7;color:#102131}
+.hp-register-content .hp-section-heading h2{color:#102131}
+.hp-register-controls{display:grid;grid-template-columns:minmax(220px,1fr) 2fr;gap:20px;align-items:end;margin:30px 0 14px}
+.hp-register-controls label{display:grid;gap:9px;font-size:11px;font-weight:700;color:#394a57}
+.hp-register-controls input{min-height:48px;border:1px solid #c8c9c5;background:#fff;padding:0 14px;font:inherit;color:#102131;border-radius:2px}
+.hp-register-filter{display:flex;flex-wrap:wrap;gap:8px}
+.hp-register-filter button{min-height:42px;padding:10px 14px;background:transparent;border:1px solid #c8c9c5;color:#394a57;font:600 10px Manrope,system-ui,sans-serif;cursor:pointer}
+.hp-register-filter button.active{background:#10283a;border-color:#10283a;color:#fff}
+.hp-register-count{font-size:11px;color:#66737a;margin:18px 0}
+.hp-register-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.hp-register-card{background:#fff;border:1px solid #deded8;padding:clamp(18px,2.5vw,30px);min-width:0;box-shadow:0 8px 28px rgba(10,25,35,.035)}
+.hp-register-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hp-register-card-top>span:first-child{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#6c7780}
+.hp-register-status{font-size:9px;line-height:1.5;color:#7a3a36;background:#f7e9e5;padding:5px 8px}
+.hp-register-card h3{font:600 32px/1.05 "Cormorant Garamond",Georgia,serif;margin:19px 0 8px}
+.hp-register-card p{font-size:12px;line-height:1.85;color:#58656c}
+.hp-register-card .hp-register-area{color:#9c4a42;font-size:10px;margin:0 0 14px}
+.hp-register-meta{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px;padding:17px 0;border-top:1px solid #e5e4df}
+.hp-register-meta span{display:grid;gap:7px;align-content:start}
+.hp-register-meta small{font-size:8px;letter-spacing:.12em;color:#7c858a}
+.hp-register-meta strong{font-size:10px;line-height:1.65;font-weight:600;overflow-wrap:anywhere}
+.hp-register-expand{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;border-top:1px solid #e5e4df;padding:15px 0 0;background:transparent;color:#17374c;font:700 10px Manrope,system-ui,sans-serif;text-align:left;cursor:pointer}
+.hp-register-expand span{font-size:20px}
+.hp-register-detail{padding:14px;margin-top:14px;background:#f5f3ed;border-left:2px solid #c65a50}
+.hp-register-detail strong{font-size:11px}
+.hp-register-detail p{margin:8px 0 0}
+.hp-register-principle{display:flex;gap:18px;margin-top:34px;padding:25px;background:#e5e0d6;border:1px solid #d6d0c6}
+.hp-register-principle>span{font-size:28px;color:#a54d45}
+.hp-register-principle h3{font:600 25px "Cormorant Garamond",Georgia,serif;margin:0 0 6px}
+.hp-register-principle p,.hp-register-disclaimer{font-size:11px;line-height:1.85;color:#58656c}
+.hp-register-disclaimer{margin-top:24px}
+@media(max-width:760px){.hp-register-hero{padding-top:54px}.hp-register-content{padding-top:48px}.hp-register-controls,.hp-register-list{grid-template-columns:1fr}.hp-register-meta{grid-template-columns:1fr}.hp-register-stats>div{flex:1;min-width:125px}.hp-register-card-top{display:grid}.hp-register-filter{display:grid;grid-template-columns:1fr}.hp-register-filter button{text-align:left}}
