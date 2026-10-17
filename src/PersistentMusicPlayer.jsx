@@ -30,6 +30,18 @@ export default function PersistentMusicPlayer() {
     let saveTimer = null;
     let cancelled = false;
     const previousReady = window.onYouTubeIframeAPIReady;
+    const advanceNext = () => {
+      try {
+        const stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "null");
+        const queue = Array.isArray(stored?.queue) ? stored.queue : [];
+        const nextIndex = Number(stored?.queueIndex ?? -1) + 1;
+        if (nextIndex >= 0 && nextIndex < queue.length) {
+          const nextTrack = { ...queue[nextIndex], queue, queueIndex: nextIndex, currentTime: 0 };
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextTrack));
+          setTrack(nextTrack);
+        }
+      } catch { /* Ignore malformed queue data. */ }
+    };
     const savePosition = (seconds) => {
       if (!Number.isFinite(seconds) || seconds < 0) return;
       try {
@@ -52,6 +64,9 @@ export default function PersistentMusicPlayer() {
               saveTimer = window.setInterval(() => {
                 try { savePosition(event.target.getCurrentTime()); } catch { /* Ignore player teardown. */ }
               }, 1000);
+            },
+            onStateChange: (event) => {
+              if (event.data === window.YT.PlayerState.ENDED) advanceNext();
             }
           }
         });
@@ -112,10 +127,13 @@ export default function PersistentMusicPlayer() {
     dragRef.current = null;
   }
 
-  function playTrack(nextTrack) {
-    setTrack(nextTrack);
+  function playTrack(nextTrack, searchQueue = [nextTrack]) {
+    const queue = searchQueue.length ? searchQueue : [nextTrack];
+    const queueIndex = Math.max(0, queue.findIndex((item) => item.id === nextTrack.id));
+    const preparedTrack = { ...nextTrack, queue, queueIndex, currentTime: 0 };
+    setTrack(preparedTrack);
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextTrack));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(preparedTrack));
     } catch {
       // Storage may be unavailable; the current-page player still works.
     }
@@ -217,7 +235,7 @@ export default function PersistentMusicPlayer() {
               {searching && <span style={{ fontSize: 12, opacity: .8 }}>Tražim pjesme…</span>}
               {searchError && <span role="status" style={{ fontSize: 12, color: "#ffd2d6" }}>{searchError}</span>}
               {results.map((result) => (
-                <button key={result.id} type="button" onClick={() => playTrack(result)} style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", minWidth: 0, padding: 6, textAlign: "left", border: "1px solid rgba(255,255,255,.13)", borderRadius: 9, background: "rgba(255,255,255,.07)", color: "#fff", cursor: "pointer" }}>
+                <button key={result.id} type="button" onClick={() => playTrack(result, results)} style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", minWidth: 0, padding: 6, textAlign: "left", border: "1px solid rgba(255,255,255,.13)", borderRadius: 9, background: "rgba(255,255,255,.07)", color: "#fff", cursor: "pointer" }}>
                   <img src={result.thumbnail} alt="" style={{ width: 54, height: 34, flexShrink: 0, objectFit: "cover", borderRadius: 5, background: "#000" }} />
                   <span style={{ minWidth: 0, flex: 1 }}>
                     <strong style={{ fontSize: 11, lineHeight: 1.35, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{result.title}</strong>
