@@ -103,3 +103,8 @@ body.psv-modal-open{overflow:hidden}
  .psv-player-back,.psv-player-close{font-size:11px;padding:9px 10px}
  .psv-player-close span{display:inline}
 }
+
+.psv-discovery-bulk{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:850px;margin:14px 0;color:#b6cbe0;font-size:12px}
+.psv-discovery-bulk button{display:inline-flex;align-items:center;gap:6px;border:1px solid #426b92;background:#173958;color:#eef6ff;border-radius:9px;padding:10px 13px;font-size:12px;font-weight:800;cursor:pointer}
+.psv-discovery-bulk button:hover{background:#204b72;border-color:#77a7d6}
+@media(max-width:480px){.psv-discovery-bulk{align-items:flex-start;flex-direction:column}.psv-discovery-bulk button{width:100%;justify-content:center}}
