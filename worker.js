@@ -188,6 +188,20 @@ export default {
       }
     }
 
-    return env.ASSETS.fetch(request);
+    const assetResponse = await env.ASSETS.fetch(request);
+    const contentType = assetResponse.headers.get("content-type") || "";
+    const isHtml = contentType.includes("text/html");
+    const isVideoArchive = url.pathname === "/video-arhiva.html" || url.pathname.startsWith("/video-arhiva/");
+    const isDedicatedMusicPage = url.pathname === "/hrvatski-val.html";
+    if (isHtml && !isVideoArchive && !isDedicatedMusicPage && request.method === "GET") {
+      return new HTMLRewriter()
+        .on("body", {
+          element(element) {
+            element.append('<script type="module" src="/assets/global-player.js"></script>', { html: true });
+          }
+        })
+        .transform(assetResponse);
+    }
+    return assetResponse;
   }
 };
