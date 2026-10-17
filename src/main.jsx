@@ -23,7 +23,7 @@ const Screen = route === "/hrvatska-pamti-grobnice.html"
   ? HrvatskaPamti
   : route === "/video-arhiva.html"
   ? PatriaSoulVideo
-  : route === "/hrvatski-val.html"
+  : (route === "/hrvatski-val.html" || route === "/hrvatski-val")
   ? HrvatskiVal
   : route === "/virtualni-muzej.html"
   ? VirtualMuseum
