@@ -8,10 +8,13 @@ const Events = lazy(() => import("./Events.jsx"));
 const AICenter = lazy(() => import("./AICenter.jsx"));
 const VirtualMuseum = lazy(() => import("./VirtualMuseum.jsx"));
 const HrvatskaPamti = lazy(() => import("./HrvatskaPamti.jsx"));
+const HrvatskaPamtiMjesto = lazy(() => import("./HrvatskaPamtiMjesto.jsx"));
 import "./index.css";
 
 const route = window.location.pathname.replace(/\/$/, "");
-const Screen = route === "/hrvatska-pamti.html"
+const Screen = route === "/hrvatska-pamti-mjesto.html"
+  ? HrvatskaPamtiMjesto
+  : route === "/hrvatska-pamti.html"
   ? HrvatskaPamti
   : route === "/virtualni-muzej.html"
   ? VirtualMuseum
