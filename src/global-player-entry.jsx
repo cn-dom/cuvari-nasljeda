@@ -5,7 +5,8 @@ import PersistentMusicPlayer from "./PersistentMusicPlayer.jsx";
 // Video arhiva namjerno ostaje bez glazbenog mini-playera.
 // Hrvatski Val već ima svoj puni player na zasebnoj stranici.
 if (!window.location.pathname.startsWith("/video-arhiva") &&
-    !window.location.pathname.startsWith("/hrvatski-val")) {
+    !window.location.pathname.startsWith("/hrvatski-val") &&
+    !document.getElementById("patriasoul-global-music-player")) {
   const mount = document.createElement("div");
   mount.id = "patriasoul-global-music-player";
   document.body.appendChild(mount);
