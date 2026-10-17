@@ -64,6 +64,40 @@ try {
       await page.close();
     }
   }
+
+  // Dedicated smoke for the video archive: add a URL, render its card, and open the embedded player.
+  {
+    const page = await browser.newPage();
+    const pageErrors = [];
+    page.on("pageerror", error => pageErrors.push(error.message));
+    await page.route("**/*", route => {
+      const parsed = new URL(route.request().url());
+      if (["http:", "https:"].includes(parsed.protocol) && !["127.0.0.1", "localhost"].includes(parsed.hostname)) {
+        return route.abort();
+      }
+      return route.continue();
+    });
+    try {
+      const response = await page.goto(new URL("/video-arhiva.html", base).href, { waitUntil: "domcontentloaded", timeout: 20000 });
+      assert.ok(response && response.status() === 200, "video archive should return HTTP 200");
+      await page.getByRole("heading", { name: /Priče koje/ }).waitFor({ state: "visible", timeout: 10000 });
+      await page.getByRole("button", { name: /Dodaj prvi video/ }).click();
+      await page.locator('input[placeholder^="https://www.youtube.com/watch?v="]').fill("https://youtu.be/dQw4w9WgXcQ");
+      await page.locator('input[placeholder="Npr. naslov dokumentarnog filma"]').fill("E2E test video");
+      await page.getByRole("button", { name: /Spremi zapis/ }).click();
+      await page.getByRole("button", { name: "E2E test video" }).waitFor({ state: "visible", timeout: 5000 });
+      await page.getByRole("button", { name: /Pusti video: E2E test video/ }).click();
+      await page.locator('iframe[title="E2E test video"]').waitFor({ state: "visible", timeout: 5000 });
+      assert.match(await page.locator("iframe").getAttribute("src"), /dQw4w9WgXcQ/, "player should embed the submitted YouTube ID");
+      assert.deepEqual(pageErrors, [], `video archive interaction produced browser errors: ${pageErrors.join("; ")}`);
+      console.log("PASS video archive add-and-play interaction");
+    } catch (error) {
+      failures.push(`/video-arhiva.html interaction: ${error.message}`);
+      console.error(`FAIL video archive interaction: ${error.message}`);
+    } finally {
+      await page.close();
+    }
+  }
 } finally {
   await browser.close();
 }
