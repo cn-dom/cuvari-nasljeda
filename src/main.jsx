@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
+import PersistentMusicPlayer from "./PersistentMusicPlayer.jsx";
 import App from "./App.jsx";
 const Admin = lazy(() => import("./Admin.jsx"));
 const Forum = lazy(() => import("./Forum.jsx"));
@@ -39,10 +40,17 @@ const Screen = route === "/hrvatska-pamti-grobnice.html"
         ? Events
         : App;
 
+const showGlobalMusicPlayer = !route.startsWith("/video-arhiva") && !route.startsWith("/hrvatski-val");
+
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Suspense fallback={<main className="route-loading" role="status" aria-live="polite">Učitavanje PatriaSoula…</main>}>
       <Screen />
     </Suspense>
+    {showGlobalMusicPlayer && (
+      <div id="patriasoul-global-music-player">
+        <PersistentMusicPlayer />
+      </div>
+    )}
   </React.StrictMode>
 );
