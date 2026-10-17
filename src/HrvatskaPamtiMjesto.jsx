@@ -15,6 +15,10 @@ const records = {
 export default function HrvatskaPamtiMjesto() {
   const slug = new URLSearchParams(window.location.search).get("mjesto") || "vukovar";
   const record = useMemo(() => records[slug] || null, [slug]);
+  const placeOrder = ["vukovar", "skabrnja", "dubrovnik", "zagreb", "knin", "osijek", "sinj", "lika-i-krbava"];
+  const currentIndex = placeOrder.indexOf(slug);
+  const previousSlug = currentIndex > 0 ? placeOrder[currentIndex - 1] : null;
+  const nextSlug = currentIndex >= 0 && currentIndex < placeOrder.length - 1 ? placeOrder[currentIndex + 1] : null;
   if (!record) return <main className="hp-detail-page"><a href="/hrvatska-pamti.html">← Povratak na kartu sjećanja</a><h1>Mjesto nije pronađeno</h1><p>Odaberi lokaciju na karti Hrvatske pamti.</p></main>;
   return <main className="hp-page hp-detail-page">
     <header className="hp-topline"><a className="hp-brand" href="/hrvatska-pamti.html"><img src="/assets/images/1000000982.png" alt="" /><span>PatriaSoul <small>HRVATSKA PAMTI</small></span></a><nav><a href="/hrvatska-pamti.html#karta">← Karta sjećanja</a><a className="hp-return" href="/">Povratak u zajednicu</a></nav></header>
@@ -32,6 +36,24 @@ export default function HrvatskaPamtiMjesto() {
       </div>
       <p className="hp-detail-sources-note">Prije objave pojedinog zapisa potrebno je navesti konkretan dokument ili publikaciju, autora ili ustanovu i datum. Izvorni materijali istražuju se zasebno, a na stranici se objavljuju sažeci vlastitim riječima.</p>
     </section>
+    <section className="hp-memory-standards" aria-labelledby="hp-memory-standards-title">
+      <span className="hp-section-kicker">KAKO ČUVAMO SVJEDOČANSTVA</span>
+      <h2 id="hp-memory-standards-title">Sjećanje zaslužuje <em>povjerenje.</em></h2>
+      <p className="hp-memory-standards-lead">Osobna priča nije fusnota povijesti. Ona je povjerenje koje nam je netko darovao. Zato svako svjedočanstvo čuvamo s poštovanjem prema osobi, obitelji i vremenu o kojem govori.</p>
+      <div className="hp-memory-standard-grid">
+        <article><span>01</span><h3>Činjenica i sjećanje</h3><p>Dokumentirana činjenica, osobno sjećanje i predaja označavaju se odvojeno. Svjedočanstvo se ne prikazuje kao neovisna potvrda svakog detalja, ali se ni ljudski glas ne odbacuje zato što opisuje osobno iskustvo.</p></article>
+        <article><span>02</span><h3>Suglasnost i dostojanstvo</h3><p>Ime, fotografija, glas i obiteljski dokument objavljuju se tek nakon provjere prava i odgovarajuće suglasnosti. Osjetljivi podaci o živim osobama, obiteljima i mjestima mogućih ukopa zahtijevaju posebnu zaštitu.</p></article>
+        <article><span>03</span><h3>Ispravak je dio istine</h3><p>Ako se pojavi vjerodostojan novi dokument ili se utvrdi pogreška, zapis treba ispraviti i zabilježiti što je promijenjeno. Ne skrivamo neizvjesnost i ne popunjavamo praznine izmišljenim imenima, datumima ili citatima.</p></article>
+      </div>
+      <p className="hp-memory-standards-note">Ova pravila su urednički standard projekta. Ne znače da su svi zapisi već prošli stručnu provjeru; status pojedinog sadržaja mora biti jasno naveden.</p>
+    </section>
+    <nav className="hp-place-pagination" aria-label="Kretanje kroz mjesta sjećanja">
+      <div className="hp-place-pagination-heading"><span className="hp-section-kicker">NASTAVI ISTRAŽIVATI</span><h2>Još jedno mjesto.<br/><em>Još jedna priča.</em></h2></div>
+      <div className="hp-place-pagination-links">
+        {previousSlug ? <a className="hp-place-pagination-card" href={`/hrvatska-pamti-mjesto.html?mjesto=${previousSlug}`}><span>← PRETHODNO MJESTO</span><strong>{records[previousSlug].name}</strong><small>{records[previousSlug].region}</small></a> : <a className="hp-place-pagination-card hp-place-pagination-map" href="/hrvatska-pamti.html#karta"><span>POČETAK ZBIRKE</span><strong>Karta sjećanja</strong><small>Pregled svih mjesta</small></a>}
+        {nextSlug ? <a className="hp-place-pagination-card hp-place-pagination-next" href={`/hrvatska-pamti-mjesto.html?mjesto=${nextSlug}`}><span>SLJEDEĆE MJESTO →</span><strong>{records[nextSlug].name}</strong><small>{records[nextSlug].region}</small></a> : <a className="hp-place-pagination-card hp-place-pagination-next" href="/hrvatska-pamti.html#karta"><span>POVRATAK NA KARTU →</span><strong>Hrvatska pamti</strong><small>Pregled svih mjesta</small></a>}
+      </div>
+    </nav>
     <footer className="hp-footer"><a className="hp-brand" href="/hrvatska-pamti.html"><img src="/assets/images/1000000982.png" alt="" /><span>PatriaSoul <small>ČUVARI NASLJEĐA</small></span></a><p>Čuvamo sjećanje. Poštujemo izvore.</p><a href="/hrvatska-pamti.html">Povratak na kartu ↗</a></footer>
   </main>;
 }
