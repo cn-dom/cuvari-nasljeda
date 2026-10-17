@@ -82,8 +82,26 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
             .setLngLat([site.coordinates.lng, site.coordinates.lat])
             .setPopup(popup)
             .addTo(mapInstance);
-          markersRef.current.push(marker);
+          markersRef.current.push({ siteId: site.id, marker, popup });
         });
+
+        const focusMarker = (event) => {
+          const siteId = event?.detail?.siteId;
+          if (!siteId || !mapInstance || cancelled) return;
+          const entry = markersRef.current.find((item) => item.siteId === siteId);
+          const site = mappedSites.find((item) => item.id === siteId);
+          if (!entry || !site) return;
+          mapInstance.flyTo({
+            center: [site.coordinates.lng, site.coordinates.lat],
+            zoom: Math.max(mapInstance.getZoom(), 12),
+            essential: true,
+            duration: 900,
+          });
+          window.setTimeout(() => {
+            if (!cancelled && entry.marker) entry.marker.togglePopup();
+          }, 950);
+        };
+        window.addEventListener("hp-focus-grave-map", focusMarker);
 
         mapInstance.on("error", (event) => {
           if (event?.error && !cancelled) setMapError(true);
@@ -104,7 +122,8 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
     loadMap();
     return () => {
       cancelled = true;
-      markersRef.current.forEach((marker) => marker.remove());
+      window.removeEventListener("hp-focus-grave-map", focusMarker);
+      markersRef.current.forEach((entry) => entry.marker.remove());
       markersRef.current = [];
       if (mapInstance) mapInstance.remove();
       mapRef.current = null;
