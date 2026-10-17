@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 import FloatingGlobalChat from "./FloatingGlobalChat.jsx";
-import PersistentMusicPlayer from "./PersistentMusicPlayer.jsx";
 import BadgeShowcase, { BadgeRow } from "./HeritageBadges.jsx";
 import { useIsMobile } from "./hooks/use-mobile.js";
 
@@ -3640,7 +3639,6 @@ function App() {
         </aside>
       </main>
 
-      <PersistentMusicPlayer />
 
       <FloatingGlobalChat supabase={supabase} session={session} onLoginRequest={() => { setAuthOpen(true); setAuthMessage(""); }} />
 
