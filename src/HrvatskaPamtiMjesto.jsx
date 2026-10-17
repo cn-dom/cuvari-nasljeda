@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import "./HrvatskaPamti.css";
 
 const records = {
@@ -15,6 +15,18 @@ const records = {
 export default function HrvatskaPamtiMjesto() {
   const slug = new URLSearchParams(window.location.search).get("mjesto") || "vukovar";
   const record = useMemo(() => records[slug] || null, [slug]);
+  const [catalogQuery, setCatalogQuery] = useState("");
+  const [catalogType, setCatalogType] = useState("sve");
+  const catalogItems = useMemo(() => {
+    if (!record) return [];
+    const items = [
+      ...record.sections.map((item, index) => ({ type: "tema", label: "Tematska cjelina", title: item.title, body: item.body, order: index })),
+      ...(record.timeline || []).map((item, index) => ({ type: "vrijeme", label: "Vremenska crta", title: `${item.date} · ${item.title}`, body: item.body, order: index })),
+      ...(record.sources || []).map((item, index) => ({ type: "izvor", label: item.publisher || "Izvor", title: item.title, body: item.note, order: index }))
+    ];
+    const query = catalogQuery.trim().toLocaleLowerCase("hr-HR");
+    return items.filter(item => (catalogType === "sve" || item.type === catalogType) && (!query || `${item.title} ${item.body} ${item.label}`.toLocaleLowerCase("hr-HR").includes(query)));
+  }, [record, catalogQuery, catalogType]);
   const placeOrder = ["vukovar", "skabrnja", "dubrovnik", "zagreb", "knin", "osijek", "sinj", "lika-i-krbava"];
   const currentIndex = placeOrder.indexOf(slug);
   const previousSlug = currentIndex > 0 ? placeOrder[currentIndex - 1] : null;
@@ -31,6 +43,23 @@ export default function HrvatskaPamtiMjesto() {
         <div><strong>{(record.sources || []).length.toString().padStart(2,"0")}</strong><span>bibliografske bilješke</span></div>
       </div>
       <p className="hp-record-overview-note">Ovo je pregled trenutačno unesenog sadržaja, a ne ocjena njegove potpune istraživačke dovršenosti. Broj zapisa ne govori koliko je povijest potpuna: svaka tvrdnja traži kontekst, a svako ime pažljivu provjeru.</p>
+    </section>
+    <section className="hp-catalog-search" aria-labelledby="hp-catalog-title">
+      <div className="hp-catalog-heading"><span className="hp-section-kicker">KAZALO DOSJEA</span><h2 id="hp-catalog-title">Istraži zapise.<br/><em>Pronađi trag.</em></h2><p>Pretraži tematske cjeline, vremensku crtu i trenutačno navedene izvore ovog dosjea. Rezultati obuhvaćaju samo sadržaj koji je već unesen na ovu stranicu.</p></div>
+      <div className="hp-catalog-tools">
+        <label className="hp-catalog-input-wrap"><span className="hp-sr-only">Pretraži dosje</span><input type="search" value={catalogQuery} onChange={event => setCatalogQuery(event.target.value)} placeholder="Traži po pojmu, datumu ili naslovu…" /></label>
+        <div className="hp-catalog-filters" role="group" aria-label="Vrsta zapisa">
+          <button type="button" className={catalogType === "sve" ? "is-active" : ""} onClick={() => setCatalogType("sve")}>Sve</button>
+          <button type="button" className={catalogType === "tema" ? "is-active" : ""} onClick={() => setCatalogType("tema")}>Teme</button>
+          <button type="button" className={catalogType === "vrijeme" ? "is-active" : ""} onClick={() => setCatalogType("vrijeme")}>Kronologija</button>
+          <button type="button" className={catalogType === "izvor" ? "is-active" : ""} onClick={() => setCatalogType("izvor")}>Izvori</button>
+        </div>
+        <p className="hp-catalog-count" aria-live="polite">Pronađeno zapisa: <strong>{catalogItems.length}</strong></p>
+      </div>
+      <div className="hp-catalog-results">
+        {catalogItems.length ? catalogItems.map((item, index) => <article className="hp-catalog-result" key={item.type + item.title}><span>{item.label}</span><h3>{item.title}</h3><p>{item.body}</p></article>) : <div className="hp-catalog-empty"><strong>Nema pronađenih zapisa.</strong><p>Pokušaj s drugim pojmom ili odaberi drugu vrstu građe.</p><button type="button" onClick={() => { setCatalogQuery(""); setCatalogType("sve"); }}>Očisti pretragu</button></div>}
+      </div>
+      <p className="hp-catalog-note">Ovo je lokalno pretraživanje sadržaja stranice, a ne još povezani arhivski registar u bazi. Oznaka izvora sama po sebi ne znači da je svaka tvrdnja završno provjerena.</p>
     </section>
     <section className="hp-detail-content"><div className="hp-detail-main"><span className="hp-section-kicker">POVIJEST · MJESTA · LJUDI</span><h2>Mjesto pamćenja.<br/><em>Priča koju čuvamo.</em></h2><p className="hp-detail-lead">Svako mjesto nosi ljudske sudbine, obiteljska sjećanja i tragove vremena. Ovdje ih zapisujemo s poštovanjem, razlikujući dokumentirane činjenice od osobnih svjedočanstava i predaje.</p>{record.sections.map((section, index) => <article className="hp-detail-section" key={section.title}><span>0{index + 1}</span><div><h3>{section.title}</h3><p>{section.body}</p></div></article>)}{record.timeline?.length > 0 && <section className="hp-timeline" aria-labelledby="hp-timeline-title"><span className="hp-section-kicker">VREMENSKA CRTA</span><h2 id="hp-timeline-title">Tragovi kroz <em>vrijeme.</em></h2><p className="hp-timeline-intro">Datumi su putokazi kroz povijest, ne zamjena za ljudske priče. Svaki zapis treba čitati u kontekstu i povezati s vjerodostojnom dokumentacijom.</p><div className="hp-timeline-list">{record.timeline.map((event, index) => <article className="hp-timeline-event" key={event.date + event.title}><div className="hp-timeline-date">{event.date}</div><div className="hp-timeline-marker" aria-hidden="true"><span /></div><div className="hp-timeline-copy"><h3>{event.title}</h3><p>{event.body}</p></div></article>)}</div><p className="hp-timeline-note">Kronologija je urednički sažetak. Za svaki datum i događaj treba provjeriti odgovarajući dokument ili stručni izvor prije konačne objave.</p></section>}</div><aside className="hp-detail-sidebar"><span className="hp-section-kicker">UREDNIČKA NAPOMENA</span><h3>Izvor za svaku tvrdnju.</h3><p>Prije objave provjerit će se autorstvo, datum, kontekst i vjerodostojnost dokumentacije. Procjene, svjedočanstva i tradicija bit će jasno označeni.</p><div className="hp-detail-status">● SADRŽAJ U PRIPREMI</div><a href="/hrvatska-pamti.html#izvori">Načela i izvori ↗</a></aside></section>
     {record.sources?.length > 0 && <section className="hp-record-sources" aria-labelledby="hp-record-sources-title"><span className="hp-section-kicker">IZVORI I DOKUMENTACIJA</span><h2 id="hp-record-sources-title">Dokumentacija i<br/><em>tragovi izvora.</em></h2><div className="hp-record-source-grid">{record.sources.map((source) => <article key={source.title}><span>{source.publisher}</span><h3>{source.title}</h3><p>{source.note}</p></article>)}</div><p className="hp-detail-sources-note">Bilješke su sažete vlastitim riječima. Navođenje ustanove ili dokumenta označava istraživačko polazište, a ne automatsku potvrdu svih tvrdnji na stranici. Konkretne arhivske signature, stranice i podatke o izdanju treba dopuniti tijekom uredničke provjere.</p></section>}
