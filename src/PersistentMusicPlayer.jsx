@@ -31,7 +31,8 @@ export default function PersistentMusicPlayer() {
 
   function startDrag(event) {
     if (event.button !== 0 || event.target.closest("button, a, input")) return;
-    const rect = event.currentTarget.parentElement.getBoundingClientRect();
+    const panel = event.currentTarget.closest("aside");
+    const rect = panel.getBoundingClientRect();
     dragRef.current = { pointerId: event.pointerId, offsetX: event.clientX - rect.left, offsetY: event.clientY - rect.top };
     event.currentTarget.setPointerCapture?.(event.pointerId);
     event.preventDefault();
@@ -41,7 +42,7 @@ export default function PersistentMusicPlayer() {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
     const width = Math.min(380, window.innerWidth - 24);
-    const height = event.currentTarget.parentElement.getBoundingClientRect().height;
+    const height = event.currentTarget.closest("aside").getBoundingClientRect().height;
     setPosition({
       x: Math.max(8, Math.min(window.innerWidth - width - 8, event.clientX - drag.offsetX)),
       y: Math.max(8, Math.min(window.innerHeight - Math.min(height, window.innerHeight - 16) - 8, event.clientY - drag.offsetY)),
