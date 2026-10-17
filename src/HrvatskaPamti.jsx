@@ -25,6 +25,8 @@ const collections = [
 export default function HrvatskaPamti() {
   const [selectedPlace, setSelectedPlace] = useState(places[0]);
   const [candleLit, setCandleLit] = useState(false);
+  const [placeQuery, setPlaceQuery] = useState("");
+  const filteredPlaces = places.filter((place) => (place.name + " " + place.region + " " + place.text).toLocaleLowerCase("hr").includes(placeQuery.trim().toLocaleLowerCase("hr")));
   return <main className="hp-page">
     <header className="hp-topline">
       <a className="hp-brand" href="/" aria-label="Povratak na PatriaSoul"><img src="/assets/images/1000000982.png" alt="" /><span>PatriaSoul <small>ČUVARI NASLJEĐA</small></span></a>
@@ -49,6 +51,8 @@ export default function HrvatskaPamti() {
     </section>
     <section className="hp-map-section" id="karta">
       <div className="hp-section-heading"><div><span className="hp-section-kicker">ISTRAŽI PROSTOR SJEĆANJA</span><h2>Karta <em>sjećanja</em></h2></div><p>Odaberi mjesto i upoznaj priče koje će biti dokumentirane uz provjerljive izvore.</p></div>
+      <div className="hp-place-search" role="search"><label htmlFor="hp-place-query">Pronađi mjesto ili regiju</label><input id="hp-place-query" type="search" value={placeQuery} onChange={(event) => setPlaceQuery(event.target.value)} placeholder="Npr. Vukovar, Dalmacija, baština…" /><span>{filteredPlaces.length} {filteredPlaces.length === 1 ? "mjesto" : "mjesta"}</span></div>
+      {placeQuery.trim() && <div className="hp-place-results" aria-live="polite">{filteredPlaces.length ? filteredPlaces.map((place) => <button type="button" key={place.name} className={selectedPlace.name === place.name ? "active" : ""} onClick={() => setSelectedPlace(place)}><span>{place.region}</span><strong>{place.name}</strong><small>Odaberi mjesto ↗</small></button>) : <p>Nema rezultata. Pokušaj upisati naziv grada ili regije.</p>}</div>}
       <div className="hp-map-layout">
         <HrvatskaPamtiMap places={places} selectedPlace={selectedPlace} onSelect={setSelectedPlace} />
         <aside className="hp-place-panel" aria-live="polite" aria-label={"Odabrano mjesto: " + selectedPlace.name}>
