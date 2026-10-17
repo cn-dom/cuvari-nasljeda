@@ -58,6 +58,7 @@ export default function HrvatskaPamti() {
           <h3>{selectedPlace.name}</h3>
           <p>{selectedPlace.text}</p>
           <span className="hp-place-status">{selectedPlace.status}</span>
+          <a className="hp-place-open" href={"/hrvatska-pamti-mjesto.html?mjesto=" + ({"Vukovar":"vukovar","Škabrnja":"skabrnja","Dubrovnik":"dubrovnik","Lika i Krbava":"lika-i-krbava","Zagreb":"zagreb","Knin":"knin","Osijek":"osijek","Sinj":"sinj"}[selectedPlace.name] || "vukovar")}>Otvori stranicu mjesta <span>↗</span></a>
           <div className="hp-source-note">
             <strong>Što slijedi?</strong>
             <p>Priprema povijesnog zapisa, provjera lokacije i povezivanje s pouzdanim arhivskim, muzejskim ili znanstvenim izvorima.</p>
