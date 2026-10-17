@@ -175,6 +175,30 @@ export default function PatriaSoulVideo() {
     setNotice("Video je dodan u tvoju lokalnu biblioteku. Provjeri izvor i povijesni kontekst prije dijeljenja.");
   }
 
+  function addAllDiscoveredVideos() {
+    const existingIds = new Set(videos.map((video) => video.youtubeId));
+    const candidates = discoveryResults.filter((item) => item.youtubeId && !existingIds.has(item.youtubeId));
+    if (!candidates.length) {
+      setNotice("Nema novih rezultata za dodavanje.");
+      return;
+    }
+    const addedAt = new Date().toISOString();
+    const imported = candidates.map((candidate) => ({
+      id: `video-${Date.now()}-${candidate.youtubeId}`,
+      youtubeId: candidate.youtubeId,
+      url: candidate.url,
+      title: candidate.title || "Video bez naslova",
+      category: "Domovinski rat",
+      description: candidate.description || "",
+      source: candidate.source || "YouTube",
+      date: candidate.date || "",
+      addedAt,
+    }));
+    setVideos((items) => [...imported, ...items]);
+    setDiscoveryResults([]);
+    setNotice(`Dodano ${imported.length} videozapisa u tvoju lokalnu biblioteku. Pregledaj naslove i kategorije prije korištenja.`);
+  }
+
   function removeVideo(id) {
     setVideos((items) => items.filter((item) => item.id !== id));
     setFavorites((items) => items.filter((item) => item !== id));
@@ -228,7 +252,7 @@ export default function PatriaSoulVideo() {
       <div className="psv-discovery-heading"><div><span className="psv-eyebrow">PRONAĐI NOVE ZAPISE</span><h2 id="psv-discovery-title">Istraži YouTube</h2><p>Pronađi javne videozapise, pregledaj rezultate i ručno odaberi što želiš dodati u svoju arhivu. Rezultati se ne objavljuju automatski.</p></div><span className="psv-discovery-badge"><ShieldCheck size={15} /> Odabir prije dodavanja</span></div>
       <form className="psv-discovery-form" onSubmit={discoverVideos}><label className="psv-search"><Search size={18} /><input value={discoveryQuery} onChange={(e) => setDiscoveryQuery(e.target.value)} placeholder="Npr. Vukovar svjedočanstva branitelja" /><button type="submit" disabled={discoveryLoading}>{discoveryLoading ? "Tražim…" : "Pretraži"}</button></label></form>
       {discoveryError && <p className="psv-discovery-message" role="status"><Info size={16} />{discoveryError}</p>}
-      {discoveryResults.length > 0 && <div className="psv-discovery-results">{discoveryResults.map((item) => <article className="psv-discovery-result" key={item.youtubeId}><img src={item.thumbnail || `https://i.ytimg.com/vi/${item.youtubeId}/mqdefault.jpg`} alt="" loading="lazy" /><div><strong>{item.title}</strong><span>{item.source || "YouTube"}{item.date ? ` · ${formatDate(item.date)}` : ""}</span><p>{item.description || "Opis nije dostupan."}</p><div className="psv-discovery-actions"><a href={item.url} target="_blank" rel="noreferrer">Provjeri izvor ↗</a><button type="button" onClick={() => addDiscoveredVideo(item)}><Plus size={15} /> Dodaj u arhivu</button></div></div></article>)}</div>}
+      {discoveryResults.length > 0 && <><div className="psv-discovery-bulk"><span>Pronađeno {discoveryResults.length} novih videozapisa</span><button type="button" onClick={addAllDiscoveredVideos}><Plus size={15} /> Dodaj sve rezultate</button></div><div className="psv-discovery-results">{discoveryResults.map((item) => <article className="psv-discovery-result" key={item.youtubeId}><img src={item.thumbnail || `https://i.ytimg.com/vi/${item.youtubeId}/mqdefault.jpg`} alt="" loading="lazy" /><div><strong>{item.title}</strong><span>{item.source || "YouTube"}{item.date ? ` · ${formatDate(item.date)}` : ""}</span><p>{item.description || "Opis nije dostupan."}</p><div className="psv-discovery-actions"><a href={item.url} target="_blank" rel="noreferrer">Provjeri izvor ↗</a><button type="button" onClick={() => addDiscoveredVideo(item)}><Plus size={15} /> Dodaj u arhivu</button></div></div></article>)}</div></>}
     </section>
 
     <section className="psv-library" id="psv-library">
