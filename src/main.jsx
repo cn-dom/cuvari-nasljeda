@@ -7,10 +7,13 @@ const Pages = lazy(() => import("./Pages.jsx"));
 const Events = lazy(() => import("./Events.jsx"));
 const AICenter = lazy(() => import("./AICenter.jsx"));
 const VirtualMuseum = lazy(() => import("./VirtualMuseum.jsx"));
+const HrvatskaPamti = lazy(() => import("./HrvatskaPamti.jsx"));
 import "./index.css";
 
 const route = window.location.pathname.replace(/\/$/, "");
-const Screen = route === "/virtualni-muzej.html"
+const Screen = route === "/hrvatska-pamti.html"
+  ? HrvatskaPamti
+  : route === "/virtualni-muzej.html"
   ? VirtualMuseum
   : route === "/ai-centar.html"
   ? AICenter
