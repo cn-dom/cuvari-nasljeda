@@ -67,6 +67,9 @@ function VideoCard({ video, onOpen, favorite, saved, onFavorite, onSave }) {
 
 export default function PatriaSoulVideo() {
   const [videos, setVideos] = useState(readLibrary);
+  const [categoryResults, setCategoryResults] = useState([]);
+  const [categoryLoading, setCategoryLoading] = useState(false);
+  const [categoryError, setCategoryError] = useState("");
   const [activeVideo, setActiveVideo] = useState(null);
   const [session, setSession] = useState(null);
   const [comments, setComments] = useState([]);
@@ -201,13 +204,14 @@ export default function PatriaSoulVideo() {
 
   const visibleVideos = useMemo(() => {
     const query = search.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("hr");
-    return videos.filter((video) => {
+    const combined = [...videos, ...categoryResults.filter((result) => !videos.some((video) => video.youtubeId === result.youtubeId))];
+    return combined.filter((video) => {
       const text = [video.title, video.description, video.category, video.source].join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("hr");
       return (!query || text.includes(query))
         && (category === "Sve" || video.category === category)
         && (view === "all" || (view === "favorites" && favorites.includes(video.id)) || (view === "saved" && saved.includes(video.id)) || (view === "history" && history.includes(video.id)));
     }).sort((a, b) => sort === "oldest" ? String(a.date).localeCompare(String(b.date)) : sort === "title" ? a.title.localeCompare(b.title, "hr") : String(b.addedAt).localeCompare(String(a.addedAt)));
-  }, [videos, search, category, view, sort, favorites, saved, history]);
+  }, [videos, categoryResults, search, category, view, sort, favorites, saved, history]);
 
   function toggle(setter, values, id) { setter(values.includes(id) ? values.filter((item) => item !== id) : [id, ...values]); }
   function openVideo(video) {
@@ -230,6 +234,58 @@ export default function PatriaSoulVideo() {
     setForm({ url: "", title: "", category: "Domovinski rat", description: "", source: "", date: "" });
     setAddOpen(false); setNotice("Video je dodan u ovu lokalnu biblioteku.");
   }
+  async function loadCategoryVideos(nextCategory) {
+    const queries = {
+      "Sve": "Domovinski rat Hrvatska dokumentarni svjedočanstva",
+      "Domovinski rat": "Domovinski rat Hrvatska dokumentarni film svjedočanstva",
+      "Vukovar": "Vukovar 1991 Domovinski rat svjedočanstva",
+      "Stradanja i žrtve": "Domovinski rat hrvatske žrtve stradanja dokumentarni",
+      "Branitelji": "hrvatski branitelji Domovinski rat svjedočanstva",
+      "Dokumentarci": "Domovinski rat Hrvatska dokumentarni film",
+      "Svjedočanstva": "svjedočanstva hrvatskih branitelja Domovinski rat",
+      "Povijesni zapisi": "Domovinski rat Hrvatska arhivski snimci povijesni zapisi",
+    };
+    const query = queries[nextCategory] || queries.Sve;
+    setCategoryLoading(true);
+    setCategoryError("");
+    try {
+      const response = await fetch(`${YOUTUBE_SEARCH_ENDPOINT}${YOUTUBE_SEARCH_ENDPOINT.includes("?") ? "&" : "?"}q=${encodeURIComponent(query)}`);
+      let payload;
+      try {
+        payload = await response.json();
+      } catch {
+        throw new Error(`Poslužitelj je vratio neispravan odgovor (${response.status}).`);
+      }
+      if (!response.ok) {
+        throw new Error(payload.error || `YouTube pretraga nije uspjela (${response.status}).`);
+      }
+      const items = Array.isArray(payload.items) ? payload.items : Array.isArray(payload.results) ? payload.results : [];
+      const results = items.map((item) => {
+        const snippet = item.snippet || item;
+        const youtubeId = item.id?.videoId || item.youtubeId || item.videoId;
+        if (!youtubeId) return null;
+        return {
+          id: `video-${youtubeId}`,
+          youtubeId,
+          url: `https://www.youtube.com/watch?v=${youtubeId}`,
+          title: safeText(snippet.title || item.title, 120) || "Video bez naslova",
+          description: safeText(snippet.description || item.description, 3000),
+          source: safeText(snippet.channelTitle || item.channelTitle || item.source, 120) || "YouTube",
+          date: (snippet.publishedAt || item.publishedAt || "").slice(0, 10),
+          addedAt: snippet.publishedAt || item.publishedAt || new Date().toISOString(),
+          category: nextCategory === "Sve" ? "Domovinski rat" : nextCategory,
+        };
+      }).filter(Boolean);
+      setCategoryResults(results.filter((item) => !videos.some((video) => video.youtubeId === item.youtubeId)));
+      if (!results.length) setCategoryError("YouTube nije pronašao videozapise za ovu kategoriju. Pokušaj ponovno.");
+    } catch (error) {
+      setCategoryResults([]);
+      setCategoryError(error.message || "Videozapise za ovu kategoriju trenutačno nije moguće učitati.");
+    } finally {
+      setCategoryLoading(false);
+    }
+  }
+
   async function discoverVideos(event) {
     event?.preventDefault();
     const query = safeText(discoveryQuery, 180);
@@ -264,6 +320,8 @@ export default function PatriaSoulVideo() {
       setDiscoveryError(error.message || "Pretraživanje trenutačno nije dostupno.");
     } finally { setDiscoveryLoading(false); }
   }
+  useEffect(() => { loadCategoryVideos("Sve"); }, []);
+
   function addDiscoveredVideo(candidate) {
     if (videos.some((item) => item.youtubeId === candidate.youtubeId)) { setNotice("Ovaj video već postoji u tvojoj biblioteci."); return; }
     const video = { id: `video-${Date.now()}-${candidate.youtubeId}`, youtubeId: candidate.youtubeId, url: candidate.url, title: candidate.title || "Video bez naslova", category: "Domovinski rat", description: candidate.description || "", source: candidate.source || "", date: candidate.date || "", addedAt: new Date().toISOString() };
@@ -360,7 +418,7 @@ export default function PatriaSoulVideo() {
         <label className="psv-sort"><SlidersHorizontal size={16} /><span>Sortiraj</span><select value={sort} onChange={(e) => setSort(e.target.value)}><option value="newest">Najnovije dodano</option><option value="oldest">Najstariji datum</option><option value="title">Naslov A–Ž</option></select><ChevronDown size={14} /></label>
       </div>
 
-      <div className="psv-category-row" aria-label="Kategorije">{CATEGORIES.map((item) => <button key={item} className={category === item ? "selected" : ""} onClick={() => setCategory(item)}>{item}</button>)}</div>
+      <div className="psv-category-row" aria-label="Kategorije">{CATEGORIES.map((item) => <button key={item} className={category === item ? "selected" : ""} onClick={() => { setView("all"); setCategory(item); loadCategoryVideos(item); }}>{item}</button>)}</div>
       <div className="psv-quick-filters">
         <button className={view === "all" ? "selected" : ""} onClick={() => setView("all")}><Tv size={15} /> Sve</button>
         <button className={view === "favorites" ? "selected" : ""} onClick={() => setView("favorites")}><Heart size={15} /> Omiljeno</button>
@@ -370,7 +428,9 @@ export default function PatriaSoulVideo() {
 
       {notice && <div className="psv-notice" role="status"><Info size={17} /><span>{notice}</span><button onClick={() => setNotice("")} aria-label="Zatvori obavijest"><X size={16} /></button></div>}
 
-      {visibleVideos.length ? <div className={`psv-video-grid ${layout === "list" ? "list-layout" : ""}`}>{visibleVideos.map((video) => <VideoCard key={video.id} video={video} onOpen={openVideo} favorite={favorites.includes(video.id)} saved={saved.includes(video.id)} onFavorite={(id) => toggle(setFavorites, favorites, id)} onSave={(id) => toggle(setSaved, saved, id)} />)}</div> : <div className="psv-empty-state"><div className="psv-empty-icon"><Film size={30} /></div><span className="psv-eyebrow">ARHIVA SE GRADI</span><h3>{videos.length ? "Nema rezultata za odabrani prikaz" : "Prvi zapis počinje ovdje"}</h3><p>{videos.length ? "Promijeni pojam pretrage ili kategoriju." : "Dodaj provjerenu YouTube poveznicu na dokumentarac, svjedočanstvo ili povijesni zapis. Naslov, izvor i kontekst ostaju uz video."}</p><button className="psv-add-button" onClick={() => setAddOpen(true)}><Plus size={17} /> Dodaj prvi video</button></div>}
+      {categoryLoading && view === "all" && <p className="psv-discovery-message" role="status"><Info size={16} /> Učitavam videozapise za kategoriju „{category}”…</p>}
+      {categoryError && view === "all" && <p className="psv-discovery-message" role="status"><Info size={16} /> {categoryError}</p>}
+      {visibleVideos.length ? <div className={`psv-video-grid ${layout === "list" ? "list-layout" : ""}`}>{visibleVideos.map((video) => <VideoCard key={video.id} video={video} onOpen={openVideo} favorite={favorites.includes(video.id)} saved={saved.includes(video.id)} onFavorite={(id) => toggle(setFavorites, favorites, id)} onSave={(id) => toggle(setSaved, saved, id)} />)}</div> : categoryLoading && view === "all" ? null : <div className="psv-empty-state"><div className="psv-empty-icon"><Film size={30} /></div><span className="psv-eyebrow">ARHIVA SE GRADI</span><h3>{videos.length ? "Nema rezultata za odabrani prikaz" : "Prvi zapis počinje ovdje"}</h3><p>{videos.length ? "Promijeni pojam pretrage ili kategoriju." : "Dodaj provjerenu YouTube poveznicu na dokumentarac, svjedočanstvo ili povijesni zapis. Naslov, izvor i kontekst ostaju uz video."}</p><button className="psv-add-button" onClick={() => setAddOpen(true)}><Plus size={17} /> Dodaj prvi video</button></div>}
     </section>
 
     <footer className="psv-footer"><div className="psv-footer-mark">✦</div><div><strong>PatriaSoul · Čuvari nasljeđa</strong><p>Čuvati sjećanje znači čuvati dostojanstvo i istinu.</p></div><span className="psv-footer-note"><ShieldCheck size={15} /> Izvor i kontekst uz svaki zapis</span></footer>
