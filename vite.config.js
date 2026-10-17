@@ -9,6 +9,7 @@ export default defineConfig({
       input: {
         main: "index.html",
         videoArhiva: "video-arhiva.html",
+        hrvatskiVal: "hrvatski-val.html",
       },
     },
   },
