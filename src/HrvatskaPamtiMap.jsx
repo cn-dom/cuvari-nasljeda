@@ -6,13 +6,17 @@ import { useEffect, useRef, useState } from "react";
  * Place descriptions remain explicitly marked as preparation, not verified records.
  */
 const MAPLIBRE_MODULE = "https://unpkg.com/maplibre-gl@6.14.0/dist/maplibre-gl.mjs";
-const MAP_STYLE = "https://demotiles.maplibre.org/style.json";
+const MAP_STYLE = "https://tiles.openfreemap.org/styles/fiord";
 
 const mapPoints = [
   { name: "Vukovar", coordinates: [18.9994, 45.3511] },
   { name: "Škabrnja", coordinates: [15.455, 44.087] },
   { name: "Dubrovnik", coordinates: [18.0944, 42.6507] },
   { name: "Lika i Krbava", coordinates: [15.375, 44.546] },
+  { name: "Zagreb", coordinates: [15.9819, 45.815], },
+  { name: "Knin", coordinates: [16.197, 44.040], },
+  { name: "Osijek", coordinates: [18.6955, 45.555], },
+  { name: "Sinj", coordinates: [16.639, 43.703], },
 ];
 
 export default function HrvatskaPamtiMap({ places, selectedPlace, onSelect }) {
