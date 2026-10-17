@@ -5,7 +5,7 @@ const base = process.env.SMOKE_BASE_URL || "http://127.0.0.1:4173";
 const routes = [
   "/", "/forum.html", "/stranice.html", "/dogadaji.html",
   "/vjera-hrvata.html", "/na-danasnji-dan.html", "/administracija.html",
-  "/ai-centar.html", "/virtualni-muzej.html", "/vrijeme.html",
+  "/ai-centar.html", "/virtualni-muzej.html", "/video-arhiva.html", "/vrijeme.html",
   "/kviz/", "/kviz/hrvatski-kviz/", "/kviz/dnevni-kviz/",
   "/kviz/gradovi-hrvatske/", "/kviz/brani-svoj-grad/",
 ];
@@ -60,6 +60,40 @@ try {
       failures.push(`${route}: ${error.message}`);
       await page.screenshot({ path: `/tmp/browser-failure-${route.replace(/[^a-z0-9]+/gi, "_") || "home"}.png`, fullPage: true }).catch(() => {});
       console.error(`FAIL browser render ${route}: ${error.message}`);
+    } finally {
+      await page.close();
+    }
+  }
+
+  // Dedicated smoke for the video archive: add a URL, render its card, and open the embedded player.
+  {
+    const page = await browser.newPage();
+    const pageErrors = [];
+    page.on("pageerror", error => pageErrors.push(error.message));
+    await page.route("**/*", route => {
+      const parsed = new URL(route.request().url());
+      if (["http:", "https:"].includes(parsed.protocol) && !["127.0.0.1", "localhost"].includes(parsed.hostname)) {
+        return route.abort();
+      }
+      return route.continue();
+    });
+    try {
+      const response = await page.goto(new URL("/video-arhiva.html", base).href, { waitUntil: "domcontentloaded", timeout: 20000 });
+      assert.ok(response && response.status() === 200, "video archive should return HTTP 200");
+      await page.getByRole("heading", { name: /Priče koje/ }).waitFor({ state: "visible", timeout: 10000 });
+      await page.getByRole("button", { name: /Dodaj prvi video/ }).click();
+      await page.locator('input[placeholder^="https://www.youtube.com/watch?v="]').fill("https://youtu.be/dQw4w9WgXcQ");
+      await page.locator('input[placeholder="Npr. naslov dokumentarnog filma"]').fill("E2E test video");
+      await page.getByRole("button", { name: /Spremi zapis/ }).click();
+      await page.locator(".psv-card-title", { hasText: "E2E test video" }).waitFor({ state: "visible", timeout: 5000 });
+      await page.getByRole("button", { name: /Pusti video: E2E test video/ }).click();
+      await page.locator('iframe[title="E2E test video"]').waitFor({ state: "visible", timeout: 5000 });
+      assert.match(await page.locator("iframe").getAttribute("src"), /dQw4w9WgXcQ/, "player should embed the submitted YouTube ID");
+      assert.deepEqual(pageErrors, [], `video archive interaction produced browser errors: ${pageErrors.join("; ")}`);
+      console.log("PASS video archive add-and-play interaction");
+    } catch (error) {
+      failures.push(`/video-arhiva.html interaction: ${error.message}`);
+      console.error(`FAIL video archive interaction: ${error.message}`);
     } finally {
       await page.close();
     }
