@@ -3,6 +3,7 @@ import { ArrowLeft, Bookmark, ChevronDown, Clock3, Film, Heart, History, Info, P
 import "./PatriaSoulVideo.css";
 
 const STORAGE_KEY = "patriasoul-video-library-v1";
+const YOUTUBE_SEARCH_ENDPOINT = import.meta.env.VITE_YOUTUBE_SEARCH_ENDPOINT || "";
 const CATEGORIES = ["Sve", "Domovinski rat", "Vukovar", "Stradanja i žrtve", "Branitelji", "Dokumentarci", "Svjedočanstva", "Povijesni zapisi"];
 const EMPTY_LIBRARY = [];
 
@@ -66,6 +67,10 @@ export default function PatriaSoulVideo() {
   const [layout, setLayout] = useState("grid");
   const [addOpen, setAddOpen] = useState(false);
   const [notice, setNotice] = useState("");
+  const [discoveryQuery, setDiscoveryQuery] = useState("Domovinski rat Hrvatska dokumentarni film");
+  const [discoveryResults, setDiscoveryResults] = useState([]);
+  const [discoveryLoading, setDiscoveryLoading] = useState(false);
+  const [discoveryError, setDiscoveryError] = useState("");
   const [favorites, setFavorites] = useState(() => JSON.parse(localStorage.getItem("patriasoul-video-favorites-v1") || "[]"));
   const [saved, setSaved] = useState(() => JSON.parse(localStorage.getItem("patriasoul-video-saved-v1") || "[]"));
   const [history, setHistory] = useState(() => JSON.parse(localStorage.getItem("patriasoul-video-history-v1") || "[]"));
@@ -107,6 +112,40 @@ export default function PatriaSoulVideo() {
     setForm({ url: "", title: "", category: "Domovinski rat", description: "", source: "", date: "" });
     setAddOpen(false); setNotice("Video je dodan u ovu lokalnu biblioteku.");
   }
+  async function discoverVideos(event) {
+    event?.preventDefault();
+    const query = safeText(discoveryQuery, 180);
+    if (!query) { setDiscoveryError("Upiši temu koju želiš pronaći."); return; }
+    if (!YOUTUBE_SEARCH_ENDPOINT) {
+      setDiscoveryError("Automatsko pretraživanje još nije povezano sa sigurnim YouTube API endpointom. API ključ se ne smije stavljati u javni frontend. Do povezivanja možeš dodavati provjerene YouTube poveznice ručno.");
+      setDiscoveryResults([]);
+      return;
+    }
+    setDiscoveryLoading(true); setDiscoveryError("");
+    try {
+      const response = await fetch(`${YOUTUBE_SEARCH_ENDPOINT}${YOUTUBE_SEARCH_ENDPOINT.includes("?") ? "&" : "?"}q=${encodeURIComponent(query)}`);
+      if (!response.ok) throw new Error(`Pretraživanje nije uspjelo (${response.status}).`);
+      const payload = await response.json();
+      const items = Array.isArray(payload.items) ? payload.items : Array.isArray(payload.results) ? payload.results : [];
+      setDiscoveryResults(items.map((item) => {
+        const snippet = item.snippet || item;
+        const youtubeId = item.id?.videoId || item.youtubeId || item.videoId;
+        if (!youtubeId) return null;
+        return { youtubeId, url: `https://www.youtube.com/watch?v=${youtubeId}`, title: safeText(snippet.title || item.title, 120), description: safeText(snippet.description || item.description, 500), source: safeText(snippet.channelTitle || item.channelTitle || item.source, 120), date: (snippet.publishedAt || item.publishedAt || "").slice(0, 10), thumbnail: snippet.thumbnails?.high?.url || snippet.thumbnails?.medium?.url || "" };
+      }).filter(Boolean).filter((item) => !videos.some((video) => video.youtubeId === item.youtubeId)));
+      if (!items.length) setDiscoveryError("Nema rezultata za ovu pretragu. Pokušaj s drugom temom.");
+    } catch (error) {
+      setDiscoveryError(error.message || "Pretraživanje trenutačno nije dostupno.");
+    } finally { setDiscoveryLoading(false); }
+  }
+  function addDiscoveredVideo(candidate) {
+    if (videos.some((item) => item.youtubeId === candidate.youtubeId)) { setNotice("Ovaj video već postoji u tvojoj biblioteci."); return; }
+    const video = { id: `video-${Date.now()}-${candidate.youtubeId}`, youtubeId: candidate.youtubeId, url: candidate.url, title: candidate.title || "Video bez naslova", category: "Domovinski rat", description: candidate.description || "", source: candidate.source || "", date: candidate.date || "", addedAt: new Date().toISOString() };
+    setVideos((items) => [video, ...items]);
+    setDiscoveryResults((items) => items.filter((item) => item.youtubeId !== candidate.youtubeId));
+    setNotice("Video je dodan u tvoju lokalnu biblioteku. Provjeri izvor i povijesni kontekst prije dijeljenja.");
+  }
+
   function removeVideo(id) {
     setVideos((items) => items.filter((item) => item.id !== id));
     setFavorites((items) => items.filter((item) => item !== id));
@@ -141,6 +180,13 @@ export default function PatriaSoulVideo() {
       <div><Heart /><span><strong>{favorites.length}</strong><small>omiljenih</small></span></div>
       <div><Bookmark /><span><strong>{saved.length}</strong><small>za pogledati</small></span></div>
       <div><History /><span><strong>{history.length}</strong><small>nedavno gledanih</small></span></div>
+    </section>
+
+    <section className="psv-discovery" aria-labelledby="psv-discovery-title">
+      <div className="psv-discovery-heading"><div><span className="psv-eyebrow">PRONAĐI NOVE ZAPISE</span><h2 id="psv-discovery-title">Istraži YouTube</h2><p>Pronađi javne videozapise, pregledaj rezultate i ručno odaberi što želiš dodati u svoju arhivu. Rezultati se ne objavljuju automatski.</p></div><span className="psv-discovery-badge"><ShieldCheck size={15} /> Odabir prije dodavanja</span></div>
+      <form className="psv-discovery-form" onSubmit={discoverVideos}><label className="psv-search"><Search size={18} /><input value={discoveryQuery} onChange={(e) => setDiscoveryQuery(e.target.value)} placeholder="Npr. Vukovar svjedočanstva branitelja" /><button type="submit" disabled={discoveryLoading}>{discoveryLoading ? "Tražim…" : "Pretraži"}</button></label></form>
+      {discoveryError && <p className="psv-discovery-message" role="status"><Info size={16} />{discoveryError}</p>}
+      {discoveryResults.length > 0 && <div className="psv-discovery-results">{discoveryResults.map((item) => <article className="psv-discovery-result" key={item.youtubeId}><img src={item.thumbnail || `https://i.ytimg.com/vi/${item.youtubeId}/mqdefault.jpg`} alt="" loading="lazy" /><div><strong>{item.title}</strong><span>{item.source || "YouTube"}{item.date ? ` · ${formatDate(item.date)}` : ""}</span><p>{item.description || "Opis nije dostupan."}</p><div className="psv-discovery-actions"><a href={item.url} target="_blank" rel="noreferrer">Provjeri izvor ↗</a><button type="button" onClick={() => addDiscoveredVideo(item)}><Plus size={15} /> Dodaj u arhivu</button></div></div></article>)}</div>}
     </section>
 
     <section className="psv-library" id="psv-library">
