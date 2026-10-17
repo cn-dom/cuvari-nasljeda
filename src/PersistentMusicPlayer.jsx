@@ -148,16 +148,47 @@ export default function PersistentMusicPlayer() {
     };
   }, [track?.id]);
 
-  function stepQueue(direction) {
+  async function stepQueue(direction) {
     try {
-      const stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "null");
+      const stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "null") || track;
       const queue = Array.isArray(stored?.queue) ? stored.queue : [];
-      const currentIndex = Number(stored?.queueIndex ?? queue.findIndex((item) => item.id === track?.id));
+      const foundIndex = queue.findIndex((item) => item?.id === track?.id);
+      const currentIndex = foundIndex >= 0 ? foundIndex : Number(stored?.queueIndex ?? -1);
       const nextIndex = currentIndex + direction;
-      if (nextIndex < 0 || nextIndex >= queue.length) return;
-      const nextTrack = { ...queue[nextIndex], queue, queueIndex: nextIndex, currentTime: 0 };
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextTrack));
-      setTrack(nextTrack);
+      if (nextIndex >= 0 && nextIndex < queue.length) {
+        const nextTrack = { ...queue[nextIndex], queue, queueIndex: nextIndex, currentTime: 0 };
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextTrack));
+        setTrack(nextTrack);
+        return;
+      }
+      if (direction < 0) return;
+      setSearchError("");
+      const searches = [
+        stored?.artist && stored.artist !== "YouTube" ? `${stored.artist} hrvatske pjesme` : "",
+        "hrvatske domoljubne pjesme klape hrvatska glazba"
+      ].filter(Boolean);
+      for (const term of searches) {
+        try {
+          const response = await fetch(`${ENDPOINT}${ENDPOINT.includes("?") ? "&" : "?"}q=${encodeURIComponent(term)}`);
+          if (!response.ok) continue;
+          const payload = await response.json();
+          const items = (Array.isArray(payload.items) ? payload.items : Array.isArray(payload.results) ? payload.results : []).map((item) => {
+            const snippet = item.snippet || item;
+            const id = item.id?.videoId || item.youtubeId || item.videoId;
+            if (!id || id === stored?.id) return null;
+            return { id, title: clean(snippet.title || item.title, 160) || "Pjesma bez naslova", artist: clean(snippet.channelTitle || item.channelTitle || item.artist || "YouTube", 120), thumbnail: snippet.thumbnails?.medium?.url || snippet.thumbnails?.high?.url || `https://i.ytimg.com/vi/${id}/hqdefault.jpg` };
+          }).filter(Boolean);
+          if (!items.length) continue;
+          const sameArtist = items.filter(item => String(item.artist).toLocaleLowerCase("hr") === String(stored?.artist || "").toLocaleLowerCase("hr"));
+          const pool = sameArtist.length ? sameArtist : items;
+          const index = Math.floor(Math.random() * pool.length);
+          const nextTrack = { ...pool[index], queue: pool, queueIndex: index, currentTime: 0 };
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextTrack));
+          setTrack(nextTrack);
+          return;
+        } catch { /* Try the general Croatian music search. */ }
+      }
+      setSearchError("Nisam uspio pronaći sljedeću pjesmu. Pokušaj ponovno.");
     } catch { /* Ignore malformed queue data. */ }
   }
 
