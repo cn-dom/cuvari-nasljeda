@@ -85,3 +85,13 @@
 .hp-detail-source-grid a{display:inline-block;margin-top:12px;color:#e5cba9!important;font-size:11px;font-weight:800}
 .hp-detail-sources .hp-detail-sources-note{padding-top:16px;margin-top:24px;border-top:1px solid var(--hp-line);font-size:10px}
 @media(max-width:760px){.hp-detail-source-grid{grid-template-columns:1fr}.hp-detail-source-grid p{min-height:0}.hp-detail-sources{padding-top:54px;padding-bottom:54px}}
+
+.hp-record-sources{padding:64px clamp(24px,8vw,128px);background:#0e2030;border-top:1px solid var(--hp-line)}
+.hp-record-sources>h2{font-family:"Cormorant Garamond",Georgia,serif;font-size:clamp(34px,4vw,48px);font-weight:500;margin:14px 0 24px}
+.hp-record-source-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.hp-record-source-grid article{padding:22px;background:#081522;border:1px solid var(--hp-line)}
+.hp-record-source-grid article>span{font-size:9px;color:#d6b48b;letter-spacing:.08em}
+.hp-record-source-grid h3{font-size:15px;line-height:1.5;margin:14px 0 9px}
+.hp-record-source-grid p{font-size:11px;line-height:1.8;color:#aab9c7}
+.hp-record-source-grid a{display:inline-block;margin-top:9px;color:#e5cba9!important;font-size:11px;font-weight:800}
+.hp-record-sources .hp-detail-sources-note{font-size:10px;color:#aab9c7;line-height:1.8;margin-top:18px}
