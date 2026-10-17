@@ -242,8 +242,16 @@ export default function PatriaSoulVideo() {
     setDiscoveryLoading(true); setDiscoveryError("");
     try {
       const response = await fetch(`${YOUTUBE_SEARCH_ENDPOINT}${YOUTUBE_SEARCH_ENDPOINT.includes("?") ? "&" : "?"}q=${encodeURIComponent(query)}`);
-      if (!response.ok) throw new Error(`Pretraživanje nije uspjelo (${response.status}).`);
-      const payload = await response.json();
+      let payload;
+      try {
+        payload = await response.json();
+      } catch {
+        throw new Error(`Poslužitelj je vratio neispravan odgovor (${response.status}). Provjeri objavu Cloudflare Workera.`);
+      }
+      if (!response.ok) {
+        const detail = [payload.error, payload.reason, payload.detail].filter(Boolean).join(" — ");
+        throw new Error(detail || `Pretraživanje nije uspjelo (${response.status}).`);
+      }
       const items = Array.isArray(payload.items) ? payload.items : Array.isArray(payload.results) ? payload.results : [];
       setDiscoveryResults(items.map((item) => {
         const snippet = item.snippet || item;
