@@ -28,7 +28,7 @@
 /* Accessibility and focused playback polish */
 body.psv-modal-open{overflow:hidden}
 .psv-app button:focus-visible,.psv-app a:focus-visible,.psv-app input:focus-visible,.psv-app select:focus-visible,.psv-app textarea:focus-visible{outline:2px solid #e8c98b;outline-offset:3px}
-.psv-player-overlay{overscroll-behavior:contain}
+.psv-player-overlay{overscroll-behavior:contain;align-items:flex-start;scroll-padding-top:22px}
 .psv-player-shell{width:min(100%,1120px);background:linear-gradient(145deg,#0d2036,#071321 78%);border-color:#82b5ee35;box-shadow:0 35px 120px #000b,0 0 0 1px #ffffff05}
 .psv-player-head{border-bottom:1px solid var(--line);background:linear-gradient(90deg,#102743aa,transparent)}
 .psv-player-head h2{line-height:1.35}
