@@ -157,10 +157,15 @@ export default {
           return json({ error: "YouTube je vratio neispravan odgovor. Pokušaj ponovno kasnije." }, 502);
         }
         if (!upstream.ok) {
+          const apiError = payload?.error || {};
+          const reason = apiError.errors?.[0]?.reason || apiError.status || "";
+          const detail = String(apiError.message || "").slice(0, 240);
           return json({
             error: upstream.status === 403
-              ? "YouTube API nije dostupan. Provjeri API ključ, uključen YouTube Data API v3 i kvotu."
-              : "YouTube trenutačno nije vratio rezultate. Pokušaj ponovno kasnije."
+              ? "YouTube API je odbio zahtjev. Provjeri je li YouTube Data API v3 uključen, je li ključ valjan i odgovaraju li mu ograničenja."
+              : "YouTube trenutačno nije vratio rezultate. Pokušaj ponovno kasnije.",
+            ...(reason ? { reason } : {}),
+            ...(detail ? { detail } : {})
           }, upstream.status === 403 ? 503 : upstream.status);
         }
 
