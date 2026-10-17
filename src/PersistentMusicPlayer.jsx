@@ -96,7 +96,7 @@ export default function PersistentMusicPlayer() {
       try { if (player && player.getCurrentTime) savePosition(player.getCurrentTime()); } catch { /* Ignore page transition. */ }
       if (window.onYouTubeIframeAPIReady === readyHandler) window.onYouTubeIframeAPIReady = previousReady;
     };
-  }, [track.id]);
+  }, [track?.id]);
 
   function closePlayer() {
     window.localStorage.removeItem(STORAGE_KEY);
@@ -182,7 +182,6 @@ export default function PersistentMusicPlayer() {
     }
   }
 
-  if (!track) return null;
 
   const panelStyle = {
     position: "fixed", zIndex: 10000,
@@ -209,7 +208,7 @@ export default function PersistentMusicPlayer() {
           <img src="/assets/images/1000000982.png" alt="" style={{ width: 28, height: 28, objectFit: "contain", pointerEvents: "none" }} />
           <div style={{ minWidth: 0, flex: 1, pointerEvents: "none" }}>
             <strong style={{ display: "block", fontSize: 11, letterSpacing: ".08em" }}>HRVATSKI VAL PLAYER</strong>
-            <span style={{ display: "block", fontSize: 12, opacity: .82, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{track.title}</span>
+            <span style={{ display: "block", fontSize: 12, opacity: .82, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{track?.title || "Odaberi pjesmu"}</span>
           </div>
           <span aria-hidden="true" style={{ fontSize: 12, opacity: .6 }}>⠿</span>
         </div>
@@ -247,7 +246,7 @@ export default function PersistentMusicPlayer() {
             </div>
           )}
 
-          <iframe
+          {track && <iframe
             key={track.id}
             title={`Hrvatski Val Player — ${track.title}`}
             src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(track.id)}?autoplay=1&playsinline=1&rel=0&enablejsapi=1`}
@@ -255,8 +254,8 @@ export default function PersistentMusicPlayer() {
             allow="autoplay; encrypted-media; picture-in-picture"
             referrerPolicy="strict-origin-when-cross-origin"
             style={{ display: "block", width: "100%", aspectRatio: "16 / 9", border: 0, borderRadius: 9, background: "#000" }}
-          />
-          <p style={{ margin: "9px 0 0", fontSize: 11, opacity: .72 }}>Povuci gornju traku za pomicanje. Smanji player da ne smeta čitanju.</p>
+          />}
+          {track ? <p style={{ margin: "9px 0 0", fontSize: 11, opacity: .72 }}>Povuci gornju traku za pomicanje. Smanji player da ne smeta čitanju.</p> : <p style={{ margin: "9px 0 0", fontSize: 11, opacity: .72 }}>Player je spreman. Pretraži pjesmu i slušaj dok pregledavaš PatriaSoul.</p>}
         </>}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
