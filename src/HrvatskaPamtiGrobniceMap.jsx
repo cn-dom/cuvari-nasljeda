@@ -99,7 +99,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
             duration: 900,
           });
           window.setTimeout(() => {
-            if (!cancelled && entry.marker) entry.marker.togglePopup();
+            if (!cancelled && entry.marker && !entry.marker.getPopup()?.isOpen()) entry.marker.togglePopup();
           }, 950);
         };
         window.addEventListener("hp-focus-grave-map", focusMarker);
