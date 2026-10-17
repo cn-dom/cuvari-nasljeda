@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Bookmark, ChevronDown, Clock3, Film, Heart, History, Info, Play, Plus, Search, ShieldCheck, SlidersHorizontal, Trash2, Tv, X } from "lucide-react";
+import { supabase } from "./lib/supabase";
 import "./PatriaSoulVideo.css";
 
 const STORAGE_KEY = "patriasoul-video-library-v1";
@@ -67,6 +68,13 @@ function VideoCard({ video, onOpen, favorite, saved, onFavorite, onSave }) {
 export default function PatriaSoulVideo() {
   const [videos, setVideos] = useState(readLibrary);
   const [activeVideo, setActiveVideo] = useState(null);
+  const [session, setSession] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState("");
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const [commentsError, setCommentsError] = useState("");
+  const [commentsNotice, setCommentsNotice] = useState("");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("Sve");
   const [view, setView] = useState("all");
@@ -88,6 +96,87 @@ export default function PatriaSoulVideo() {
   useEffect(() => { localStorage.setItem("patriasoul-video-favorites-v1", JSON.stringify(favorites)); }, [favorites]);
   useEffect(() => { localStorage.setItem("patriasoul-video-saved-v1", JSON.stringify(saved)); }, [saved]);
   useEffect(() => { localStorage.setItem("patriasoul-video-history-v1", JSON.stringify(history)); }, [history]);
+
+  useEffect(() => {
+    if (!supabase) return undefined;
+    let alive = true;
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (alive && !error) setSession(data?.session ?? null);
+    });
+    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession ?? null);
+    });
+    return () => {
+      alive = false;
+      data.subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!activeVideo?.youtubeId) {
+      setComments([]);
+      setCommentsError("");
+      setCommentsNotice("");
+      setCommentText("");
+      return undefined;
+    }
+    let cancelled = false;
+    async function loadComments() {
+      setCommentsLoading(true);
+      setCommentsError("");
+      try {
+        if (!supabase || !session?.user?.id) {
+          if (!cancelled) setComments([]);
+          return;
+        }
+        const { data, error } = await supabase
+          .from("video_archive_comments")
+          .select("id, video_id, user_id, content, created_at, profiles(display_name)")
+          .eq("video_id", activeVideo.youtubeId)
+          .order("created_at", { ascending: true })
+          .limit(100);
+        if (error) throw error;
+        if (!cancelled) setComments(data || []);
+      } catch {
+        if (!cancelled) setCommentsError("Komentare trenutačno nije moguće učitati. Provjeri je li nova tablica primijenjena u Supabaseu.");
+      } finally {
+        if (!cancelled) setCommentsLoading(false);
+      }
+    }
+    loadComments();
+    return () => { cancelled = true; };
+  }, [activeVideo?.youtubeId, session?.user?.id]);
+
+  async function submitVideoComment(event) {
+    event.preventDefault();
+    const content = commentText.trim();
+    if (!content || !session?.user?.id || !supabase || commentSubmitting) return;
+    setCommentSubmitting(true);
+    setCommentsError("");
+    setCommentsNotice("");
+    try {
+      const { error } = await supabase.from("video_archive_comments").insert({
+        video_id: activeVideo.youtubeId,
+        user_id: session.user.id,
+        content,
+      });
+      if (error) throw error;
+      setCommentText("");
+      setCommentsNotice("Komentar je objavljen.");
+      const { data, error: loadError } = await supabase
+        .from("video_archive_comments")
+        .select("id, video_id, user_id, content, created_at, profiles(display_name)")
+        .eq("video_id", activeVideo.youtubeId)
+        .order("created_at", { ascending: true })
+        .limit(100);
+      if (loadError) throw loadError;
+      setComments(data || []);
+    } catch {
+      setCommentsError("Komentar nije spremljen. Provjeri vezu i je li tablica komentara aktivirana u Supabaseu.");
+    } finally {
+      setCommentSubmitting(false);
+    }
+  }
 
   useEffect(() => {
     const onKeyDown = (event) => {
@@ -282,6 +371,22 @@ export default function PatriaSoulVideo() {
       <div className="psv-player-shell"><div className="psv-player-head"><div className="psv-player-heading-copy"><span className="psv-eyebrow">{activeVideo.category}</span><h2>{activeVideo.title}</h2></div><div className="psv-player-head-actions"><button className="psv-player-back" onClick={() => { setActiveVideo(null); document.getElementById("psv-library")?.scrollIntoView({ behavior: "smooth" }); }}><ArrowLeft size={16} /> Natrag na arhivu</button><button className="psv-player-close" onClick={() => setActiveVideo(null)} aria-label="Zatvori player"><X size={19} /><span>Zatvori</span></button></div></div>
         <div className="psv-player-frame"><iframe src={`https://www.youtube-nocookie.com/embed/${activeVideo.youtubeId}?autoplay=1&controls=1&rel=0&modestbranding=1`} title={activeVideo.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen /></div>
         <div className="psv-player-details"><div><span>IZVOR</span><strong>{activeVideo.source || "YouTube · izvor nije dodat"}</strong><p className="psv-full-description">{activeVideo.description || "Opis i povijesni kontekst nisu uneseni."}</p><small className="psv-player-control-hint">Za glasnoću, isključenje zvuka i pauzu koristi kontrole unutar videozapisa.</small>{activeVideo.date && <small>Datum događaja/zapisa: {formatDate(activeVideo.date)}</small>}</div><div className="psv-player-buttons"><button className={favorites.includes(activeVideo.id) ? "is-active" : ""} onClick={() => toggle(setFavorites, favorites, activeVideo.id)}><Heart size={16} /> Omiljeno</button><button className={saved.includes(activeVideo.id) ? "is-active" : ""} onClick={() => toggle(setSaved, saved, activeVideo.id)}><Bookmark size={16} /> Kasnije</button><a href={activeVideo.url} target="_blank" rel="noreferrer">Otvori na YouTubeu ↗</a><button className="psv-delete-button" onClick={() => removeVideo(activeVideo.id)}><Trash2 size={15} /> Ukloni iz moje biblioteke</button></div></div>
+        <section className="psv-comments" aria-labelledby="psv-comments-title">
+          <div className="psv-comments-heading">
+            <div><span className="psv-eyebrow">RAZGOVOR ZAJEDNICE</span><h3 id="psv-comments-title">Komentari na video</h3><p>Podijeli sjećanje, kontekst ili pitanje uz poštovanje prema temi i drugim članovima.</p></div>
+            {session?.user && <span className="psv-comments-count">{comments.length} {comments.length === 1 ? "komentar" : "komentara"}</span>}
+          </div>
+          {!session?.user ? <div className="psv-comments-signin"><Info size={18} /><div><strong>Prijavi se za sudjelovanje</strong><p>Komentari su dostupni prijavljenim članovima PatriaSoula.</p><a href="/#prijava">Prijava / registracija ↗</a></div></div> : <>
+            <form className="psv-comment-form" onSubmit={submitVideoComment}>
+              <label htmlFor="psv-comment-text">Napiši komentar</label>
+              <textarea id="psv-comment-text" maxLength={1500} rows={3} value={commentText} onChange={(event) => setCommentText(event.target.value)} placeholder="Napiši komentar uz poštovanje, činjenice i izvor gdje je potrebno…" required />
+              <div className="psv-comment-form-footer"><small>{commentText.length}/1500 znakova</small><button type="submit" disabled={commentSubmitting || !commentText.trim()}>{commentSubmitting ? "Objavljujem…" : "Objavi komentar"}</button></div>
+            </form>
+            {commentsNotice && <p className="psv-comments-status" role="status">{commentsNotice}</p>}
+            {commentsError && <p className="psv-comments-error" role="alert">{commentsError}</p>}
+            {commentsLoading ? <p className="psv-comments-empty">Učitavam komentare…</p> : comments.length ? <div className="psv-comment-list">{comments.map((comment) => <article className="psv-comment" key={comment.id}><div className="psv-comment-avatar">{(comment.profiles?.display_name || "Č").trim().charAt(0).toLocaleUpperCase("hr")}</div><div className="psv-comment-content"><div className="psv-comment-meta"><strong>{comment.profiles?.display_name?.trim() || "Čuvar nasljeđa"}</strong><time dateTime={comment.created_at}>{new Date(comment.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" })}</time></div><p>{comment.content}</p></div></article>)}</div> : <p className="psv-comments-empty">Još nema komentara. Budi prvi koji će podijeliti svoje mišljenje ili dodatni povijesni kontekst.</p>}
+          </>}
+        </section>
         <aside className="psv-player-sidebar" aria-label="Sljedeći i preporučeni videozapisi">
           <div className="psv-sidebar-heading"><span className="psv-eyebrow">NASTAVI GLEDATI</span><h3>Sljedeći video</h3><p>Preporuke iz tvoje arhive, prvo iz iste kategorije.</p></div>
           {recommendedVideos.length > 0 ? <>
