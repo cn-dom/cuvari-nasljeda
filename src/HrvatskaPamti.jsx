@@ -7,6 +7,10 @@ const places = [
   { name: "Škabrnja", region: "Dalmacija", text: "Mjesto sjećanja na civilne žrtve i branitelje iz studenoga 1991.", status: "Priprema sadržaja", symbol: "✦" },
   { name: "Dubrovnik", region: "Južna Hrvatska", text: "Obrana grada i očuvanje kulturne baštine tijekom napada 1991.–1992.", status: "Priprema sadržaja", symbol: "✦" },
   { name: "Lika i Krbava", region: "Središnja Hrvatska", text: "Prostor brojnih povijesnih slojeva, stradanja i obiteljskih sjećanja.", status: "Priprema sadržaja", symbol: "✦" },
+  { name: "Zagreb", region: "Središnja Hrvatska", text: "Glavni grad i mjesto susreta različitih razdoblja hrvatske političke, kulturne i društvene povijesti.", status: "Priprema sadržaja", symbol: "✦" },
+  { name: "Knin", region: "Dalmatinsko zaleđe", text: "Povijesni grad povezan s hrvatskom državnom tradicijom i događajima novije povijesti.", status: "Priprema sadržaja", symbol: "✦" },
+  { name: "Osijek", region: "Istočna Hrvatska", text: "Grad na Dravi s bogatom urbanom baštinom i važnim pričama iz novije hrvatske povijesti.", status: "Priprema sadržaja", symbol: "✦" },
+  { name: "Sinj", region: "Dalmatinsko zaleđe", text: "Grad snažne lokalne tradicije, poznat po Sinjskoj alci i baštini Cetinske krajine.", status: "Priprema sadržaja", symbol: "✦" },
 ];
 
 const collections = [
