@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, AudioLines, Heart, MessageCircle, Music2, Pause, Play, Search, SkipBack, SkipForward, Volume2, X, ChevronDown, ChevronUp, ListMusic, Clock3, Bookmark, Radio } from "lucide-react";
 import { supabase } from "./lib/supabase";
 import "./HrvatskiVal.css";
@@ -39,6 +39,64 @@ export default function HrvatskiVal() {
   const [minimized, setMinimized] = useState(false);
   const [playerVisible, setPlayerVisible] = useState(true);
   const [volume, setVolume] = useState(80);
+  const playerIframeRef = useRef(null);
+
+  useEffect(() => {
+    if (!active?.id || !playerIframeRef.current) return undefined;
+    let player = null;
+    let saveTimer = null;
+    let cancelled = false;
+    const previousReady = window.onYouTubeIframeAPIReady;
+    const savePosition = (seconds) => {
+      if (!Number.isFinite(seconds) || seconds < 0) return;
+      try {
+        const stored = JSON.parse(localStorage.getItem(CURRENT_TRACK_KEY) || "null");
+        if (stored && stored.id === active.id) {
+          stored.currentTime = Math.floor(seconds);
+          localStorage.setItem(CURRENT_TRACK_KEY, JSON.stringify(stored));
+        }
+      } catch { /* Storage may be unavailable. */ }
+    };
+    const attachPlayer = () => {
+      if (cancelled || !window.YT || !window.YT.Player || !playerIframeRef.current) return;
+      try {
+        player = new window.YT.Player(playerIframeRef.current, {
+          events: {
+            onReady: (event) => {
+              const resumeAt = Math.max(0, Number(active.currentTime) || 0);
+              if (resumeAt > 0) event.target.seekTo(resumeAt, true);
+              saveTimer = window.setInterval(() => {
+                try { savePosition(event.target.getCurrentTime()); } catch { /* Ignore player teardown. */ }
+              }, 1000);
+            }
+          }
+        });
+      } catch (error) {
+        console.warn("Hrvatski Val: spremanje vremena reprodukcije nije dostupno", error);
+      }
+    };
+    const readyHandler = () => {
+      if (typeof previousReady === "function") previousReady();
+      attachPlayer();
+    };
+    if (window.YT && window.YT.Player) attachPlayer();
+    else {
+      window.onYouTubeIframeAPIReady = readyHandler;
+      if (!document.querySelector("script[data-patriasoul-youtube-api]")) {
+        const script = document.createElement("script");
+        script.src = "https://www.youtube.com/iframe_api";
+        script.async = true;
+        script.dataset.patriasoulYoutubeApi = "true";
+        document.head.appendChild(script);
+      }
+    }
+    return () => {
+      cancelled = true;
+      if (saveTimer) window.clearInterval(saveTimer);
+      try { if (player && player.getCurrentTime) savePosition(player.getCurrentTime()); } catch { /* Ignore page transition. */ }
+      if (window.onYouTubeIframeAPIReady === readyHandler) window.onYouTubeIframeAPIReady = previousReady;
+    };
+  }, [active?.id]);
 
   useEffect(() => { localStorage.setItem(FAV_KEY, JSON.stringify(favorites)); }, [favorites]);
   useEffect(() => { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); }, [history]);
@@ -163,7 +221,7 @@ export default function HrvatskiVal() {
     {active && playerVisible && <aside className={`hv-dock ${minimized ? "minimized" : ""}`} aria-label="Glazbeni player">
       {!minimized && <div className="hv-dock-expanded"><div className="hv-now-playing"><img src={active.thumbnail} alt=""/><div><small>SADA SVIRA</small><strong>{active.title}</strong><span>{active.artist}</span></div></div><div className="hv-controls"><button onClick={() => { const i = visible.findIndex(t => t.id === active.id); if (visible[i - 1]) play(visible[i - 1]); }} aria-label="Prethodna pjesma"><SkipBack size={18}/></button><button className="hv-main-play" onClick={() => setMinimized(true)} aria-label="Smanji player"><Pause size={19}/></button><button onClick={() => { const i = visible.findIndex(t => t.id === active.id); if (visible[i + 1]) play(visible[i + 1]); }} aria-label="Sljedeća pjesma"><SkipForward size={18}/></button></div><label className="hv-volume"><Volume2 size={16}/><input aria-label="Glasnoća" type="range" min="0" max="100" value={volume} onChange={e => setVolume(Number(e.target.value))}/></label><div className="hv-social-controls"><button className={likedByMe ? "selected" : ""} onClick={toggleLike} title="Lajkaj pjesmu"><Heart size={17} fill={likedByMe ? "currentColor" : "none"}/><span>{likes.length}</span></button><button onClick={() => setMinimized(false)} title="Komentari"><MessageCircle size={17}/><span>{comments.length}</span></button><button onClick={() => { setPlayerVisible(false); localStorage.removeItem(CURRENT_TRACK_KEY); }} title="Zatvori player"><X size={17}/></button></div><button className="hv-collapse" onClick={() => setMinimized(true)} aria-label="Smanji player"><ChevronDown size={17}/></button></div>}
       {minimized && <div className="hv-dock-mini"><button className="hv-mini-open" onClick={() => setMinimized(false)}><img src={active.thumbnail} alt=""/><span><strong>{active.title}</strong><small>{active.artist}</small></span><ChevronUp size={17}/></button><button onClick={() => setMinimized(false)} aria-label="Otvori player"><Play size={18}/></button><button onClick={() => setPlayerVisible(false)} aria-label="Zatvori player"><X size={17}/></button></div>}
-      <div className="hv-player-embed"><iframe title={`Reprodukcija: ${active.title}`} src={`https://www.youtube-nocookie.com/embed/${active.id}?autoplay=1&playsinline=1&rel=0`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen/></div>
+      <div className="hv-player-embed"><iframe title={`Reprodukcija: ${active.title}`} src={`https://www.youtube-nocookie.com/embed/${active.id}?autoplay=1&playsinline=1&rel=0&enablejsapi=1`} ref={playerIframeRef} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen/></div>
       {!minimized && <section className="hv-comments"><div className="hv-comments-heading"><div><strong><MessageCircle size={17}/> Razgovor o pjesmi</strong><small>Lajkovi i komentari zajednice</small></div><button onClick={() => setMinimized(true)} aria-label="Smanji player"><ChevronDown size={17}/></button></div>
         {!session?.user?.id && <p className="hv-login-note">Za lajkanje i komentiranje prijavi se u PatriaSoul.</p>}
         {session?.user?.id && <form className="hv-comment-form" onSubmit={submitComment}><textarea value={commentText} onChange={e => setCommentText(e.target.value)} maxLength={1200} placeholder="Napiši komentar uz ovu pjesmu…" required/><button disabled={commentBusy || !commentText.trim()}>{commentBusy ? "Objavljujem…" : "Objavi komentar"}</button></form>}
