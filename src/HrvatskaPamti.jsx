@@ -30,7 +30,7 @@ export default function HrvatskaPamti() {
   return <main className="hp-page">
     <header className="hp-topline">
       <a className="hp-brand" href="/" aria-label="Povratak na PatriaSoul"><img src="/assets/images/1000000982.png" alt="" /><span>PatriaSoul <small>ČUVARI NASLJEĐA</small></span></a>
-      <nav aria-label="Navigacija Hrvatske pamti"><a href="#karta">Karta sjećanja</a><a href="#price">Povijesne priče</a><a href="#izvori">Izvori i načela</a><a className="hp-return" href="/">← Povratak u zajednicu</a></nav>
+      <nav aria-label="Navigacija Hrvatske pamti"><a href="#karta">Karta sjećanja</a><a href="#price">Povijesne priče</a><a href="#izvori">Izvori i načela</a><a href="/hrvatska-pamti-grobnice.html">Registar grobišta</a><a className="hp-return" href="/">← Povratak u zajednicu</a></nav>
     </header>
     <section className="hp-hero">
       <div className="hp-hero-shade" />
@@ -73,7 +73,7 @@ export default function HrvatskaPamti() {
     </section>
     <section className="hp-collections" id="price">
       <div className="hp-section-heading"><div><span className="hp-section-kicker">JEDNO SJEĆANJE · MNOGO PRIČA</span><h2>Čuvamo ono što<br /><em>ne smijemo zaboraviti.</em></h2></div><p>Jedna obitelj čuva fotografiju. Jedno mjesto čuva spomen. Jedan dokument rasvjetljava događaj. Kada ih povežemo, povijest postaje bliža i razumljivija.</p></div>
-      <div className="hp-collection-grid">{collections.map((item) => <article className="hp-collection-card" key={item.number}><div className="hp-card-top"><span className="hp-card-icon">{item.icon}</span><span className="hp-card-number">{item.number}</span></div><h3>{item.title}</h3><p>{item.copy}</p><a href={item.number === "01" ? "#karta" : item.number === "02" ? "#svijeca" : "#izvori"}>{item.tag} <span>↗</span></a></article>)}</div>
+      <div className="hp-collection-grid">{collections.map((item) => <article className="hp-collection-card" key={item.number}><div className="hp-card-top"><span className="hp-card-icon">{item.icon}</span><span className="hp-card-number">{item.number}</span></div><h3>{item.title}</h3><p>{item.copy}</p><a href={item.number === "01" ? "#karta" : item.number === "02" ? "#svijeca" : item.number === "04" ? "/hrvatska-pamti-grobnice.html" : "#izvori"}>{item.tag} <span>↗</span></a></article>)}</div>
     </section>
     <section className="hp-candle-section" id="svijeca">
       <div className="hp-candle-art"><div className={candleLit ? "hp-flame lit" : "hp-flame"} /><div className="hp-candle-glow" /><div className="hp-candle-body"><span>✦</span></div><div className="hp-candle-reflection" /></div>
