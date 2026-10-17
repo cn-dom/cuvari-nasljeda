@@ -26,9 +26,9 @@ export default function HrvatskaPamtiMjesto() {
       <h2 id="hp-detail-sources-title">Provjeri građu.<br/><em>Prati izvor do izvora.</em></h2>
       <p>Ove poveznice služe kao početne točke istraživanja. Ne znače da svaka pojedinačna tvrdnja na ovoj stranici već ima potvrdu; konkretne reference dodat ćemo uz svaki obrađeni zapis.</p>
       <div className="hp-detail-source-grid">
-        <article><span>01 · ARHIV</span><h3>Hrvatski državni arhiv</h3><p>Za pronalazak fondova, zbirki i izvorne dokumentacije.</p><a href="https://www.arhiv.hr/Search-the-records" target="_blank" rel="noreferrer">Pretraži arhivsku građu ↗</a></article>
-        <article><span>02 · DIGITALNE ZBIRKE</span><h3>Portal eKultura</h3><p>Za istraživanje digitalizirane kulturne i dokumentarne baštine.</p><a href="https://ekultura.hr/" target="_blank" rel="noreferrer">Otvori portal ↗</a></article>
-        <article><span>03 · MEMORIJALNA DOKUMENTACIJA</span><h3>Ministarstvo hrvatskih branitelja</h3><p>Za teme Domovinskog rata i službenu memorijalno-dokumentacijsku građu.</p><a href="https://branitelji.gov.hr/" target="_blank" rel="noreferrer">Službene informacije ↗</a></article>
+        <article><span>01 · ARHIV</span><h3>Hrvatski državni arhiv</h3><p>Za pronalazak fondova, zbirki i izvorne dokumentacije.</p><span className="hp-detail-source-label">Arhivska građa · sadržaj se obrađuje</span></article>
+        <article><span>02 · DIGITALNE ZBIRKE</span><h3>Portal eKultura</h3><p>Za istraživanje digitalizirane kulturne i dokumentarne baštine.</p><span className="hp-detail-source-label">Digitalne zbirke · sadržaj se obrađuje</span></article>
+        <article><span>03 · MEMORIJALNA DOKUMENTACIJA</span><h3>Ministarstvo hrvatskih branitelja</h3><p>Za teme Domovinskog rata i službenu memorijalno-dokumentacijsku građu.</p><span className="hp-detail-source-label">Službena dokumentacija · sadržaj se obrađuje</span></article>
       </div>
       <p className="hp-detail-sources-note">Prije objave pojedinog zapisa potrebno je navesti konkretan dokument ili publikaciju, autora ili ustanovu, datum i poveznicu kad je dostupna.</p>
     </section>
