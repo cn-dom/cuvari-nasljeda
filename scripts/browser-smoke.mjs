@@ -5,7 +5,7 @@ const base = process.env.SMOKE_BASE_URL || "http://127.0.0.1:4173";
 const routes = [
   "/", "/forum.html", "/stranice.html", "/dogadaji.html",
   "/vjera-hrvata.html", "/na-danasnji-dan.html", "/administracija.html",
-  "/ai-centar.html", "/virtualni-muzej.html", "/vrijeme.html",
+  "/ai-centar.html", "/virtualni-muzej.html", "/video-arhiva.html", "/vrijeme.html",
   "/kviz/", "/kviz/hrvatski-kviz/", "/kviz/dnevni-kviz/",
   "/kviz/gradovi-hrvatske/", "/kviz/brani-svoj-grad/",
 ];
