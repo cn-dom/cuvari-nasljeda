@@ -115,6 +115,74 @@ export default {
       );
     }
 
+    if (url.pathname === "/api/youtube-search") {
+      if (request.method !== "GET") {
+        return Response.json({ error: "Dopuštena je samo GET metoda." }, { status: 405, headers: { Allow: "GET" } });
+      }
+
+      const query = (url.searchParams.get("q") || "").trim().slice(0, 160);
+      const json = (body, status = 200, headers = {}) => new Response(JSON.stringify(body), {
+        status,
+        headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff", ...headers }
+      });
+
+      if (query.length < 2) return json({ error: "Upiši barem dva znaka za pretragu." }, 400);
+      if (!env.YOUTUBE_API_KEY) return json({ error: "YouTube pretraga nije aktivirana: nedostaje Cloudflare tajna YOUTUBE_API_KEY." }, 503);
+
+      const cache = typeof caches !== "undefined" ? caches.default : null;
+      const cacheUrl = new URL("/api/youtube-search-cache", url.origin);
+      cacheUrl.searchParams.set("q", query.toLocaleLowerCase("hr"));
+      const cacheRequest = new Request(cacheUrl.toString(), { method: "GET" });
+      if (cache) {
+        const cached = await cache.match(cacheRequest);
+        if (cached) return cached;
+      }
+
+      const apiUrl = new URL("https://www.googleapis.com/youtube/v3/search");
+      apiUrl.searchParams.set("part", "snippet");
+      apiUrl.searchParams.set("type", "video");
+      apiUrl.searchParams.set("maxResults", "12");
+      apiUrl.searchParams.set("safeSearch", "moderate");
+      apiUrl.searchParams.set("relevanceLanguage", "hr");
+      apiUrl.searchParams.set("regionCode", "HR");
+      apiUrl.searchParams.set("q", query);
+      apiUrl.searchParams.set("key", env.YOUTUBE_API_KEY);
+
+      try {
+        const upstream = await fetch(apiUrl.toString());
+        let payload;
+        try {
+          payload = await upstream.json();
+        } catch {
+          return json({ error: "YouTube je vratio neispravan odgovor. Pokušaj ponovno kasnije." }, 502);
+        }
+        if (!upstream.ok) {
+          return json({
+            error: upstream.status === 403
+              ? "YouTube API nije dostupan. Provjeri API ključ, uključen YouTube Data API v3 i kvotu."
+              : "YouTube trenutačno nije vratio rezultate. Pokušaj ponovno kasnije."
+          }, upstream.status === 403 ? 503 : upstream.status);
+        }
+
+        const items = (Array.isArray(payload.items) ? payload.items : []).map((item) => ({
+          id: { videoId: item.id?.videoId || "" },
+          snippet: {
+            title: item.snippet?.title || "",
+            description: item.snippet?.description || "",
+            channelTitle: item.snippet?.channelTitle || "",
+            publishedAt: item.snippet?.publishedAt || "",
+            thumbnails: item.snippet?.thumbnails || {}
+          }
+        })).filter((item) => item.id.videoId);
+
+        const response = json({ items }, 200, { "Cache-Control": "public, max-age=300, s-maxage=600" });
+        if (cache) await cache.put(cacheRequest, response.clone());
+        return response;
+      } catch {
+        return json({ error: "Povezivanje s YouTubeom trenutačno nije uspjelo." }, 502);
+      }
+    }
+
     return env.ASSETS.fetch(request);
   }
 };
