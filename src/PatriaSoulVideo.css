@@ -157,3 +157,9 @@ body.psv-modal-open{overflow:hidden}
  .psv-comments-heading h3{font-size:19px}
  .psv-comment-form-footer button{min-height:42px}
 }
+
+
+/* Player modal: keep the top reachable and allow the modal itself to scroll. */
+.psv-player-overlay{display:block!important;overflow-y:auto!important;overflow-x:hidden;align-items:initial!important;overscroll-behavior:contain;scroll-padding-top:22px;-webkit-overflow-scrolling:touch}
+.psv-player-overlay .psv-player-shell{margin:22px auto;max-height:none;flex:none}
+@media(max-width:620px){.psv-player-overlay{padding:10px!important}.psv-player-overlay .psv-player-shell{margin:0 auto 10px}}
