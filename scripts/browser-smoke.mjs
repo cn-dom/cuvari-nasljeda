@@ -85,7 +85,7 @@ try {
       await page.locator('input[placeholder^="https://www.youtube.com/watch?v="]').fill("https://youtu.be/dQw4w9WgXcQ");
       await page.locator('input[placeholder="Npr. naslov dokumentarnog filma"]').fill("E2E test video");
       await page.getByRole("button", { name: /Spremi zapis/ }).click();
-      await page.getByRole("button", { name: "E2E test video" }).waitFor({ state: "visible", timeout: 5000 });
+      await page.locator(".psv-card-title", { hasText: "E2E test video" }).waitFor({ state: "visible", timeout: 5000 });
       await page.getByRole("button", { name: /Pusti video: E2E test video/ }).click();
       await page.locator('iframe[title="E2E test video"]').waitFor({ state: "visible", timeout: 5000 });
       assert.match(await page.locator("iframe").getAttribute("src"), /dQw4w9WgXcQ/, "player should embed the submitted YouTube ID");
