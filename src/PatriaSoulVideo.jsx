@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Bookmark, Check, ChevronDown, Clock3, Film, Filter, Heart, History, Info, ListVideo, Menu, Play, Plus, Search, ShieldCheck, SlidersHorizontal, Trash2, Tv, X } from "lucide-react";
+import { ArrowLeft, Bookmark, ChevronDown, Clock3, Film, Heart, History, Info, Play, Plus, Search, ShieldCheck, SlidersHorizontal, Trash2, Tv, X } from "lucide-react";
 import "./PatriaSoulVideo.css";
 
 const STORAGE_KEY = "patriasoul-video-library-v1";
@@ -65,7 +65,6 @@ export default function PatriaSoulVideo() {
   const [sort, setSort] = useState("newest");
   const [layout, setLayout] = useState("grid");
   const [addOpen, setAddOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [favorites, setFavorites] = useState(() => JSON.parse(localStorage.getItem("patriasoul-video-favorites-v1") || "[]"));
   const [saved, setSaved] = useState(() => JSON.parse(localStorage.getItem("patriasoul-video-saved-v1") || "[]"));
@@ -124,7 +123,6 @@ export default function PatriaSoulVideo() {
       <div className="psv-top-actions">
         <a className="psv-back-link" href="/"><ArrowLeft size={16} /> Zajednica</a>
         <button className="psv-add-button" onClick={() => setAddOpen(true)}><Plus size={17} /> Dodaj video</button>
-        <button className="psv-icon-button psv-mobile-menu" onClick={() => setMenuOpen((v) => !v)} aria-label="Otvori izbornik"><Menu /></button>
       </div>
     </header>
 
