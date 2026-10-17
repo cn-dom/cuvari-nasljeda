@@ -173,3 +173,31 @@
 .hp-research-steps h3{font-family:"Cormorant Garamond",Georgia,serif;font-size:25px;margin:0 0 4px;font-weight:600}
 .hp-research-steps p{font-size:11px;line-height:1.85;color:#59656d;margin:0}
 @media(max-width:760px){.hp-research-process{grid-template-columns:1fr;gap:25px;padding-top:55px;padding-bottom:55px}}
+
+
+/* Searchable local catalogue for each Hrvatska pamti dossier */
+.hp-catalog-search{padding:68px clamp(24px,8vw,128px);background:#f0ede7;color:#102131;border-top:1px solid #d6b48b45;border-bottom:1px solid #d6b48b45}
+.hp-catalog-heading{max-width:720px}
+.hp-catalog-heading .hp-section-kicker{color:#8a5e44}
+.hp-catalog-heading h2{font-family:"Cormorant Garamond",Georgia,serif;font-size:clamp(38px,5vw,58px);font-weight:500;line-height:.98;margin:16px 0}
+.hp-catalog-heading h2 em{color:#9c3b43;font-weight:400}
+.hp-catalog-heading>p{max-width:640px;color:#59656d;font-size:12px;line-height:1.9}
+.hp-catalog-tools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:15px;align-items:center;margin:28px 0 18px;padding:18px 0;border-top:1px solid #c9c2b8;border-bottom:1px solid #c9c2b8}
+.hp-catalog-input-wrap input{width:100%;min-height:46px;border:1px solid #b9b3aa;border-radius:0;background:#faf8f4;color:#102131;padding:0 14px;font:inherit;font-size:12px;outline:none}
+.hp-catalog-input-wrap input:focus{border-color:#9c3b43;box-shadow:0 0 0 2px #9c3b4320}
+.hp-catalog-filters{display:flex;flex-wrap:wrap;gap:6px}
+.hp-catalog-filters button,.hp-catalog-empty button{border:1px solid #c9c2b8;background:transparent;color:#33434d;padding:10px 12px;font:inherit;font-size:10px;font-weight:800;cursor:pointer}
+.hp-catalog-filters button.is-active,.hp-catalog-filters button:hover,.hp-catalog-empty button:hover{background:#102131;border-color:#102131;color:#f0ede7}
+.hp-catalog-count{grid-column:1/-1;margin:0;color:#59656d;font-size:10px}
+.hp-catalog-count strong{color:#9c3b43}
+.hp-catalog-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.hp-catalog-result{padding:21px;border:1px solid #d1cbc2;background:#f7f4ee;min-width:0}
+.hp-catalog-result>span{font-size:9px;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:#9c3b43}
+.hp-catalog-result h3{font-family:"Cormorant Garamond",Georgia,serif;font-size:25px;line-height:1.1;font-weight:600;margin:12px 0 8px;overflow-wrap:anywhere}
+.hp-catalog-result p{font-size:11px;line-height:1.85;color:#59656d;margin:0;overflow-wrap:anywhere}
+.hp-catalog-empty{grid-column:1/-1;padding:26px;border:1px dashed #b9b3aa;color:#102131}
+.hp-catalog-empty strong{font-family:"Cormorant Garamond",Georgia,serif;font-size:24px}
+.hp-catalog-empty p{font-size:11px;color:#59656d}
+.hp-catalog-note{margin:22px 0 0;color:#6a7379;font-size:10px;line-height:1.85}
+.hp-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:760px){.hp-catalog-search{padding-top:52px;padding-bottom:52px}.hp-catalog-tools{grid-template-columns:1fr}.hp-catalog-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.hp-catalog-filters button{min-height:42px}.hp-catalog-results{grid-template-columns:1fr}.hp-catalog-result{padding:18px}}
