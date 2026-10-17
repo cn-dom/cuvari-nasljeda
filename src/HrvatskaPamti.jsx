@@ -3,23 +3,23 @@ import "./HrvatskaPamti.css";
 import HrvatskaPamtiMap from "./HrvatskaPamtiMap.jsx";
 
 const places = [
-  { name: "Vukovar", region: "Istočna Hrvatska", text: "Sjećanje na obranu grada, stradanje civila i branitelja te povratak života.", status: "Priprema sadržaja", symbol: "✦" },
-  { name: "Škabrnja", region: "Dalmacija", text: "Mjesto sjećanja na civilne žrtve i branitelje iz studenoga 1991.", status: "Priprema sadržaja", symbol: "✦" },
-  { name: "Dubrovnik", region: "Južna Hrvatska", text: "Obrana grada i očuvanje kulturne baštine tijekom napada 1991.–1992.", status: "Priprema sadržaja", symbol: "✦" },
-  { name: "Lika i Krbava", region: "Središnja Hrvatska", text: "Prostor brojnih povijesnih slojeva, stradanja i obiteljskih sjećanja.", status: "Priprema sadržaja", symbol: "✦" },
-  { name: "Zagreb", region: "Središnja Hrvatska", text: "Glavni grad i mjesto susreta različitih razdoblja hrvatske političke, kulturne i društvene povijesti.", status: "Priprema sadržaja", symbol: "✦" },
-  { name: "Knin", region: "Dalmatinsko zaleđe", text: "Povijesni grad povezan s hrvatskom državnom tradicijom i događajima novije povijesti.", status: "Priprema sadržaja", symbol: "✦" },
-  { name: "Osijek", region: "Istočna Hrvatska", text: "Grad na Dravi s bogatom urbanom baštinom i važnim pričama iz novije hrvatske povijesti.", status: "Priprema sadržaja", symbol: "✦" },
-  { name: "Sinj", region: "Dalmatinsko zaleđe", text: "Grad snažne lokalne tradicije, poznat po Sinjskoj alci i baštini Cetinske krajine.", status: "Priprema sadržaja", symbol: "✦" },
+  { name: "Vukovar", region: "Istočna Hrvatska", text: "Grad na Dunavu čuva sjećanje na obranu, izgubljene živote, obitelji koje su čekale i povratak života nakon razaranja.", status: "Povijesni zapis dostupan", symbol: "✦" },
+  { name: "Škabrnja", region: "Dalmacija", text: "Mjesto tuge i dostojanstva, gdje se iza svake brojke pamti čovjek, obitelj i prekinuti život.", status: "Povijesni zapis dostupan", symbol: "✦" },
+  { name: "Dubrovnik", region: "Južna Hrvatska", text: "Grad čije su zidine i domovi ranjeni ratom, a čija je obnova postala svjedočanstvo ustrajnosti.", status: "Povijesni zapis dostupan", symbol: "✦" },
+  { name: "Lika i Krbava", region: "Gorska Hrvatska", text: "Krajolik obiteljskih korijena, raseljenih sudbina, povrataka i priča koje se čuvaju od zaborava.", status: "Povijesni zapis dostupan", symbol: "✦" },
+  { name: "Zagreb", region: "Središnja Hrvatska", text: "Grad dvaju brežuljaka koji se kroz stoljeća obnavljao, mijenjao i čuvao tragove svojih stanovnika.", status: "Povijesni zapis dostupan", symbol: "✦" },
+  { name: "Knin", region: "Dalmatinsko zaleđe", text: "Kamena tvrđava i grad u kojem se susreću stoljetna povijest, državna simbolika i osobna sjećanja.", status: "Povijesni zapis dostupan", symbol: "✦" },
+  { name: "Osijek", region: "Istočna Hrvatska", text: "Grad na Dravi koji je u ratnim godinama čuvao domove, ulice i nadu svojih stanovnika.", status: "Povijesni zapis dostupan", symbol: "✦" },
+  { name: "Sinj", region: "Dalmatinsko zaleđe", text: "Mjesto gdje se zavjet, vještina i ponos Cetinske krajine prenose iz naraštaja u naraštaj.", status: "Povijesni zapis dostupan", symbol: "✦" },
 ];
 
 const collections = [
-  { icon: "⌖", number: "01", title: "Karta sjećanja", copy: "Mjesta, događaji i spomen-obilježja povezana na jednoj interaktivnoj karti.", tag: "ISTRAŽI MJESTA" },
-  { icon: "🕯", number: "02", title: "Upali svijeću", copy: "Tiho, dostojanstveno digitalno sjećanje bez natjecanja i rangiranja.", tag: "ODAJ POČAST" },
-  { icon: "◷", number: "03", title: "Priče kroz vrijeme", copy: "Vremenske crte, fotografije, dokumenti i svjedočanstva s navedenim izvorima.", tag: "UPOZNAJ PRIČE" },
-  { icon: "✧", number: "04", title: "Stratišta i grobišta", copy: "Dokumentiranje mjesta stradanja uz jasno označene činjenice, procjene i nepoznanice.", tag: "SAČUVAJ SJEĆANJE" },
-  { icon: "⌂", number: "05", title: "Korijeni i baština", copy: "Obiteljske priče, lokalna tradicija i nasljeđe koje se prenosi naraštajima.", tag: "OTKRIJ KORIJENE" },
-  { icon: "▤", number: "06", title: "Izvori i dokumenti", copy: "Arhivska građa i pouzdani izvori uz svaku povijesnu tvrdnju.", tag: "PROVJERI IZVORE" },
+  { icon: "⌖", number: "01", title: "Karta sjećanja", copy: "Mjesta sjećanja povezana s ljudima, događajima i dokumentima — kako nijedna priča ne bi ostala sama.", tag: "ISTRAŽI MJESTA" },
+  { icon: "🕯", number: "02", title: "Upali svijeću", copy: "Zastani na trenutak, zapali simboličnu svijeću i posveti tišinu onima kojih se sjećamo.", tag: "ODAJ POČAST" },
+  { icon: "◷", number: "03", title: "Priče kroz vrijeme", copy: "Povijesni događaji kroz vrijeme, dokumente i svjedočanstva koja se čuvaju uz poštovanje i provjeru.", tag: "UPOZNAJ PRIČE" },
+  { icon: "✧", number: "04", title: "Stratišta i grobišta", copy: "Mjesta stradanja i grobišta obrađivat će se pažljivo, uz razlikovanje potvrđenih podataka, procjena i nepoznanica.", tag: "SAČUVAJ SJEĆANJE" },
+  { icon: "⌂", number: "05", title: "Korijeni i baština", copy: "Fotografije, prezimena, običaji i obiteljske uspomene koje pomažu budućim naraštajima pronaći svoje korijene.", tag: "OTKRIJ KORIJENE" },
+  { icon: "▤", number: "06", title: "Izvori i dokumenti", copy: "Svaka važna tvrdnja treba imati trag do dokumenta, ustanove ili stručnog istraživanja.", tag: "PROVJERI IZVORE" },
 ];
 
 export default function HrvatskaPamti() {
@@ -38,7 +38,7 @@ export default function HrvatskaPamti() {
         <div className="hp-eyebrow"><span /> DIGITALNI SPOMENIK HRVATSKE <span /></div>
         <h1>Hrvatska<br /><em>pamti.</em></h1>
         <p className="hp-hero-lead">Imena. Mjesta. Sudbine. Sjećanje koje se prenosi.</p>
-        <p className="hp-hero-copy">Prostor posvećen ljudima, događajima i mjestima koja su obilježila hrvatsku povijest. Svaka priča zaslužuje dostojanstvo, a svaka tvrdnja — izvor.</p>
+        <p className="hp-hero-copy">Ovdje čuvamo tragove ljudi i mjesta koja su oblikovala Hrvatsku. Ne da bismo ostali zarobljeni u prošlosti, nego da bismo razumjeli što su naraštaji prije nas proživjeli, što su sačuvali i što imamo obvezu prenijeti dalje. Svaka priča zaslužuje dostojanstvo, a svaka tvrdnja — izvor.</p>
         <a className="hp-primary-cta" href="#karta">Istraži kartu sjećanja <span>↗</span></a>
         <div className="hp-hero-note"><span>✦</span> U znak poštovanja prema žrtvama i svima koji čuvaju istinu.</div>
       </div>
@@ -47,10 +47,10 @@ export default function HrvatskaPamti() {
     </section>
     <section className="hp-intro">
       <div><span className="hp-section-kicker">ZA ONE KOJI DOLAZE</span><h2>Prošlost ne smije<br />ostati bez <em>glasa.</em></h2></div>
-      <p>Ovo nije popis bezličnih datuma. Ovo je živi digitalni prostor u kojem se mjesta povezuju s ljudima, dokumenti s pričama, a sjećanje s odgovornošću. Sadržaj se objavljuje postupno, uz provjeru i jasno navođenje izvora.</p>
+      <p>Ovo nije popis bezličnih datuma. To je mjesto za ljude koji su voljeli svoj dom, za obitelji koje su sačuvale fotografiju, pismo ili sjećanje, za mjesta koja su preživjela razaranja i za baštinu koja se prenosi dalje. Sjećanje ne smije zamijeniti činjenice, a činjenice ne smiju izbrisati ljudsku bol. Zato svaki zapis gradimo pažljivo, uz provjeru i jasno navođenje izvora.</p>
     </section>
     <section className="hp-map-section" id="karta">
-      <div className="hp-section-heading"><div><span className="hp-section-kicker">ISTRAŽI PROSTOR SJEĆANJA</span><h2>Karta <em>sjećanja</em></h2></div><p>Odaberi mjesto i upoznaj priče koje će biti dokumentirane uz provjerljive izvore.</p></div>
+      <div className="hp-section-heading"><div><span className="hp-section-kicker">ISTRAŽI PROSTOR SJEĆANJA</span><h2>Karta <em>sjećanja</em></h2></div><p>Odaberi mjesto na karti. Upoznaj njegovu povijest, zastani uz ljudske priče i otkrij dokumente koji pomažu sačuvati sjećanje.</p></div>
       <div className="hp-place-search" role="search"><label htmlFor="hp-place-query">Pronađi mjesto ili regiju</label><input id="hp-place-query" type="search" value={placeQuery} onChange={(event) => setPlaceQuery(event.target.value)} placeholder="Npr. Vukovar, Dalmacija, baština…" /><span>{filteredPlaces.length} {filteredPlaces.length === 1 ? "mjesto" : "mjesta"}</span></div>
       {placeQuery.trim() && <div className="hp-place-results" aria-live="polite">{filteredPlaces.length ? filteredPlaces.map((place) => <button type="button" key={place.name} className={selectedPlace.name === place.name ? "active" : ""} onClick={() => setSelectedPlace(place)}><span>{place.region}</span><strong>{place.name}</strong><small>Odaberi mjesto ↗</small></button>) : <p>Nema rezultata. Pokušaj upisati naziv grada ili regije.</p>}</div>}
       <div className="hp-map-layout">
@@ -72,7 +72,7 @@ export default function HrvatskaPamti() {
       <p className="hp-map-disclaimer">Ovo je početni vizualni pregled, a ne geografski precizna karta. Povijesni zapisi i lokacije neće se prikazivati kao potvrđeni dok se ne provjere izvori.</p>
     </section>
     <section className="hp-collections" id="price">
-      <div className="hp-section-heading"><div><span className="hp-section-kicker">JEDNO SJEĆANJE · MNOGO PRIČA</span><h2>Čuvamo ono što<br /><em>ne smijemo zaboraviti.</em></h2></div><p>Svaka zbirka imat će svoj prostor, ali će se sve povezivati kroz ljude, mjesta i povijesne događaje.</p></div>
+      <div className="hp-section-heading"><div><span className="hp-section-kicker">JEDNO SJEĆANJE · MNOGO PRIČA</span><h2>Čuvamo ono što<br /><em>ne smijemo zaboraviti.</em></h2></div><p>Jedna obitelj čuva fotografiju. Jedno mjesto čuva spomen. Jedan dokument rasvjetljava događaj. Kada ih povežemo, povijest postaje bliža i razumljivija.</p></div>
       <div className="hp-collection-grid">{collections.map((item) => <article className="hp-collection-card" key={item.number}><div className="hp-card-top"><span className="hp-card-icon">{item.icon}</span><span className="hp-card-number">{item.number}</span></div><h3>{item.title}</h3><p>{item.copy}</p><a href={item.number === "01" ? "#karta" : item.number === "02" ? "#svijeca" : "#izvori"}>{item.tag} <span>↗</span></a></article>)}</div>
     </section>
     <section className="hp-candle-section" id="svijeca">
