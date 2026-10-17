@@ -2756,11 +2756,11 @@ function App() {
           <section className="side-section sidebar-nav-section">
             <h3>MOJA ZAJEDNICA</h3>
             {navItems.filter((item) => ["PatriaSoul", "Kviz", "Forum", "Stranice", "Virtualni muzej", "Video arhiva", "Hrvatski Val", "Hrvatska pamti", "Čuvari nasljeđa", "Grupe", "Značke"].includes(item.label)).map((item) => (
-              <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => item.label === "Kviz" ? (window.location.href = "/kviz/") : item.label === "Forum" ? (window.location.href = "/forum.html") : item.label === "Stranice" ? (window.location.href = "/stranice.html") : item.label === "Virtualni muzej" ? (window.location.href = "/virtualni-muzej.html") : item.label === "Video arhiva" ? (window.location.href = "/video-arhiva.html") : item.label === "Hrvatski Val" ? (window.location.href = "/hrvatski-val.html") : item.label === "Hrvatska pamti" ? (window.location.href = "/hrvatska-pamti.html") : item.label === "Značke" ? setActiveNav("Značke") : setActiveNav(item.label)}>
+              {item.label === "Hrvatski Val" ? <a key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} href="/hrvatski-val.html"><span className="side-icon">{item.icon}</span><span className="side-link-label">{item.label}</span><span aria-hidden="true">↗</span></a> : <button key={item.label} className={activeNav === item.label ? "side-link selected" : "side-link"} onClick={() => item.label === "Kviz" ? (window.location.href = "/kviz/") : item.label === "Forum" ? (window.location.href = "/forum.html") : item.label === "Stranice" ? (window.location.href = "/stranice.html") : item.label === "Virtualni muzej" ? (window.location.href = "/virtualni-muzej.html") : item.label === "Video arhiva" ? (window.location.href = "/video-arhiva.html") : item.label === "Hrvatska pamti" ? (window.location.href = "/hrvatska-pamti.html") : item.label === "Značke" ? setActiveNav("Značke") : setActiveNav(item.label)}>
                 <span className="side-icon">{item.icon}</span><span className="side-link-label">{item.label}</span>
                 {item.label === "Čuvari nasljeđa" && <span className="side-count">{memberDirectory.length || ""}</span>}
                 {item.label === "Grupe" && <span className="side-count">{groupChats.length || ""}</span>}
-              </button>
+              </button>}
             ))}
           </section>
           <section className="side-section sidebar-nav-section today-sidebar-section">
