@@ -142,3 +142,20 @@
 .hp-place-pagination-next{align-items:flex-end;text-align:right;background:linear-gradient(225deg,#172d3b,#0b1a28)}
 .hp-place-pagination-map{background:#102131}
 @media(max-width:680px){.hp-memory-standards{padding-top:56px;padding-bottom:56px}.hp-memory-standard-grid{grid-template-columns:1fr;gap:23px}.hp-place-pagination{padding-top:54px;padding-bottom:54px}.hp-place-pagination-links{grid-template-columns:1fr}.hp-place-pagination-card{min-height:130px}.hp-place-pagination-next{align-items:flex-start;text-align:left}}
+
+
+/* Archive dossier overview: transparent counts, not a false verification score */
+.hp-record-overview{padding:38px clamp(24px,8vw,128px) 42px;background:#0d1e2c;border-top:1px solid var(--hp-line);border-bottom:1px solid var(--hp-line)}
+.hp-record-overview-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:25px}
+.hp-record-overview-head h2{font-family:"Cormorant Garamond",Georgia,serif;font-size:clamp(32px,4vw,47px);font-weight:500;line-height:1;margin:12px 0 0}
+.hp-record-overview-head h2 em{color:#d6b48b;font-weight:400}
+.hp-record-status{display:inline-flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid #d6b48b4a;color:#d9c4a8;font-size:9px;font-weight:800;letter-spacing:.11em;white-space:nowrap}
+.hp-record-status i{width:6px;height:6px;border-radius:50%;background:#d6b48b;box-shadow:0 0 0 4px #d6b48b20}
+.hp-record-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--hp-line);border-bottom:1px solid var(--hp-line)}
+.hp-record-metrics>div{display:flex;flex-direction:column;gap:5px;padding:20px 22px;border-right:1px solid var(--hp-line)}
+.hp-record-metrics>div:first-child{padding-left:0}
+.hp-record-metrics>div:last-child{border-right:0}
+.hp-record-metrics strong{font-family:"Cormorant Garamond",Georgia,serif;font-size:39px;font-weight:500;color:#f4e7d4;line-height:1}
+.hp-record-metrics span{font-size:10px;color:#aab9c7}
+.hp-record-overview-note{max-width:900px;margin:17px 0 0;color:#9daebc;font-size:10px;line-height:1.9}
+@media(max-width:640px){.hp-record-overview{padding-top:30px;padding-bottom:32px}.hp-record-overview-head{align-items:flex-start;flex-direction:column;gap:15px}.hp-record-status{white-space:normal}.hp-record-metrics>div{padding:16px 10px}.hp-record-metrics>div:first-child{padding-left:0}.hp-record-metrics strong{font-size:32px}.hp-record-metrics span{font-size:9px;line-height:1.5}}
