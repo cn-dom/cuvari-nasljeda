@@ -33,3 +33,16 @@ Endpoint prima GET parametar `q` (pojam pretrage), poziva YouTube Data API v3 `s
 - Prije dodavanja provjeri kanal/izvor, naslov, opis, kontekst i relevantnost. Ne preuzimaj niti ponovno postavljaj tuđe videozapise bez dopuštenja.
 - Neki videozapisi ne dopuštaju ugrađivanje; u tom slučaju ponudi poveznicu na YouTube.
 - Trenutačna biblioteka i popisi omiljenih/spremanja ostaju lokalni u pregledniku. Za sinkronizaciju između uređaja potrebna je zasebna Supabase tablica s pravilima RLS.
+
+
+## Ugrađeni Cloudflare endpoint
+
+Aplikacija sada zadano poziva `/api/youtube-search`, a datoteka `functions/api/youtube-search.js` obrađuje zahtjev na poslužitelju. Time API ključ ne ulazi u JavaScript koji se šalje pregledniku. Za aktivaciju u Cloudflare Pages projektu postavi tajnu:
+
+```sh
+npx wrangler pages secret put YOUTUBE_API_KEY --project-name cuvari-nasljeda
+```
+
+Kad Wrangler zatraži vrijednost, zalijepi YouTube Data API v3 ključ. Nemoj ga slati u chat, spremati u repozitorij ili stavljati u varijablu koja počinje s `VITE_`. Provjeri i da je YouTube Data API v3 uključen u Google Cloud projektu te da API ključ ima odgovarajuća ograničenja. Nakon objave funkcije i postavljanja tajne, pretraga vraća do 12 rezultata po upitu i kratko ih predmemorira. Ako se ključ ne postavi, sučelje će prikazati jasnu poruku umjesto da pretraga tiho ne radi.
+
+Gumb **Dodaj sve rezultate** uvozi rezultate trenutačne pretrage u lokalnu biblioteku jednim klikom. To nije javna objava; zapisi se zasad čuvaju samo u pregledniku na kojem ih dodaješ. Preporučujemo da prije grupnog dodavanja provjeriš pojam pretrage i rezultate.
