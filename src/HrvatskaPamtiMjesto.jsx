@@ -20,6 +20,17 @@ export default function HrvatskaPamtiMjesto() {
     <header className="hp-topline"><a className="hp-brand" href="/hrvatska-pamti.html"><img src="/assets/images/1000000982.png" alt="" /><span>PatriaSoul <small>HRVATSKA PAMTI</small></span></a><nav><a href="/hrvatska-pamti.html#karta">← Karta sjećanja</a><a className="hp-return" href="/">Povratak u zajednicu</a></nav></header>
     <section className="hp-detail-hero"><span className="hp-section-kicker">HRVATSKA PAMTI · {record.region.toUpperCase()}</span><h1>{record.name}<em>.</em></h1><p>{record.intro}</p><span className="hp-detail-period">{record.years}</span></section>
     <section className="hp-detail-content"><div className="hp-detail-main"><span className="hp-section-kicker">POVIJEST · MJESTA · LJUDI</span><h2>Priča mjesta<br/><em>tek se zapisuje.</em></h2><p className="hp-detail-lead">Ova je stranica pripremljena za dokumentiranje povijesti {record.name}. Sadržaj se neće označiti kao potvrđen dok se ne provjere vjerodostojni izvori.</p>{record.sections.map((section, index) => <article className="hp-detail-section" key={section.title}><span>0{index + 1}</span><div><h3>{section.title}</h3><p>{section.body}</p></div></article>)}</div><aside className="hp-detail-sidebar"><span className="hp-section-kicker">UREDNIČKA NAPOMENA</span><h3>Izvor za svaku tvrdnju.</h3><p>Prije objave provjerit će se autorstvo, datum, kontekst i vjerodostojnost dokumentacije. Procjene, svjedočanstva i tradicija bit će jasno označeni.</p><div className="hp-detail-status">● SADRŽAJ U PRIPREMI</div><a href="/hrvatska-pamti.html#izvori">Načela i izvori ↗</a></aside></section>
+    <section className="hp-detail-sources" aria-labelledby="hp-detail-sources-title">
+      <span className="hp-section-kicker">POLAZIŠTA ZA ISTRAŽIVANJE</span>
+      <h2 id="hp-detail-sources-title">Provjeri građu.<br/><em>Prati izvor do izvora.</em></h2>
+      <p>Ove poveznice služe kao početne točke istraživanja. Ne znače da svaka pojedinačna tvrdnja na ovoj stranici već ima potvrdu; konkretne reference dodat ćemo uz svaki obrađeni zapis.</p>
+      <div className="hp-detail-source-grid">
+        <article><span>01 · ARHIV</span><h3>Hrvatski državni arhiv</h3><p>Za pronalazak fondova, zbirki i izvorne dokumentacije.</p><a href="https://www.arhiv.hr/Search-the-records" target="_blank" rel="noreferrer">Pretraži arhivsku građu ↗</a></article>
+        <article><span>02 · DIGITALNE ZBIRKE</span><h3>Portal eKultura</h3><p>Za istraživanje digitalizirane kulturne i dokumentarne baštine.</p><a href="https://ekultura.hr/" target="_blank" rel="noreferrer">Otvori portal ↗</a></article>
+        <article><span>03 · MEMORIJALNA DOKUMENTACIJA</span><h3>Ministarstvo hrvatskih branitelja</h3><p>Za teme Domovinskog rata i službenu memorijalno-dokumentacijsku građu.</p><a href="https://branitelji.gov.hr/" target="_blank" rel="noreferrer">Službene informacije ↗</a></article>
+      </div>
+      <p className="hp-detail-sources-note">Prije objave pojedinog zapisa potrebno je navesti konkretan dokument ili publikaciju, autora ili ustanovu, datum i poveznicu kad je dostupna.</p>
+    </section>
     <footer className="hp-footer"><a className="hp-brand" href="/hrvatska-pamti.html"><img src="/assets/images/1000000982.png" alt="" /><span>PatriaSoul <small>ČUVARI NASLJEĐA</small></span></a><p>Čuvamo sjećanje. Poštujemo izvore.</p><a href="/hrvatska-pamti.html">Povratak na kartu ↗</a></footer>
   </main>;
 }
