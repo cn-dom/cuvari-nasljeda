@@ -26,6 +26,7 @@ export default function PersistentMusicPlayer() {
   const iframeRef = useRef(null);
   const playerRef = useRef(null);
   const [volume, setVolume] = useState(80);
+  const volumeRef = useRef(80);
 
   useEffect(() => {
     let player = null;
@@ -63,7 +64,8 @@ export default function PersistentMusicPlayer() {
               playerRef.current = event.target;
               const resumeAt = Math.max(0, Number(track.currentTime) || 0);
               if (resumeAt > 0) event.target.seekTo(resumeAt, true);
-              event.target.setVolume?.(volume);
+              event.target.setVolume?.(volumeRef.current);
+              if (volumeRef.current === 0) event.target.mute?.(); else event.target.unMute?.();
               event.target.playVideo();
               saveTimer = window.setInterval(() => {
                 try { savePosition(event.target.getCurrentTime()); } catch { /* Ignore player teardown. */ }
@@ -117,9 +119,13 @@ export default function PersistentMusicPlayer() {
   }
 
   function changeVolume(value) {
-    const nextVolume = Number(value);
+    const nextVolume = Math.max(0, Math.min(100, Number(value) || 0));
+    volumeRef.current = nextVolume;
     setVolume(nextVolume);
-    try { playerRef.current?.setVolume(nextVolume); } catch { /* Player may be loading. */ }
+    try {
+      if (nextVolume === 0) playerRef.current?.mute?.();
+      else { playerRef.current?.unMute?.(); playerRef.current?.setVolume?.(nextVolume); }
+    } catch { /* Player may be loading. */ }
   }
 
   function closePlayer() {
@@ -270,15 +276,6 @@ export default function PersistentMusicPlayer() {
             </div>
           )}
 
-          {track && <iframe
-            key={track.id}
-            title={`Hrvatski Val Player — ${track.title}`}
-            src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(track.id)}?autoplay=1&playsinline=1&rel=0&enablejsapi=1`}
-            ref={iframeRef}
-            allow="autoplay; encrypted-media; picture-in-picture"
-            referrerPolicy="strict-origin-when-cross-origin"
-            style={{ display: "block", width: "100%", aspectRatio: "16 / 9", border: 0, borderRadius: 9, background: "#000" }}
-          />}
           {track && <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 9 }}>
             <button type="button" onClick={() => stepQueue(-1)} disabled={!(Number(track.queueIndex ?? -1) > 0)} aria-label="Prethodna pjesma" title="Prethodna pjesma" style={{ padding: "7px 10px", border: "1px solid rgba(255,255,255,.2)", borderRadius: 8, color: "#fff", background: "rgba(255,255,255,.1)", cursor: "pointer" }}>⏮</button>
             <button type="button" onClick={() => stepQueue(1)} disabled={!Array.isArray(track.queue) || Number(track.queueIndex ?? -1) >= track.queue.length - 1} aria-label="Sljedeća pjesma" title="Sljedeća pjesma" style={{ padding: "7px 10px", border: "1px solid rgba(255,255,255,.2)", borderRadius: 8, color: "#fff", background: "rgba(255,255,255,.1)", cursor: "pointer" }}>⏭</button>
@@ -286,6 +283,17 @@ export default function PersistentMusicPlayer() {
           </div>}
           {track ? <p style={{ margin: "9px 0 0", fontSize: 11, opacity: .72 }}>Povuci gornju traku za pomicanje. Smanji player da ne smeta čitanju.</p> : <p style={{ margin: "9px 0 0", fontSize: 11, opacity: .72 }}>Player je spreman. Pretraži pjesmu i slušaj dok pregledavaš PatriaSoul.</p>}
         </>}
+        {track && <iframe
+          key={track.id}
+          title={`Hrvatski Val Player — ${track.title}`}
+          src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(track.id)}?autoplay=1&playsinline=1&rel=0&enablejsapi=1`}
+          ref={iframeRef}
+          allow="autoplay; encrypted-media; picture-in-picture"
+          referrerPolicy="strict-origin-when-cross-origin"
+          style={minimized
+            ? { position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none", left: 0, bottom: 0, border: 0 }
+            : { display: "block", width: "100%", aspectRatio: "16 / 9", border: 0, borderRadius: 9, background: "#000" }}
+        />}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         <button type="button" onClick={() => setMinimized((value) => !value)} aria-label={minimized ? "Proširi player" : "Smanji player"} title={minimized ? "Proširi player" : "Smanji player"} style={{ cursor: "pointer", border: "1px solid rgba(255,255,255,.25)", borderRadius: 9, color: "#fff", background: "rgba(255,255,255,.1)", width: 32, height: 32, fontSize: 16 }}>{minimized ? "□" : "−"}</button>
