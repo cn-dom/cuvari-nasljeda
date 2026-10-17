@@ -3,14 +3,14 @@ import "./HrvatskaPamti.css";
 import HrvatskaPamtiMap from "./HrvatskaPamtiMap.jsx";
 
 const places = [
-  { name: "Vukovar", region: "Istočna Hrvatska", text: "Grad na Dunavu čuva sjećanje na obranu, izgubljene živote, obitelji koje su čekale i povratak života nakon razaranja.", status: "Povijesni zapis dostupan", symbol: "✦" },
-  { name: "Škabrnja", region: "Dalmacija", text: "Mjesto tuge i dostojanstva, gdje se iza svake brojke pamti čovjek, obitelj i prekinuti život.", status: "Povijesni zapis dostupan", symbol: "✦" },
-  { name: "Dubrovnik", region: "Južna Hrvatska", text: "Grad čije su zidine i domovi ranjeni ratom, a čija je obnova postala svjedočanstvo ustrajnosti.", status: "Povijesni zapis dostupan", symbol: "✦" },
-  { name: "Lika i Krbava", region: "Gorska Hrvatska", text: "Krajolik obiteljskih korijena, raseljenih sudbina, povrataka i priča koje se čuvaju od zaborava.", status: "Povijesni zapis dostupan", symbol: "✦" },
-  { name: "Zagreb", region: "Središnja Hrvatska", text: "Grad dvaju brežuljaka koji se kroz stoljeća obnavljao, mijenjao i čuvao tragove svojih stanovnika.", status: "Povijesni zapis dostupan", symbol: "✦" },
-  { name: "Knin", region: "Dalmatinsko zaleđe", text: "Kamena tvrđava i grad u kojem se susreću stoljetna povijest, državna simbolika i osobna sjećanja.", status: "Povijesni zapis dostupan", symbol: "✦" },
-  { name: "Osijek", region: "Istočna Hrvatska", text: "Grad na Dravi koji je u ratnim godinama čuvao domove, ulice i nadu svojih stanovnika.", status: "Povijesni zapis dostupan", symbol: "✦" },
-  { name: "Sinj", region: "Dalmatinsko zaleđe", text: "Mjesto gdje se zavjet, vještina i ponos Cetinske krajine prenose iz naraštaja u naraštaj.", status: "Povijesni zapis dostupan", symbol: "✦" },
+  { name: "Vukovar", region: "Istočna Hrvatska", text: "Grad na Dunavu čuva sjećanje na obranu, izgubljene živote, obitelji koje su čekale i povratak života nakon razaranja.", status: "Radni zapis · provjera u tijeku", symbol: "✦" },
+  { name: "Škabrnja", region: "Dalmacija", text: "Mjesto tuge i dostojanstva, gdje se iza svake brojke pamti čovjek, obitelj i prekinuti život.", status: "Radni zapis · provjera u tijeku", symbol: "✦" },
+  { name: "Dubrovnik", region: "Južna Hrvatska", text: "Grad čije su zidine i domovi ranjeni ratom, a čija je obnova postala svjedočanstvo ustrajnosti.", status: "Radni zapis · provjera u tijeku", symbol: "✦" },
+  { name: "Lika i Krbava", region: "Gorska Hrvatska", text: "Krajolik obiteljskih korijena, raseljenih sudbina, povrataka i priča koje se čuvaju od zaborava.", status: "Radni zapis · provjera u tijeku", symbol: "✦" },
+  { name: "Zagreb", region: "Središnja Hrvatska", text: "Grad dvaju brežuljaka koji se kroz stoljeća obnavljao, mijenjao i čuvao tragove svojih stanovnika.", status: "Radni zapis · provjera u tijeku", symbol: "✦" },
+  { name: "Knin", region: "Dalmatinsko zaleđe", text: "Kamena tvrđava i grad u kojem se susreću stoljetna povijest, državna simbolika i osobna sjećanja.", status: "Radni zapis · provjera u tijeku", symbol: "✦" },
+  { name: "Osijek", region: "Istočna Hrvatska", text: "Grad na Dravi koji je u ratnim godinama čuvao domove, ulice i nadu svojih stanovnika.", status: "Radni zapis · provjera u tijeku", symbol: "✦" },
+  { name: "Sinj", region: "Dalmatinsko zaleđe", text: "Mjesto gdje se zavjet, vještina i ponos Cetinske krajine prenose iz naraštaja u naraštaj.", status: "Radni zapis · provjera u tijeku", symbol: "✦" },
 ];
 
 const collections = [
@@ -65,7 +65,7 @@ export default function HrvatskaPamti() {
           <a className="hp-place-open" href={"/hrvatska-pamti-mjesto.html?mjesto=" + ({"Vukovar":"vukovar","Škabrnja":"skabrnja","Dubrovnik":"dubrovnik","Lika i Krbava":"lika-i-krbava","Zagreb":"zagreb","Knin":"knin","Osijek":"osijek","Sinj":"sinj"}[selectedPlace.name] || "vukovar")}>Otvori stranicu mjesta <span>↗</span></a>
           <div className="hp-source-note">
             <strong>Što slijedi?</strong>
-            <p>Priprema povijesnog zapisa, provjera lokacije i povezivanje s pouzdanim arhivskim, muzejskim ili znanstvenim izvorima.</p>
+            <p>Ovaj je dosje početna urednička obrada. Sljedeći koraci su provjera konkretnih dokumenata, potvrda podataka o lokaciji i pažljivo povezivanje izvora sa svakom važnom tvrdnjom.</p>
           </div>
         </aside>
       </div>
@@ -80,6 +80,15 @@ export default function HrvatskaPamti() {
       <div className="hp-candle-copy"><span className="hp-section-kicker">TRENUTAK TIŠINE</span><h2>Jedna svijeća.<br /><em>Jedno sjećanje.</em></h2><p>U znak poštovanja, zastani na trenutak. Ova demonstracija prikazuje simbolično paljenje svijeće samo na ovom uređaju — ne sprema javnu počast niti je šalje u bazu podataka.</p><button type="button" className={candleLit ? "hp-candle-button lit" : "hp-candle-button"} onClick={() => setCandleLit((value) => !value)}>{candleLit ? "Svijeća gori · ugasi" : "🕯 Upali svijeću"}</button><small>{candleLit ? "Neka sjećanje ostane živo." : "Bez natjecanja. Bez ljestvica. Samo sjećanje."}</small></div>
     </section>
     <section className="hp-principles" id="izvori"><span className="hp-section-kicker">POVIJEST ZASLUŽUJE ODGOVORNOST</span><h2>Dostojanstvo u sjećanju.<br /><em>Istina u svakom zapisu.</em></h2><div className="hp-principle-grid"><article><span>01</span><h3>Izvori prije tvrdnji</h3><p>Arhivi, muzeji, znanstvena literatura i službeni registri imaju prednost pred neprovjerenim objavama.</p></article><article><span>02</span><h3>Jasno što znamo</h3><p>Činjenice, procjene, svjedočanstva, predaje i otvorena istraživanja bit će jasno razdvojeni.</p></article><article><span>03</span><h3>Bez izmišljanja</h3><p>Nijedno ime, broj žrtava, mjesto grobišta ili citat neće biti predstavljen kao potvrđen bez provjere.</p></article></div></section>
+    <section className="hp-research-process" aria-labelledby="hp-research-process-title">
+      <div className="hp-research-process-intro"><span className="hp-section-kicker">OD DOKUMENTA DO SJEĆANJA</span><h2 id="hp-research-process-title">Svaka priča prolazi<br/><em>put provjere.</em></h2><p>Ne želimo samo prikupiti sadržaj. Želimo znati odakle dolazi, što doista potvrđuje i smijemo li ga sačuvati i podijeliti.</p></div>
+      <div className="hp-research-steps">
+        <article><span>01</span><div><h3>Pronaći trag</h3><p>Utvrditi naziv dokumenta, ustanovu, autora ili stvaratelja, datum i kontekst nastanka.</p></div></article>
+        <article><span>02</span><div><h3>Provjeriti navod</h3><p>Usporediti tvrdnju s izvornom građom i drugim vjerodostojnim izvorima kad je to moguće.</p></div></article>
+        <article><span>03</span><div><h3>Sačuvati ljudski glas</h3><p>Svjedočanstva jasno označiti, provjeriti suglasnost i zaštititi osjetljive osobne podatke.</p></div></article>
+        <article><span>04</span><div><h3>Objaviti odgovorno</h3><p>Naznačiti što je potvrđeno, što je svjedočenje, a što još zahtijeva istraživanje — i ispraviti zapis ako se pojave novi dokazi.</p></div></article>
+      </div>
+    </section>
     <section className="hp-source-library" aria-labelledby="hp-source-library-title">
       <div className="hp-source-library-heading"><span className="hp-section-kicker">POČETNE TOČKE ZA ISTRAŽIVANJE</span><h2 id="hp-source-library-title">Istraživanje počinje<br /><em>vjerodostojnim izvorom.</em></h2><p>Iza svakog zapisa stoji odgovornost. Službene evidencije, arhivski dokumenti i stručna istraživanja služe kao polazište, a ne kao dopuštenje za nagađanje. Podatak o mogućem grobištu ili nestaloj osobi nikada nećemo pretvarati u senzacionalističku objavu.</p></div>
       <div className="hp-source-library-grid">
