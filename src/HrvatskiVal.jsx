@@ -15,13 +15,14 @@ const CATEGORIES = [
 ];
 const FAV_KEY = "patriasoul-val-favorites-v1";
 const HISTORY_KEY = "patriasoul-val-history-v1";
+const CURRENT_TRACK_KEY = "patriasoul-val-current-track-v1";
 const clean = (v, max = 240) => String(v || "").replace(/[<>]/g, "").trim().slice(0, max);
 const normalize = (v) => String(v || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("hr");
 const readList = (key) => { try { const x = JSON.parse(localStorage.getItem(key) || "[]"); return Array.isArray(x) ? x : []; } catch { return []; } };
 
 export default function HrvatskiVal() {
   const [tracks, setTracks] = useState([]);
-  const [active, setActive] = useState(null);
+  const [active, setActive] = useState(() => { try { return JSON.parse(localStorage.getItem(CURRENT_TRACK_KEY) || "null"); } catch { return null; } });
   const [category, setCategory] = useState("Sve");
   const [query, setQuery] = useState("");
   const [favorites, setFavorites] = useState(() => readList(FAV_KEY));
@@ -97,7 +98,9 @@ export default function HrvatskiVal() {
   }, [tracks, query, view, favorites, history]);
 
   function play(track) {
-    setActive(track); setPlayerVisible(true); setMinimized(false);
+    setActive(track);
+    try { localStorage.setItem(CURRENT_TRACK_KEY, JSON.stringify(track)); } catch { /* Storage may be unavailable. */ }
+    setPlayerVisible(true); setMinimized(false);
     setHistory(old => [track.id, ...old.filter(id => id !== track.id)].slice(0, 100));
   }
   function toggleFavorite(id) { setFavorites(old => old.includes(id) ? old.filter(x => x !== id) : [id, ...old]); }
@@ -158,7 +161,7 @@ export default function HrvatskiVal() {
     <footer className="hv-footer"><img src="/assets/images/1000000982.png" alt=""/><span><strong>HRVATSKI VAL PLAYER</strong><small>Hrvatska u svakom tonu. · PatriaSoul</small></span></footer>
 
     {active && playerVisible && <aside className={`hv-dock ${minimized ? "minimized" : ""}`} aria-label="Glazbeni player">
-      {!minimized && <div className="hv-dock-expanded"><div className="hv-now-playing"><img src={active.thumbnail} alt=""/><div><small>SADA SVIRA</small><strong>{active.title}</strong><span>{active.artist}</span></div></div><div className="hv-controls"><button onClick={() => { const i = visible.findIndex(t => t.id === active.id); if (visible[i - 1]) play(visible[i - 1]); }} aria-label="Prethodna pjesma"><SkipBack size={18}/></button><button className="hv-main-play" onClick={() => setMinimized(true)} aria-label="Smanji player"><Pause size={19}/></button><button onClick={() => { const i = visible.findIndex(t => t.id === active.id); if (visible[i + 1]) play(visible[i + 1]); }} aria-label="Sljedeća pjesma"><SkipForward size={18}/></button></div><label className="hv-volume"><Volume2 size={16}/><input aria-label="Glasnoća" type="range" min="0" max="100" value={volume} onChange={e => setVolume(Number(e.target.value))}/></label><div className="hv-social-controls"><button className={likedByMe ? "selected" : ""} onClick={toggleLike} title="Lajkaj pjesmu"><Heart size={17} fill={likedByMe ? "currentColor" : "none"}/><span>{likes.length}</span></button><button onClick={() => setMinimized(false)} title="Komentari"><MessageCircle size={17}/><span>{comments.length}</span></button><button onClick={() => setPlayerVisible(false)} title="Zatvori player"><X size={17}/></button></div><button className="hv-collapse" onClick={() => setMinimized(true)} aria-label="Smanji player"><ChevronDown size={17}/></button></div>}
+      {!minimized && <div className="hv-dock-expanded"><div className="hv-now-playing"><img src={active.thumbnail} alt=""/><div><small>SADA SVIRA</small><strong>{active.title}</strong><span>{active.artist}</span></div></div><div className="hv-controls"><button onClick={() => { const i = visible.findIndex(t => t.id === active.id); if (visible[i - 1]) play(visible[i - 1]); }} aria-label="Prethodna pjesma"><SkipBack size={18}/></button><button className="hv-main-play" onClick={() => setMinimized(true)} aria-label="Smanji player"><Pause size={19}/></button><button onClick={() => { const i = visible.findIndex(t => t.id === active.id); if (visible[i + 1]) play(visible[i + 1]); }} aria-label="Sljedeća pjesma"><SkipForward size={18}/></button></div><label className="hv-volume"><Volume2 size={16}/><input aria-label="Glasnoća" type="range" min="0" max="100" value={volume} onChange={e => setVolume(Number(e.target.value))}/></label><div className="hv-social-controls"><button className={likedByMe ? "selected" : ""} onClick={toggleLike} title="Lajkaj pjesmu"><Heart size={17} fill={likedByMe ? "currentColor" : "none"}/><span>{likes.length}</span></button><button onClick={() => setMinimized(false)} title="Komentari"><MessageCircle size={17}/><span>{comments.length}</span></button><button onClick={() => { setPlayerVisible(false); localStorage.removeItem(CURRENT_TRACK_KEY); }} title="Zatvori player"><X size={17}/></button></div><button className="hv-collapse" onClick={() => setMinimized(true)} aria-label="Smanji player"><ChevronDown size={17}/></button></div>}
       {minimized && <div className="hv-dock-mini"><button className="hv-mini-open" onClick={() => setMinimized(false)}><img src={active.thumbnail} alt=""/><span><strong>{active.title}</strong><small>{active.artist}</small></span><ChevronUp size={17}/></button><button onClick={() => setMinimized(false)} aria-label="Otvori player"><Play size={18}/></button><button onClick={() => setPlayerVisible(false)} aria-label="Zatvori player"><X size={17}/></button></div>}
       <div className="hv-player-embed"><iframe title={`Reprodukcija: ${active.title}`} src={`https://www.youtube-nocookie.com/embed/${active.id}?autoplay=1&playsinline=1&rel=0`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen/></div>
       {!minimized && <section className="hv-comments"><div className="hv-comments-heading"><div><strong><MessageCircle size={17}/> Razgovor o pjesmi</strong><small>Lajkovi i komentari zajednice</small></div><button onClick={() => setMinimized(true)} aria-label="Smanji player"><ChevronDown size={17}/></button></div>
