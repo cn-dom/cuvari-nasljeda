@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./HrvatskaPamti.css";
+import HrvatskaPamtiMap from "./HrvatskaPamtiMap.jsx";
 
 const places = [
   { name: "Vukovar", region: "Istočna Hrvatska", text: "Sjećanje na obranu grada, stradanje civila i branitelja te povratak života.", status: "Priprema sadržaja", symbol: "✦" },
@@ -45,13 +46,7 @@ export default function HrvatskaPamti() {
     <section className="hp-map-section" id="karta">
       <div className="hp-section-heading"><div><span className="hp-section-kicker">ISTRAŽI PROSTOR SJEĆANJA</span><h2>Karta <em>sjećanja</em></h2></div><p>Odaberi mjesto i upoznaj priče koje će biti dokumentirane uz provjerljive izvore.</p></div>
       <div className="hp-map-layout">
-        <div className="hp-map-art" role="img" aria-label="Stilizirani prikaz hrvatskih povijesnih regija">
-          <div className="hp-map-grid" /><div className="hp-map-contour contour-one" /><div className="hp-map-contour contour-two" />
-          <svg className="hp-croatia-shape" viewBox="0 0 360 440" aria-hidden="true"><path d="M73 31 L112 43 L137 67 L159 79 L173 104 L202 114 L218 137 L246 148 L251 170 L282 187 L291 208 L271 218 L255 205 L239 219 L223 241 L205 251 L185 244 L169 261 L150 276 L132 267 L117 247 L96 233 L84 210 L64 195 L55 171 L35 158 L46 141 L64 135 L58 114 L74 101 L65 81 L84 67 Z" /><path d="M115 247 L139 264 L158 286 L182 300 L203 316 L226 325 L245 346 L266 359 L283 383 L270 398 L249 380 L232 362 L211 352 L192 335 L174 328 L151 310 L135 293 L120 275 Z" /></svg>
-          {places.map((place, i) => <button key={place.name} type="button" className={selectedPlace.name === place.name ? "hp-map-pin selected" : "hp-map-pin"} style={{ "--pin-x": ["52%","39%","67%","43%"][i], "--pin-y": ["29%","51%","75%","62%"][i] }} onClick={() => setSelectedPlace(place)} aria-label={"Odaberi " + place.name}><span>✦</span></button>)}
-          <div className="hp-map-caption"><span className="hp-map-live-dot" /> DIGITALNI ATLAS SJEĆANJA <small>POČETNI PREGLED</small></div>
-        </div>
-        <div className="hp-place-panel"><span className="hp-section-kicker">ODABRANO PODRUČJE</span><span className="hp-place-symbol">{selectedPlace.symbol}</span><span className="hp-place-region">{selectedPlace.region}</span><h3>{selectedPlace.name}</h3><p>{selectedPlace.text}</p><div className="hp-place-status">{selectedPlace.status}</div><div className="hp-source-note"><strong>Načelo izvora</strong><p>Svaki budući zapis sadržavat će izvor, datum provjere i oznaku pouzdanosti podataka.</p></div></div>
+        <HrvatskaPamtiMap places={places} selectedPlace={selectedPlace} onSelect={setSelectedPlace} />
       </div>
       <p className="hp-map-disclaimer">Ovo je početni vizualni pregled, a ne geografski precizna karta. Povijesni zapisi i lokacije neće se prikazivati kao potvrđeni dok se ne provjere izvori.</p>
     </section>
