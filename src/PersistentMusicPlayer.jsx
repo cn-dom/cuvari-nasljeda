@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const STORAGE_KEY = "patriasoul-val-current-track-v1";
 const ENDPOINT = import.meta.env.VITE_YOUTUBE_SEARCH_ENDPOINT || "/api/youtube-search";
@@ -23,6 +23,65 @@ export default function PersistentMusicPlayer() {
   const [minimized, setMinimized] = useState(false);
   const [position, setPosition] = useState(null);
   const dragRef = useRef(null);
+  const iframeRef = useRef(null);
+
+  useEffect(() => {
+    let player = null;
+    let saveTimer = null;
+    let cancelled = false;
+    const previousReady = window.onYouTubeIframeAPIReady;
+    const savePosition = (seconds) => {
+      if (!Number.isFinite(seconds) || seconds < 0) return;
+      try {
+        const stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "null");
+        if (stored && stored.id === track.id) {
+          stored.currentTime = Math.floor(seconds);
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+        }
+      } catch { /* Storage may be unavailable. */ }
+    };
+    const attachPlayer = () => {
+      if (cancelled || !window.YT || !window.YT.Player || !iframeRef.current) return;
+      try {
+        player = new window.YT.Player(iframeRef.current, {
+          events: {
+            onReady: (event) => {
+              const resumeAt = Math.max(0, Number(track.currentTime) || 0);
+              if (resumeAt > 0) event.target.seekTo(resumeAt, true);
+              event.target.playVideo();
+              saveTimer = window.setInterval(() => {
+                try { savePosition(event.target.getCurrentTime()); } catch { /* Ignore player teardown. */ }
+              }, 1000);
+            }
+          }
+        });
+      } catch (error) {
+        console.warn("Hrvatski Val: nastavak reprodukcije nije dostupan", error);
+      }
+    };
+    const readyHandler = () => {
+      if (typeof previousReady === "function") previousReady();
+      attachPlayer();
+    };
+    if (window.YT && window.YT.Player) {
+      attachPlayer();
+    } else {
+      window.onYouTubeIframeAPIReady = readyHandler;
+      if (!document.querySelector("script[data-patriasoul-youtube-api]")) {
+        const script = document.createElement("script");
+        script.src = "https://www.youtube.com/iframe_api";
+        script.async = true;
+        script.dataset.patriasoulYoutubeApi = "true";
+        document.head.appendChild(script);
+      }
+    }
+    return () => {
+      cancelled = true;
+      if (saveTimer) window.clearInterval(saveTimer);
+      try { if (player && player.getCurrentTime) savePosition(player.getCurrentTime()); } catch { /* Ignore page transition. */ }
+      if (window.onYouTubeIframeAPIReady === readyHandler) window.onYouTubeIframeAPIReady = previousReady;
+    };
+  }, [track.id]);
 
   function closePlayer() {
     window.localStorage.removeItem(STORAGE_KEY);
@@ -173,7 +232,8 @@ export default function PersistentMusicPlayer() {
           <iframe
             key={track.id}
             title={`Hrvatski Val Player — ${track.title}`}
-            src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(track.id)}?autoplay=1&playsinline=1&rel=0`}
+            src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(track.id)}?autoplay=1&playsinline=1&rel=0&enablejsapi=1`}
+            ref={iframeRef}
             allow="autoplay; encrypted-media; picture-in-picture"
             referrerPolicy="strict-origin-when-cross-origin"
             style={{ display: "block", width: "100%", aspectRatio: "16 / 9", border: 0, borderRadius: 9, background: "#000" }}
