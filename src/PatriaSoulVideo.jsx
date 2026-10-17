@@ -183,6 +183,19 @@ export default function PatriaSoulVideo() {
     if (activeVideo?.id === id) setActiveVideo(null);
   }
 
+  const recommendedVideos = useMemo(() => {
+    if (!activeVideo) return [];
+    return videos
+      .filter((video) => video.id !== activeVideo.id)
+      .sort((a, b) => {
+        const aSame = a.category === activeVideo.category ? 1 : 0;
+        const bSame = b.category === activeVideo.category ? 1 : 0;
+        if (aSame !== bSame) return bSame - aSame;
+        return String(b.addedAt || "").localeCompare(String(a.addedAt || ""));
+      })
+      .slice(0, 8);
+  }, [videos, activeVideo]);
+
   const currentTitle = ({all:"Svi videozapisi", favorites:"Omiljeni videozapisi", saved:"Popis za kasnije", history:"Nedavno gledano"})[view];
 
   return <main className="psv-app">
@@ -245,6 +258,19 @@ export default function PatriaSoulVideo() {
       <div className="psv-player-shell"><div className="psv-player-head"><div><span className="psv-eyebrow">{activeVideo.category}</span><h2>{activeVideo.title}</h2></div><button className="psv-icon-button" onClick={() => setActiveVideo(null)} aria-label="Zatvori player"><X /></button></div>
         <div className="psv-player-frame"><iframe src={`https://www.youtube-nocookie.com/embed/${activeVideo.youtubeId}?autoplay=1&rel=0&modestbranding=1`} title={activeVideo.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen /></div>
         <div className="psv-player-details"><div><span>IZVOR</span><strong>{activeVideo.source || "YouTube · izvor nije dodat"}</strong><p>{activeVideo.description || "Opis i povijesni kontekst nisu uneseni."}</p>{activeVideo.date && <small>Datum događaja/zapisa: {formatDate(activeVideo.date)}</small>}</div><div className="psv-player-buttons"><button className={favorites.includes(activeVideo.id) ? "is-active" : ""} onClick={() => toggle(setFavorites, favorites, activeVideo.id)}><Heart size={16} /> Omiljeno</button><button className={saved.includes(activeVideo.id) ? "is-active" : ""} onClick={() => toggle(setSaved, saved, activeVideo.id)}><Bookmark size={16} /> Kasnije</button><a href={activeVideo.url} target="_blank" rel="noreferrer">Otvori na YouTubeu ↗</a><button className="psv-delete-button" onClick={() => removeVideo(activeVideo.id)}><Trash2 size={15} /> Ukloni iz moje biblioteke</button></div></div>
+        <aside className="psv-player-sidebar" aria-label="Sljedeći i preporučeni videozapisi">
+          <div className="psv-sidebar-heading"><span className="psv-eyebrow">NASTAVI GLEDATI</span><h3>Sljedeći video</h3><p>Preporuke iz tvoje arhive, prvo iz iste kategorije.</p></div>
+          {recommendedVideos.length > 0 ? <>
+            <button className="psv-next-feature" onClick={() => openVideo(recommendedVideos[0])}>
+              <span className="psv-mini-thumb"><img src={`https://i.ytimg.com/vi/${recommendedVideos[0].youtubeId}/mqdefault.jpg`} alt="" loading="lazy" /><span><Play size={16} fill="currentColor" /></span></span>
+              <span className="psv-next-copy"><small>SLJEDEĆI ZA GLEDANJE</small><strong>{recommendedVideos[0].title}</strong><em>{recommendedVideos[0].category}</em></span>
+            </button>
+            <div className="psv-recommend-list">{recommendedVideos.slice(1).map((video) => <button className="psv-recommend-item" key={video.id} onClick={() => openVideo(video)}>
+              <span className="psv-mini-thumb"><img src={`https://i.ytimg.com/vi/${video.youtubeId}/mqdefault.jpg`} alt="" loading="lazy" /><span><Play size={13} fill="currentColor" /></span></span>
+              <span><strong>{video.title}</strong><small>{video.category}</small></span>
+            </button>)}</div>
+          </> : <div className="psv-sidebar-empty"><Film size={24} /><strong>Još nema preporuka</strong><p>Dodaj još videozapisa u arhivu i ovdje će se pojaviti sljedeći prijedlozi.</p></div>}
+        </aside>
         <p className="psv-embed-note">Video se reproducira putem ugrađenog YouTube playera. Neki autori ne dopuštaju ugrađivanje; takav video možda se neće moći reproducirati ovdje.</p>
       </div>
     </div>}
