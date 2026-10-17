@@ -263,6 +263,59 @@ export default function HrvatskiVal() {
     setPlayerVisible(true); setMinimized(false);
     setHistory(old => [track.id, ...old.filter(id => id !== track.id)].slice(0, 100));
   }
+
+  async function goToNextTrack(direction = 1) {
+    const stored = (() => { try { return JSON.parse(localStorage.getItem(CURRENT_TRACK_KEY) || "null"); } catch { return null; } })();
+    const queue = Array.isArray(stored?.queue) && stored.queue.length ? stored.queue : tracks;
+    const currentIndex = Math.max(0, queue.findIndex(item => item?.id === active?.id));
+    const targetIndex = currentIndex + direction;
+    if (direction < 0 && targetIndex >= 0 && queue[targetIndex]) {
+      playFromQueue(queue, targetIndex);
+      return;
+    }
+    if (direction > 0 && targetIndex >= 0 && queue[targetIndex]) {
+      playFromQueue(queue, targetIndex);
+      return;
+    }
+    if (direction < 0) return;
+    setMessage("Tražim sljedeću pjesmu…");
+    const searches = [
+      active?.artist && active.artist !== "YouTube" ? `${active.artist} hrvatske pjesme` : "",
+      "hrvatske domoljubne pjesme klape hrvatska glazba"
+    ].filter(Boolean);
+    for (const term of searches) {
+      try {
+        const response = await fetch(`${ENDPOINT}${ENDPOINT.includes("?") ? "&" : "?"}q=${encodeURIComponent(term)}`);
+        const payload = await response.json();
+        if (!response.ok) continue;
+        const items = (Array.isArray(payload.items) ? payload.items : Array.isArray(payload.results) ? payload.results : []).map(item => {
+          const snippet = item.snippet || item;
+          const id = item.id?.videoId || item.youtubeId || item.videoId;
+          if (!id || id === active?.id) return null;
+          return { id, title: clean(snippet.title || item.title, 160) || "Pjesma bez naslova", artist: clean(snippet.channelTitle || item.channelTitle || item.artist || "YouTube", 120), description: clean(snippet.description || item.description, 500), thumbnail: snippet.thumbnails?.high?.url || snippet.thumbnails?.medium?.url || `https://i.ytimg.com/vi/${id}/hqdefault.jpg`, category: "Hrvatska glazba", url: `https://www.youtube.com/watch?v=${id}` };
+        }).filter(Boolean);
+        if (!items.length) continue;
+        const sameArtist = items.filter(item => normalize(item.artist) === normalize(active?.artist));
+        const pool = sameArtist.length ? sameArtist : items;
+        const chosenIndex = Math.floor(Math.random() * pool.length);
+        const chosen = { ...pool[chosenIndex], queue: pool, queueIndex: chosenIndex, currentTime: 0 };
+        play(chosen);
+        setMessage("");
+        return;
+      } catch { /* Try general Croatian music search. */ }
+    }
+    setMessage("Nisam uspio pronaći sljedeću pjesmu. Pokušaj ponovno.");
+  }
+
+  function playFromQueue(queue, index) {
+    const selected = queue[index];
+    if (!selected?.id) return;
+    const prepared = { ...selected, queue, queueIndex: index, currentTime: 0 };
+    setActive(prepared);
+    try { localStorage.setItem(CURRENT_TRACK_KEY, JSON.stringify(prepared)); } catch { /* Storage may be unavailable. */ }
+    setPlayerVisible(true);
+    setHistory(old => [prepared.id, ...old.filter(id => id !== prepared.id)].slice(0, 100));
+  }
   function toggleFavorite(id) { setFavorites(old => old.includes(id) ? old.filter(x => x !== id) : [id, ...old]); }
   const likedByMe = likes.some(x => x.user_id === session?.user?.id);
 
@@ -321,7 +374,7 @@ export default function HrvatskiVal() {
     <footer className="hv-footer"><img src="/assets/images/1000000982.png" alt=""/><span><strong>HRVATSKI VAL PLAYER</strong><small>Hrvatska u svakom tonu. · PatriaSoul</small></span></footer>
 
     {active && playerVisible && <aside className={`hv-dock ${minimized ? "minimized" : ""}`} aria-label="Glazbeni player">
-      {!minimized && <div className="hv-dock-expanded"><div className="hv-now-playing"><img src={active.thumbnail} alt=""/><div><small>SADA SVIRA</small><strong>{active.title}</strong><span>{active.artist}</span></div></div><div className="hv-controls"><button onClick={() => { const i = visible.findIndex(t => t.id === active.id); if (visible[i - 1]) play(visible[i - 1]); }} aria-label="Prethodna pjesma"><SkipBack size={18}/></button><button className="hv-main-play" onClick={() => setMinimized(true)} aria-label="Smanji player"><Pause size={19}/></button><button onClick={() => { const i = visible.findIndex(t => t.id === active.id); if (visible[i + 1]) play(visible[i + 1]); }} aria-label="Sljedeća pjesma"><SkipForward size={18}/></button></div><label className="hv-volume"><Volume2 size={16}/><input aria-label="Glasnoća" type="range" min="0" max="100" value={volume} onChange={e => changeVolume(e.target.value)}/></label><div className="hv-social-controls"><button className={likedByMe ? "selected" : ""} onClick={toggleLike} title="Lajkaj pjesmu"><Heart size={17} fill={likedByMe ? "currentColor" : "none"}/><span>{likes.length}</span></button><button onClick={() => setMinimized(false)} title="Komentari"><MessageCircle size={17}/><span>{comments.length}</span></button><button onClick={() => { setPlayerVisible(false); localStorage.removeItem(CURRENT_TRACK_KEY); }} title="Zatvori player"><X size={17}/></button></div><button className="hv-collapse" onClick={() => setMinimized(true)} aria-label="Smanji player"><ChevronDown size={17}/></button></div>}
+      {!minimized && <div className="hv-dock-expanded"><div className="hv-now-playing"><img src={active.thumbnail} alt=""/><div><small>SADA SVIRA</small><strong>{active.title}</strong><span>{active.artist}</span></div></div><div className="hv-controls"><button onClick={() => { void goToNextTrack(-1); }} aria-label="Prethodna pjesma"><SkipBack size={18}/></button><button className="hv-main-play" onClick={() => setMinimized(true)} aria-label="Smanji player"><Pause size={19}/></button><button onClick={() => { void goToNextTrack(1); }} aria-label="Sljedeća pjesma"><SkipForward size={18}/></button></div><label className="hv-volume"><Volume2 size={16}/><input aria-label="Glasnoća" type="range" min="0" max="100" value={volume} onChange={e => changeVolume(e.target.value)}/></label><div className="hv-social-controls"><button className={likedByMe ? "selected" : ""} onClick={toggleLike} title="Lajkaj pjesmu"><Heart size={17} fill={likedByMe ? "currentColor" : "none"}/><span>{likes.length}</span></button><button onClick={() => setMinimized(false)} title="Komentari"><MessageCircle size={17}/><span>{comments.length}</span></button><button onClick={() => { setPlayerVisible(false); localStorage.removeItem(CURRENT_TRACK_KEY); }} title="Zatvori player"><X size={17}/></button></div><button className="hv-collapse" onClick={() => setMinimized(true)} aria-label="Smanji player"><ChevronDown size={17}/></button></div>}
       {minimized && <div className="hv-dock-mini"><button className="hv-mini-open" onClick={() => setMinimized(false)}><img src={active.thumbnail} alt=""/><span><strong>{active.title}</strong><small>{active.artist}</small></span><ChevronUp size={17}/></button><button onClick={() => setMinimized(false)} aria-label="Otvori player"><Play size={18}/></button><button onClick={() => setPlayerVisible(false)} aria-label="Zatvori player"><X size={17}/></button></div>}
       <div className="hv-player-embed"><iframe key={active.id} title={`Reprodukcija: ${active.title}`} src={`https://www.youtube-nocookie.com/embed/${active.id}?autoplay=1&playsinline=1&rel=0&enablejsapi=1`} ref={playerIframeRef} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen/></div>
       {!minimized && <section className="hv-comments"><div className="hv-comments-heading"><div><strong><MessageCircle size={17}/> Razgovor o pjesmi</strong><small>Lajkovi i komentari zajednice</small></div><button onClick={() => setMinimized(true)} aria-label="Smanji player"><ChevronDown size={17}/></button></div>
