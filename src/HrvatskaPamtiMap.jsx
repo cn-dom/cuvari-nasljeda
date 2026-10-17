@@ -58,7 +58,7 @@ export default function HrvatskaPamtiMap({ places, selectedPlace, onSelect }) {
           if (!place) return;
           const markerElement = document.createElement("button");
           markerElement.type = "button";
-          markerElement.className = "hp-real-map-marker";
+          markerElement.className = place.name === selectedPlace?.name ? "hp-real-map-marker selected" : "hp-real-map-marker";
           markerElement.setAttribute("aria-label", "Odaberi " + place.name);
           markerElement.innerHTML = '<span aria-hidden="true">✦</span>';
           markerElement.addEventListener("click", () => onSelect(place));
