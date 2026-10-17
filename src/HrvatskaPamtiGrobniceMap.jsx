@@ -17,6 +17,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
   useEffect(() => {
     let cancelled = false;
     let mapInstance;
+    let focusMarker;
 
     async function loadMap() {
       try {
@@ -85,7 +86,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
           markersRef.current.push({ siteId: site.id, marker, popup });
         });
 
-        const focusMarker = (event) => {
+        focusMarker = (event) => {
           const siteId = event?.detail?.siteId;
           if (!siteId || !mapInstance || cancelled) return;
           const entry = markersRef.current.find((item) => item.siteId === siteId);
@@ -122,7 +123,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
     loadMap();
     return () => {
       cancelled = true;
-      window.removeEventListener("hp-focus-grave-map", focusMarker);
+      if (focusMarker) window.removeEventListener("hp-focus-grave-map", focusMarker);
       markersRef.current.forEach((entry) => entry.marker.remove());
       markersRef.current = [];
       if (mapInstance) mapInstance.remove();
