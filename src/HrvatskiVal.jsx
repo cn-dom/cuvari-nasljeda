@@ -130,13 +130,13 @@ export default function HrvatskiVal() {
 
   return <main className="hv-app">
     <header className="hv-topbar">
-      <a href="/" className="hv-brand"><img src="/assets/images/1000000982.png" alt="PatriaSoul grb" /><span><strong>HRVATSKI VAL</strong><small>BY PATRIASOUL</small></span></a>
+      <a href="/" className="hv-brand"><img src="/assets/images/1000000982.png" alt="PatriaSoul grb" /><span><strong>HRVATSKI VAL PLAYER</strong><small>BY PATRIASOUL</small></span></a>
       <a href="/" className="hv-back"><ArrowLeft size={16} /> PatriaSoul</a>
     </header>
 
     <section className="hv-hero">
       <div className="hv-hero-copy"><span className="hv-eyebrow"><AudioLines size={15}/> HRVATSKA U SVAKOM TONU</span><h1>Glazba koja nosi <em>dušu Hrvatske.</em></h1><p>Domoljubne pjesme, klapska tradicija, zavičaj i glazba koja povezuje naraštaje.</p><button onClick={() => document.getElementById("hv-library")?.scrollIntoView({ behavior: "smooth", block: "start" })}><Play size={17} fill="currentColor"/> Istraži glazbu</button></div>
-      <div className="hv-hero-art" aria-hidden="true"><div className="hv-wave"><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/></div><div className="hv-art-flag"><span/><span/><span/></div><div className="hv-art-copy"><small>GLAS NAŠE DOMOVINE</small><strong>HRVATSKI VAL</strong><em>Hrvatska u svakom tonu.</em></div></div>
+      <div className="hv-hero-art" aria-hidden="true"><div className="hv-wave"><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/></div><div className="hv-art-flag"><span/><span/><span/></div><div className="hv-art-copy"><small>GLAS NAŠE DOMOVINE</small><strong>HRVATSKI VAL PLAYER</strong><em>Hrvatska u svakom tonu.</em></div></div>
     </section>
 
     <section className="hv-content" id="hv-library">
@@ -146,7 +146,7 @@ export default function HrvatskiVal() {
       <div className="hv-filters"><button className={view === "all" ? "active" : ""} onClick={() => setView("all")}><Music2 size={15}/> Sve pjesme</button><button className={view === "favorites" ? "active" : ""} onClick={() => setView("favorites")}><Heart size={15}/> Omiljeno ({favorites.length})</button><button className={view === "history" ? "active" : ""} onClick={() => setView("history")}><Clock3 size={15}/> Nedavno slušano</button></div>
       {error && <div className="hv-message error" role="status">{error}<button onClick={() => setError("")} aria-label="Zatvori"><X size={15}/></button></div>}
       {message && <div className="hv-message" role="status">{message}</div>}
-      {loading && <div className="hv-empty"><AudioLines size={26}/><p>Tražim glazbu za Hrvatski Val…</p></div>}
+      {loading && <div className="hv-empty"><AudioLines size={26}/><p>Tražim glazbu za Hrvatski Val Player…</p></div>}
       {!loading && visible.length > 0 && <div className="hv-track-grid">{visible.map(track => <article className="hv-track" key={track.id}>
         <button className="hv-cover" onClick={() => play(track)} aria-label={`Pusti ${track.title}`}><img src={track.thumbnail} alt="" loading="lazy" onError={e => { e.currentTarget.style.opacity = ".15"; }}/><span><Play size={23} fill="currentColor"/></span></button>
         <div className="hv-track-info"><small>{track.category}</small><button className="hv-track-title" onClick={() => play(track)}>{track.title}</button><p>{track.artist}</p><div className="hv-track-actions"><button className={favorites.includes(track.id) ? "selected" : ""} onClick={() => toggleFavorite(track.id)} aria-label="Omiljeno"><Heart size={16} fill={favorites.includes(track.id) ? "currentColor" : "none"}/> Spremi</button><button onClick={() => play(track)}><Play size={15}/> Pusti</button></div></div>
@@ -155,7 +155,7 @@ export default function HrvatskiVal() {
       <p className="hv-source-note">Dostupnost reprodukcije ovisi o izvornom YouTube videozapisu i njegovim postavkama.</p>
     </section>
 
-    <footer className="hv-footer"><img src="/assets/images/1000000982.png" alt=""/><span><strong>HRVATSKI VAL</strong><small>Hrvatska u svakom tonu. · PatriaSoul</small></span></footer>
+    <footer className="hv-footer"><img src="/assets/images/1000000982.png" alt=""/><span><strong>HRVATSKI VAL PLAYER</strong><small>Hrvatska u svakom tonu. · PatriaSoul</small></span></footer>
 
     {active && playerVisible && <aside className={`hv-dock ${minimized ? "minimized" : ""}`} aria-label="Glazbeni player">
       {!minimized && <div className="hv-dock-expanded"><div className="hv-now-playing"><img src={active.thumbnail} alt=""/><div><small>SADA SVIRA</small><strong>{active.title}</strong><span>{active.artist}</span></div></div><div className="hv-controls"><button onClick={() => { const i = visible.findIndex(t => t.id === active.id); if (visible[i - 1]) play(visible[i - 1]); }} aria-label="Prethodna pjesma"><SkipBack size={18}/></button><button className="hv-main-play" onClick={() => setMinimized(true)} aria-label="Smanji player"><Pause size={19}/></button><button onClick={() => { const i = visible.findIndex(t => t.id === active.id); if (visible[i + 1]) play(visible[i + 1]); }} aria-label="Sljedeća pjesma"><SkipForward size={18}/></button></div><label className="hv-volume"><Volume2 size={16}/><input aria-label="Glasnoća" type="range" min="0" max="100" value={volume} onChange={e => setVolume(Number(e.target.value))}/></label><div className="hv-social-controls"><button className={likedByMe ? "selected" : ""} onClick={toggleLike} title="Lajkaj pjesmu"><Heart size={17} fill={likedByMe ? "currentColor" : "none"}/><span>{likes.length}</span></button><button onClick={() => setMinimized(false)} title="Komentari"><MessageCircle size={17}/><span>{comments.length}</span></button><button onClick={() => setPlayerVisible(false)} title="Zatvori player"><X size={17}/></button></div><button className="hv-collapse" onClick={() => setMinimized(true)} aria-label="Smanji player"><ChevronDown size={17}/></button></div>}
