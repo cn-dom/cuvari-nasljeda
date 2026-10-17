@@ -95,3 +95,5 @@
 .hp-record-source-grid p{font-size:11px;line-height:1.8;color:#aab9c7}
 .hp-record-source-grid a{display:inline-block;margin-top:9px;color:#e5cba9!important;font-size:11px;font-weight:800}
 .hp-record-sources .hp-detail-sources-note{font-size:10px;color:#aab9c7;line-height:1.8;margin-top:18px}
+
+.hp-source-library-action,.hp-detail-source-label{display:inline-block;margin-top:12px;color:#d6b48b;font-size:10px;font-weight:700;line-height:1.7}
