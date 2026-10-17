@@ -33,17 +33,60 @@ export default function PersistentMusicPlayer() {
     let saveTimer = null;
     let cancelled = false;
     const previousReady = window.onYouTubeIframeAPIReady;
-    const advanceNext = () => {
+    let advancing = false;
+    const advanceNext = async () => {
+      if (advancing || cancelled) return;
+      advancing = true;
       try {
-        const stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "null");
+        const stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "null") || track;
+        if (stored?.id && stored.id !== track.id) return;
         const queue = Array.isArray(stored?.queue) ? stored.queue : [];
-        const nextIndex = Number(stored?.queueIndex ?? -1) + 1;
-        if (nextIndex >= 0 && nextIndex < queue.length) {
+        const currentIndex = Number.isInteger(Number(stored?.queueIndex))
+          ? Number(stored.queueIndex)
+          : queue.findIndex((item) => item?.id === stored?.id);
+        if (currentIndex >= 0 && currentIndex + 1 < queue.length) {
+          const nextIndex = currentIndex + 1;
           const nextTrack = { ...queue[nextIndex], queue, queueIndex: nextIndex, currentTime: 0 };
           window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextTrack));
           setTrack(nextTrack);
+          return;
         }
-      } catch { /* Ignore malformed queue data. */ }
+        const searches = [
+          stored?.artist && stored.artist !== "YouTube" ? `${stored.artist} hrvatske pjesme` : "",
+          "hrvatske domoljubne pjesme klape hrvatska glazba"
+        ].filter(Boolean);
+        for (const term of searches) {
+          try {
+            const response = await fetch(`${ENDPOINT}${ENDPOINT.includes("?") ? "&" : "?"}q=${encodeURIComponent(term)}`);
+            if (!response.ok) continue;
+            const payload = await response.json();
+            const items = Array.isArray(payload.items) ? payload.items : Array.isArray(payload.results) ? payload.results : [];
+            const candidates = items.map((item) => {
+              const snippet = item.snippet || item;
+              const id = item.id?.videoId || item.youtubeId || item.videoId;
+              if (!id || id === stored?.id) return null;
+              return {
+                id,
+                title: clean(snippet.title || item.title, 160) || "Pjesma bez naslova",
+                artist: clean(snippet.channelTitle || item.channelTitle || item.artist || "YouTube", 120),
+                thumbnail: snippet.thumbnails?.medium?.url || snippet.thumbnails?.high?.url || `https://i.ytimg.com/vi/${id}/hqdefault.jpg`
+              };
+            }).filter(Boolean);
+            if (candidates.length) {
+              const sameArtist = candidates.filter(item => String(item.artist).toLocaleLowerCase("hr") === String(stored?.artist || "").toLocaleLowerCase("hr"));
+              const pool = sameArtist.length ? sameArtist : candidates;
+              const chosen = pool[Math.floor(Math.random() * pool.length)];
+              const nextTrack = { ...chosen, queue: pool, queueIndex: 0, currentTime: 0 };
+              if (!cancelled) {
+                window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextTrack));
+                setTrack(nextTrack);
+              }
+              return;
+            }
+          } catch { /* Try the next fallback search. */ }
+        }
+      } catch { /* Ignore malformed queue data or unavailable search. */ }
+      finally { advancing = false; }
     };
     const savePosition = (seconds) => {
       if (!Number.isFinite(seconds) || seconds < 0) return;
@@ -72,7 +115,7 @@ export default function PersistentMusicPlayer() {
               }, 1000);
             },
             onStateChange: (event) => {
-              if (event.data === window.YT.PlayerState.ENDED) advanceNext();
+              if (event.data === (window.YT?.PlayerState?.ENDED ?? 0)) void advanceNext();
             }
           }
         });
