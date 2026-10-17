@@ -47,6 +47,18 @@ export default function HrvatskaPamti() {
       <div className="hp-section-heading"><div><span className="hp-section-kicker">ISTRAŽI PROSTOR SJEĆANJA</span><h2>Karta <em>sjećanja</em></h2></div><p>Odaberi mjesto i upoznaj priče koje će biti dokumentirane uz provjerljive izvore.</p></div>
       <div className="hp-map-layout">
         <HrvatskaPamtiMap places={places} selectedPlace={selectedPlace} onSelect={setSelectedPlace} />
+        <aside className="hp-place-panel" aria-live="polite" aria-label={"Odabrano mjesto: " + selectedPlace.name}>
+          <span className="hp-section-kicker">ODABRANO MJESTO</span>
+          <span className="hp-place-symbol" aria-hidden="true">{selectedPlace.symbol}</span>
+          <span className="hp-place-region">{selectedPlace.region}</span>
+          <h3>{selectedPlace.name}</h3>
+          <p>{selectedPlace.text}</p>
+          <span className="hp-place-status">{selectedPlace.status}</span>
+          <div className="hp-source-note">
+            <strong>Što slijedi?</strong>
+            <p>Priprema povijesnog zapisa, provjera lokacije i povezivanje s pouzdanim arhivskim, muzejskim ili znanstvenim izvorima.</p>
+          </div>
+        </aside>
       </div>
       <p className="hp-map-disclaimer">Ovo je početni vizualni pregled, a ne geografski precizna karta. Povijesni zapisi i lokacije neće se prikazivati kao potvrđeni dok se ne provjere izvori.</p>
     </section>
