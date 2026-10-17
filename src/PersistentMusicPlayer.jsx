@@ -24,6 +24,8 @@ export default function PersistentMusicPlayer() {
   const [position, setPosition] = useState(null);
   const dragRef = useRef(null);
   const iframeRef = useRef(null);
+  const playerRef = useRef(null);
+  const [volume, setVolume] = useState(80);
 
   useEffect(() => {
     let player = null;
@@ -58,8 +60,10 @@ export default function PersistentMusicPlayer() {
         player = new window.YT.Player(iframeRef.current, {
           events: {
             onReady: (event) => {
+              playerRef.current = event.target;
               const resumeAt = Math.max(0, Number(track.currentTime) || 0);
               if (resumeAt > 0) event.target.seekTo(resumeAt, true);
+              event.target.setVolume?.(volume);
               event.target.playVideo();
               saveTimer = window.setInterval(() => {
                 try { savePosition(event.target.getCurrentTime()); } catch { /* Ignore player teardown. */ }
@@ -94,9 +98,29 @@ export default function PersistentMusicPlayer() {
       cancelled = true;
       if (saveTimer) window.clearInterval(saveTimer);
       try { if (player && player.getCurrentTime) savePosition(player.getCurrentTime()); } catch { /* Ignore page transition. */ }
+      if (playerRef.current === player) playerRef.current = null;
       if (window.onYouTubeIframeAPIReady === readyHandler) window.onYouTubeIframeAPIReady = previousReady;
     };
   }, [track?.id]);
+
+  function stepQueue(direction) {
+    try {
+      const stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "null");
+      const queue = Array.isArray(stored?.queue) ? stored.queue : [];
+      const currentIndex = Number(stored?.queueIndex ?? queue.findIndex((item) => item.id === track?.id));
+      const nextIndex = currentIndex + direction;
+      if (nextIndex < 0 || nextIndex >= queue.length) return;
+      const nextTrack = { ...queue[nextIndex], queue, queueIndex: nextIndex, currentTime: 0 };
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextTrack));
+      setTrack(nextTrack);
+    } catch { /* Ignore malformed queue data. */ }
+  }
+
+  function changeVolume(value) {
+    const nextVolume = Number(value);
+    setVolume(nextVolume);
+    try { playerRef.current?.setVolume(nextVolume); } catch { /* Player may be loading. */ }
+  }
 
   function closePlayer() {
     window.localStorage.removeItem(STORAGE_KEY);
@@ -255,6 +279,11 @@ export default function PersistentMusicPlayer() {
             referrerPolicy="strict-origin-when-cross-origin"
             style={{ display: "block", width: "100%", aspectRatio: "16 / 9", border: 0, borderRadius: 9, background: "#000" }}
           />}
+          {track && <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 9 }}>
+            <button type="button" onClick={() => stepQueue(-1)} disabled={!(Number(track.queueIndex ?? -1) > 0)} aria-label="Prethodna pjesma" title="Prethodna pjesma" style={{ padding: "7px 10px", border: "1px solid rgba(255,255,255,.2)", borderRadius: 8, color: "#fff", background: "rgba(255,255,255,.1)", cursor: "pointer" }}>⏮</button>
+            <button type="button" onClick={() => stepQueue(1)} disabled={!Array.isArray(track.queue) || Number(track.queueIndex ?? -1) >= track.queue.length - 1} aria-label="Sljedeća pjesma" title="Sljedeća pjesma" style={{ padding: "7px 10px", border: "1px solid rgba(255,255,255,.2)", borderRadius: 8, color: "#fff", background: "rgba(255,255,255,.1)", cursor: "pointer" }}>⏭</button>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0, flex: 1, fontSize: 11 }}><span aria-hidden="true">{volume === 0 ? "🔇" : "🔊"}</span><input aria-label="Glasnoća glazbe" type="range" min="0" max="100" value={volume} onChange={(event) => changeVolume(event.target.value)} style={{ minWidth: 0, width: "100%", accentColor: "#ff6672" }} /><span style={{ width: 30, textAlign: "right" }}>{volume}%</span></label>
+          </div>}
           {track ? <p style={{ margin: "9px 0 0", fontSize: 11, opacity: .72 }}>Povuci gornju traku za pomicanje. Smanji player da ne smeta čitanju.</p> : <p style={{ margin: "9px 0 0", fontSize: 11, opacity: .72 }}>Player je spreman. Pretraži pjesmu i slušaj dok pregledavaš PatriaSoul.</p>}
         </>}
       </div>
