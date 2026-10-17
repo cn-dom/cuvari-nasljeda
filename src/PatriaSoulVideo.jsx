@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Bookmark, ChevronDown, Clock3, Film, Heart, History, Info, Play, Plus, Search, ShieldCheck, SlidersHorizontal, Trash2, Tv, X } from "lucide-react";
 import "./PatriaSoulVideo.css";
 
@@ -6,6 +6,13 @@ const STORAGE_KEY = "patriasoul-video-library-v1";
 const YOUTUBE_SEARCH_ENDPOINT = import.meta.env.VITE_YOUTUBE_SEARCH_ENDPOINT || "";
 const CATEGORIES = ["Sve", "Domovinski rat", "Vukovar", "Stradanja i žrtve", "Branitelji", "Dokumentarci", "Svjedočanstva", "Povijesni zapisi"];
 const EMPTY_LIBRARY = [];
+
+function readStoredArray(key) {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(key) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch { return []; }
+}
 
 function readLibrary() {
   try {
@@ -71,15 +78,37 @@ export default function PatriaSoulVideo() {
   const [discoveryResults, setDiscoveryResults] = useState([]);
   const [discoveryLoading, setDiscoveryLoading] = useState(false);
   const [discoveryError, setDiscoveryError] = useState("");
-  const [favorites, setFavorites] = useState(() => JSON.parse(localStorage.getItem("patriasoul-video-favorites-v1") || "[]"));
-  const [saved, setSaved] = useState(() => JSON.parse(localStorage.getItem("patriasoul-video-saved-v1") || "[]"));
-  const [history, setHistory] = useState(() => JSON.parse(localStorage.getItem("patriasoul-video-history-v1") || "[]"));
+  const [favorites, setFavorites] = useState(() => readStoredArray("patriasoul-video-favorites-v1"));
+  const [saved, setSaved] = useState(() => readStoredArray("patriasoul-video-saved-v1"));
+  const [history, setHistory] = useState(() => readStoredArray("patriasoul-video-history-v1"));
+  const librarySearchRef = useRef(null);
   const [form, setForm] = useState({ url: "", title: "", category: "Domovinski rat", description: "", source: "", date: "" });
 
   useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(videos)); }, [videos]);
   useEffect(() => { localStorage.setItem("patriasoul-video-favorites-v1", JSON.stringify(favorites)); }, [favorites]);
   useEffect(() => { localStorage.setItem("patriasoul-video-saved-v1", JSON.stringify(saved)); }, [saved]);
   useEffect(() => { localStorage.setItem("patriasoul-video-history-v1", JSON.stringify(history)); }, [history]);
+
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        if (addOpen) setAddOpen(false);
+        else if (activeVideo) setActiveVideo(null);
+      }
+      if (event.key === "/" && !addOpen && !activeVideo && !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName)) {
+        event.preventDefault();
+        librarySearchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [addOpen, activeVideo]);
+
+  useEffect(() => {
+    const modalOpen = Boolean(addOpen || activeVideo);
+    document.body.classList.toggle("psv-modal-open", modalOpen);
+    return () => document.body.classList.remove("psv-modal-open");
+  }, [addOpen, activeVideo]);
 
   const visibleVideos = useMemo(() => {
     const query = search.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("hr");
@@ -193,7 +222,7 @@ export default function PatriaSoulVideo() {
       <div className="psv-section-heading"><div><span className="psv-eyebrow">DIGITALNA ZBIRKA</span><h2>{currentTitle}</h2><p>Pretraži, razvrstaj i otvori video bez napuštanja PatriaSoul sučelja.</p></div><div className="psv-layout-switch"><button className={layout === "grid" ? "selected" : ""} onClick={() => setLayout("grid")}>Kartice</button><button className={layout === "list" ? "selected" : ""} onClick={() => setLayout("list")}>Popis</button></div></div>
 
       <div className="psv-toolbar">
-        <label className="psv-search"><Search size={18} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pretraži naslove, mjesta, svjedoke…" /><kbd>/</kbd></label>
+        <label className="psv-search"><Search size={18} /><input ref={librarySearchRef} value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pretraži naslove, mjesta, svjedoke…" aria-label="Pretraži videoarhivu" /><kbd aria-hidden="true">/</kbd></label>
         <label className="psv-sort"><SlidersHorizontal size={16} /><span>Sortiraj</span><select value={sort} onChange={(e) => setSort(e.target.value)}><option value="newest">Najnovije dodano</option><option value="oldest">Najstariji datum</option><option value="title">Naslov A–Ž</option></select><ChevronDown size={14} /></label>
       </div>
 
