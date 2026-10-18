@@ -294,3 +294,22 @@
 .hp-record-source-link:hover,.hp-record-source-link:focus-visible{text-decoration:underline;color:#fff!important;outline-offset:4px}
 .hp-record-source-grid article{align-items:flex-start}
 .hp-record-source-grid article .hp-record-source-link{margin-top:auto}
+
+
+/* Evidence-first metrics for Hrvatska pamti */
+.hp-national-memory-stats{padding:70px clamp(24px,8vw,128px);background:linear-gradient(135deg,#0d2030,#091622);border-top:1px solid var(--hp-line);border-bottom:1px solid var(--hp-line)}
+.hp-national-stats-heading{max-width:720px;margin-bottom:30px}
+.hp-national-stats-heading h2{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;font-size:clamp(38px,4.5vw,58px);line-height:1;margin:17px 0}
+.hp-national-stats-heading h2 em{color:#d6b48b}
+.hp-national-stats-heading>p,.hp-national-stats-note{font-size:12px;line-height:1.9;color:#aab9c7}
+.hp-national-stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.hp-national-stats-grid article{display:flex;flex-direction:column;align-items:flex-start;min-height:205px;padding:23px;border:1px solid var(--hp-line);background:#0e2030}
+.hp-national-stats-grid article>strong{font-family:"Cormorant Garamond",Georgia,serif;font-size:clamp(35px,4vw,52px);line-height:1;color:#f0d0a5;font-weight:500;font-variant-numeric:tabular-nums}
+.hp-national-stats-grid article>span{font-size:11px;line-height:1.7;font-weight:800;margin-top:13px;color:#f2eee7}
+.hp-national-stats-grid article>small{font-size:10px;line-height:1.7;color:#9eafbd;margin-top:8px}
+.hp-national-stats-grid article>a{font-size:10px;color:#e5c69f;margin-top:auto;padding-top:14px}
+.hp-national-stats-note{margin:22px 0 0}
+.hp-record-metrics-evidence{grid-template-columns:repeat(4,minmax(0,1fr))}
+.hp-record-overview-note{max-width:980px}
+@media(max-width:900px){.hp-national-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hp-record-metrics-evidence{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.hp-national-memory-stats{padding:52px 20px}.hp-national-stats-grid{grid-template-columns:1fr}.hp-national-stats-grid article{min-height:0}.hp-record-metrics-evidence{grid-template-columns:repeat(2,minmax(0,1fr))}}
