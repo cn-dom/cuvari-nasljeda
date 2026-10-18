@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { supabase } from "./lib/supabase.js";
 import "./virtual-museum.css";
 import { BadgeRow, getBadge } from "./HeritageBadges.jsx";
+import SiteChrome from "./SiteChrome.jsx";
 
 const exhibits = [
   {
@@ -446,11 +447,7 @@ export default function VirtualMuseum() {
   }
 
   return <main className="virtual-museum-page">
-    <header className="museum-header">
-      <a className="museum-back" href="/">← Čuvari nasljeđa</a>
-      <div className="museum-brand"><span className="museum-brand-mark">✦</span><div><p>PATRIASOUL · ČUVARI NASLJEĐA</p><h1>Virtualni muzej PatriaSoul</h1></div></div>
-      <p className="museum-intro">Prošetaj dvoranom hrvatske baštine. Svaki predmet zaslužuje provjerenu priču.</p>
-    </header>
+    <SiteChrome section="Kultura i znanje" links={[{"label":"Muzej","href":"/virtualni-muzej.html"},{"label":"Zbirke","href":"#collections"},{"label":"Izložbe","href":"#exhibitions"},{"label":"PatriaSoul","href":"/"}]}/>
     <nav className="museum-tabs" aria-label="Dijelovi virtualnog muzeja">
       <button className={activeTab==="explore"?"active":""} onClick={()=>setActiveTab("explore")}>🏛 Istraži muzej</button>
       <button className={activeTab==="create"?"active":""} onClick={()=>{setActiveTab("create");loadSavedDrafts();}}>✧ Digitalni Kursor</button>
@@ -483,6 +480,6 @@ export default function VirtualMuseum() {
         {draftsBusy ? <p>Učitavam tvoje nacrte…</p> : savedDrafts.length === 0 ? <p className="museum-empty-drafts">Još nema spremljenih nacrta. Izradi prvi iznad.</p> : <div className="museum-draft-list">{savedDrafts.map(draft => <article className="museum-saved-draft" key={draft.id}><div><strong>{draft.title}</strong><span>{draft.category} · {new Date(draft.updated_at || draft.created_at).toLocaleDateString("hr-HR")}</span><small>{draft.image_path ? "Fotografija priložena" : "Bez fotografije"} · Privatno</small></div><div className="museum-saved-actions"><button type="button" onClick={()=>openSavedDraft(draft)}>Otvori / uredi</button><button type="button" onClick={()=>deleteSavedDraft(draft)}>Izbriši</button></div></article>)}</div>}
       </section>
     </section>}
-    <footer className="museum-footer">Virtualni muzej PatriaSoul · Povijesne činjenice moraju imati provjerljive izvore · AI ilustracije nikad se ne označavaju kao izvorne povijesne fotografije.</footer>
+    
   </main>;
 }
