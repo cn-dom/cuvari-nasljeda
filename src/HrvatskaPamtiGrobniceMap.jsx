@@ -1,7 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-const MAP_STYLE = "https://tiles.openfreemap.org/styles/fiord";
+const MAP_STYLE = {
+  version: 8,
+  sources: {
+    "osm-raster": {
+      type: "raster",
+      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+      tileSize: 256,
+      attribution: "© OpenStreetMap contributors",
+    },
+  },
+  layers: [{ id: "osm-raster-layer", type: "raster", source: "osm-raster", minzoom: 0, maxzoom: 19 }],
+};
 
 // Približne točke naselja odvojene su od točnih koordinata grobnica.
 const APPROXIMATE_LOCALITIES = {
@@ -282,8 +293,13 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
         };
         window.addEventListener("hp-focus-grave-map", focusMarker);
 
+        mapInstance.on("load", () => {
+          if (!cancelled) setMapError(false);
+        });
         mapInstance.on("error", (event) => {
-          if (event?.error && !cancelled) setMapError(true);
+          // Tile-level 404/temporary network errors must not hide a usable map.
+          // Show the fallback message only if the map itself failed to initialize.
+          if (!cancelled && !mapInstance.isStyleLoaded()) setMapError(true);
         });
         if (mappedSites.length > 1) {
           const bounds = new maplibregl.LngLatBounds();
