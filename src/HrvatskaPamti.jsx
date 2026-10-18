@@ -30,7 +30,7 @@ export default function HrvatskaPamti() {
   const [placeQuery, setPlaceQuery] = useState("");
   const filteredPlaces = places.filter((place) => (place.name + " " + place.region + " " + place.text).toLocaleLowerCase("hr").includes(placeQuery.trim().toLocaleLowerCase("hr")));
   const registeredCroatianSites = graveSites.filter((site) => site.croatianVictimsConfirmed === true);
-  const recordsWithNumericFindings = registeredCroatianSites.filter((site) => Number.isFinite(site.victimsFound) || /\\b\\d+\\b/.test(site.foundLabel || ""));
+  const recordsWithNumericFindings = registeredCroatianSites.filter((site) => Number.isFinite(site.victimsFound) || Number.isFinite(site.victimsFound).test(site.foundLabel || ""));
   return <main className="hp-page">
     <SiteChrome section="Domovina" links={[{"label":"Karta sjećanja","href":"#karta"},{"label":"Povijesne priče","href":"#price"},{"label":"Izvori i načela","href":"#izvori"},{"label":"Registar grobišta","href":"/hrvatska-pamti-grobnice.html"}]}/>
     
