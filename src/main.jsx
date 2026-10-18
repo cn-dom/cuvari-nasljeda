@@ -21,7 +21,7 @@ const Screen = route === "/hrvatska-pamti-grobnice.html"
   : route === "/hrvatska-pamti-mjesto.html"
   ? HrvatskaPamtiMjesto
   : route === "/hrvatska-pamti.html"
-  ? HrvatskaPamti
+  ? HrvatskaPamtiGrobnice
   : route === "/video-arhiva.html"
   ? PatriaSoulVideo
   : (route === "/hrvatski-val.html" || route === "/hrvatski-val")
