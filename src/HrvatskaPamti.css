@@ -335,14 +335,14 @@
 /* Vukovar memorial dossier: fixed Water Tower backdrop and a separate Ovčara header photograph. */
 .hp-detail-page-vukovar{
   background-color:#081522;
-  background-image:linear-gradient(180deg,rgba(5,15,24,.80),rgba(5,15,24,.91)),url("https://commons.wikimedia.org/wiki/Special:FilePath/Vukovar%20Water%20Tower.jpg?width=1920");
+  background-image:linear-gradient(180deg,rgba(5,15,24,.80),rgba(5,15,24,.91)),url("https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/Vukovar_with_Water_Tower_at_Night_-_urban_composition_along_River_Danube%2C_autor_Istriana.jpg/1280px-Vukovar_with_Water_Tower_at_Night_-_urban_composition_along_River_Danube%2C_autor_Istriana.jpg");
   background-size:cover;
   background-position:center center;
   background-attachment:fixed;
 }
 .hp-detail-hero-vukovar{
   background-color:#081522;
-  background-image:linear-gradient(90deg,rgba(5,14,22,.94) 0%,rgba(5,14,22,.82) 42%,rgba(5,14,22,.45) 100%),linear-gradient(0deg,rgba(5,14,22,.48),rgba(5,14,22,.16)),url("https://commons.wikimedia.org/wiki/Special:FilePath/Ovcara%20Memorial.JPG?width=1920");
+  background-image:linear-gradient(90deg,rgba(5,14,22,.94) 0%,rgba(5,14,22,.82) 42%,rgba(5,14,22,.45) 100%),linear-gradient(0deg,rgba(5,14,22,.48),rgba(5,14,22,.16)),url("https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/Ovcara_Memorial.JPG/1280px-Ovcara_Memorial.JPG");
   background-size:cover;
   background-position:center,center,62% 43%;
   border-bottom-color:rgba(214,180,139,.35);
