@@ -9,4 +9,7 @@
 <link rel="manifest" href="/manifest.webmanifest"><link rel="stylesheet" href="/kviz/game-images.css?v=20261014-6"><link rel="icon" href="/assets/images/1000000982.png" type="image/png"><link rel="apple-touch-icon" href="/assets/images/1000000982.png">
 <title>PatriaSoul — Hrvatski kviz | Znanje · Ponos · Nasljeđe</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/assets/images/1000000982.png?v=20261018">
+  <link rel="shortcut icon" type="image/png" href="/assets/images/1000000982.png?v=20261018">
+  <link rel="apple-touch-icon" href="/assets/images/1000000982.png?v=20261018">
 </head><body><div id="root"></div><script>if ("serviceWorker" in navigator) { window.addEventListener("load", async () => { try { const regs = await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.filter((r) => r.active?.scriptURL.includes("/kviz/sw.js") || r.installing?.scriptURL.includes("/kviz/sw.js") || r.waiting?.scriptURL.includes("/kviz/sw.js")).map((r) => r.unregister())); await navigator.serviceWorker.register("/sw.js", { scope: "/" }); } catch (error) { console.warn("PatriaSoul PWA:", error); } }); }</script><script type="module" src="./src/main.jsx"></script></body></html>
