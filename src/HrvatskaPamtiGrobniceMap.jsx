@@ -87,20 +87,80 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
+  const maplibreRef = useRef(null);
+  const searchMarkerRef = useRef(null);
   const [mapError, setMapError] = useState(false);
   const [mapQuery, setMapQuery] = useState("");
+  const [placeMatches, setPlaceMatches] = useState([]);
   const mappedSites = sites
      .filter((site) => site.certainty === "confirmed" && getMapLocation(site))
     .map((site) => ({ ...site, mapLocation: getMapLocation(site) }));
-  const searchMatches = mapQuery.trim().length < 2 ? [] : mappedSites.filter((site) => [site.name, site.area, site.period, site.detail, site.mapLocation.label].filter(Boolean).join(" ").toLocaleLowerCase("hr").includes(mapQuery.trim().toLocaleLowerCase("hr"))).slice(0, 8);
+  const searchMatches = mapQuery.trim().length < 2 ? [] : sites.filter((site) => [site.name, site.area, site.period, site.detail, getMapLocation(site)?.label].filter(Boolean).join(" ").toLocaleLowerCase("hr").includes(mapQuery.trim().toLocaleLowerCase("hr"))).slice(0, 8);
+
+  useEffect(() => {
+    const query = mapQuery.trim();
+    if (query.length < 3) {
+      setPlaceMatches([]);
+      return undefined;
+    }
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      try {
+        const response = await fetch("https://photon.komoot.io/api/?q=" + encodeURIComponent(query) + "&limit=5&lang=hr", {
+          signal: controller.signal,
+          headers: { Accept: "application/json" },
+        });
+        if (!response.ok) throw new Error("Pretraga mjesta nije dostupna.");
+        const payload = await response.json();
+        if (controller.signal.aborted) return;
+        setPlaceMatches((payload.features || []).map((feature, index) => {
+          const properties = feature.properties || {};
+          const [lng, lat] = feature.geometry?.coordinates || [];
+          return {
+            id: "map-place-" + index + "-" + String(properties.osm_id || properties.name || query),
+            name: properties.name || query,
+            area: [properties.city, properties.county, properties.country].filter(Boolean).join(", ") || properties.name || query,
+            lat: Number(lat),
+            lng: Number(lng),
+            label: [properties.name, properties.city, properties.county, properties.country].filter(Boolean).join(", "),
+          };
+        }).filter((place) => Number.isFinite(place.lat) && Number.isFinite(place.lng)));
+      } catch (error) {
+        if (!controller.signal.aborted) setPlaceMatches([]);
+      }
+    }, 450);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [mapQuery]);
 
   function focusSite(siteId) {
     const entry = markersRef.current.find((item) => item.siteId === siteId);
     const site = mappedSites.find((item) => item.id === siteId);
     const map = mapRef.current;
     if (!entry || !site || !map) return;
+    if (searchMarkerRef.current) {
+      searchMarkerRef.current.remove();
+      searchMarkerRef.current = null;
+    }
     map.flyTo({ center: [site.mapLocation.lng, site.mapLocation.lat], zoom: Math.max(map.getZoom(), 11), essential: true, duration: 700 });
     window.setTimeout(() => { if (entry.marker && !entry.marker.getPopup()?.isOpen()) entry.marker.togglePopup(); }, 750);
+  }
+
+  function focusPlace(place) {
+    const map = mapRef.current;
+    const maplibregl = maplibreRef.current;
+    if (!map || !maplibregl || !Number.isFinite(place.lat) || !Number.isFinite(place.lng)) return;
+    if (searchMarkerRef.current) searchMarkerRef.current.remove();
+    map.flyTo({ center: [place.lng, place.lat], zoom: 12, essential: true, duration: 800 });
+    const popup = new maplibregl.Popup({ offset: 18, maxWidth: "300px" })
+      .setText((place.label || place.name) + " — geografska lokacija, ne potvrda grobnice.");
+    searchMarkerRef.current = new maplibregl.Marker({ color: "#dc2626" })
+      .setLngLat([place.lng, place.lat])
+      .setPopup(popup)
+      .addTo(map);
+    searchMarkerRef.current.togglePopup();
   }
 
   useEffect(() => {
@@ -130,6 +190,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
           cooperativeGestures: true,
         });
         mapRef.current = mapInstance;
+        maplibreRef.current = maplibregl;
         mapInstance.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 
         mappedSites.forEach((site) => {
@@ -219,6 +280,11 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
       markersRef.current = [];
       if (mapInstance) mapInstance.remove();
       mapRef.current = null;
+      maplibreRef.current = null;
+      if (searchMarkerRef.current) {
+        searchMarkerRef.current.remove();
+        searchMarkerRef.current = null;
+      }
     };
   }, [sites]);
 
@@ -232,7 +298,15 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
         <label htmlFor="hp-grave-map-search-input">Pronađi mjesto na karti</label>
         <input id="hp-grave-map-search-input" type="search" value={mapQuery} onChange={(event) => setMapQuery(event.target.value)} placeholder="Upiši npr. Baćin, Sotin, Ovčara, Vukovar…" autoComplete="off" />
         {mapQuery.trim().length >= 2 && <div className="hp-grave-map-search-results" role="listbox" aria-label="Rezultati pretrage karte">
-          {searchMatches.length ? searchMatches.map((site) => <button type="button" key={site.id} role="option" onClick={() => focusSite(site.id)}><span>{site.name}</span><small>{site.area} · {site.mapLocation.approximate ? "približna lokacija" : "objavljena koordinata"}</small></button>) : <p>Nema podudaranja među potvrđenim zapisima s lokacijom na karti.</p>}
+          {searchMatches.map((site) => <button type="button" key={"site-" + site.id} role="option" onClick={() => {
+            if (getMapLocation(site) && site.certainty === "confirmed") focusSite(site.id);
+            else {
+              const card = document.getElementById("hp-site-" + site.id);
+              if (card) card.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+          }}><span>{site.name}</span><small>{site.area} · {getMapLocation(site) ? (site.certainty === "confirmed" ? "zapis na karti" : "istraživački zapis — nije potvrđen") : "nema provjerene lokacije na karti"}</small></button>)}
+          {placeMatches.map((place) => <button type="button" key={place.id} role="option" onClick={() => focusPlace(place)}><span>{place.name}</span><small>{place.area} · pronađi mjesto na karti</small></button>)}
+          {!searchMatches.length && !placeMatches.length && <p>Tražim mjesta na karti… Ako se ništa ne pojavi, pokušaj precizniji naziv.</p>}
         </div>}
       </div>
       <div className="hp-grave-map-shell">
