@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 import "./community-sections.css";
-import SiteChrome from "./SiteChrome.jsx";
+import SiteChrome, { SiteFooter } from "./SiteChrome.jsx";
 
 const normalizeUsername = (value) => String(value || "").trim().replace(/^@/, "").toLowerCase();
 const displayName = (profile) => profile?.display_name || normalizeUsername(profile?.username) || "Čuvar nasljeđa";
@@ -87,5 +87,6 @@ export default function Pages() {
       {busy && <p>Učitavam stranice…</p>}{!busy && !pages.length && <p className="community-section-empty">Još nema stranica. Pokreni prvu zajednicu.</p>}
       <div className="community-pages-grid">{pages.map(page => <button key={page.id} className="community-page-tile" onClick={() => loadPagePosts(page)}><span className="community-page-symbol">▣</span><strong>{page.name}</strong><small>{page.category} · {displayName(page.profiles)}</small><p>{page.description || "Tematska stranica zajednice Čuvari nasljeđa."}</p><span className="community-page-open">Otvori stranicu →</span></button>)}</div>
     </section><section className="community-section-card"><h2>Stvori novu stranicu</h2><p className="community-section-subtitle">Za lokalnu zajednicu, udrugu, zavičaj, temu ili projekt baštine.</p><form className="community-section-form" onSubmit={createPage}><label htmlFor="page-name">Naziv stranice</label><input id="page-name" value={name} onChange={e => setName(e.target.value)} minLength={3} maxLength={80} required placeholder="Npr. Baština Sinjske krajine" /><small className="community-character-count">{name.length} / 80 znakova</small><label htmlFor="page-category">Kategorija</label><select id="page-category" value={category} onChange={e => setCategory(e.target.value)}><option>Zajednica</option><option>Povijest</option><option>Zavičaj</option><option>Obitelj i običaji</option><option>Vjera</option><option>Branitelji i sjećanje</option><option>Kultura i baština</option><option>Udruga</option></select><label htmlFor="page-description">Opis</label><textarea id="page-description" value={description} onChange={e => setDescription(e.target.value)} maxLength={1000} placeholder="Čemu je stranica posvećena?" /><small className="community-character-count">{description.length} / 1.000 znakova</small><button className="community-section-primary" disabled={busy}>{busy ? "Spremam…" : "Stvori stranicu"}</button>{!session && <small>Za stvaranje stranice potrebna je prijava.</small>}</form></section></div>}
-  </main>;
+  <SiteFooter />
+    </main>;
 }
