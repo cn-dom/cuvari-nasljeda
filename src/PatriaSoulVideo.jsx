@@ -393,7 +393,7 @@ export default function PatriaSoulVideo() {
         <p>Videoarhiva Domovinskog rata, hrvatskih branitelja, žrtava i mjesta stradanja. Svaki zapis zaslužuje izvor, kontekst i dostojanstvo.</p>
         <div className="psv-hero-actions"><button onClick={() => { setView("all"); setCategory("Sve"); document.getElementById("psv-library")?.scrollIntoView({ behavior: "smooth" }); }}><Play size={16} fill="currentColor" /> Istraži arhivu</button><button className="psv-secondary-button" onClick={() => setAddOpen(true)}><Plus size={16} /> Dodaj zapis</button></div>
       </div>
-      <div className="psv-hero-art" aria-hidden="true"><div className="psv-art-glow" /><div className="psv-art-cross">✦</div><div className="psv-art-line" /><div className="psv-art-caption"><span>DOMOVINSKI RAT</span><strong>Sjećanje je odgovornost.</strong></div></div>
+      <div className="psv-hero-art" role="img" aria-label="Vukovarski vodotoranj kao simbol sjećanja na Domovinski rat"><div className="psv-art-caption"><span>DOMOVINSKI RAT</span><strong>Sjećanje je odgovornost.</strong></div></div>
     </section>
 
     <section className="psv-stat-row" aria-label="Pregled biblioteke">
