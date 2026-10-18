@@ -82,9 +82,8 @@ const APPROXIMATE_LOCALITIES = {
   "velika-solina": { lat:45.3400, lng:16.0500, label:"Velika Solina, Glina", precision:"Približna lokacija naselja — nije točka grobnice" },
   "mohovo": { lat:45.4000, lng:19.2500, label:"Mohovo", precision:"Približna lokacija naselja — nije točka grobnice" },
   "sveta-nedelja-lipje-trebez": { lat:45.8000, lng:15.7800, label:"Sveta Nedelja — Lipje i Trebež-Pakovica", precision:"Približno područje — dvije grobnice nisu pojedinačno locirane" },
-  "mostisce-sudovac": { lat:46.10583, lng:16.36305, label:"Sudovec, Novi Marof", precision:"Približna lokacija naselja — nije točka grobnice Mostišće" },
+  "mostisce-sudovac": { lat:46.1319959, lng:16.3629416, label:"Mostišće, Sudovec", precision:"Koordinata zaseoka Mostišće iz javnog zemljopisnog izvora — nije točka pojedinačne grobne jame" },
   "krasic-hrzenik": { lat:45.65627, lng:15.48728, label:"Hrženik, Krašić", precision:"Približna lokacija naselja — nije točka grobnice" },
-  "jama-grijalice": { lat:45.37989, lng:14.81169, label:"Špilja Grijalica, Delnice", precision:"Kartirana lokacija špilje; nije potvrda točne točke iskopa iz jame" },
   "betin-dvor": { lat:45.5500, lng:18.7400, label:"Betin Dvor kod Tenje", precision:"Približno područje — nije točka grobnice" },
   "stari-seles-domovinski-rat": { lat:45.5200, lng:18.7000, label:"Stari Seleš", precision:"Približno područje — nije točka grobnice" },
 };
