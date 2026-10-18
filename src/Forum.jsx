@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 import "./community-sections.css";
+import SiteChrome from "./SiteChrome.jsx";
 
 const normalizeUsername = (value) => String(value || "").trim().replace(/^@/, "").toLowerCase();
 const label = (profile) => profile?.display_name || normalizeUsername(profile?.username) || "Čuvar nasljeđa";
@@ -93,7 +94,7 @@ export default function Forum() {
   }
 
   return <main className="community-section-page">
-    <header className="community-section-header"><a href="/" className="community-section-brand">← Čuvari nasljeđa</a><span className="community-section-eyebrow">PATRiASOUL · RAZGOVORI</span><h1>Domoljubni forum</h1><p>Razmjenjuj znanje, postavljaj pitanja i čuvaj priče Hrvatske.</p><div className="community-section-actions"><a className="community-section-home" href="/">Povratak na zid</a><a className="community-section-home ai-community-link" href="/ai-centar.html">✦ PatriaSoul Centar</a></div></header>
+    <SiteChrome section="Zajednica" links={[{"label":"Forum","href":"/forum.html"},{"label":"Grupe","href":"/#grupe"},{"label":"Članovi","href":"/"},{"label":"Događaji","href":"/dogadaji.html"}]}/>
     {!isSupabaseConfigured && <div className="community-section-alert">Baza nije konfigurirana u ovoj verziji aplikacije. Postavi javni URL i publishable ključ testnog projekta.</div>}
     {error && <div className="community-section-alert">{error}</div>}{notice && <div className="community-section-notice">{notice}</div>}
     {activeTopic ? <section className="community-section-card">
