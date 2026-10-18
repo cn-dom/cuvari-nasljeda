@@ -61,7 +61,7 @@ export default function HrvatskaPamtiMjesto() {
     return items.filter(item => (catalogType === "sve" || item.type === catalogType) && (!query || `${item.title} ${item.body} ${item.label}`.toLocaleLowerCase("hr-HR").includes(query)));
   }, [record, catalogQuery, catalogType]);
   const placeOrder = ["vukovar", "skabrnja", "dubrovnik", "zagreb", "knin", "osijek", "sinj", "lika-i-krbava"];
-  const linkedGraveRecords = (record?.graveRegistryIds || []).map(id => graveSites.find(site => site.id === id)).filter(Boolean);
+  const linkedGraveRecords = graveSites.filter(site => site.placeSlug === slug || (record?.graveRegistryIds || []).includes(site.id));
   const linkedRecordsWithNumbers = linkedGraveRecords.filter(site => Number.isFinite(site.victimsFound));
   const countedFindings = linkedGraveRecords.filter(site => site.countInTotal === true && Number.isFinite(site.victimsFound));
   const vukovarDocumentedFindings = countedFindings.reduce((sum, site) => sum + site.victimsFound, 0);
