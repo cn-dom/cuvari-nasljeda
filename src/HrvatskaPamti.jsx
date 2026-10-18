@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./HrvatskaPamti.css";
 import HrvatskaPamtiMap from "./HrvatskaPamtiMap.jsx";
+import { sites as graveSites } from "./HrvatskaPamtiGrobnice.jsx";
 import SiteChrome, { SiteFooter } from "./SiteChrome.jsx";
 
 const places = [
@@ -28,6 +29,8 @@ export default function HrvatskaPamti() {
   const [candleLit, setCandleLit] = useState(false);
   const [placeQuery, setPlaceQuery] = useState("");
   const filteredPlaces = places.filter((place) => (place.name + " " + place.region + " " + place.text).toLocaleLowerCase("hr").includes(placeQuery.trim().toLocaleLowerCase("hr")));
+  const registeredCroatianSites = graveSites.filter((site) => site.croatianVictimsConfirmed === true);
+  const recordsWithNumericFindings = registeredCroatianSites.filter((site) => Number.isFinite(site.victimsFound) || /\\b\\d+\\b/.test(site.foundLabel || ""));
   return <main className="hp-page">
     <SiteChrome section="Domovina" links={[{"label":"Karta sjećanja","href":"#karta"},{"label":"Povijesne priče","href":"#price"},{"label":"Izvori i načela","href":"#izvori"},{"label":"Registar grobišta","href":"/hrvatska-pamti-grobnice.html"}]}/>
     
@@ -43,6 +46,16 @@ export default function HrvatskaPamti() {
       </div>
       <div className="hp-hero-vertical">HRVATSKA · PAMĆENJE · DOSTOJANSTVO</div>
       <div className="hp-hero-bottom"><span>VJERA · OBITELJ · DOMOVINA</span><span>01 / SJEĆANJE</span></div>
+    </section>
+    <section className="hp-national-memory-stats" aria-label="Brojčani pregled sjećanja i potrage">
+      <div className="hp-national-stats-heading"><span className="hp-section-kicker">EVIDENCIJA · STANJE PREMA SLUŽBENIM OBJAVAMA</span><h2>Brojevi koji <em>imaju ime.</em></h2><p>Ovo su pokazatelji trenutačne evidencije i neriješenih slučajeva, a ne konačan broj svih žrtava ili svih grobnica u Hrvatskoj.</p></div>
+      <div className="hp-national-stats-grid">
+        <article><strong>{registeredCroatianSites.length.toLocaleString("hr-HR")}</strong><span>zapisa u registru s potvrđenim hrvatskim žrtvama</span><small>Broj zapisa u našoj evidenciji, ne ukupan broj grobnica u Hrvatskoj.</small></article>
+        <article><strong>{recordsWithNumericFindings.length.toLocaleString("hr-HR")}</strong><span>zapisa s brojčanim podatkom iz izvora</span><small>Brojevi se ne zbrajaju jer mogu opisivati različite nalaze ili obuhvate.</small></article>
+        <article><strong>1.725</strong><span>neriješenih slučajeva iz Domovinskog rata</span><small>1.341 osoba nepoznate sudbine i 384 smrtno stradale osobe za koje nije poznato mjesto ukopa.</small><a href="https://branitelji.gov.hr/mjere-14/nestale-osobe/nestale-osobe-u-domovinskom-ratu-834/834" target="_blank" rel="noreferrer">Ministarstvo hrvatskih branitelja ↗</a></article>
+        <article><strong>343</strong><span>osobe identificirane u proteklih deset godina</span><small>Podatak iz službene objave Vlade RH od 30. kolovoza 2026.; nije broj svih identificiranih od 1991.</small><a href="https://www.vlada.gov.hr/pitanje-nestalih-jedan-je-od-glavnih-prioriteta/47206" target="_blank" rel="noreferrer">Vlada RH · 30. 8. 2026. ↗</a></article>
+      </div>
+      <p className="hp-national-stats-note">Broj neriješenih slučajeva mijenja se kada se pronađu i identificiraju posmrtni ostaci. Zato je uz broj uvijek naveden izvor, a broj žrtava, ekshumiranih ostataka, identificiranih osoba i grobnica vodimo kao odvojene kategorije.</p>
     </section>
     <section className="hp-intro">
       <div><span className="hp-section-kicker">ZA ONE KOJI DOLAZE</span><h2>Prošlost ne smije<br />ostati bez <em>glasa.</em></h2></div>
