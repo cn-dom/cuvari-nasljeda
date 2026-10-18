@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import "./HrvatskaPamti.css";
 import HrvatskaPamtiGrobniceMap from "./HrvatskaPamtiGrobniceMap.jsx";
-import SiteChrome from "./SiteChrome.jsx";
+import SiteChrome, { SiteFooter } from "./SiteChrome.jsx";
 
 const sites = [
   { id:"ovcara",victimsFound:200,countInTotal:true,coordinates:{lat:45.2958166254,lng:19.0588920533,label:"Točka masovne grobnice Ovčara",precision:"Javno objavljena lokacija grobnice",source:"Balkan Insight, Mass Graves Database; uspoređeno s opisom Memorijalnog centra Domovinskog rata Vukovar",sourceUrl:"https://massgravesmap.balkaninsight.com/ovcara-farm/"},croatianVictimsConfirmed:true,victimAttribution:"Potvrđene hrvatske žrtve Domovinskog rata; pojedinačne identifikacije provjeravaju se prema službenim evidencijama.",foundLabel:"Oko 200 posmrtnih ostataka ekshumirano iz masovne grobnice prema javno dostupnoj memorijalnoj dokumentaciji; broj se odnosi na pronađene ostatke, ne na broj osoba identificiranih DNA analizom.", name:"Ovčara", area:"Vukovar, Vukovarsko-srijemska županija", period:"Domovinski rat", year:"1991.", status:"Potvrđeno mjesto masovne grobnice", certainty:"confirmed", detail:"Mjesto masovne grobnice povezano s ubojstvom ranjenika i zarobljenika odvedenih iz vukovarske bolnice u studenome 1991. Podatke o broju žrtava i identifikacijama treba vezati uz pojedinačne službene evidencije.", source:"Memorijalni centar Domovinskog rata Vukovar; Ministarstvo hrvatskih branitelja", publicLocation:"Javno poznato memorijalno mjesto" },
@@ -87,5 +87,6 @@ export default function HrvatskaPamtiGrobnice() {
       <p className="hp-register-disclaimer">Napomena o potpunosti: glavni registar namjerno prikazuje samo zapise za koje je u izvorima potvrđena masovna grobnica i hrvatske žrtve. Ostali ranije prikupljeni zapisi nisu izbrisani iz izvornog popisa podataka, ali se ne prikazuju u ovoj evidenciji dok se ne potvrde kriteriji. Broj ekshumiranih, broj identificiranih i ukupan broj žrtava nisu ista mjera i ne zbrajaju se u jednu ukupnu brojku. Statusi se ažuriraju prema novim službenim nalazima. Za svaku grobnicu objavljujemo koordinate same lokacije samo kada ih možemo povezati s provjerljivim izvorom. Kada je grobnica aktivno istraživana ili izvor navodi samo šire područje, jasno označavamo da koordinate još nisu potvrđene; ne izmišljamo točnost i ne predstavljamo središte naselja kao grobnicu. Uz unesene koordinate prikazujemo izvor i poveznicu radi neovisne provjere.</p>
     </section>
     
-  </main>;
+  <SiteFooter />
+    </main>;
 }
