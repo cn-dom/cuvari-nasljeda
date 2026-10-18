@@ -85,7 +85,7 @@ export default function HrvatskaPamtiGrobnice() {
   const [expanded, setExpanded] = useState("");
   // Glavni registar prikazuje samo lokacije s pouzdano potvrđenim hrvatskim žrtvama.
   // Ostali početni zapisi ostaju izvan javnog popisa dok se ne provjere izvori i pripadnost žrtava.
-  const confirmedSites = useMemo(() => sites.filter(site => site.croatianVictimsConfirmed === true), []);
+  const confirmedSites = useMemo(() => sites.filter(site => site.certainty === "confirmed"), []);
   const results = useMemo(() => confirmedSites.filter((site) => {
     const matchesPeriod = period === "Sve lokacije" || site.period === period;
     const matchesCountry = country === "Sve države" || (site.country || "Hrvatska") === country;
