@@ -330,3 +330,39 @@
 .hp-place-finding-count>span{font-size:9px;line-height:1.6;color:#c0cbd3;margin-top:7px}
 .hp-place-finding-count>small{font-size:9px;line-height:1.6;color:#d6b48b;margin-top:5px}
 @media(max-width:600px){.hp-place-findings{padding:26px 16px}.hp-place-finding-card{grid-template-columns:minmax(0,1fr) 88px;gap:10px;padding:15px 12px}.hp-place-finding-main h3{font-size:21px}.hp-place-finding-count>strong{font-size:28px}}
+
+
+/* Vukovar memorial dossier: fixed Water Tower backdrop and a separate Ovčara header photograph. */
+.hp-detail-page-vukovar{
+  background-color:#081522;
+  background-image:linear-gradient(180deg,rgba(5,15,24,.80),rgba(5,15,24,.91)),url("https://commons.wikimedia.org/wiki/Special:FilePath/Vukovar%20Water%20Tower.jpg?width=1920");
+  background-size:cover;
+  background-position:center center;
+  background-attachment:fixed;
+}
+.hp-detail-hero-vukovar{
+  background-color:#081522;
+  background-image:linear-gradient(90deg,rgba(5,14,22,.94) 0%,rgba(5,14,22,.82) 42%,rgba(5,14,22,.45) 100%),linear-gradient(0deg,rgba(5,14,22,.48),rgba(5,14,22,.16)),url("https://commons.wikimedia.org/wiki/Special:FilePath/Ovcara%20Memorial.JPG?width=1920");
+  background-size:cover;
+  background-position:center,center,62% 43%;
+  border-bottom-color:rgba(214,180,139,.35);
+}
+.hp-detail-hero-vukovar .hp-section-kicker{position:relative;z-index:1}
+.hp-detail-hero-vukovar h1,.hp-detail-hero-vukovar p,.hp-detail-hero-vukovar .hp-detail-period{position:relative;z-index:1}
+.hp-detail-hero-vukovar .hp-detail-period{display:inline-block}
+.hp-vukovar-photo-credit{
+  position:relative;
+  z-index:1;
+  max-width:780px;
+  margin-top:28px;
+  font-size:9px;
+  line-height:1.8;
+  color:#d1dbe2;
+}
+.hp-vukovar-photo-credit a{color:#f0d0a5!important;text-decoration:underline;text-underline-offset:3px}
+.hp-vukovar-photo-credit a:hover{color:#fff!important}
+@media(max-width:700px){
+  .hp-detail-page-vukovar{background-attachment:scroll;background-position:58% center}
+  .hp-detail-hero-vukovar{background-position:center,center,60% center}
+  .hp-vukovar-photo-credit{font-size:8px}
+}
