@@ -62,7 +62,7 @@ export default function HrvatskaPamtiMjesto() {
   }, [record, catalogQuery, catalogType]);
   const placeOrder = ["vukovar", "skabrnja", "dubrovnik", "zagreb", "knin", "osijek", "sinj", "lika-i-krbava"];
   const linkedGraveRecords = (record?.graveRegistryIds || []).map(id => graveSites.find(site => site.id === id)).filter(Boolean);
-  const linkedRecordsWithNumbers = linkedGraveRecords.filter(site => Number.isFinite(site.victimsFound) || Number.isFinite(site.victimsFound).test(site.foundLabel || ""));
+  const linkedRecordsWithNumbers = linkedGraveRecords.filter(site => Number.isFinite(site.victimsFound));
   const currentIndex = placeOrder.indexOf(slug);
   const previousSlug = currentIndex > 0 ? placeOrder[currentIndex - 1] : null;
   const nextSlug = currentIndex >= 0 && currentIndex < placeOrder.length - 1 ? placeOrder[currentIndex + 1] : null;
