@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-
-const MAPLIBRE_MODULE = "https://unpkg.com/maplibre-gl@6.14.0/dist/maplibre-gl.mjs";
+import * as maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 const MAP_STYLE = "https://tiles.openfreemap.org/styles/fiord";
 
 // Približne točke naselja odvojene su od točnih koordinata grobnica.
@@ -204,14 +204,6 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
 
     async function loadMap() {
       try {
-        if (!document.querySelector('link[data-hp-grave-maplibre="true"]')) {
-          const stylesheet = document.createElement("link");
-          stylesheet.rel = "stylesheet";
-          stylesheet.href = "https://unpkg.com/maplibre-gl@6.14.0/dist/maplibre-gl.css";
-          stylesheet.dataset.hpGraveMaplibre = "true";
-          document.head.appendChild(stylesheet);
-        }
-        const maplibregl = await import(/* @vite-ignore */ MAPLIBRE_MODULE);
         if (cancelled || !containerRef.current) return;
         mapInstance = new maplibregl.Map({
           container: containerRef.current,
