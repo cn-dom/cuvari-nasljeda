@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Bookmark, ChevronDown, Clock3, Film, Heart, History, Info, Play, Plus, Search, ShieldCheck, SlidersHorizontal, Trash2, Tv, X } from "lucide-react";
 import { supabase } from "./lib/supabase";
 import "./PatriaSoulVideo.css";
-import SiteChrome from "./SiteChrome.jsx";
+import SiteChrome, { SiteFooter } from "./SiteChrome.jsx";
 
 const STORAGE_KEY = "patriasoul-video-library-v1";
 const YOUTUBE_SEARCH_ENDPOINT = import.meta.env.VITE_YOUTUBE_SEARCH_ENDPOINT || "/api/youtube-search";
@@ -471,5 +471,6 @@ export default function PatriaSoulVideo() {
     {addOpen && <div className="psv-modal-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) setAddOpen(false); }}><section className="psv-add-modal" role="dialog" aria-modal="true" aria-labelledby="psv-add-title"><div className="psv-modal-heading"><div><span className="psv-eyebrow">DOPUNI ZBIRKU</span><h2 id="psv-add-title">Dodaj video zapis</h2><p>Dodaj samo sadržaj koji je relevantan i za koji postoji dopuštenje za ugrađivanje ili povezivanje.</p></div><button className="psv-icon-button" onClick={() => setAddOpen(false)} aria-label="Zatvori"><X /></button></div>
       <form className="psv-add-form" onSubmit={addVideo}><label>YouTube poveznica *<input autoFocus type="url" required placeholder="https://www.youtube.com/watch?v=…" value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} /></label><label>Naslov zapisa *<input required maxLength={120} placeholder="Npr. naslov dokumentarnog filma" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></label><label>Kategorija<select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>{CATEGORIES.filter((item) => item !== "Sve").map((item) => <option key={item}>{item}</option>)}</select></label><label>Izvor / autor<input maxLength={120} placeholder="Produkcija, ustanova, autor…" value={form.source} onChange={(e) => setForm({ ...form, source: e.target.value })} /></label><label>Datum događaja ili zapisa<input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></label><label>Opis i povijesni kontekst<textarea maxLength={3000} rows={6} placeholder="Što gledatelj treba znati? Navedi provjerljive podatke." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></label><div className="psv-form-note"><ShieldCheck size={17} /><span>Navedi izvor i provjeri naslov, opis i kontekst. Ova prva verzija sprema zapise samo u ovom pregledniku.</span></div><div className="psv-modal-actions"><button type="button" className="psv-cancel-button" onClick={() => setAddOpen(false)}>Odustani</button><button type="submit" className="psv-add-button"><Plus size={16} /> Spremi zapis</button></div></form>
     </section></div>}
-  </main>;
+  <SiteFooter />
+    </main>;
 }
