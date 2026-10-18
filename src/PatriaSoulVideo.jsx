@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Bookmark, ChevronDown, Clock3, Film, Heart, History, Info, Play, Plus, Search, ShieldCheck, SlidersHorizontal, Trash2, Tv, X } from "lucide-react";
 import { supabase } from "./lib/supabase";
 import "./PatriaSoulVideo.css";
+import SiteChrome from "./SiteChrome.jsx";
 
 const STORAGE_KEY = "patriasoul-video-library-v1";
 const YOUTUBE_SEARCH_ENDPOINT = import.meta.env.VITE_YOUTUBE_SEARCH_ENDPOINT || "/api/youtube-search";
@@ -378,13 +379,8 @@ export default function PatriaSoulVideo() {
   const currentTitle = ({all:"Svi videozapisi", favorites:"Omiljeni videozapisi", saved:"Popis za kasnije", history:"Nedavno gledano"})[view];
 
   return <main className="psv-app">
-    <header className="psv-topbar">
-      <a href="/" className="psv-brand"><img src="/assets/images/1000000982.png" alt="PatriaSoul" /><span><strong>PatriaSoul</strong><small>VIDEO ARHIVA SJEĆANJA</small></span></a>
-      <div className="psv-top-actions">
-        <a className="psv-back-link" href="/"><ArrowLeft size={16} /> Zajednica</a>
-        <button className="psv-add-button" onClick={() => setAddOpen(true)}><Plus size={17} /> Dodaj video</button>
-      </div>
-    </header>
+    <SiteChrome section="Mediji" links={[{"label":"Svi videozapisi","href":"#video-library"},{"label":"Pretraživanje","href":"#video-discovery"},{"label":"Omiljeno","href":"#video-library"},{"label":"Gledaj kasnije","href":"#video-library"}]} rightContent={<button className="psv-add-button" onClick={() => setAddOpen(true)}><Plus size={17} /> Dodaj video</button>}/>
+    
 
     <section className="psv-hero">
       <div className="psv-hero-copy">
@@ -433,7 +429,7 @@ export default function PatriaSoulVideo() {
       {visibleVideos.length ? <div className={`psv-video-grid ${layout === "list" ? "list-layout" : ""}`}>{visibleVideos.map((video) => <VideoCard key={video.id} video={video} onOpen={openVideo} favorite={favorites.includes(video.id)} saved={saved.includes(video.id)} onFavorite={(id) => toggle(setFavorites, favorites, id)} onSave={(id) => toggle(setSaved, saved, id)} />)}</div> : categoryLoading && view === "all" ? null : <div className="psv-empty-state"><div className="psv-empty-icon"><Film size={30} /></div><span className="psv-eyebrow">ARHIVA SE GRADI</span><h3>{videos.length ? "Nema rezultata za odabrani prikaz" : "Prvi zapis počinje ovdje"}</h3><p>{videos.length ? "Promijeni pojam pretrage ili kategoriju." : "Dodaj provjerenu YouTube poveznicu na dokumentarac, svjedočanstvo ili povijesni zapis. Naslov, izvor i kontekst ostaju uz video."}</p><button className="psv-add-button" onClick={() => setAddOpen(true)}><Plus size={17} /> Dodaj prvi video</button></div>}
     </section>
 
-    <footer className="psv-footer"><div className="psv-footer-mark">✦</div><div><strong>PatriaSoul · Čuvari nasljeđa</strong><p>Čuvati sjećanje znači čuvati dostojanstvo i istinu.</p></div><span className="psv-footer-note"><ShieldCheck size={15} /> Izvor i kontekst uz svaki zapis</span></footer>
+    
 
     {activeVideo && <div className="psv-player-overlay" role="dialog" aria-modal="true" aria-label={activeVideo.title}>
       <div className="psv-player-shell"><div className="psv-player-head"><div className="psv-player-heading-copy"><span className="psv-eyebrow">{activeVideo.category}</span><h2>{activeVideo.title}</h2></div><div className="psv-player-head-actions"><button className="psv-player-back" onClick={() => { setActiveVideo(null); document.getElementById("psv-library")?.scrollIntoView({ behavior: "smooth" }); }}><ArrowLeft size={16} /> Natrag na arhivu</button><button className="psv-player-close" onClick={() => setActiveVideo(null)} aria-label="Zatvori player"><X size={19} /><span>Zatvori</span></button></div></div>
