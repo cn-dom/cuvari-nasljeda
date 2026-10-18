@@ -350,7 +350,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
       <div className="hp-grave-map-shell">
         <div ref={containerRef} className="hp-grave-map-canvas" aria-label="Interaktivna karta masovnih grobnica hrvatskih žrtava" />
         {mapError && <div className="hp-grave-map-error" role="status">Karta se trenutačno ne može učitati. Evidencijski zapisi i njihove izvorne poveznice ostaju dostupni ispod.</div>}
-        <div className="hp-grave-map-caption"><span /> KARTA TEMELJENA NA PODACIMA OPENSTREETMAPA <small>© OpenStreetMap contributors · OpenFreeMap</small></div>
+        <div className="hp-grave-map-caption"><span /> KARTA TEMELJENA NA PODACIMA OPENSTREETMAPA <small>© OpenStreetMap contributors</small></div>
       </div>
       <p className="hp-grave-map-note"><strong>{mappedSites.length}</strong> {mappedSites.length === 1 ? "lokacija" : "lokacije"} prikazane su na karti. Puna oznaka znači da je potvrđena javna koordinata grobnice. Isprekidana oznaka pokazuje približno naselje ili šire područje, a ne točku iskopa. Više zapisa na istom području može dijeliti približnu oznaku; to nije dokaz da je riječ o istoj grobnici.</p>
     </section>
