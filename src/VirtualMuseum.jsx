@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { supabase } from "./lib/supabase.js";
 import "./virtual-museum.css";
 import { BadgeRow, getBadge } from "./HeritageBadges.jsx";
-import SiteChrome from "./SiteChrome.jsx";
+import SiteChrome, { SiteFooter } from "./SiteChrome.jsx";
 
 const exhibits = [
   {
@@ -481,5 +481,6 @@ export default function VirtualMuseum() {
       </section>
     </section>}
     
-  </main>;
+  <SiteFooter />
+    </main>;
 }
