@@ -379,7 +379,7 @@ export default function PatriaSoulVideo() {
   const currentTitle = ({all:"Svi videozapisi", favorites:"Omiljeni videozapisi", saved:"Popis za kasnije", history:"Nedavno gledano"})[view];
 
   return <main className="psv-app">
-    <SiteChrome section="Mediji" links={[{"label":"Svi videozapisi","href":"#video-library"},{"label":"Pretraživanje","href":"#video-discovery"},{"label":"Omiljeno","href":"#video-library"},{"label":"Gledaj kasnije","href":"#video-library"}]} rightContent={<button className="psv-add-button" onClick={() => setAddOpen(true)}><Plus size={17} /> Dodaj video</button>}/>
+    <SiteChrome section="Mediji" links={[{"label":"Svi videozapisi","href":"#psv-library"},{"label":"Pretraživanje","href":"#psv-discovery"},{"label":"Omiljeno","href":"#video-library"},{"label":"Gledaj kasnije","href":"#video-library"}]} rightContent={<button className="psv-add-button" onClick={() => setAddOpen(true)}><Plus size={17} /> Dodaj video</button>}/>
     
 
     <section className="psv-hero">
@@ -399,7 +399,7 @@ export default function PatriaSoulVideo() {
       <div><History /><span><strong>{history.length}</strong><small>nedavno gledanih</small></span></div>
     </section>
 
-    <section className="psv-discovery" aria-labelledby="psv-discovery-title">
+    <section className="psv-discovery" id="psv-discovery" aria-labelledby="psv-discovery-title">
       <div className="psv-discovery-heading"><div><span className="psv-eyebrow">PRONAĐI NOVE ZAPISE</span><h2 id="psv-discovery-title">Istraži YouTube</h2><p>Pronađi javne videozapise, pregledaj rezultate i ručno odaberi što želiš dodati u svoju arhivu. Rezultati se ne objavljuju automatski.</p></div><span className="psv-discovery-badge"><ShieldCheck size={15} /> Odabir prije dodavanja</span></div>
       <form className="psv-discovery-form" onSubmit={discoverVideos}><label className="psv-search"><Search size={18} /><input value={discoveryQuery} onChange={(e) => setDiscoveryQuery(e.target.value)} placeholder="Npr. Vukovar svjedočanstva branitelja" /><button type="submit" disabled={discoveryLoading}>{discoveryLoading ? "Tražim…" : "Pretraži"}</button></label></form>
       {discoveryError && <p className="psv-discovery-message" role="status"><Info size={16} />{discoveryError}</p>}
