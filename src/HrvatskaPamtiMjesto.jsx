@@ -76,10 +76,10 @@ export default function HrvatskaPamtiMjesto() {
   const previousSlug = currentIndex > 0 ? placeOrder[currentIndex - 1] : null;
   const nextSlug = currentIndex >= 0 && currentIndex < placeOrder.length - 1 ? placeOrder[currentIndex + 1] : null;
   if (!record) return <main className="hp-detail-page"><a href="/hrvatska-pamti.html">← Povratak na kartu sjećanja</a><h1>Mjesto nije pronađeno</h1><p>Odaberi lokaciju na karti Hrvatske pamti.</p></main>;
-  return <main className="hp-page hp-detail-page">
+  return <main className={`hp-page hp-detail-page ${slug === "vukovar" ? "hp-detail-page-vukovar" : ""}`}>
     <SiteChrome section="Domovina" links={[{"label":"Karta sjećanja","href":"/hrvatska-pamti.html#karta"},{"label":"Registar grobišta","href":"/hrvatska-pamti-grobnice.html"},{"label":"Hrvatska pamti","href":"/hrvatska-pamti.html"}]}/>
     
-    <section className="hp-detail-hero"><span className="hp-section-kicker">HRVATSKA PAMTI · {record.region.toUpperCase()}</span><h1>{record.name}<em>.</em></h1><p>{record.intro}</p><span className="hp-detail-period">{record.years}</span></section>
+    <section className={`hp-detail-hero ${slug === "vukovar" ? "hp-detail-hero-vukovar" : ""}`}><span className="hp-section-kicker">HRVATSKA PAMTI · {record.region.toUpperCase()}</span><h1>{record.name}<em>.</em></h1><p>{record.intro}</p><span className="hp-detail-period">{record.years}</span>{slug === "vukovar" && <div className="hp-vukovar-photo-credit">Fotografije: <a href="https://commons.wikimedia.org/wiki/File:Vukovar_Water_Tower.jpg" target="_blank" rel="noreferrer">Vukovarski vodotoranj — ZagoniBarna, CC BY-SA 3.0</a> · <a href="https://commons.wikimedia.org/wiki/File:Ovcara_Memorial.JPG" target="_blank" rel="noreferrer">Spomen-područje Ovčara — Modzzak, javno vlasništvo</a></div>}</section>
     <section className="hp-record-overview" aria-label="Pregled dosjea mjesta">
       <div className="hp-record-overview-head"><div><span className="hp-section-kicker">ARHIVSKI DOSJE</span><h2>Tragovi koje <em>čuvamo.</em></h2></div><span className="hp-record-status"><i aria-hidden="true" /> UREDNIČKA OBRADA U TIJEKU</span></div>
       <div className="hp-record-metrics hp-record-metrics-evidence">
