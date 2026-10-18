@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 import "./community-sections.css";
-import SiteChrome from "./SiteChrome.jsx";
+import SiteChrome, { SiteFooter } from "./SiteChrome.jsx";
 
 const normalizeUsername = (value) => String(value || "").trim().replace(/^@/, "").toLowerCase();
 const label = (profile) => profile?.display_name || normalizeUsername(profile?.username) || "Čuvar nasljeđa";
@@ -110,5 +110,6 @@ export default function Forum() {
         {topics.map(topic => <button className="community-topic" key={topic.id} onClick={() => setActiveTopic(topic)}><span className="community-topic-pin">{topic.is_pinned ? "📌" : "▤"}</span><span><strong>{topic.title}</strong><small>{topic.forum_categories?.name || "Forum"} · {label(topic.profiles)} · {dateLabel(topic.created_at)}</small><p>{topic.body}</p></span><span>→</span></button>)}
       </section><section className="community-section-card"><h2>Otvori novu temu</h2><form className="community-section-form" onSubmit={createTopic}><label htmlFor="forum-title">Naslov teme</label><input id="forum-title" value={title} onChange={e => setTitle(e.target.value)} minLength={5} maxLength={160} required placeholder="O čemu želiš razgovarati?" /><small className="community-character-count">{title.length} / 160 znakova</small><label htmlFor="forum-body">Prva poruka</label><textarea id="forum-body" value={body} onChange={e => setBody(e.target.value)} maxLength={10000} required placeholder="Napiši pitanje ili pokreni razgovor…" /><small className="community-character-count">{body.length} / 10.000 znakova</small><button className="community-section-primary" disabled={busy}>{busy ? "Spremam…" : "Objavi temu"}</button>{!session && <small>Za objavu teme potrebna je prijava.</small>}</form></section></div>
     </div>}
-  </main>;
+  <SiteFooter />
+    </main>;
 }
