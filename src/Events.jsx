@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 import "./community-sections.css";
+import SiteChrome from "./SiteChrome.jsx";
 
 const normalizeUsername = (value) => String(value || "").trim().replace(/^@/, "").toLowerCase();
 const displayName = (profile) => profile?.display_name || normalizeUsername(profile?.username) || "Čuvar nasljeđa";
@@ -100,13 +101,7 @@ export default function Events() {
   }
 
   return <main className="community-section-page">
-    <header className="community-section-header">
-      <a href="/" className="community-section-brand">← Čuvari nasljeđa</a>
-      <span className="community-section-eyebrow">PATRiASOUL · SUSRETI</span>
-      <h1>Događaji zajednice</h1>
-      <p>Susreti, predavanja, izložbe, hodočašća i događaji koji povezuju čuvare hrvatske baštine.</p>
-      <div className="community-section-actions"><a className="community-section-home" href="/">Povratak na zid</a><a className="community-section-home ai-community-link" href="/ai-centar.html">✦ PatriaSoul Centar</a></div>
-    </header>
+    <SiteChrome section="Zajednica" links={[{"label":"Događaji","href":"/dogadaji.html"},{"label":"Forum","href":"/forum.html"},{"label":"Grupe","href":"/#grupe"},{"label":"Članovi","href":"/"}]}/>
     {!isSupabaseConfigured && <div className="community-section-alert">Testna baza nije povezana. Događaji se trenutačno ne mogu spremati.</div>}
     {error && <div className="community-section-alert">{error}</div>}
     {notice && <div className="community-section-notice">{notice}</div>}
