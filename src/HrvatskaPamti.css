@@ -366,3 +366,25 @@
   .hp-detail-hero-vukovar{background-position:center,center,60% center}
   .hp-vukovar-photo-credit{font-size:8px}
 }
+
+
+/* Škabrnja memorial dossier: fixed memorial-cemetery backdrop and a separate monument hero. */
+.hp-detail-page-skabrnja{
+  background-color:#081522;
+  background-image:linear-gradient(180deg,rgba(5,15,24,.82),rgba(5,15,24,.92)),url("https://upload.wikimedia.org/wikipedia/commons/5/50/Spomenik_zrtvama_u_Skabrnji.JPG");
+  background-size:cover;
+  background-position:center center;
+  background-attachment:fixed;
+}
+.hp-detail-hero-skabrnja{
+  background-color:#081522;
+  background-image:linear-gradient(90deg,rgba(5,14,22,.94) 0%,rgba(5,14,22,.82) 42%,rgba(5,14,22,.42) 100%),linear-gradient(0deg,rgba(5,14,22,.52),rgba(5,14,22,.18)),url("https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Skabrnja-spomenik.JPG/1280px-Skabrnja-spomenik.JPG");
+  background-size:cover;
+  background-position:center,center,58% 42%;
+  border-bottom-color:rgba(214,180,139,.35);
+}
+.hp-detail-hero-skabrnja .hp-section-kicker,.hp-detail-hero-skabrnja h1,.hp-detail-hero-skabrnja p,.hp-detail-hero-skabrnja .hp-detail-period{position:relative;z-index:1}
+@media(max-width:700px){
+  .hp-detail-page-skabrnja{background-attachment:scroll;background-position:58% center}
+  .hp-detail-hero-skabrnja{background-position:center,center,58% center}
+}
