@@ -20,11 +20,58 @@ const primary = [
 ];
 
 export function SiteFooter() {
-  return <footer className="ps-site-footer">
-      <a className="ps-site-footer-brand" href="/"><img src="/assets/images/1000000982.png" alt="" /><span><strong>PatriaSoul</strong><small>ČUVARI NASLJEĐA</small></span></a>
-      <p>Upoznaj Hrvatsku. Čuvaj baštinu. Prenesi priču.</p>
-      <nav aria-label="Informacije i pravila"><a href="/pravila-koristenja.html">Pravila korištenja</a><a href="/privatnost.html">Privatnost</a><a href="/pravila-zajednice.html">Pravila zajednice</a><a href="mailto:patriasoul@protonmail.com">Kontakt</a></nav>
-    </footer>;
+  return (
+    <footer className="community-site-footer">
+            <div className="community-site-footer-grid">
+              <section className="community-footer-brand">
+                <a href="/" className="community-footer-logo" aria-label="PatriaSoul — Čuvari nasljeđa">
+                  <img src="/assets/images/1000000982.png" alt="PatriaSoul" />
+                  <span><strong>PatriaSoul</strong><small>ČUVARI NASLJEĐA</small></span>
+                </a>
+                <p>Hrvatska · povijest · znanje · identitet.</p>
+                <p>Prostor za učenje, igru i čuvanje priča koje čine naše nasljeđe.</p>
+                <strong className="community-footer-motto">Znanje · Ponos · Nasljeđe</strong>
+                <a className="community-footer-return" href="/">Povratak na PatriaSoul <span aria-hidden="true">→</span></a>
+              </section>
+              <section>
+                <h2>Brzi izbornik</h2>
+                <nav aria-label="Brza navigacija podnožja">
+                  <a href="/">PatriaSoul – Čuvari nasljeđa</a>
+                  <a href="/kviz/">PatriaSoul kviz</a>
+                  <a href="/forum.html">Forum zajednice</a>
+                  <a href="/stranice.html">Stranice zajednice</a>
+                  <a href="/dogadaji.html">Događaji</a>
+                </nav>
+              </section>
+              <section>
+                <h2>Prati nas</h2>
+                <div className="community-footer-social">
+                  <strong>PatriaSoul</strong>
+                  <p>Prati kratke priče, zanimljivosti i kvizove o Hrvatskoj.</p>
+                  <a href="https://www.tiktok.com/@patriasoul" target="_blank" rel="noreferrer">Prati nas na TikToku <span aria-hidden="true">↗</span></a>
+                </div>
+                <div className="community-footer-social faith">
+                  <strong>Vjera · Yeshua</strong>
+                  <p>Vjera, nada i istina kroz priču o Yeshui — Isusu Kristu.</p>
+                  <a href="https://www.tiktok.com/@hajdi331?lang=hr" target="_blank" rel="noreferrer">Prati vjerski kanal <span aria-hidden="true">↗</span></a>
+                </div>
+              </section>
+              <div className="community-footer-legal">
+                <nav aria-label="Pravne informacije">
+                  <a href="/pravila-koristenja.html">Pravila korištenja</a>
+                  <a href="/pravila-zajednice.html">Pravila zajednice</a>
+                  <a href="/kviz/rules.html">Pravilnik o igranju kviza</a>
+                  <a href="/kviz/terms.html">Uvjeti korištenja</a>
+                  <a href="/privatnost.html">Politika privatnosti</a>
+                  <a href="/kviz/about.html">O PatriaSoul</a>
+                  <a href="/kviz/contact.html">Kontakt</a>
+                </nav>
+                <p>© 2026 PatriaSoul. Sva prava pridržana.</p>
+                <small>Hrvatska · Povijest · Znanje · Identitet</small>
+              </div>
+            </div>
+          </footer>
+  );
 }
 
 export default function SiteChrome({ section = "Domovina", links = [], rightContent = null }) {
