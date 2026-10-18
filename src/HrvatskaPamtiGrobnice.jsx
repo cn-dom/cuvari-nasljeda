@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import "./HrvatskaPamti.css";
 import SiteChrome, { SiteFooter } from "./SiteChrome.jsx";
 
@@ -107,7 +107,7 @@ export default function HrvatskaPamtiGrobnice() {
       <div className="hp-register-table-wrap">
         <table className="hp-register-table">
           <thead><tr><th scope="col">Lokacija / naziv</th><th scope="col">Područje</th><th scope="col">Razdoblje</th><th scope="col">Pronađeni / ekshumirani</th><th scope="col">Status</th><th scope="col">Opis</th></tr></thead>
-          <tbody>{results.map((site,index)=><>
+          <tbody>{results.map((site,index)=><Fragment key={site.id}>
             <tr className={expanded===site.id?"hp-register-row-active":""} key={site.id}>
               <td><span className="hp-register-index">{String(index+1).padStart(2,"0")}</span><strong>{site.name}</strong><small>{site.country || "Hrvatska"}</small></td>
               <td>{site.area}</td>
@@ -122,7 +122,7 @@ export default function HrvatskaPamtiGrobnice() {
               <div><span className="hp-register-detail-kicker">LOKACIJA I PRECIZNOST</span><p>{site.publicLocation || site.coordinateNote || (site.coordinates ? site.coordinates.label+" — "+site.coordinates.precision : "Precizna lokacija nije zasebno potvrđena u ovom registru.")}</p></div>
               <div><span className="hp-register-detail-kicker">IZVOR</span><p>{site.source || "Izvor nije zasebno naveden u ovom zapisu."}{site.sourceUrl&&<> · <a className="hp-register-source-link" href={site.sourceUrl} target="_blank" rel="noreferrer">Otvori izvor ↗</a></>}</p></div>
             </div></td></tr>}
-          </>)}</tbody>
+          </Fragment>)}</tbody>
         </table>
       </div>
       {!results.length&&<div className="hp-catalog-empty"><strong>Nema pronađenih zapisa</strong><p>Promijeni pojam ili odaberi drugo razdoblje.</p></div>}
