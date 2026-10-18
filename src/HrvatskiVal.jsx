@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, AudioLines, Heart, MessageCircle, Music2, Pause, Play, Search, SkipBack, SkipForward, Volume2, X, ChevronDown, ChevronUp, ListMusic, Clock3, Bookmark, Radio } from "lucide-react";
 import { supabase } from "./lib/supabase";
 import "./HrvatskiVal.css";
+import SiteChrome from "./SiteChrome.jsx";
 
 const ENDPOINT = import.meta.env.VITE_YOUTUBE_SEARCH_ENDPOINT || "/api/youtube-search";
 const CATEGORIES = [
@@ -345,10 +346,8 @@ export default function HrvatskiVal() {
   }
 
   return <main className="hv-app">
-    <header className="hv-topbar">
-      <a href="/" className="hv-brand"><img src="/assets/images/1000000982.png" alt="PatriaSoul grb" /><span><strong>HRVATSKI VAL PLAYER</strong><small>BY PATRIASOUL</small></span></a>
-      <a href="/" className="hv-back"><ArrowLeft size={16} /> PatriaSoul</a>
-    </header>
+    <SiteChrome section="Mediji" links={[{"label":"Glazbena zbirka","href":"#hv-library"},{"label":"Trenutno svira","href":"#hv-player"},{"label":"PatriaSoul","href":"/"}]}/>
+    
 
     <section className="hv-hero">
       <div className="hv-hero-copy"><span className="hv-eyebrow"><AudioLines size={15}/> HRVATSKA U SVAKOM TONU</span><h1>Glazba koja nosi <em>dušu Hrvatske.</em></h1><p>Domoljubne pjesme, klapska tradicija, zavičaj i glazba koja povezuje naraštaje.</p><button onClick={() => document.getElementById("hv-library")?.scrollIntoView({ behavior: "smooth", block: "start" })}><Play size={17} fill="currentColor"/> Istraži glazbu</button></div>
@@ -371,7 +370,7 @@ export default function HrvatskiVal() {
       <p className="hv-source-note">Dostupnost reprodukcije ovisi o izvornom YouTube videozapisu i njegovim postavkama.</p>
     </section>
 
-    <footer className="hv-footer"><img src="/assets/images/1000000982.png" alt=""/><span><strong>HRVATSKI VAL PLAYER</strong><small>Hrvatska u svakom tonu. · PatriaSoul</small></span></footer>
+    
 
     {active && playerVisible && <aside className={`hv-dock ${minimized ? "minimized" : ""}`} aria-label="Glazbeni player">
       {!minimized && <div className="hv-dock-expanded"><div className="hv-now-playing"><img src={active.thumbnail} alt=""/><div><small>SADA SVIRA</small><strong>{active.title}</strong><span>{active.artist}</span></div></div><div className="hv-controls"><button onClick={() => { void goToNextTrack(-1); }} aria-label="Prethodna pjesma"><SkipBack size={18}/></button><button className="hv-main-play" onClick={() => setMinimized(true)} aria-label="Smanji player"><Pause size={19}/></button><button onClick={() => { void goToNextTrack(1); }} aria-label="Sljedeća pjesma"><SkipForward size={18}/></button></div><label className="hv-volume"><Volume2 size={16}/><input aria-label="Glasnoća" type="range" min="0" max="100" value={volume} onChange={e => changeVolume(e.target.value)}/></label><div className="hv-social-controls"><button className={likedByMe ? "selected" : ""} onClick={toggleLike} title="Lajkaj pjesmu"><Heart size={17} fill={likedByMe ? "currentColor" : "none"}/><span>{likes.length}</span></button><button onClick={() => setMinimized(false)} title="Komentari"><MessageCircle size={17}/><span>{comments.length}</span></button><button onClick={() => { setPlayerVisible(false); localStorage.removeItem(CURRENT_TRACK_KEY); }} title="Zatvori player"><X size={17}/></button></div><button className="hv-collapse" onClick={() => setMinimized(true)} aria-label="Smanji player"><ChevronDown size={17}/></button></div>}
