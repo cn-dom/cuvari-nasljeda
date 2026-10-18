@@ -148,6 +148,40 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
     window.setTimeout(() => { if (entry.marker && !entry.marker.getPopup()?.isOpen()) entry.marker.togglePopup(); }, 750);
   }
 
+  async function focusSearchSite(site) {
+    if (site.certainty === "confirmed" && getMapLocation(site)) {
+      focusSite(site.id);
+      return;
+    }
+    const map = mapRef.current;
+    const maplibregl = maplibreRef.current;
+    if (!map || !maplibregl) return;
+    const queries = [site.name + ", " + site.area, site.area].filter(Boolean);
+    for (const query of queries) {
+      try {
+        const response = await fetch("https://photon.komoot.io/api/?q=" + encodeURIComponent(query) + "&limit=1&lang=hr", { headers: { Accept: "application/json" } });
+        if (!response.ok) continue;
+        const payload = await response.json();
+        const feature = payload.features?.[0];
+        const coords = feature?.geometry?.coordinates;
+        if (!Array.isArray(coords) || !Number.isFinite(Number(coords[0])) || !Number.isFinite(Number(coords[1]))) continue;
+        const properties = feature.properties || {};
+        focusPlace({
+          name: properties.name || site.name,
+          area: [properties.city, properties.county, properties.country].filter(Boolean).join(", ") || site.area,
+          label: (properties.name || site.name) + " — približna lokacija zapisa: " + site.area,
+          lng: Number(coords[0]),
+          lat: Number(coords[1]),
+        });
+        return;
+      } catch {
+        // Pokušaj sljedeći naziv; ne izmišljaj koordinate ako geokoder nije dostupan.
+      }
+    }
+    const card = document.getElementById("hp-site-" + site.id);
+    if (card) card.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
   function focusPlace(place) {
     const map = mapRef.current;
     const maplibregl = maplibreRef.current;
@@ -299,11 +333,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
         <input id="hp-grave-map-search-input" type="search" value={mapQuery} onChange={(event) => setMapQuery(event.target.value)} placeholder="Upiši npr. Baćin, Sotin, Ovčara, Vukovar…" autoComplete="off" />
         {mapQuery.trim().length >= 2 && <div className="hp-grave-map-search-results" role="listbox" aria-label="Rezultati pretrage karte">
           {searchMatches.map((site) => <button type="button" key={"site-" + site.id} role="option" onClick={() => {
-            if (getMapLocation(site) && site.certainty === "confirmed") focusSite(site.id);
-            else {
-              const card = document.getElementById("hp-site-" + site.id);
-              if (card) card.scrollIntoView({ behavior: "smooth", block: "center" });
-            }
+            void focusSearchSite(site);
           }}><span>{site.name}</span><small>{site.area} · {getMapLocation(site) ? (site.certainty === "confirmed" ? "zapis na karti" : "istraživački zapis — nije potvrđen") : "nema provjerene lokacije na karti"}</small></button>)}
           {placeMatches.map((place) => <button type="button" key={place.id} role="option" onClick={() => focusPlace(place)}><span>{place.name}</span><small>{place.area} · pronađi mjesto na karti</small></button>)}
           {!searchMatches.length && !placeMatches.length && <p>Tražim mjesta na karti… Ako se ništa ne pojavi, pokušaj precizniji naziv.</p>}
