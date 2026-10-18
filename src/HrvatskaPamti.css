@@ -263,7 +263,7 @@
 .hp-grave-map-heading h2{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;font-size:clamp(34px,4vw,52px);line-height:1;margin:12px 0 0;color:#f5f2ec}
 .hp-grave-map-heading h2 em{color:#d6b48b;font-weight:400}
 .hp-grave-map-heading>p{max-width:440px;font-size:12px;line-height:1.8;color:#aab9c7;margin:0}
-.hp-grave-map-shell{position:relative;min-height:440px;border:1px solid rgba(218,230,239,.16);background:#102535;isolation:isolate}
+.hp-grave-map-shell{position:relative;height:440px;min-height:440px;width:100%;border:1px solid rgba(218,230,239,.16);background:#102535;isolation:isolate}
 .hp-grave-map-canvas{position:absolute;inset:0;min-height:440px;width:100%;height:100%}
 .hp-grave-map-canvas .maplibregl-canvas{outline:none}
 .hp-grave-map-canvas .maplibregl-ctrl-group{background:#102535;border:1px solid #ffffff30;box-shadow:none}
