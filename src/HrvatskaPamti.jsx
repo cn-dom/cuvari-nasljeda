@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./HrvatskaPamti.css";
 import HrvatskaPamtiMap from "./HrvatskaPamtiMap.jsx";
-import SiteChrome from "./SiteChrome.jsx";
+import SiteChrome, { SiteFooter } from "./SiteChrome.jsx";
 
 const places = [
   { name: "Vukovar", region: "Istočna Hrvatska", text: "Grad na Dunavu čuva sjećanje na obranu, izgubljene živote, obitelji koje su čekale i povratak života nakon razaranja.", status: "Radni zapis · provjera u tijeku", symbol: "✦" },
@@ -99,5 +99,6 @@ export default function HrvatskaPamti() {
       <p className="hp-source-library-note">Fotografije i dokumenti neće se preuzimati niti ponovno objavljivati bez provjere uvjeta korištenja, autorstva i prava. Osjetljivi podaci o obiteljima, svjedocima i mogućim mjestima ukopa neće se objavljivati na način koji može ugroziti privatnost ili stručni rad nadležnih službi.</p>
     </section>
     
-  </main>;
+  <SiteFooter />
+    </main>;
 }
