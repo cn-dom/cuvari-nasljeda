@@ -288,3 +288,9 @@
 .hp-grave-map-popup-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-top:1px solid #d9d4cb;margin-top:12px;padding-top:11px}
 .hp-grave-map-popup-actions button,.hp-grave-map-popup-actions a{font:700 10px Manrope,system-ui,sans-serif;color:#8e3039;background:transparent;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:800px){.hp-grave-map-section{padding:18px;margin:26px 0}.hp-grave-map-heading{align-items:flex-start;flex-direction:column;gap:13px}.hp-grave-map-shell,.hp-grave-map-canvas{min-height:370px}.hp-grave-map-caption{font-size:7px;letter-spacing:.06em}.hp-grave-map-caption small{width:100%;padding-left:15px}}
+
+/* Direct links to the cited source documents in each place dossier */
+.hp-record-source-link{display:inline-flex;align-items:center;gap:9px;margin-top:auto;padding-top:18px;color:#e2c59f!important;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;text-underline-offset:4px}
+.hp-record-source-link:hover,.hp-record-source-link:focus-visible{text-decoration:underline;color:#fff!important;outline-offset:4px}
+.hp-record-source-grid article{align-items:flex-start}
+.hp-record-source-grid article .hp-record-source-link{margin-top:auto}
