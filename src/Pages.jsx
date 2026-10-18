@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 import "./community-sections.css";
+import SiteChrome from "./SiteChrome.jsx";
 
 const normalizeUsername = (value) => String(value || "").trim().replace(/^@/, "").toLowerCase();
 const displayName = (profile) => profile?.display_name || normalizeUsername(profile?.username) || "Čuvar nasljeđa";
@@ -75,7 +76,7 @@ export default function Pages() {
   }
 
   return <main className="community-section-page">
-    <header className="community-section-header"><a href="/" className="community-section-brand">← Čuvari nasljeđa</a><span className="community-section-eyebrow">PATRiASOUL · ZAJEDNICA</span><h1>Stranice zajednice</h1><p>Okupljaj ljude oko zavičaja, povijesti, obitelji, običaja i drugih tema.</p><div className="community-section-actions"><a className="community-section-home" href="/">Povratak na zid</a><a className="community-section-home ai-community-link" href="/ai-centar.html">✦ PatriaSoul Centar</a></div></header>
+    <SiteChrome section="Zajednica" links={[{"label":"Stranice zajednice","href":"/stranice.html"},{"label":"Forum","href":"/forum.html"},{"label":"Članovi","href":"/"},{"label":"Događaji","href":"/dogadaji.html"}]}/>
     {!isSupabaseConfigured && <div className="community-section-alert">Baza nije konfigurirana u ovoj verziji aplikacije. Postavi javni URL i publishable ključ testnog projekta.</div>}
     {error && <div className="community-section-alert">{error}</div>}{notice && <div className="community-section-notice">{notice}</div>}
     {selectedPage ? <section className="community-section-card"><button className="community-section-back" onClick={() => setSelectedPage(null)}>← Sve stranice</button><span className="community-section-eyebrow">{selectedPage.category}</span><h2>{selectedPage.name}</h2><p>{selectedPage.description}</p><p className="community-section-meta">Stranicu pokrenuo/la {displayName(selectedPage.profiles)}</p>
