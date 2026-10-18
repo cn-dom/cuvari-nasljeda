@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import * as maplibregl from "maplibre-gl";
+import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 const MAP_STYLE = {
   version: 8,
@@ -248,7 +248,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
           const status = document.createElement("p");
           status.textContent = site.foundLabel || "Broj pronađenih osoba nije zasebno potvrđen u ovom zapisu.";
           const precision = document.createElement("small");
-          precision.textContent = site.mapLocation.label + " — " + site.mapLocation.precision;
+          precision.textContent = (site.mapLocation.label || site.name) + " — " + (site.mapLocation.precision || (site.mapLocation.approximate ? "Približna lokacija — nije potvrđena točna točka grobnice" : "Koordinate preuzete iz evidencijskog zapisa"));
           const actions = document.createElement("div");
           actions.className = "hp-grave-map-popup-actions";
           const recordLink = document.createElement("button");
