@@ -6,6 +6,11 @@ const MAP_STYLE = "https://tiles.openfreemap.org/styles/fiord";
 // Približne točke naselja odvojene su od točnih koordinata grobnica.
 const APPROXIMATE_LOCALITIES = {
   // Sve točke u ovom popisu označavaju naselje ili šire područje, ne točnu jamu.
+  "ilaca-domovinski-rat": { lat:45.18241, lng:19.09501, label:"Ilača", precision:"Približna lokacija naselja — nije koordinata grobnice" },
+  "negoslavci-masovna-2024": { lat:45.2800, lng:18.9900, label:"Negoslavci", precision:"Približna lokacija naselja — nije koordinata grobnice" },
+  "miklusevci": { lat:45.25125, lng:19.08465, label:"Mikluševci", precision:"Približna lokacija naselja — nije koordinata grobnice" },
+  "bobota-ekonomija-2025": { lat:45.42195, lng:18.85723, label:"Bobota", precision:"Približna lokacija naselja — nije koordinata grobnice" },
+  "gornje-jame": { lat:45.40664, lng:16.12150, label:"Gornje Jame", precision:"Približna lokacija naselja — nije koordinata grobnice" },
   "ovcara-individual-2025": { lat:45.2958, lng:19.0589, label:"Ovčara, Vukovar", precision:"Približno područje — nije točka pojedinačne grobnice" },
   "ovcara-2025": { lat:45.2958, lng:19.0589, label:"Ovčara, Vukovar", precision:"Približno područje — nije točka grobnice iz 2025." },
   "sarviz-dola": { lat:45.3890, lng:18.9700, label:"Područje Berka", precision:"Približno područje lokaliteta — nije točka grobnice" },
