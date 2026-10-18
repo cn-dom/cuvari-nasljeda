@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { puter } from "@heyputer/puter.js";
 import { ArrowLeft, BookOpen, BrainCircuit, Camera, CheckCircle2, Copy, ImagePlus, LoaderCircle, Send, ShieldCheck, Volume2, WandSparkles } from "lucide-react";
 import "./ai-center.css";
+import SiteChrome from "./SiteChrome.jsx";
 
 const STARTER_QUESTIONS = [
   "Objasni mi najvažnije događaje hrvatske povijesti jednostavnim jezikom.",
@@ -226,12 +227,7 @@ export default function AICenter() {
   const Icon = activeMode.icon;
 
   return <main className="ai-center-page">
-    <header className="ai-center-header">
-      <a href="/" className="ai-back-link"><ArrowLeft size={16} /> Povratak na zid</a>
-      <div className="ai-center-brand"><img src="/assets/images/1000000982.png" alt="" /><span><small>PATRIASOUL · ČUVARI NASLJEĐA</small><strong>PatriaSoul Centar</strong><small className="ai-center-subtitle">Središte znanja, hrvatske baštine i pametnih alata</small></span></div>
-      <p>Upoznaj Hrvatsku, istražuj njezinu baštinu i pronađi pametnu pomoć — sve na jednom mjestu.</p>
-      <div className="ai-notice"><ShieldCheck size={18} /><span>AI može pogriješiti. Ne učitavaj privatne dokumente, osobne podatke, lozinke ni tajne ključeve.</span></div>
-    </header>
+    <SiteChrome section="Kultura i znanje" links={[{"label":"PatriaSoul Centar","href":"/ai-centar.html"},{"label":"AI alati","href":"#ai-tools"},{"label":"Pravila korištenja","href":"/pravila-koristenja.html"}]}/>
     <div className="ai-center-layout">
       <nav className="ai-tools-nav" aria-label="AI alati">
         {modes.map((item) => { const ItemIcon = item.icon; return <button key={item.id} type="button" className={mode === item.id ? "ai-tool-tab active" : "ai-tool-tab"} onClick={() => { setMode(item.id); setError(""); setStatus(""); }}><ItemIcon size={18} /><span><strong>{item.label}</strong><small>{item.description}</small></span></button>; })}
@@ -254,7 +250,7 @@ export default function AICenter() {
         {mode === "images" && <div className="ai-feature-card"><form className="ai-form" onSubmit={generateIllustration}><label htmlFor="ai-image-prompt">Opiši ilustraciju</label><textarea id="ai-image-prompt" rows={4} maxLength={500} value={imagePrompt} onChange={(event) => setImagePrompt(event.target.value)} placeholder="Primjer: ilustracija staroga hrvatskog obalnog grada, bez teksta, edukativni stil…" /><p className="ai-muted">Generirana slika je ilustracija, ne povijesni dokaz. Stvarno generiranje može koristiti kvotu Puter računa i traži potvrdu prije pokretanja.</p><button type="submit" disabled={busy || !imagePrompt.trim()}><WandSparkles size={16} />{busy ? "Izrađujem…" : "Izradi ilustraciju"}</button></form>{generatedImage && <div className="ai-generated-image"><img src={generatedImage} alt="AI-generirana ilustracija baštine" /><p>AI-generirana ilustracija · provjeri prava i uvjete prije objave.</p></div>}</div>}
         {mode === "study" && <div className="ai-feature-card"><form className="ai-form" onSubmit={makePractice}><label htmlFor="ai-practice-topic">Tema za dodatnu vježbu</label><input id="ai-practice-topic" value={practiceTopic} onChange={(event) => setPracticeTopic(event.target.value)} maxLength={120} placeholder="Npr. hrvatski srednji vijek" /><button type="submit" disabled={busy || !practiceTopic.trim()}><BrainCircuit size={16} />{busy ? "Pripremam…" : "Pripremi 5 pitanja za vježbu"}</button></form>{practiceQuestions && <article className="ai-result-text"><h2>Vježba za učenje</h2><pre>{practiceQuestions}</pre><p>Ova vježba je odvojena od službenog kviza i ne mijenja bodove ni rang-listu.</p></article>}</div>}
         {mode === "quality" && <div className="ai-feature-card"><form className="ai-form" onSubmit={analyzeDiagnostic}><label htmlFor="ai-diagnostic-text">Tehnička poruka ili zapis greške</label><textarea id="ai-diagnostic-text" rows={7} maxLength={6000} value={diagnosticText} onChange={(event) => setDiagnosticText(event.target.value)} placeholder="Zalijepi poruku iz GitHub Actions ili preglednika, ali prvo ukloni tokene, lozinke i ključeve." /><p className="ai-muted">AI samo objašnjava dostavljeni tekst. Ne pristupa GitHubu, Supabaseu ni Cloudflareu i ne mijenja kod. Ukloni osobne podatke, tokene, lozinke i ključeve prije slanja.</p><small className="ai-muted">{diagnosticText.length}/6000 znakova</small><button type="submit" disabled={busy || !diagnosticText.trim()}><ShieldCheck size={16} />{busy ? "Analiziram…" : "Objasni grešku"}</button></form>{diagnosticResult && <article className="ai-result-text"><h2>Analiza greške</h2><pre>{diagnosticResult}</pre><button type="button" className="ai-secondary-button" onClick={() => navigator.clipboard?.writeText(diagnosticResult)}>Kopiraj objašnjenje</button></article>}</div>}
-        <footer className="ai-center-footnote">Puter.js je vanjska AI usluga. Pri prvoj uporabi može zatražiti Puter prijavu. Dostupnost modela i kvote ovise o Puterovim pravilima. AI odgovori nisu zamjena za provjeru povijesnih izvora.</footer>
+        
       </section>
     </div>
   </main>;
