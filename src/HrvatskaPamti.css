@@ -271,6 +271,7 @@
 .hp-grave-map-canvas .maplibregl-ctrl-attrib{background:#081522e8!important;color:#d5e0e6!important;font-size:9px}
 .hp-grave-map-canvas .maplibregl-ctrl-attrib a{color:#d6b48b}
 .hp-grave-map-marker{width:32px;height:32px;display:grid;place-items:center;border-radius:50%;border:2px solid #f0d9b7;background:#a83c45;color:#fff;cursor:pointer;box-shadow:0 0 0 6px #b83d4730,0 5px 18px #0008;padding:0}
+.hp-grave-map-marker-approximate{background:#8a7049;border-style:dashed;box-shadow:0 0 0 6px #d6b48b24,0 5px 18px #0008}
 .hp-grave-map-marker span{font-size:15px;line-height:1}
 .hp-grave-map-marker:hover,.hp-grave-map-marker:focus-visible{transform:scale(1.12);outline:2px solid #fff;outline-offset:2px}
 .hp-grave-map-caption{position:absolute;z-index:2;left:12px;bottom:12px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;max-width:calc(100% - 24px);padding:9px 11px;background:#081522e8;color:#e0e7ec;font-size:8px;font-weight:800;letter-spacing:.12em}
