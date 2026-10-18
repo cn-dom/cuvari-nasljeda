@@ -3,16 +3,32 @@ import { useEffect, useRef, useState } from "react";
 const MAPLIBRE_MODULE = "https://unpkg.com/maplibre-gl@6.14.0/dist/maplibre-gl.mjs";
 const MAP_STYLE = "https://tiles.openfreemap.org/styles/fiord";
 
+// Približne točke naselja odvojene su od točnih koordinata grobnica.
+const APPROXIMATE_LOCALITIES = {
+  "ilaca-domovinski-rat": { lat: 45.19, lng: 18.93, label: "Ilača", precision: "Približna lokacija naselja — nije koordinata grobnice" },
+  "negoslavci-masovna-2024": { lat: 45.28, lng: 18.99, label: "Negoslavci", precision: "Približna lokacija naselja — nije koordinata grobnice" },
+  "miklusevci": { lat: 45.23, lng: 19.05, label: "Mikluševci", precision: "Približna lokacija naselja — nije koordinata grobnice" },
+  "bobota-ekonomija-2025": { lat: 45.37, lng: 18.85, label: "Bobota", precision: "Približna lokacija naselja — nije koordinata grobnice" },
+  "gornje-jame": { lat: 45.34, lng: 15.99, label: "Gornje Jame", precision: "Približna lokacija naselja — nije koordinata grobnice" },
+  "stari-seles": { lat: 45.27, lng: 18.92, label: "Stari Seleš", precision: "Približna lokacija područja — nije koordinata grobnice" },
+};
+
+function getMapLocation(site) {
+  if (Number.isFinite(site.coordinates?.lat) && Number.isFinite(site.coordinates?.lng)) {
+    return { ...site.coordinates, approximate: false };
+  }
+  const approximate = APPROXIMATE_LOCALITIES[site.id];
+  return approximate ? { ...approximate, approximate: true } : null;
+}
+
 export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
   const [mapError, setMapError] = useState(false);
-  const mappedSites = sites.filter((site) =>
-    site.croatianVictimsConfirmed === true &&
-    Number.isFinite(site.coordinates?.lat) &&
-    Number.isFinite(site.coordinates?.lng)
-  );
+  const mappedSites = sites
+    .filter((site) => site.croatianVictimsConfirmed === true && getMapLocation(site))
+    .map((site) => ({ ...site, mapLocation: getMapLocation(site) }));
 
   useEffect(() => {
     let cancelled = false;
@@ -46,7 +62,9 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
         mappedSites.forEach((site) => {
           const markerElement = document.createElement("button");
           markerElement.type = "button";
-          markerElement.className = "hp-grave-map-marker";
+          markerElement.className = site.mapLocation.approximate
+            ? "hp-grave-map-marker hp-grave-map-marker-approximate"
+            : "hp-grave-map-marker";
           markerElement.setAttribute("aria-label", "Otvori zapis: " + site.name);
           markerElement.innerHTML = '<span aria-hidden="true">✦</span>';
 
@@ -59,7 +77,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
           const status = document.createElement("p");
           status.textContent = site.foundLabel || "Broj pronađenih osoba nije zasebno potvrđen u ovom zapisu.";
           const precision = document.createElement("small");
-          precision.textContent = site.coordinates.label + " — " + site.coordinates.precision;
+          precision.textContent = site.mapLocation.label + " — " + site.mapLocation.precision;
           const actions = document.createElement("div");
           actions.className = "hp-grave-map-popup-actions";
           const recordLink = document.createElement("button");
@@ -69,9 +87,9 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
             document.getElementById("hp-site-" + site.id)?.scrollIntoView({ behavior: "smooth", block: "center" });
           });
           actions.appendChild(recordLink);
-          if (site.coordinates.sourceUrl) {
+          if (site.mapLocation.sourceUrl) {
             const sourceLink = document.createElement("a");
-            sourceLink.href = site.coordinates.sourceUrl;
+            sourceLink.href = site.mapLocation.sourceUrl;
             sourceLink.target = "_blank";
             sourceLink.rel = "noreferrer";
             sourceLink.textContent = "Provjeri izvor ↗";
@@ -80,7 +98,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
           popupContent.append(heading, area, status, precision, actions);
           const popup = new maplibregl.Popup({ offset: 18, maxWidth: "320px" }).setDOMContent(popupContent);
           const marker = new maplibregl.Marker({ element: markerElement, anchor: "center" })
-            .setLngLat([site.coordinates.lng, site.coordinates.lat])
+            .setLngLat([site.mapLocation.lng, site.mapLocation.lat])
             .setPopup(popup)
             .addTo(mapInstance);
           markersRef.current.push({ siteId: site.id, marker, popup });
@@ -93,7 +111,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
           const site = mappedSites.find((item) => item.id === siteId);
           if (!entry || !site) return;
           mapInstance.flyTo({
-            center: [site.coordinates.lng, site.coordinates.lat],
+            center: [site.mapLocation.lng, site.mapLocation.lat],
             zoom: Math.max(mapInstance.getZoom(), 12),
             essential: true,
             duration: 900,
@@ -109,10 +127,10 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
         });
         if (mappedSites.length > 1) {
           const bounds = new maplibregl.LngLatBounds();
-          mappedSites.forEach((site) => bounds.extend([site.coordinates.lng, site.coordinates.lat]));
+          mappedSites.forEach((site) => bounds.extend([site.mapLocation.lng, site.mapLocation.lat]));
           mapInstance.fitBounds(bounds, { padding: 70, maxZoom: 7.5, duration: 0 });
         } else if (mappedSites.length === 1) {
-          mapInstance.setCenter([mappedSites[0].coordinates.lng, mappedSites[0].coordinates.lat]);
+          mapInstance.setCenter([mappedSites[0].mapLocation.lng, mappedSites[0].mapLocation.lat]);
           mapInstance.setZoom(8);
         }
       } catch {
@@ -142,7 +160,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
         {mapError && <div className="hp-grave-map-error" role="status">Karta se trenutačno ne može učitati. Evidencijski zapisi i njihove izvorne poveznice ostaju dostupni ispod.</div>}
         <div className="hp-grave-map-caption"><span /> KARTA TEMELJENA NA PODACIMA OPENSTREETMAPA <small>© OpenStreetMap contributors · OpenFreeMap</small></div>
       </div>
-      <p className="hp-grave-map-note"><strong>{mappedSites.length}</strong> {mappedSites.length === 1 ? "lokacija" : "lokacije"} s potvrđenim javnim koordinatama prikazane su na karti. Ostale potvrđene grobnice ostaju u registru, ali se neće označiti približnim točkama dok ne pronađemo pouzdan izvor koordinata.</p>
+      <p className="hp-grave-map-note"><strong>{mappedSites.length}</strong> {mappedSites.length === 1 ? "lokacija" : "lokacije"} prikazane su na karti. Oznake s punom bojom imaju javno potvrđene koordinate grobnice; oznake s isprekidanim rubom prikazuju samo približno područje naselja, ne mjesto iskopa. Ostale potvrđene grobnice ostaju u registru dok se ne pronađu pouzdani podaci o lokaciji.</p>
     </section>
   );
 }
