@@ -102,7 +102,7 @@ jobs:
             echo "::error::Nedostaje GitHub Actions secret YOUTUBE_API_KEY. Dodaj ga u Settings > Secrets and variables > Actions."
             exit 1
           fi
-          printf '%s' "$YOUTUBE_API_KEY" | npx --yes wrangler@4 secret put YOUTUBE_API_KEY --config wrangler.jsonc
+          printf '%s' "$YOUTUBE_API_KEY" | npx --yes wrangler@4 versions secret put YOUTUBE_API_KEY --config wrangler.jsonc
       - name: Objavi Worker i statičke datoteke
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
