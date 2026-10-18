@@ -90,6 +90,19 @@ export default function HrvatskaPamtiMjesto() {
       </div>
       <p className="hp-record-overview-note">{record.victimCountLabel ? record.victimCountLabel + ". " : ""}Broj grobišta prikazuje samo zapise iz registra koji su izričito povezani s ovim dosjeom; crtica znači da povezivanje još nije uneseno, a ne da grobišta nema. {slug === "vukovar" ? `Zbroj ${vukovarDocumentedFindings.toLocaleString("hr-HR")} obuhvaća brojčane nalaze iz odvojenih primarnih grobnica i pojedinačnih nalazišta: ${countedFindingsSummary}. To nije konačan broj svih žrtava Vukovara niti jamstvo da se u povijesnim evidencijama ne preklapaju pojedini slučajevi. Nalazi izvan zbroja: ${excludedFindingsSummary}. Ministarstvo je 19. svibnja 2026. navelo još 320 osoba za kojima se traga na području Vukovara; to je zasebna kategorija, ne pribraja se nalazima. Za Inženjerijski poligon, Balenicu — pašnjak, Gradsku tržnicu i Priljevo izvor potvrđuje pretraživanje, ali ne daje broj pronađenih osoba; zato su ta mjesta evidentirana bez izmišljene nule i bez uključivanja u zbroj.` : ""} Broj žrtava nije konačan zbroj svih stradalih na tom području. Uvijek provjeri izvor i vremenski obuhvat.</p>
     </section>
+    {slug === "vukovar" && <section className="hp-place-findings" aria-labelledby="hp-place-findings-title">
+      <div className="hp-place-findings-heading"><span className="hp-section-kicker">REGISTAR · PODATAK PO PODATAK</span><h2 id="hp-place-findings-title">Nalazište po <em>nalazište.</em></h2><p>Svaki broj ostaje vezan uz konkretno mjesto i izvor. Sekundarne grobnice, moguća preklapanja i područja na kojima broj nije objavljen prikazani su odvojeno — crtica ne znači nula žrtava.</p></div>
+      <div className="hp-place-findings-list">
+        {linkedGraveRecords.map(site => {
+          const count = Number.isFinite(site.victimsFound) ? site.victimsFound : Number.isFinite(site.identifiedCount) ? site.identifiedCount : null;
+          const countLabel = Number.isFinite(site.victimsFound) ? "pronađenih / ekshumiranih" : Number.isFinite(site.identifiedCount) ? "identificiranih osoba" : "broj nije naveden";
+          return <article className="hp-place-finding-card" key={site.id}>
+            <div className="hp-place-finding-main"><span className="hp-place-finding-status">{site.countInTotal === true ? "UKLJUČENO U ZBROJ" : "PRIKAZANO ODVOJENO"}</span><h3>{site.name}</h3><p>{site.foundLabel || "Izvor potvrđuje istraživanje ili postojanje lokacije, ali ne navodi broj pronađenih osoba. Ne upisujemo nulu."}</p>{site.sourceUrl && <a href={site.sourceUrl} target="_blank" rel="noreferrer">Provjeri izvor ↗</a>}</div>
+            <div className="hp-place-finding-count"><strong>{count === null ? "—" : count.toLocaleString("hr-HR")}</strong><span>{countLabel}</span>{Number.isFinite(site.boneFragmentsFoundAtLeast) && <small>+ više od {site.boneFragmentsFoundAtLeast.toLocaleString("hr-HR")} fragmenata kostiju</small>}</div>
+          </article>;
+        })}
+      </div>
+    </section>}
     <section className="hp-catalog-search" aria-labelledby="hp-catalog-title">
       <div className="hp-catalog-heading"><span className="hp-section-kicker">KAZALO DOSJEA</span><h2 id="hp-catalog-title">Istraži zapise.<br/><em>Pronađi trag.</em></h2><p>Pretraži tematske cjeline, vremensku crtu i trenutačno navedene izvore ovog dosjea. Rezultati obuhvaćaju samo sadržaj koji je već unesen na ovu stranicu.</p></div>
       <div className="hp-catalog-tools">
