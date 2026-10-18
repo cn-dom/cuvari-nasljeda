@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, AudioLines, Heart, MessageCircle, Music2, Pause, Play, Search, SkipBack, SkipForward, Volume2, X, ChevronDown, ChevronUp, ListMusic, Clock3, Bookmark, Radio } from "lucide-react";
 import { supabase } from "./lib/supabase";
 import "./HrvatskiVal.css";
-import SiteChrome from "./SiteChrome.jsx";
+import SiteChrome, { SiteFooter } from "./SiteChrome.jsx";
 
 const ENDPOINT = import.meta.env.VITE_YOUTUBE_SEARCH_ENDPOINT || "/api/youtube-search";
 const CATEGORIES = [
@@ -383,5 +383,6 @@ export default function HrvatskiVal() {
       </section>}
     </aside>}
     {active && !playerVisible && <button className="hv-reopen-player" onClick={() => setPlayerVisible(true)}><Play size={16}/> Nastavi: {active.title}</button>}
-  </main>;
+  <SiteFooter />
+    </main>;
 }
