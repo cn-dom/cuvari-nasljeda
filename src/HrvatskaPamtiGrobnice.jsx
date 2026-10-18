@@ -75,8 +75,8 @@ export default function HrvatskaPamtiGrobnice() {
     
     <section className="hp-register-hero">
       <span className="hp-section-kicker">DOKUMENTIRANJE · DOSTOJANSTVO · ISTINA</span>
-      <h1>Masovne grobnice<br/><em>hrvatskih žrtava.</em></h1>
-      <p>Evidencija masovnih grobnica u kojima su pouzdanim izvorima potvrđene hrvatske žrtve. Svaki zapis mora jasno razlikovati potvrđene činjenice, broj ekshumiranih osoba i podatke o identitetu ili pripadnosti žrtava.</p>
+      <h1>Grobišta i nalazišta<br/><em>žrtava Domovinskog rata.</em></h1>
+      <p>Evidencija potvrđenih masovnih i pojedinačnih grobnica te drugih nalazišta dokumentiranih pouzdanim izvorima. Svaki zapis razlikuje broj pronađenih ili ekshumiranih osoba, identificirane osobe i područja istraživanja; neobjavljen broj nikada ne prikazujemo kao nulu.</p>
       <div className="hp-register-stats"><div><strong>{confirmedSites.length.toString().padStart(2,"0")}</strong><span>zapisa s potvrđenim hrvatskim žrtvama</span></div><div><strong>{confirmedSites.filter(site => Number.isFinite(site.victimsFound) && typeof site.foundLabel === "string").length.toString().padStart(2,"0")}</strong><span>zapisa s brojčanim podatkom iz izvora — ne zbrajamo pronađene ostatke, identificirane osobe i žrtve</span></div><div><strong>1</strong><span>država trenutačno zastupljena u potvrđenim zapisima</span></div></div>
     </section>
     <section className="hp-register-content" id="registar">
