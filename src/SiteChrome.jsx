@@ -19,6 +19,14 @@ const primary = [
   ]},
 ];
 
+export function SiteFooter() {
+  return <footer className="ps-site-footer">
+      <a className="ps-site-footer-brand" href="/"><img src="/assets/images/1000000982.png" alt="" /><span><strong>PatriaSoul</strong><small>ČUVARI NASLJEĐA</small></span></a>
+      <p>Upoznaj Hrvatsku. Čuvaj baštinu. Prenesi priču.</p>
+      <nav aria-label="Informacije i pravila"><a href="/pravila-koristenja.html">Pravila korištenja</a><a href="/privatnost.html">Privatnost</a><a href="/pravila-zajednice.html">Pravila zajednice</a><a href="mailto:patriasoul@protonmail.com">Kontakt</a></nav>
+    </footer>;
+}
+
 export default function SiteChrome({ section = "Domovina", links = [], rightContent = null }) {
   const active = primary.find((item) => item.label === section) || primary[1];
   const sublinks = links.length ? links : (active.children || []);
@@ -37,10 +45,6 @@ export default function SiteChrome({ section = "Domovina", links = [], rightCont
       <span className="ps-site-subnav-label">{active.label}</span>
       {sublinks.map((item) => <a key={item.label} href={item.href}>{item.label}</a>)}
     </nav>}
-    <footer className="ps-site-footer">
-      <a className="ps-site-footer-brand" href="/"><img src="/assets/images/1000000982.png" alt="" /><span><strong>PatriaSoul</strong><small>ČUVARI NASLJEĐA</small></span></a>
-      <p>Upoznaj Hrvatsku. Čuvaj baštinu. Prenesi priču.</p>
-      <nav aria-label="Informacije i pravila"><a href="/pravila-koristenja.html">Pravila korištenja</a><a href="/privatnost.html">Privatnost</a><a href="/pravila-zajednice.html">Pravila zajednice</a><a href="mailto:patriasoul@protonmail.com">Kontakt</a></nav>
-    </footer>
+
   </>;
 }
