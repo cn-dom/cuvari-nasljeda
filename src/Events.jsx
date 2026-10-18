@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 import "./community-sections.css";
-import SiteChrome from "./SiteChrome.jsx";
+import SiteChrome, { SiteFooter } from "./SiteChrome.jsx";
 
 const normalizeUsername = (value) => String(value || "").trim().replace(/^@/, "").toLowerCase();
 const displayName = (profile) => profile?.display_name || normalizeUsername(profile?.username) || "Čuvar nasljeđa";
@@ -140,5 +140,6 @@ export default function Events() {
         </article>;
       })}</div>
     </section>
-  </main>;
+  <SiteFooter />
+    </main>;
 }
