@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./HrvatskaPamti.css";
 import HrvatskaPamtiMap from "./HrvatskaPamtiMap.jsx";
+import SiteChrome from "./SiteChrome.jsx";
 
 const places = [
   { name: "Vukovar", region: "Istočna Hrvatska", text: "Grad na Dunavu čuva sjećanje na obranu, izgubljene živote, obitelji koje su čekale i povratak života nakon razaranja.", status: "Radni zapis · provjera u tijeku", symbol: "✦" },
@@ -28,10 +29,8 @@ export default function HrvatskaPamti() {
   const [placeQuery, setPlaceQuery] = useState("");
   const filteredPlaces = places.filter((place) => (place.name + " " + place.region + " " + place.text).toLocaleLowerCase("hr").includes(placeQuery.trim().toLocaleLowerCase("hr")));
   return <main className="hp-page">
-    <header className="hp-topline">
-      <a className="hp-brand" href="/" aria-label="Povratak na PatriaSoul"><img src="/assets/images/1000000982.png" alt="" /><span>PatriaSoul <small>ČUVARI NASLJEĐA</small></span></a>
-      <nav aria-label="Navigacija Hrvatske pamti"><a href="#karta">Karta sjećanja</a><a href="#price">Povijesne priče</a><a href="#izvori">Izvori i načela</a><a href="/hrvatska-pamti-grobnice.html">Registar grobišta</a><a className="hp-return" href="/">← Povratak u zajednicu</a></nav>
-    </header>
+    <SiteChrome section="Domovina" links={[{"label":"Karta sjećanja","href":"#karta"},{"label":"Povijesne priče","href":"#price"},{"label":"Izvori i načela","href":"#izvori"},{"label":"Registar grobišta","href":"/hrvatska-pamti-grobnice.html"}]}/>
+    
     <section className="hp-hero">
       <div className="hp-hero-shade" />
       <div className="hp-hero-content">
@@ -99,6 +98,6 @@ export default function HrvatskaPamti() {
       </div>
       <p className="hp-source-library-note">Fotografije i dokumenti neće se preuzimati niti ponovno objavljivati bez provjere uvjeta korištenja, autorstva i prava. Osjetljivi podaci o obiteljima, svjedocima i mogućim mjestima ukopa neće se objavljivati na način koji može ugroziti privatnost ili stručni rad nadležnih službi.</p>
     </section>
-    <footer className="hp-footer"><a className="hp-brand" href="/"><img src="/assets/images/1000000982.png" alt="" /><span>PatriaSoul <small>ČUVARI NASLJEĐA</small></span></a><p>Hrvatska pamti — digitalni prostor sjećanja i odgovornog istraživanja.</p><a href="/">Povratak na PatriaSoul ↗</a></footer>
+    
   </main>;
 }
