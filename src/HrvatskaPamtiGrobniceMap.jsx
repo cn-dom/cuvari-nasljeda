@@ -88,9 +88,20 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
   const mapRef = useRef(null);
   const markersRef = useRef([]);
   const [mapError, setMapError] = useState(false);
+  const [mapQuery, setMapQuery] = useState("");
   const mappedSites = sites
      .filter((site) => site.certainty === "confirmed" && getMapLocation(site))
     .map((site) => ({ ...site, mapLocation: getMapLocation(site) }));
+  const searchMatches = mapQuery.trim().length < 2 ? [] : mappedSites.filter((site) => [site.name, site.area, site.period, site.detail, site.mapLocation.label].filter(Boolean).join(" ").toLocaleLowerCase("hr").includes(mapQuery.trim().toLocaleLowerCase("hr"))).slice(0, 8);
+
+  function focusSite(siteId) {
+    const entry = markersRef.current.find((item) => item.siteId === siteId);
+    const site = mappedSites.find((item) => item.id === siteId);
+    const map = mapRef.current;
+    if (!entry || !site || !map) return;
+    map.flyTo({ center: [site.mapLocation.lng, site.mapLocation.lat], zoom: Math.max(map.getZoom(), 11), essential: true, duration: 700 });
+    window.setTimeout(() => { if (entry.marker && !entry.marker.getPopup()?.isOpen()) entry.marker.togglePopup(); }, 750);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -216,6 +227,13 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
       <div className="hp-grave-map-heading">
         <div><span className="hp-section-kicker">GEOGRAFSKI PREGLED</span><h2 id="hp-grave-map-title">Grobnice na <em>karti</em></h2></div>
         <p>Odaberi oznaku za pregled zapisa, broja pronađenih ostataka i izvora lokacije. Pune oznake su provjerene koordinate grobnica; isprekidane su približne lokacije naselja ili područja.</p>
+      </div>
+      <div className="hp-grave-map-search">
+        <label htmlFor="hp-grave-map-search-input">Pronađi mjesto na karti</label>
+        <input id="hp-grave-map-search-input" type="search" value={mapQuery} onChange={(event) => setMapQuery(event.target.value)} placeholder="Upiši npr. Baćin, Sotin, Ovčara, Vukovar…" autoComplete="off" />
+        {mapQuery.trim().length >= 2 && <div className="hp-grave-map-search-results" role="listbox" aria-label="Rezultati pretrage karte">
+          {searchMatches.length ? searchMatches.map((site) => <button type="button" key={site.id} role="option" onClick={() => focusSite(site.id)}><span>{site.name}</span><small>{site.area} · {site.mapLocation.approximate ? "približna lokacija" : "objavljena koordinata"}</small></button>) : <p>Nema podudaranja među potvrđenim zapisima s lokacijom na karti.</p>}
+        </div>}
       </div>
       <div className="hp-grave-map-shell">
         <div ref={containerRef} className="hp-grave-map-canvas" aria-label="Interaktivna karta masovnih grobnica hrvatskih žrtava" />
