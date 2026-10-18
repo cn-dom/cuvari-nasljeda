@@ -346,7 +346,7 @@ export default function HrvatskiVal() {
   }
 
   return <main className="hv-app">
-    <SiteChrome section="Mediji" links={[{"label":"Glazbena zbirka","href":"#hv-library"},{"label":"Trenutno svira","href":"#hv-player"},{"label":"PatriaSoul","href":"/"}]}/>
+    <SiteChrome section="Mediji" links={[{"label":"Glazbena zbirka","href":"#hv-library"},{"label":"Trenutno svira","href":"#hv-library"},{"label":"PatriaSoul","href":"/"}]}/>
     
 
     <section className="hv-hero">
