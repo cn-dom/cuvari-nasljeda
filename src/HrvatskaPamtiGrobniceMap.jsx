@@ -5,12 +5,11 @@ const MAP_STYLE = "https://tiles.openfreemap.org/styles/fiord";
 
 // Približne točke naselja odvojene su od točnih koordinata grobnica.
 const APPROXIMATE_LOCALITIES = {
-  "ilaca-domovinski-rat": { lat: 45.19, lng: 18.93, label: "Ilača", precision: "Približna lokacija naselja — nije koordinata grobnice" },
+  "ilaca-domovinski-rat": { lat: 45.18241, lng: 19.09501, label: "Ilača", precision: "Približna lokacija naselja — nije koordinata grobnice" },
   "negoslavci-masovna-2024": { lat: 45.28, lng: 18.99, label: "Negoslavci", precision: "Približna lokacija naselja — nije koordinata grobnice" },
-  "miklusevci": { lat: 45.23, lng: 19.05, label: "Mikluševci", precision: "Približna lokacija naselja — nije koordinata grobnice" },
-  "bobota-ekonomija-2025": { lat: 45.37, lng: 18.85, label: "Bobota", precision: "Približna lokacija naselja — nije koordinata grobnice" },
-  "gornje-jame": { lat: 45.34, lng: 15.99, label: "Gornje Jame", precision: "Približna lokacija naselja — nije koordinata grobnice" },
-  "stari-seles": { lat: 45.27, lng: 18.92, label: "Stari Seleš", precision: "Približna lokacija područja — nije koordinata grobnice" },
+  "miklusevci": { lat: 45.25125, lng: 19.08465, label: "Mikluševci", precision: "Približna lokacija naselja — nije koordinata grobnice" },
+  "bobota-ekonomija-2025": { lat: 45.42195, lng: 18.85723, label: "Bobota", precision: "Približna lokacija naselja — nije koordinata grobnice" },
+  "gornje-jame": { lat: 45.40664, lng: 16.12150, label: "Gornje Jame", precision: "Približna lokacija naselja — nije koordinata grobnice" },
 };
 
 function getMapLocation(site) {
