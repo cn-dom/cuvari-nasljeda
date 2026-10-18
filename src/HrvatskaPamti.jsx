@@ -31,6 +31,8 @@ export default function HrvatskaPamti() {
   const filteredPlaces = places.filter((place) => (place.name + " " + place.region + " " + place.text).toLocaleLowerCase("hr").includes(placeQuery.trim().toLocaleLowerCase("hr")));
   const registeredCroatianSites = graveSites.filter((site) => site.croatianVictimsConfirmed === true);
   const recordsWithNumericFindings = registeredCroatianSites.filter((site) => Number.isFinite(site.victimsFound));
+  const countedFindings = registeredCroatianSites.filter((site) => site.countInTotal === true && Number.isFinite(site.victimsFound));
+  const documentedFindingsTotal = countedFindings.reduce((total, site) => total + site.victimsFound, 0);
   return <main className="hp-page">
     <SiteChrome section="Domovina" links={[{"label":"Karta sjećanja","href":"#karta"},{"label":"Povijesne priče","href":"#price"},{"label":"Izvori i načela","href":"#izvori"},{"label":"Registar grobišta","href":"/hrvatska-pamti-grobnice.html"}]}/>
     
@@ -52,6 +54,7 @@ export default function HrvatskaPamti() {
       <div className="hp-national-stats-grid">
         <article><strong>{registeredCroatianSites.length.toLocaleString("hr-HR")}</strong><span>zapisa u registru s potvrđenim hrvatskim žrtvama</span><small>Broj zapisa u našoj evidenciji, ne ukupan broj grobnica u Hrvatskoj.</small></article>
         <article><strong>{recordsWithNumericFindings.length.toLocaleString("hr-HR")}</strong><span>zapisa s brojčanim podatkom iz izvora</span><small>Brojevi se ne zbrajaju jer mogu opisivati različite nalaze ili obuhvate.</small></article>
+        <article><strong>{documentedFindingsTotal.toLocaleString("hr-HR")}</strong><span>pronađenih/ekshumiranih osoba u zapisima uključenima u zbroj</span><small>Automatski zbroj samo zapisa označenih countInTotal; moguća preklapanja i nalazi koji se ne mogu sigurno pribrojiti ostaju izvan zbroja.</small></article>
         <article><strong>1.725</strong><span>neriješenih slučajeva iz Domovinskog rata</span><small>1.341 osoba nepoznate sudbine i 384 smrtno stradale osobe za koje nije poznato mjesto ukopa.</small><a href="https://branitelji.gov.hr/mjere-14/nestale-osobe/nestale-osobe-u-domovinskom-ratu-834/834" target="_blank" rel="noreferrer">Ministarstvo hrvatskih branitelja ↗</a></article>
         <article><strong>343</strong><span>osobe identificirane u proteklih deset godina</span><small>Podatak iz službene objave Vlade RH od 30. kolovoza 2026.; nije broj svih identificiranih od 1991.</small><a href="https://www.vlada.gov.hr/pitanje-nestalih-jedan-je-od-glavnih-prioriteta/47206" target="_blank" rel="noreferrer">Vlada RH · 30. 8. 2026. ↗</a></article>
       </div>
