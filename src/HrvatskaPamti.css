@@ -389,3 +389,16 @@
   .hp-detail-page-skabrnja{background-attachment:scroll;background-position:58% center}
   .hp-detail-hero-skabrnja{background-position:center,center,58% center}
 }
+
+
+.hp-grave-map-search{position:relative;display:grid;grid-template-columns:minmax(150px,220px) minmax(0,1fr);gap:10px;align-items:center;margin:0 0 14px}
+.hp-grave-map-search>label{font-size:11px;font-weight:800;letter-spacing:.04em;color:#d6b48b}
+.hp-grave-map-search>input{width:100%;min-height:44px;box-sizing:border-box;border:1px solid #526473;background:#102535;color:#f5f2ec;border-radius:2px;padding:0 13px;font:500 12px Manrope,system-ui,sans-serif}
+.hp-grave-map-search>input::placeholder{color:#9aabb8}
+.hp-grave-map-search-results{position:absolute;z-index:8;top:calc(100% + 4px);left:220px;right:0;max-height:260px;overflow:auto;background:#f4f0e8;border:1px solid #c8c0b3;box-shadow:0 12px 26px #0005}
+.hp-grave-map-search-results button{display:grid;gap:4px;width:100%;text-align:left;padding:10px 13px;border:0;border-bottom:1px solid #ded8cf;background:transparent;color:#243543;cursor:pointer}
+.hp-grave-map-search-results button:hover,.hp-grave-map-search-results button:focus-visible{background:#e7dfd2;outline:2px solid #a83c45;outline-offset:-2px}
+.hp-grave-map-search-results button span{font-size:12px;font-weight:800}
+.hp-grave-map-search-results button small{font-size:10px;color:#586975}
+.hp-grave-map-search-results p{padding:12px;margin:0;font-size:11px;color:#40515e}
+@media(max-width:760px){.hp-grave-map-search{grid-template-columns:1fr;gap:8px}.hp-grave-map-search-results{left:0}}
