@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { puter } from "@heyputer/puter.js";
 import { ArrowLeft, BookOpen, BrainCircuit, Camera, CheckCircle2, Copy, ImagePlus, LoaderCircle, Send, ShieldCheck, Volume2, WandSparkles } from "lucide-react";
 import "./ai-center.css";
-import SiteChrome from "./SiteChrome.jsx";
+import SiteChrome, { SiteFooter } from "./SiteChrome.jsx";
 
 const STARTER_QUESTIONS = [
   "Objasni mi najvažnije događaje hrvatske povijesti jednostavnim jezikom.",
@@ -253,5 +253,6 @@ export default function AICenter() {
         
       </section>
     </div>
-  </main>;
+  <SiteFooter />
+    </main>;
 }
