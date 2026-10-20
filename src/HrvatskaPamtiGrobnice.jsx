@@ -183,6 +183,12 @@ export default function HrvatskaPamtiGrobnice() {
           <a href="https://branitelji.gov.hr/vijesti/u-zagrebackoj-dubravi-jos-jedna-masovna-grobnica-iz-drugog-svjetskog-rata/5218" target="_blank" rel="noreferrer">Izvor Ministarstva ↗</a>
         </article>
         <article>
+          <span className="hp-research-date">PREGLED OBJAVLJEN 28. SVIBNJA 2026.</span>
+          <h3>Granešinski Novaki</h3>
+          <p>Granešinski Novaki navedeni su u službenom zbirnom pregledu istraživanja i ekshumacija tijekom 2026. godine. Sažetak ne izdvaja broj osoba ni detalje pojedinačnog nalaza za ovu lokaciju, pa registar ne pripisuje joj broj žrtava niti opisuje neobjavljene okolnosti.</p>
+          <a href="https://branitelji.gov.hr/vijesti/u-zagrebackoj-dubravi-jos-jedna-masovna-grobnica-iz-drugog-svjetskog-rata/5218" target="_blank" rel="noreferrer">Izvor Ministarstva ↗</a>
+        </article>
+        <article>
           <span className="hp-research-date">28. SVIBNJA 2026.</span>
           <h3>Šuma Lešće</h3>
           <p>Novija službena objava za dvije grobnice u šumi Lešće navodi 55 ekshumiranih žrtava. To je noviji zbirni podatak od ranije objavljenih najmanje 23 osobe; stariji i noviji podatak ne zbrajamo kao odvojene skupine.</p>
