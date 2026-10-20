@@ -117,8 +117,12 @@ for (const { raw, props } of records) {
   if (seen.has(id)) errors.push("Dupli ID: " + id);
   seen.add(id);
 
-  for (const field of ["name", "period", "status", "certainty"]) {
-    if (!props.has(field)) warnings.push(id + ": nedostaje polje " + field);
+  // Osnovna polja za razumljiv i provjerljiv javni zapis ne smiju izostati.
+  for (const field of ["name", "period", "status", "certainty", "source", "foundLabel", "detail"]) {
+    const value = props.get(field);
+    if (!value || /^["']\s*["']$/.test(value)) {
+      errors.push(id + ": nedostaje obvezno polje " + field + ".");
+    }
   }
 
   if (props.get("countInTotal") === "true" && !/^\d+(?:\.\d+)?\s*(?:,|$)/.test(props.get("victimsFound") ?? "")) {
