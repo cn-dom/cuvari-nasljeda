@@ -23,51 +23,73 @@ function hash(value) {
   return h >>> 0;
 }
 
+function stableSort(items, key) {
+  return [...items].sort((a, b) => {
+    const difference = hash(`${key}:${a.id}`) - hash(`${key}:${b.id}`);
+    return difference || String(a.id).localeCompare(String(b.id));
+  });
+}
+
 export async function fetchDailyQuizQuestions(date = new Date()) {
   const dailyKey = getDailyKey(date);
   const all = await fetchMainQuizQuestions();
 
   if (all.length < 10) {
-    throw new Error("Za Dnevni kviz trenutno nema dovoljno aktivnih pitanja.");
+    throw new Error("Za Dnevni kviz trenutno nema dovoljno aktivnih, jedinstvenih pitanja.");
   }
 
   const byCategory = new Map();
   for (const question of all) {
-    const list = byCategory.get(question.category) ?? [];
+    const category = String(question.category ?? "").trim();
+    if (!category) continue;
+    const list = byCategory.get(category) ?? [];
     list.push(question);
-    byCategory.set(question.category, list);
+    byCategory.set(category, list);
   }
 
   const selected = [];
   const usedIds = new Set();
+  const usedQuestionText = new Set();
 
-  // Jedno pitanje iz svake od 10 glavnih kategorija, deterministički za taj dan.
-  for (const [category, questions] of byCategory) {
+  // Rotate category order deterministically each day so the same early
+  // database categories do not dominate every daily set.
+  const categories = [...byCategory.keys()].sort((a, b) => {
+    const difference = hash(`${dailyKey}:category:${a}`) - hash(`${dailyKey}:category:${b}`);
+    return difference || a.localeCompare(b);
+  });
+
+  for (const category of categories) {
     if (selected.length >= 10) break;
-    const candidates = [...questions].sort((a, b) => hash(`${dailyKey}:${a.id}`) - hash(`${dailyKey}:${b.id}`));
-    const question = candidates.find((item) => !usedIds.has(item.id));
+    const candidates = stableSort(byCategory.get(category), `${dailyKey}:category:${category}`);
+    const question = candidates.find((item) => {
+      const text = String(item.question ?? "").normalize("NFKC").toLocaleLowerCase("hr").replace(/\s+/g, " ").trim();
+      return !usedIds.has(item.id) && text && !usedQuestionText.has(text);
+    });
     if (question) {
       selected.push(question);
       usedIds.add(question.id);
+      usedQuestionText.add(String(question.question).normalize("NFKC").toLocaleLowerCase("hr").replace(/\s+/g, " ").trim());
     }
   }
 
-  // Ako neka kategorija nema aktivno pitanje, popuni ostatak iz cijele baze.
+  // If fewer than ten categories contain valid questions, fill from the
+  // remaining unique questions without repeating an ID or question text.
   if (selected.length < 10) {
-    const remaining = all
-      .filter((question) => !usedIds.has(question.id))
-      .sort((a, b) => hash(`${dailyKey}:fill:${a.id}`) - hash(`${dailyKey}:fill:${b.id}`));
-
+    const remaining = stableSort(all, `${dailyKey}:fill`).filter((question) => {
+      const text = String(question.question ?? "").normalize("NFKC").toLocaleLowerCase("hr").replace(/\s+/g, " ").trim();
+      if (!text || usedIds.has(question.id) || usedQuestionText.has(text)) return false;
+      usedIds.add(question.id);
+      usedQuestionText.add(text);
+      return true;
+    });
     selected.push(...remaining.slice(0, 10 - selected.length));
   }
 
   if (selected.length < 10) {
-    throw new Error("Dnevni kviz trenutno nema 10 dostupnih pitanja.");
+    throw new Error(`Dnevni kviz ima samo ${selected.length} valjanih, jedinstvenih pitanja; potrebno ih je 10.`);
   }
 
-  return selected
-    .sort((a, b) => hash(`${dailyKey}:order:${a.id}`) - hash(`${dailyKey}:order:${b.id}`))
-    .slice(0, 10);
+  return stableSort(selected, `${dailyKey}:order`).slice(0, 10);
 }
 
 export function getDailyQuizKey(date = new Date()) {
