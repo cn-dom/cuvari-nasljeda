@@ -110,7 +110,7 @@ export default function HrvatskaPamtiGrobnice() {
   const results = useMemo(() => confirmedSites.filter((site) => {
     const matchesPeriod = period === "Sve lokacije" || site.period === period;
     const matchesCountry = country === "Sve države" || (site.country || "Hrvatska") === country;
-    const haystack = [site.name, site.area, site.country || "Hrvatska", site.period, site.status, site.detail, site.source].join(" ").toLocaleLowerCase("hr");
+    const haystack = [site.name, site.area, site.country || "Hrvatska", site.period, site.year, site.status, site.detail, site.foundLabel, site.victimAttribution, site.source, site.sourceUrl, site.publicLocation].filter(Boolean).join(" ").toLocaleLowerCase("hr");
     return matchesPeriod && matchesCountry && haystack.includes(query.trim().toLocaleLowerCase("hr"));
   }), [query, period, country, confirmedSites]);
   return <main className="hp-page hp-register-page">
