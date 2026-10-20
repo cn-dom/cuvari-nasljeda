@@ -13,19 +13,6 @@ import { getAdminDashboardStats, getAdminUsers, getAdminQuizResults, deleteAdmin
 import { supabase } from "./lib/supabase";
 import { getCommunityComments, createCommunityComment, deleteCommunityComment, getCommunityMembers, createCommunityNotification, getCommunityNotifications, markCommunityNotificationRead } from "./lib/community";
 
-const categories = [
-  ["opce", "Hrvatsko opće znanje", "Raznoliko znanje o Hrvatskoj."],
-  ["povijest", "Povijest Hrvatske", "Ključni događaji i osobe hrvatske povijesti."],
-  ["domovinski_rat", "Domovinski rat", "Sjećanje, znanje i povijesne činjenice."],
-  ["geografija", "Geografija Hrvatske", "Gradovi, krajevi, otoci, rijeke i planine."],
-  ["priroda", "Priroda Hrvatske", "Nacionalni parkovi i životinjski svijet."],
-  ["bastina", "Kultura i baština", "Kultura, običaji i hrvatsko nasljeđe."],
-  ["glagoljica", "Glagoljica", "Pismo i glagoljska kulturna baština Hrvata."],
-  ["vjera", "Vjera i sakralna baština", "Vjera, crkvena baština i sakralna kultura."],
-  ["sport", "Sport", "Hrvatski sportaši, klubovi i reprezentacije."],
-  ["znanost", "Znanost i izumi", "Hrvatski znanstvenici, izumitelji i otkrića."],
-];
-
 export default function App() {
   const [screen, setScreen] = useState("home");
   const [round, setRound] = useState([]);
@@ -800,23 +787,7 @@ export default function App() {
   };
 
 
-  // Kompatibilnost sa starim poveznicama: svaki poziv pokreće miješani Hrvatski kviz.
-  const startMainCategory = async (_category, authenticatedUser = null) => startCroatianQuiz(authenticatedUser);
-
-  const openCroatianQuiz = () => {
-    setScreen("home");
-    window.history.replaceState({}, "", window.location.pathname + "#kategorije");
-    setError("");
-    setRound([]);
-    setResult(null);
-    setActiveQuizType(null);
-    setActiveCategory(null);
-    setAttemptId(null);
-    setCity(null);
-    window.setTimeout(() => {
-      document.getElementById("kategorije")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 0);
-  };
+  const openCroatianQuiz = () => startCroatianQuiz();
 
   const handleDeepLink = (mode) => {
     if (mode === "croatian") {
@@ -953,7 +924,7 @@ export default function App() {
     }
   }, [user, profile, nicknameOpen, pendingDeepLink]);
 
-  const activeCategoryTitle = categories.find(([id]) => id === activeCategory)?.[1] ?? "Hrvatski kviz";
+  const activeCategoryTitle = "Hrvatski kviz";
   const quizTitle = activeQuizType === "city"
     ? `Brani svoj grad: ${city?.name ?? ""}`
     : activeQuizType === "daily"
@@ -1127,7 +1098,7 @@ export default function App() {
         </div>
       </section>
 
-<section id="nasljede" className="patria-section-dark border-b border-white/10"><div className="mx-auto max-w-6xl px-4 py-12 sm:px-6"><div className="mb-7"><p className="text-xs font-bold uppercase tracking-[.2em] text-[#f1d078]">Zašto PatriaSoul?</p><h2 className="mt-2 text-3xl text-white sm:text-4xl">Testiraj. Čuvaj. Nauči. Prenesi.</h2></div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><button onClick={() => document.getElementById("kategorije")?.scrollIntoView({ behavior: "smooth" })} className="patria-feature text-left"><span className="patria-icon-ring"><BookOpen className="h-5 w-5" /></span><h3 className="mt-4 text-lg text-white">TESTIRAJ SVOJE ZNANJE</h3><p className="mt-2 text-sm text-white/60">Provjeri koliko znaš o Hrvatskoj i njezinoj povijesti.</p></button><button onClick={() => document.getElementById("kategorije")?.scrollIntoView({ behavior: "smooth" })} className="patria-feature text-left"><span className="patria-icon-ring"><ShieldCheck className="h-5 w-5" /></span><h3 className="mt-4 text-lg text-white">ČUVAJ NASLJEĐE</h3><p className="mt-2 text-sm text-white/60">Upoznaj priče, mjesta, običaje i vrijednosti koje vrijedi sačuvati.</p></button><button onClick={() => startMainCategory(categories.find(([id]) => id === "povijest"))} className="patria-feature text-left"><span className="patria-icon-ring"><FileText className="h-5 w-5" /></span><h3 className="mt-4 text-lg text-white">NAUČI ŠTO JE I KAKO JE BILO</h3><p className="mt-2 text-sm text-white/60">Povijest nam pomaže razumjeti Hrvatsku danas.</p></button><button onClick={openCities} className="patria-feature text-left"><span className="patria-icon-ring"><MapPin className="h-5 w-5" /></span><h3 className="mt-4 text-lg text-white">BUDI DIO PRIČE</h3><p className="mt-2 text-sm text-white/60">Istražuj gradove, upoznaj Hrvatsku i ostavi svoj rezultat.</p></button></div></div></section>
+<section id="nasljede" className="patria-section-dark border-b border-white/10"><div className="mx-auto max-w-6xl px-4 py-12 sm:px-6"><div className="mb-7"><p className="text-xs font-bold uppercase tracking-[.2em] text-[#f1d078]">Zašto PatriaSoul?</p><h2 className="mt-2 text-3xl text-white sm:text-4xl">Testiraj. Čuvaj. Nauči. Prenesi.</h2></div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><button onClick={() => document.getElementById("kategorije")?.scrollIntoView({ behavior: "smooth" })} className="patria-feature text-left"><span className="patria-icon-ring"><BookOpen className="h-5 w-5" /></span><h3 className="mt-4 text-lg text-white">TESTIRAJ SVOJE ZNANJE</h3><p className="mt-2 text-sm text-white/60">Provjeri koliko znaš o Hrvatskoj i njezinoj povijesti.</p></button><button onClick={() => document.getElementById("kategorije")?.scrollIntoView({ behavior: "smooth" })} className="patria-feature text-left"><span className="patria-icon-ring"><ShieldCheck className="h-5 w-5" /></span><h3 className="mt-4 text-lg text-white">ČUVAJ NASLJEĐE</h3><p className="mt-2 text-sm text-white/60">Upoznaj priče, mjesta, običaje i vrijednosti koje vrijedi sačuvati.</p></button><button onClick={() => startCroatianQuiz()} className="patria-feature text-left"><span className="patria-icon-ring"><FileText className="h-5 w-5" /></span><h3 className="mt-4 text-lg text-white">NAUČI ŠTO JE I KAKO JE BILO</h3><p className="mt-2 text-sm text-white/60">Povijest nam pomaže razumjeti Hrvatsku danas.</p></button><button onClick={openCities} className="patria-feature text-left"><span className="patria-icon-ring"><MapPin className="h-5 w-5" /></span><h3 className="mt-4 text-lg text-white">BUDI DIO PRIČE</h3><p className="mt-2 text-sm text-white/60">Istražuj gradove, upoznaj Hrvatsku i ostavi svoj rezultat.</p></button></div></div></section>
 
       <section className="border-y border-border bg-background">
   <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-14">
