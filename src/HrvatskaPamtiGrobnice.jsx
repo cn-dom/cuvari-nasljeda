@@ -232,6 +232,12 @@ export default function HrvatskaPamtiGrobnice() {
           <a href="https://branitelji.gov.hr/vijesti/u-zagrebu-pronadjene-jos-dvije-masovne-grobnice-iz-drugog-svjetskog-rata-i-poslijeratnog-razdoblja/5182" target="_blank" rel="noreferrer">Službena objava Ministarstva ↗</a>
         </article>
         <article>
+          <span className="hp-research-date">22. KOLOVOZA 2026. · ZBIRNI SLUŽBENI PODATAK</span>
+          <h3>Deset godina istraživanja: nacionalni pregled</h3>
+          <p>U objavi povodom pokopa žrtava u Maclju Ministarstvo je navelo da je od 2016. provedeno 635 terenskih izvida, istraženo 96 lokacija te pronađeno najmanje 2.300 žrtava u masovnim i pojedinačnim grobnicama. U Maclju je nakon pokopa 500 posmrtnih ostataka preuzetih iz Slovenije navedeno ukupno 1.747 ondje pokopanih žrtava. To su zbirni podaci za različite razine i razdoblja, a ne dodatne lokacije ni brojevi koje treba pribrajati pojedinačnim zapisima ovog registra.</p>
+          <a href="https://branitelji.gov.hr/vijesti/u-maclju-pokopano-500-hrvatskih-zrtava-ekshumiranih-iz-grobnica-u-republici-sloveniji/5255" target="_blank" rel="noreferrer">Službena objava Ministarstva ↗</a>
+        </article>
+        <article>
           <span className="hp-research-date">SLUŽBENI POSTUPAK · MINISTARSTVO</span>
           <h3>Od dojave do identifikacije</h3>
           <p>Službeni postupak razlikuje nekoliko faza: provjeru dojave u evidencijama i arhivskoj građi, terenski izvid i probna iskapanja, potvrdu grobnice, utvrđivanje broja posmrtnih ostataka, stručnu obradu te moguću identifikaciju. Identifikacija nije automatska posljedica ekshumacije; za osobe nestale u Domovinskom ratu uspoređuju se nalazi obrade i DNA s podacima i uzorcima srodnika, a završna identifikacija uključuje obitelj. U registru zato odvajamo pronađene ostatke, identificirane osobe i osobe za kojima se još traga.</p>
