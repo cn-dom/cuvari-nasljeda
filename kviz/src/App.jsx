@@ -13,19 +13,6 @@ import { getAdminDashboardStats, getAdminUsers, getAdminQuizResults, deleteAdmin
 import { supabase } from "./lib/supabase";
 import { getCommunityComments, createCommunityComment, deleteCommunityComment, getCommunityMembers, createCommunityNotification, getCommunityNotifications, markCommunityNotificationRead } from "./lib/community";
 
-const categories = [
-  ["opce", "Hrvatsko opće znanje", "Raznoliko znanje o Hrvatskoj."],
-  ["povijest", "Povijest Hrvatske", "Ključni događaji i osobe hrvatske povijesti."],
-  ["domovinski_rat", "Domovinski rat", "Sjećanje, znanje i povijesne činjenice."],
-  ["geografija", "Geografija Hrvatske", "Gradovi, krajevi, otoci, rijeke i planine."],
-  ["priroda", "Priroda Hrvatske", "Nacionalni parkovi i životinjski svijet."],
-  ["bastina", "Kultura i baština", "Kultura, običaji i hrvatsko nasljeđe."],
-  ["glagoljica", "Glagoljica", "Pismo i glagoljska kulturna baština Hrvata."],
-  ["vjera", "Vjera i sakralna baština", "Vjera, crkvena baština i sakralna kultura."],
-  ["sport", "Sport", "Hrvatski sportaši, klubovi i reprezentacije."],
-  ["znanost", "Znanost i izumi", "Hrvatski znanstvenici, izumitelji i otkrića."],
-];
-
 export default function App() {
   const [screen, setScreen] = useState("home");
   const [round, setRound] = useState([]);
@@ -751,14 +738,14 @@ export default function App() {
     }
   };
 
-  const startMainCategory = async (category, authenticatedUser = null) => {
+  const startCroatianQuiz = async (authenticatedUser = null) => {
     let currentUser = authenticatedUser || user;
 
     // Auth stanje se održava centralno u listeneru iznad.
     // Ako korisnik nije prijavljen, odmah otvori prijavu bez dodatnog
     // mrežnog poziva koji bi mogao blokirati otvaranje modala.
     if (!currentUser) {
-      const pending = { type: "category", category };
+      const pending = { type: "croatian" };
       pendingCategoryRef.current = pending;
       try {
         localStorage.setItem(pendingCategoryStorageKey, JSON.stringify(pending));
@@ -777,7 +764,7 @@ export default function App() {
     setError("");
     setLoadingQuiz(true);
     try {
-      const attempt = await startQuizAttempt({ quizType: "croatian", category: category[0] });
+      const attempt = await startQuizAttempt({ quizType: "croatian", category: null });
       const questions = Array.isArray(attempt?.questions) ? attempt.questions : [];
 
       if (!attempt?.attemptId || questions.length !== 10) {
@@ -786,7 +773,7 @@ export default function App() {
 
       setCity(null);
       setActiveQuizType("croatian");
-      setActiveCategory(category[0]);
+      setActiveCategory(null);
       setAttemptId(attempt.attemptId);
       setRound(questions);
       setResult(null);
@@ -799,20 +786,8 @@ export default function App() {
     }
   };
 
-  const openCroatianQuiz = () => {
-    setScreen("home");
-    window.history.replaceState({}, "", window.location.pathname + "#kategorije");
-    setError("");
-    setRound([]);
-    setResult(null);
-    setActiveQuizType(null);
-    setActiveCategory(null);
-    setAttemptId(null);
-    setCity(null);
-    window.setTimeout(() => {
-      document.getElementById("kategorije")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 0);
-  };
+
+  const openCroatianQuiz = () => startCroatianQuiz();
 
   const handleDeepLink = (mode) => {
     if (mode === "croatian") {
@@ -872,8 +847,7 @@ export default function App() {
       startCity(city);
       return;
     }
-    const selected = categories.find(([id]) => id === activeCategory);
-    if (selected) startMainCategory(selected);
+    startCroatianQuiz();
   };
 
   useEffect(() => {
@@ -932,14 +906,14 @@ export default function App() {
       } catch {}
     }
 
-    if (pending?.type === "category" && Array.isArray(pending.category)) {
+    if ((pending?.type === "category" && Array.isArray(pending.category)) || pending?.type === "croatian") {
       // Ako je ovo prvi ulazak i profil još nema nadimak, prvo tražimo nadimak.
       // Kviz se ne smije pokrenuti ispod modalnog prozora za nadimak.
       if (nicknameOpen) return;
 
       pendingCategoryRef.current = null;
       try { localStorage.removeItem(pendingCategoryStorageKey); } catch {}
-      window.setTimeout(() => startMainCategory(pending.category, user), 0);
+      window.setTimeout(() => startCroatianQuiz(user), 0);
       return;
     }
 
@@ -950,7 +924,7 @@ export default function App() {
     }
   }, [user, profile, nicknameOpen, pendingDeepLink]);
 
-  const activeCategoryTitle = categories.find(([id]) => id === activeCategory)?.[1] ?? "Hrvatski kviz";
+  const activeCategoryTitle = "Hrvatski kviz";
   const quizTitle = activeQuizType === "city"
     ? `Brani svoj grad: ${city?.name ?? ""}`
     : activeQuizType === "daily"
@@ -1074,14 +1048,14 @@ export default function App() {
         <h1 className="font-display text-5xl font-bold leading-tight sm:text-6xl">Hrvatski kviz</h1>
         <p className="mt-6 max-w-3xl text-lg text-white/80">Provjeri svoje znanje o Hrvatskoj — od povijesti i Domovinskog rata do geografije, prirode, baštine, glagoljice, vjere, sporta i znanosti.</p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <a href="#kategorije" className="patria-button-accent"><BookOpen className="mr-2 h-4 w-4" /> Testiraj svoje znanje</a>
+          <button onClick={() => startCroatianQuiz()} disabled={loadingQuiz} className="patria-button-accent"><BookOpen className="mr-2 h-4 w-4" /> Pokreni Hrvatski kviz</button>
           <button onClick={openCities} className="patria-button"><MapPin className="mr-2 h-4 w-4" /> Brani svoj grad</button>
           <button onClick={() => openLeaderboard()} className="patria-button"><Medal className="mr-2 h-4 w-4" /> Rang-lista</button>
           <a href="/ai-centar.html" className="patria-button"><MessageCircle className="mr-2 h-4 w-4" /> PatriaSoul Centar</a>
         </div>
         <div className="mt-7 flex flex-wrap gap-2 text-sm text-white/70">
           <span className="rounded-full border border-white/15 bg-black/20 px-3 py-1.5">{loadingMainCount ? "Učitavam bazu…" : `${mainCount.toLocaleString("hr-HR")} pitanja`}</span>
-          <span className="rounded-full border border-border bg-card px-3 py-1.5">10 kategorija</span>
+          <span className="rounded-full border border-border bg-card px-3 py-1.5">Sve teme pomiješane</span>
           <span className="rounded-full border border-border bg-card px-3 py-1.5">10 pitanja po rundi</span>
         </div>
         {user && <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm"><UserRound className="h-4 w-4 text-accent" /> <strong>{accountDisplayName}</strong><span className="text-muted-foreground">je prijavljen</span></div>}
@@ -1124,7 +1098,7 @@ export default function App() {
         </div>
       </section>
 
-<section id="nasljede" className="patria-section-dark border-b border-white/10"><div className="mx-auto max-w-6xl px-4 py-12 sm:px-6"><div className="mb-7"><p className="text-xs font-bold uppercase tracking-[.2em] text-[#f1d078]">Zašto PatriaSoul?</p><h2 className="mt-2 text-3xl text-white sm:text-4xl">Testiraj. Čuvaj. Nauči. Prenesi.</h2></div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><button onClick={() => document.getElementById("kategorije")?.scrollIntoView({ behavior: "smooth" })} className="patria-feature text-left"><span className="patria-icon-ring"><BookOpen className="h-5 w-5" /></span><h3 className="mt-4 text-lg text-white">TESTIRAJ SVOJE ZNANJE</h3><p className="mt-2 text-sm text-white/60">Provjeri koliko znaš o Hrvatskoj i njezinoj povijesti.</p></button><button onClick={() => document.getElementById("kategorije")?.scrollIntoView({ behavior: "smooth" })} className="patria-feature text-left"><span className="patria-icon-ring"><ShieldCheck className="h-5 w-5" /></span><h3 className="mt-4 text-lg text-white">ČUVAJ NASLJEĐE</h3><p className="mt-2 text-sm text-white/60">Upoznaj priče, mjesta, običaje i vrijednosti koje vrijedi sačuvati.</p></button><button onClick={() => startMainCategory(categories.find(([id]) => id === "povijest"))} className="patria-feature text-left"><span className="patria-icon-ring"><FileText className="h-5 w-5" /></span><h3 className="mt-4 text-lg text-white">NAUČI ŠTO JE I KAKO JE BILO</h3><p className="mt-2 text-sm text-white/60">Povijest nam pomaže razumjeti Hrvatsku danas.</p></button><button onClick={openCities} className="patria-feature text-left"><span className="patria-icon-ring"><MapPin className="h-5 w-5" /></span><h3 className="mt-4 text-lg text-white">BUDI DIO PRIČE</h3><p className="mt-2 text-sm text-white/60">Istražuj gradove, upoznaj Hrvatsku i ostavi svoj rezultat.</p></button></div></div></section>
+<section id="nasljede" className="patria-section-dark border-b border-white/10"><div className="mx-auto max-w-6xl px-4 py-12 sm:px-6"><div className="mb-7"><p className="text-xs font-bold uppercase tracking-[.2em] text-[#f1d078]">Zašto PatriaSoul?</p><h2 className="mt-2 text-3xl text-white sm:text-4xl">Testiraj. Čuvaj. Nauči. Prenesi.</h2></div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><button onClick={() => document.getElementById("kategorije")?.scrollIntoView({ behavior: "smooth" })} className="patria-feature text-left"><span className="patria-icon-ring"><BookOpen className="h-5 w-5" /></span><h3 className="mt-4 text-lg text-white">TESTIRAJ SVOJE ZNANJE</h3><p className="mt-2 text-sm text-white/60">Provjeri koliko znaš o Hrvatskoj i njezinoj povijesti.</p></button><button onClick={() => document.getElementById("kategorije")?.scrollIntoView({ behavior: "smooth" })} className="patria-feature text-left"><span className="patria-icon-ring"><ShieldCheck className="h-5 w-5" /></span><h3 className="mt-4 text-lg text-white">ČUVAJ NASLJEĐE</h3><p className="mt-2 text-sm text-white/60">Upoznaj priče, mjesta, običaje i vrijednosti koje vrijedi sačuvati.</p></button><button onClick={() => startCroatianQuiz()} className="patria-feature text-left"><span className="patria-icon-ring"><FileText className="h-5 w-5" /></span><h3 className="mt-4 text-lg text-white">NAUČI ŠTO JE I KAKO JE BILO</h3><p className="mt-2 text-sm text-white/60">Povijest nam pomaže razumjeti Hrvatsku danas.</p></button><button onClick={openCities} className="patria-feature text-left"><span className="patria-icon-ring"><MapPin className="h-5 w-5" /></span><h3 className="mt-4 text-lg text-white">BUDI DIO PRIČE</h3><p className="mt-2 text-sm text-white/60">Istražuj gradove, upoznaj Hrvatsku i ostavi svoj rezultat.</p></button></div></div></section>
 
       <section className="border-y border-border bg-background">
   <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-14">
@@ -1145,11 +1119,19 @@ export default function App() {
   </div>
 </section>
 
-<section id="kategorije" className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20"><p className="text-sm font-bold uppercase tracking-[.16em] text-accent">10 područja</p><h2 className="patria-accent-line mt-2 text-3xl">Odaberi kategoriju</h2>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{categories.map(([id, title, desc], i) => <button key={id} disabled={loadingQuiz} onClick={() => startMainCategory([id, title, desc])} className="patria-card group p-5 text-left disabled:opacity-60"><div className="flex items-start justify-between gap-4"><span className="flex h-9 w-9 items-center justify-center rounded-md bg-secondary text-sm font-bold text-primary">{String(i + 1).padStart(2, "0")}</span><ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" /></div><h3 className="mt-5 text-xl">{title}</h3><p className="mt-2 text-sm text-muted-foreground">{desc}</p><p className="mt-4 text-xs font-semibold text-accent">Pokreni 10 pitanja →</p></button>)}</div>
-        {error && <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</div>}
-        {loadingQuiz && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"><div className="rounded-xl bg-card px-6 py-5 shadow-xl"><div className="flex items-center gap-3"><Loader2 className="h-5 w-5 animate-spin" /> Učitavam pitanja...</div></div></div>}
-      </section>
+<section id="kategorije" className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
+  <div className="patria-card mx-auto max-w-4xl p-6 sm:p-10">
+    <p className="text-sm font-bold uppercase tracking-[.16em] text-accent">Glavni izazov</p>
+    <h2 className="patria-accent-line mt-2 text-3xl">Hrvatski kviz</h2>
+    <p className="mt-4 max-w-2xl text-muted-foreground">Deset nasumično odabranih pitanja iz cijele aktivne baze: hrvatska povijest, Domovinski rat, vjera i sakralna baština, gradovi, jezik, glagoljica, kultura, sport, priroda i znanost. Teme su pomiješane — nema zasebnog odabira kategorija.</p>
+    <div className="mt-6 flex flex-wrap items-center gap-3">
+      <button onClick={() => startCroatianQuiz()} disabled={loadingQuiz} className="patria-button-accent"><BookOpen className="mr-2 h-4 w-4" /> {loadingQuiz ? "Učitavam pitanja..." : "Pokreni Hrvatski kviz"}</button>
+      <span className="text-sm text-muted-foreground">{loadingMainCount ? "Učitavam broj pitanja…" : `${mainCount.toLocaleString("hr-HR")} aktivnih pitanja u bazi`}</span>
+    </div>
+    {error && <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</div>}
+    {loadingQuiz && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"><div className="rounded-xl bg-card px-6 py-5 shadow-xl"><div className="flex items-center gap-3"><Loader2 className="h-5 w-5 animate-spin" /> Učitavam pitanja...</div></div></div>}
+  </div>
+</section>
 
       <section id="dnevni-kviz" className="border-y border-border bg-secondary/40">
   <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
@@ -1216,7 +1198,7 @@ export default function App() {
     {screen === "result" && result && <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-20"><div className="patria-card overflow-hidden text-center"><div className="bg-primary px-6 py-10 text-primary-foreground"><Trophy className="mx-auto h-12 w-12 text-red-300" /><p className="mt-4 text-sm font-bold uppercase tracking-[.16em] text-red-200">Rezultat</p><h1 className="mt-2 font-display text-5xl font-bold">{result.score} / {result.total}</h1><p className="mt-2 opacity-75">Vrijeme: {result.timeSeconds} s</p></div><div className="p-8"><p className="text-lg font-semibold">{result.saved ? "Rezultat je spremljen." : user ? "Rezultat se obrađuje." : "Rezultat je prikazan."}</p><p className="mt-2 text-muted-foreground">{result.saveError || (user ? "Tvoj rezultat je povezan s tvojim profilom." : "Prijavi se kako bi se rezultat mogao spremiti u tvoj račun.")}</p>
           {result.saved && user && <div className="mt-6 rounded-xl border border-border bg-secondary/40 p-5 text-left"><p className="font-semibold">✨ PatriaSoul ti predlaže da podijeliš svoj uspjeh!</p><p className="mt-1 text-sm text-muted-foreground">Pripremit ćemo objavu na tvom profilu i zidu zajednice. Prije objave možeš urediti tekst i sam/a potvrditi dijeljenje.</p><button type="button" className="patria-button-accent mt-4 w-full justify-center" onClick={() => { const title = activeQuizType === "city" ? `Brani svoj grad — ${city?.name || "kviz grada"}` : activeQuizType === "daily" ? "Dnevni kviz" : `Hrvatski kviz — ${activeCategoryTitle}`; const params = new URLSearchParams({ shareQuiz: "1", score: String(result.score), total: String(result.total), time: String(result.timeSeconds || 0), title }); window.location.href = "/?" + params.toString(); }}><MessageCircle className="mr-2 h-4 w-4" /> Podijeli rezultat na zid zajednice</button></div>}
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">{activeQuizType !== "daily" && <button onClick={restartQuiz} className="patria-button-accent"><RotateCcw className="mr-2 h-4 w-4" /> Igraj ponovno</button>}
-          {activeQuizType === "daily" && <button onClick={() => setScreen("daily")} className="patria-button-accent">Dnevni kviz</button>}<button onClick={activeQuizType === "city" ? () => setScreen("cities") : home} className="patria-button">{activeQuizType === "city" ? "Odaberi drugi grad" : "Odaberi kategoriju"}</button><button onClick={() => openLeaderboard(activeQuizType)} className="patria-button">Rang-lista</button></div></div></div></main>}
+          {activeQuizType === "daily" && <button onClick={() => setScreen("daily")} className="patria-button-accent">Dnevni kviz</button>}<button onClick={activeQuizType === "city" ? () => setScreen("cities") : home} className="patria-button">{activeQuizType === "city" ? "Odaberi drugi grad" : "Natrag na kviz"}</button><button onClick={() => openLeaderboard(activeQuizType)} className="patria-button">Rang-lista</button></div></div></div></main>}
 
     {screen === "account" && <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
       <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
