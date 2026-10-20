@@ -2,7 +2,7 @@
 .heritage-badge-row.compact{gap:5px;margin:9px 0 2px}
 .heritage-badge-pill{display:inline-flex;align-items:center;gap:7px;min-width:0;max-width:100%;padding:6px 10px 6px 6px;border:1px solid #d5b76d;border-radius:999px;background:linear-gradient(145deg,#203b59 0%,#14253a 62%,#0c1726 100%);color:#fff0c5;font-size:10px;font-weight:800;box-shadow:0 3px 0 #08111c,0 5px 9px #0b1b2b30,inset 0 1px 0 #ffffff45,inset 0 -2px 3px #0007}
 .heritage-badge-icon{position:relative;display:inline-grid;place-items:center;flex:0 0 auto;width:25px;height:25px;border:2px solid #f1d58c;border-radius:50%;background:radial-gradient(circle at 32% 22%,#fff4c8 0,#c8a65c 18%,#76531f 49%,#e3c477 72%,#67471c 100%);color:#172c46;font-size:12px;text-shadow:0 1px 0 #fff8;box-shadow:0 2px 0 #60451d,inset 0 1px 2px #fff9,inset 0 -2px 3px #4c3519}
-.heritage-badge-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.heritage-badge-name{min-width:0;overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:anywhere;line-height:1.3}
 .heritage-badge-more{display:inline-flex;align-items:center;justify-content:center;min-width:30px;padding:4px 8px;border:1px solid #d6bd7b;border-radius:999px;background:#f4ead0;color:#34455a;font-size:10px;font-weight:900;box-shadow:0 2px 0 #c8b47f}
 .heritage-badges-empty{color:#7d8792;font-size:11px;margin:9px 0}
 .heritage-badges-empty.compact{font-size:10px;margin:7px 0}
@@ -44,3 +44,12 @@
 @keyframes badge-enter{0%{transform:perspective(180px) rotateX(5deg) scale(.85);filter:brightness(1.8)}70%{transform:perspective(180px) rotateX(5deg) scale(1.05)}100%{transform:perspective(180px) rotateX(5deg) scale(1)}}
 @media(prefers-reduced-motion:reduce){.heritage-badge-card,.heritage-badge-medallion{transition:none!important;animation:none!important}}
 @media(max-width:680px){.heritage-badge-grid{grid-template-columns:1fr}.heritage-badge-heading{align-items:flex-start;padding:18px}.heritage-badge-total{flex-basis:58px;width:58px;height:58px}.heritage-badge-total strong{font-size:18px}.heritage-badge-card{padding:13px;gap:12px}.heritage-badge-medallion{flex-basis:60px;width:60px;height:60px}.heritage-badge-medallion>span{font-size:25px}.heritage-badge-pill{font-size:9px}}
+
+/* Čitljiv prikaz znački i u profilu člana i u popisu zajednice. */
+.member-card-badges{min-width:0;max-width:100%;overflow:visible}
+.member-card-badges .heritage-badge-row{align-items:flex-start;min-width:0}
+.member-card-badges .heritage-badge-pill{max-width:100%;border-radius:12px;white-space:normal}
+.member-card-badges .heritage-badge-name{flex:1 1 auto;min-width:0;white-space:normal;overflow-wrap:anywhere}
+.profile-earned-badges .heritage-badge-row{align-items:flex-start}
+.profile-earned-badges .heritage-badge-pill{max-width:100%;border-radius:12px;white-space:normal}
+.profile-earned-badges .heritage-badge-name{white-space:normal;overflow-wrap:anywhere}
