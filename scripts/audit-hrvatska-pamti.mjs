@@ -234,6 +234,43 @@ if (maceljRecord && (maceljRecord.get("countInTotal") !== "false" || maceljRecor
   errors.push("Macelj je odredišni ukop i kumulativni broj; ne smije se ponovno pribrajati nalazima iz Slovenije.");
 }
 
+// Revizija ponovljenih izvora i eksplicitno označenih mogućih preklapanja.
+const sourceRecords = new Map();
+for (const { raw, props } of records) {
+  const id = raw.match(/^\{\s*id\s*:\s*["']([^"']+)["']/)?.[1];
+  const sourceUrl = props.get("sourceUrl")?.match(/^["']([^"']+)["']/)?.[1];
+  if (sourceUrl) {
+    const items = sourceRecords.get(sourceUrl) ?? [];
+    items.push(id);
+    sourceRecords.set(sourceUrl, items);
+  }
+
+  const duplicateReview = props.get("duplicateReview")?.match(/^["']([^"']+)["']/)?.[1];
+  if (duplicateReview) {
+    const targetId = duplicateReview.split(":").at(-1);
+    if (!registryIds.has(targetId)) {
+      errors.push(id + ": duplicateReview upućuje na nepostojeći zapis " + targetId + ".");
+    }
+    if (props.get("countInTotal") !== "false" || props.get("countsTowardUniqueTotal") !== "false") {
+      errors.push(id + ": zapis s mogućim preklapanjem mora izričito biti izuzet iz oba zbroja.");
+    }
+  }
+}
+for (const [url, ids] of sourceRecords) {
+  if (ids.length > 1) warnings.push("Isti izvor koristi više zapisa (" + ids.join(", ") + "): " + url);
+}
+for (const { raw, props } of records) {
+  const id = raw.match(/^\{\s*id\s*:\s*["']([^"']+)["']/)?.[1];
+  const duplicateReview = props.get("duplicateReview")?.match(/^["']([^"']+)["']/)?.[1];
+  if (!duplicateReview) continue;
+  const targetId = duplicateReview.split(":").at(-1);
+  const targetProps = recordById.get(targetId);
+  const reverse = targetProps?.get("duplicateReview")?.match(/^["']([^"']+)["']/)?.[1];
+  if (reverse?.split(":").at(-1) !== id) {
+    errors.push(id + ": mogući duplikat " + targetId + " nema uzajamnu oznaku duplicateReview.");
+  }
+}
+
 console.log("Hrvatska pamti — provjera registra i povezivanja");
 console.log("Broj zapisa:", records.length);
 console.log("Jedinstvenih ID-eva:", seen.size);
