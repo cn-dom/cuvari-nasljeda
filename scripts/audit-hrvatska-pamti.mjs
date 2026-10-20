@@ -5,7 +5,11 @@ import path from "node:path";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const registryPath = path.join(root, "src", "HrvatskaPamtiGrobnice.jsx");
+const mapPath = path.join(root, "src", "HrvatskaPamtiMap.jsx");
+const dossierPath = path.join(root, "src", "HrvatskaPamtiMjesto.jsx");
 const source = await readFile(registryPath, "utf8");
+const mapSource = await readFile(mapPath, "utf8");
+const dossierSource = await readFile(dossierPath, "utf8");
 
 function extractTopLevelObjects(text) {
   const arrayStart = text.indexOf("export const sites = [");
@@ -144,9 +148,49 @@ for (const { raw, props } of records) {
   }
 }
 
-console.log("Hrvatska pamti — provjera registra");
+// Provjeri da svako mjesto prikazano na karti ima odgovarajući dosje.
+const mapSlugByName = new Map([
+  ["Vukovar", "vukovar"],
+  ["Škabrnja", "skabrnja"],
+  ["Dubrovnik", "dubrovnik"],
+  ["Lika i Krbava", "lika-i-krbava"],
+  ["Zagreb", "zagreb"],
+  ["Knin", "knin"],
+  ["Osijek", "osijek"],
+  ["Sinj", "sinj"],
+]);
+const mapNames = [...mapSource.matchAll(/\{\s*name:\s*"([^"]+)"\s*,\s*coordinates:\s*\[\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*\]/g)];
+const dossierSlugs = new Set([...dossierSource.matchAll(/^\s{2}(?:"([^"]+)"|([a-z][\w-]*))\s*:\s*\{\s*name:/gm)].map((match) => match[1] ?? match[2]));
+const mapSeen = new Set();
+for (const match of mapNames) {
+  const [, name, longitudeText, latitudeText] = match;
+  const longitude = Number(longitudeText);
+  const latitude = Number(latitudeText);
+  if (mapSeen.has(name)) errors.push("Duplikat mjesta na karti: " + name);
+  mapSeen.add(name);
+  if (!mapSlugByName.has(name)) errors.push("Mjesto na karti nema mapiranje prema dosjeu: " + name);
+  else if (!dossierSlugs.has(mapSlugByName.get(name))) errors.push("Mjesto na karti nema dosje: " + name);
+  if (longitude < 12 || longitude > 21 || latitude < 41 || latitude > 47.5) {
+    errors.push(name + ": koordinata karte je izvan očekivanog područja Hrvatske.");
+  }
+}
+for (const name of mapSlugByName.keys()) {
+  if (!mapSeen.has(name)) errors.push("Očekivano mjesto nedostaje na karti: " + name);
+}
+
+// Provjeri da svi ID-evi koje dosjei navode doista postoje u registru.
+const registryIds = new Set(records.map(({ raw }) => raw.match(/^\{\s*id\s*:\s*["']([^"']+)["']/)?.[1]).filter(Boolean);
+const dossierReferences = [...dossierSource.matchAll(/graveRegistryIds:\s*\[([\s\S]*?)\]/g)]
+  .flatMap((match) => [...match[1].matchAll(/["']([^"']+)["']/g)].map((item) => item[1]));
+for (const id of new Set(dossierReferences)) {
+  if (!registryIds.has(id)) errors.push("Dosje upućuje na nepostojeći ID registra: " + id);
+}
+
+console.log("Hrvatska pamti — provjera registra i povezivanja");
 console.log("Broj zapisa:", records.length);
 console.log("Jedinstvenih ID-eva:", seen.size);
+console.log("Mjesta na karti:", mapSeen.size);
+console.log("Poveznice dosjea prema registru:", dossierReferences.length);
 console.log("Upozorenja:", warnings.length);
 console.log("Pogreške:", errors.length);
 for (const warning of warnings) console.warn("UPOZORENJE:", warning);
