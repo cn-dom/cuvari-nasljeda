@@ -118,6 +118,36 @@ export default function HrvatskaPamtiGrobnice() {
     const haystack = [site.name, site.area, site.country || "Hrvatska", site.period, site.year, site.status, site.detail, site.foundLabel, site.victimAttribution, site.source, site.sourceUrl, site.publicLocation].filter(Boolean).join(" ").toLocaleLowerCase("hr");
     return matchesPeriod && matchesCountry && haystack.includes(query.trim().toLocaleLowerCase("hr"));
   }), [query, period, country, confirmedSites]);
+  const exportCsv = () => {
+    const columns = [
+      ["Naziv", site => site.name],
+      ["Područje", site => site.area],
+      ["Država", site => site.country || "Hrvatska"],
+      ["Razdoblje", site => site.period],
+      ["Godina ili datum", site => site.year],
+      ["Status", site => site.status],
+      ["Evidencijski podatak", site => site.foundLabel],
+      ["Povezanost žrtava", site => site.victimAttribution],
+      ["Opis", site => site.detail],
+      ["Izvor", site => site.source],
+      ["Poveznica izvora", site => site.sourceUrl],
+      ["Javna napomena o lokaciji", site => site.publicLocation || site.coordinateNote],
+    ];
+    const escapeCsv = value => '"' + String(value ?? "").replace(/"/g, '""') + '"';
+    const csv = "\uFEFF" + [
+      columns.map(([label]) => escapeCsv(label)).join(";"),
+      ...results.map(site => columns.map(([, read]) => escapeCsv(read(site))).join(";")),
+    ].join("\r\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "hrvatska-pamti-filtrirani-zapisi.csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
   return <main className="hp-page hp-register-page">
     <SiteChrome section="Domovina" links={[{"label":"Hrvatska pamti","href":"/hrvatska-pamti.html"},{"label":"Registar lokacija","href":"#registar"},{"label":"Izvori i načela","href":"/hrvatska-pamti.html#izvori"}]}/>
     
@@ -130,7 +160,7 @@ export default function HrvatskaPamtiGrobnice() {
     <section className="hp-register-content" id="registar">
       <div className="hp-section-heading"><div><span className="hp-section-kicker">POTVRĐENI ZAPISI</span><h2>Čuvamo <em>naše ljude</em></h2></div><p>Registar uključuje potvrđene masovne i pojedinačne grobnice te druga nalazišta s pouzdanim izvorima. Razdoblje, država, potvrda nacionalnosti i status nalaza vode se odvojeno. Područja pretraživanja bez potvrđenog nalaza ne predstavljamo kao potvrđene grobnice; nepoznat broj ne znači da žrtava nije bilo.</p></div>
       <div className="hp-register-controls"><label>Pretraži naziv, područje ili opis<input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Npr. Vukovar, Kočevski Rog, Tomašica…"/></label><label>Država<select value={country} onChange={e=>setCountry(e.target.value)}>{countries.map(item=><option key={item} value={item}>{item}</option>)}</select></label><div className="hp-register-filter" role="group" aria-label="Filtriraj po razdoblju">{filters.map(item=><button type="button" key={item} className={period===item?"active":""} onClick={()=>setPeriod(item)}>{item}</button>)}</div></div>
-      <p className="hp-register-count" aria-live="polite">Prikazano potvrđenih zapisa: {results.length} od {confirmedSites.length}</p>
+      <div className="hp-register-toolbar"><p className="hp-register-count" aria-live="polite">Prikazano potvrđenih zapisa: {results.length} od {confirmedSites.length}</p><button className="hp-register-export" type="button" onClick={exportCsv} disabled={!results.length}>Izvezi prikazane zapise (.csv)</button></div>
       <div className="hp-register-table-wrap">
         <table className="hp-register-table">
           <thead><tr><th scope="col">Lokacija / naziv</th><th scope="col">Područje</th><th scope="col">Razdoblje</th><th scope="col">Broj / evidencijski podatak</th><th scope="col">Status</th><th scope="col">Opis</th></tr></thead>
