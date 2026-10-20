@@ -234,6 +234,26 @@ if (maceljRecord && (maceljRecord.get("countInTotal") !== "false" || maceljRecor
   errors.push("Macelj je odredišni ukop i kumulativni broj; ne smije se ponovno pribrajati nalazima iz Slovenije.");
 }
 
+// Spriječi dvostruko brojanje zbirnih/sekundarnih ukopa i povezanih primarnih nalazišta.
+const excludedFromUniqueTotal = new Map([
+  ["novo-groblje-vukovar", "Zbirni ukop na Novom groblju obuhvaća ostatke s više primarnih lokacija."],
+  ["petrovacka-dola", "Petrovačka dola je sekundarna, a moguće i tercijarna grobnica."],
+  ["velepromet-tri-grobnice", "19 osoba s Veleprometa kasnije je ekshumirano s Novog groblja."],
+  ["velepromet-probna-iskapanja", "Nalaz dviju osoba s probnih iskapanja nema potvrđen nepreklapajući odnos prema drugim evidencijama."],
+  ["sotin-atar-vinogradi-2013", "Tri osobe iz primarnog sotinskog nalazišta ne smiju se zbrajati povrh zajedničkog broja 13."],
+  ["sotin-sekundarna-klaonica-1996", "Sekundarna grobnica u Sotinu dio je zajedničkog broja 13 iz primarne i sekundarne lokacije."],
+]);
+for (const [id, reason] of excludedFromUniqueTotal) {
+  const props = recordById.get(id);
+  if (!props) {
+    errors.push("Nedostaje zapis koji mora biti zaštićen od dvostrukog brojanja: " + id + ".");
+    continue;
+  }
+  if (props.get("countInTotal") !== "false" || props.get("countsTowardUniqueTotal") !== "false") {
+    errors.push(id + ": mora biti izuzet iz oba automatska zbroja. Razlog: " + reason);
+  }
+}
+
 // Revizija ponovljenih izvora i eksplicitno označenih mogućih preklapanja.
 const sourceRecords = new Map();
 for (const { raw, props } of records) {
