@@ -168,7 +168,7 @@ export default function HrvatskaPamtiGrobnice() {
           <span className="hp-research-date">8. / 16. TRAVNJA 2026.</span>
           <h3>Biokovo kod Zagvozda i pojedinačni nalazi</h3>
           <p>Ministarstvo je prvo objavilo devet ekshumiranih osoba iz Medviđe jame te dvije osobe iz pojedinačnih grobnica kod Vrgorca i Imotskog. U kasnijoj objavi navelo je 13 ekshumiranih iz jame na Biokovu kod Zagvozda. Zbog različitih datuma objava, broj se ne zbraja automatski.</p>
-          <a href="https://branitelji.gov.hr/vijesti/pronadjeni-posmrtni-ostaci-najmanje-11-zrtava-iz-drugog-svjetskog-rata/5170" target="_blank" rel="noreferrer">Izvor Ministarstva ↗</a>
+          <a href="https://branitelji.gov.hr/vijesti/pronadjeni-posmrtni-ostaci-najmanje-11-zrtava-iz-drugog-svjetskog-rata/5170" target="_blank" rel="noreferrer">Prva objava Ministarstva ↗</a><span className="hp-research-source-separator">·</span><a href="https://branitelji.gov.hr/vijesti/u-zagrebu-pronadjeni-posmrtni-ostaci-jos-tri-zrtve-iz-drugog-svjetskog-rata-i-poslijeratnog-razdoblja/5175" target="_blank" rel="noreferrer">Kasniji pregled Ministarstva ↗</a>
         </article>
         <article>
           <span className="hp-research-date">28. TRAVNJA 2026.</span>
