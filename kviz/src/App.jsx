@@ -28,6 +28,7 @@ export default function App() {
   const [mainCount, setMainCount] = useState(0);
   const [error, setError] = useState("");
   const [user, setUser] = useState(null);
+  const [authProfileReady, setAuthProfileReady] = useState(false);
   const [leaderboard, setLeaderboard] = useState([]);
   const [leaderboardType, setLeaderboardType] = useState(null);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
@@ -153,16 +154,21 @@ export default function App() {
           setNicknameOpen(false);
         }
       } catch (authError) {
-        if (mounted) setError(authError.message || "Prijava se trenutno ne može provjeriti.");
+        if (mounted) {
+          setError(authError.message || "Prijava se trenutno ne može provjeriti.");
+          setAuthProfileReady(true);
+        }
       }
 
       if (!mounted) return;
+      setAuthProfileReady(true);
 
       const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
         if (!mounted) return;
 
         const currentUser = session?.user ?? null;
         setUser(currentUser);
+        if (currentUser) setAuthProfileReady(false);
 
         // Ne pozivamo druge Supabase API-je unutar auth callbacka.
         // Profil učitavamo nakon što callback završi.
@@ -172,12 +178,12 @@ export default function App() {
           if (!currentUser) {
             setProfile(null);
             setNicknameOpen(false);
+            setAuthProfileReady(true);
             return;
           }
 
           if (event === "SIGNED_IN") {
             setAuthOpen(false);
-            setScreen("home");
           }
 
           try {
@@ -190,6 +196,8 @@ export default function App() {
             }
           } catch (profileError) {
             if (mounted) setError(profileError.message || "Profil se nije mogao učitati.");
+          } finally {
+            if (mounted) setAuthProfileReady(true);
           }
         }, 0);
       });
@@ -896,7 +904,7 @@ export default function App() {
   }, [screen]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !authProfileReady) return;
 
     let pending = pendingCategoryRef.current;
     if (!pending?.category) {
