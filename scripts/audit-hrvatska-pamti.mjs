@@ -186,6 +186,41 @@ for (const id of new Set(dossierReferences)) {
   if (!registryIds.has(id)) errors.push("Dosje upućuje na nepostojeći ID registra: " + id);
 }
 
+// Čuvaj provjerene brojeve za četiri slovenske lokacije i spriječi dvostruko brojanje ukopa u Maclju.
+const expectedSlovenianCounts = new Map([
+  ["trebce-slovenija", 10],
+  ["rugarski-klanci-podstenice", 22],
+  ["kosnica-pri-celju", 307],
+  ["cerklje-na-krki", 161],
+]);
+const recordById = new Map(records.map(({ raw, props }) => [
+  raw.match(/^\\{\\s*id\\s*:\\s*["']([^"']+)["']/)?.[1],
+  props,
+]));
+let slovenianCountSum = 0;
+for (const [id, expectedCount] of expectedSlovenianCounts) {
+  const props = recordById.get(id);
+  if (!props) {
+    errors.push("Nedostaje službeno potvrđena slovenska lokacija: " + id);
+    continue;
+  }
+  const actualCount = Number(props.get("victimsFound"));
+  if (actualCount !== expectedCount) {
+    errors.push(id + ": očekivano " + expectedCount + " ekshumiranih, pronađeno " + props.get("victimsFound") + ".");
+  }
+  if (props.get("countInTotal") !== "true") {
+    errors.push(id + ": potvrđeni broj ekshumiranih mora biti uključen u zbroj nalazišta.");
+  }
+  slovenianCountSum += actualCount;
+}
+if (slovenianCountSum !== 500) {
+  errors.push("Četiri slovenske lokacije moraju zbrojem dati 500 ekshumiranih; dobiveno: " + slovenianCountSum + ".");
+}
+const maceljRecord = recordById.get("macelj-zajednicki-ukop-2026");
+if (maceljRecord && (maceljRecord.get("countInTotal") !== "false" || maceljRecord.get("countsTowardUniqueTotal") !== "false")) {
+  errors.push("Macelj je odredišni ukop i kumulativni broj; ne smije se ponovno pribrajati nalazima iz Slovenije.");
+}
+
 console.log("Hrvatska pamti — provjera registra i povezivanja");
 console.log("Broj zapisa:", records.length);
 console.log("Jedinstvenih ID-eva:", seen.size);
