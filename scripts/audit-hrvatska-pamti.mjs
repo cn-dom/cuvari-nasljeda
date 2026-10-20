@@ -179,7 +179,7 @@ for (const name of mapSlugByName.keys()) {
 }
 
 // Provjeri da svi ID-evi koje dosjei navode doista postoje u registru.
-const registryIds = new Set(records.map(({ raw }) => raw.match(/^\{\s*id\s*:\s*["']([^"']+)["']/)?.[1]).filter(Boolean);
+const registryIds = new Set(records.map(({ raw }) => raw.match(/^\{\s*id\s*:\s*["']([^"']+)["']/)?.[1]).filter(Boolean));
 const dossierReferences = [...dossierSource.matchAll(/graveRegistryIds:\s*\[([\s\S]*?)\]/g)]
   .flatMap((match) => [...match[1].matchAll(/["']([^"']+)["']/g)].map((item) => item[1]));
 for (const id of new Set(dossierReferences)) {
