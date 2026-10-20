@@ -194,7 +194,7 @@ const expectedSlovenianCounts = new Map([
   ["cerklje-na-krki", 161],
 ]);
 const recordById = new Map(records.map(({ raw, props }) => [
-  raw.match(/^\\{\\s*id\\s*:\\s*["']([^"']+)["']/)?.[1],
+  raw.match(/^\{\s*id\s*:\s*["']([^"']+)["']/)?.[1],
   props,
 ]));
 let slovenianCountSum = 0;
