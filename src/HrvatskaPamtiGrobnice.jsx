@@ -157,6 +157,40 @@ export default function HrvatskaPamtiGrobnice() {
       <p>Evidencija potvrđenih masovnih i pojedinačnih grobnica te drugih nalazišta iz različitih povijesnih razdoblja, dokumentiranih pouzdanim izvorima. Svaki zapis razlikuje broj pronađenih ili ekshumiranih osoba, identificirane osobe i područja istraživanja; nacionalnost žrtava navodimo samo kada je potvrđena, a neobjavljen broj nikada ne prikazujemo kao nulu.</p>
       <div className="hp-register-stats"><div><strong>{confirmedSites.length.toString().padStart(2,"0")}</strong><span>zapisa s potvrđenim nalazom</span></div><div><strong>{confirmedSites.filter(site => Number.isFinite(site.victimsFound) && typeof site.foundLabel === "string").length.toString().padStart(2,"0")}</strong><span>zapisa s brojčanim podatkom iz izvora — ne zbrajamo pronađene ostatke, identificirane osobe i žrtve</span></div><div><strong>{confirmedCountries.length}</strong><span>država zastupljenih u potvrđenim zapisima</span></div></div>
     </section>
+    <section className="hp-research-updates" aria-labelledby="hp-research-updates-title">
+      <div className="hp-research-updates-heading">
+        <span className="hp-section-kicker">SLUŽBENE OBJAVE · 2026.</span>
+        <h2 id="hp-research-updates-title">Nova istraživanja,<br/><em>tragovi koji se otkrivaju.</em></h2>
+        <p>Pregled novijih službenih objava Ministarstva hrvatskih branitelja. Ovi sažeci služe kao vremenski pregled istraživanja, a ne kao dodatni zapisi za zbrajanje: pojedina nalazišta mogu biti obuhvaćena i širim izvještajima, a objavljeni brojevi mijenjaju se kako radovi napreduju.</p>
+      </div>
+      <div className="hp-research-updates-grid">
+        <article>
+          <span className="hp-research-date">8. / 16. TRAVNJA 2026.</span>
+          <h3>Biokovo kod Zagvozda i pojedinačni nalazi</h3>
+          <p>Ministarstvo je prvo objavilo devet ekshumiranih osoba iz Medviđe jame te dvije osobe iz pojedinačnih grobnica kod Vrgorca i Imotskog. U kasnijoj objavi navelo je 13 ekshumiranih iz jame na Biokovu kod Zagvozda. Zbog različitih datuma objava, broj se ne zbraja automatski.</p>
+          <a href="https://branitelji.gov.hr/vijesti/pronadjeni-posmrtni-ostaci-najmanje-11-zrtava-iz-drugog-svjetskog-rata/5170" target="_blank" rel="noreferrer">Izvor Ministarstva ↗</a>
+        </article>
+        <article>
+          <span className="hp-research-date">28. TRAVNJA 2026.</span>
+          <h3>Jama Golubinka</h3>
+          <p>U jami Golubinka na brdu Sopanj, na području Tisna, objavljena je masovna grobnica žrtava Drugog svjetskog rata i poraća. U službenom zapisu registra navodi se 18 žrtava prema stanju iz objave od 28. travnja 2026.; identiteti se ne pretpostavljaju bez potvrde.</p>
+          <a href="https://branitelji.gov.hr/print.aspx?id=5186&url=print" target="_blank" rel="noreferrer">Izvor Ministarstva ↗</a>
+        </article>
+        <article>
+          <span className="hp-research-date">28. SVIBNJA 2026.</span>
+          <h3>Oporovečki vinogradi</h3>
+          <p>Na području zagrebačke Dubrave pronađena je masovna grobnica iz koje su ekshumirani posmrtni ostaci najmanje 29 osoba. Ministarstvo je opisalo preliminarne antropološke nalaze, ali pojedinačni identiteti nisu navedeni u objavi.</p>
+          <a href="https://branitelji.gov.hr/vijesti/u-zagrebackoj-dubravi-jos-jedna-masovna-grobnica-iz-drugog-svjetskog-rata/5218" target="_blank" rel="noreferrer">Izvor Ministarstva ↗</a>
+        </article>
+        <article>
+          <span className="hp-research-date">28. SVIBNJA 2026.</span>
+          <h3>Šuma Lešće</h3>
+          <p>Novija službena objava za dvije grobnice u šumi Lešće navodi 55 ekshumiranih žrtava. To je noviji zbirni podatak od ranije objavljenih najmanje 23 osobe; stariji i noviji podatak ne zbrajamo kao odvojene skupine.</p>
+          <a href="https://branitelji.gov.hr/vijesti/u-zagrebackoj-dubravi-jos-jedna-masovna-grobnica-iz-drugog-svjetskog-rata/5218" target="_blank" rel="noreferrer">Izvor Ministarstva ↗</a>
+        </article>
+      </div>
+      <p className="hp-research-updates-note"><strong>Napomena:</strong> Ministarstvo je u objavi od 28. svibnja 2026. navelo da je tijekom 2026. na više lokacija diljem Hrvatske do tada ekshumirano najmanje 142 žrtve iz Drugog svjetskog rata i poraća. To je zbirni podatak za više nalazišta i ne dodaje se na pojedinačne zapise u registru.</p>
+    </section>
     <section className="hp-register-content" id="registar">
       <div className="hp-section-heading"><div><span className="hp-section-kicker">POTVRĐENI ZAPISI</span><h2>Čuvamo <em>naše ljude</em></h2></div><p>Registar uključuje potvrđene masovne i pojedinačne grobnice te druga nalazišta s pouzdanim izvorima. Razdoblje, država, potvrda nacionalnosti i status nalaza vode se odvojeno. Područja pretraživanja bez potvrđenog nalaza ne predstavljamo kao potvrđene grobnice; nepoznat broj ne znači da žrtava nije bilo.</p></div>
       <div className="hp-register-controls"><label>Pretraži naziv, područje ili opis<input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Npr. Vukovar, Kočevski Rog, Tomašica…"/></label><label>Država<select value={country} onChange={e=>setCountry(e.target.value)}>{countries.map(item=><option key={item} value={item}>{item}</option>)}</select></label><div className="hp-register-filter" role="group" aria-label="Filtriraj po razdoblju">{filters.map(item=><button type="button" key={item} className={period===item?"active":""} onClick={()=>setPeriod(item)}>{item}</button>)}</div></div>
