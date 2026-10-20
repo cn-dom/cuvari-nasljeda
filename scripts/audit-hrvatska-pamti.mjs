@@ -200,6 +200,23 @@ for (const id of new Set(dossierReferences)) {
 }
 
 // Čuvaj provjerene brojeve za četiri slovenske lokacije i spriječi dvostruko brojanje ukopa u Maclju.
+// Zbirni povijesni pregledi područja Zagreba i neusporedivi brojevi ne ulaze u jedinstveni zbroj.
+const mustExcludeFromUniqueTotals = [
+  "gracani",
+  "tuskanac",
+  "pescenka",
+  "savska-cesta",
+  "obernjak-medvednica",
+  "tomasica",
+];
+for (const id of mustExcludeFromUniqueTotals) {
+  const entry = records.find(({ raw }) => raw.includes('id:"' + id + '"'));
+  if (!entry) errors.push("Nedostaje zapis koji mora biti izuzet iz jedinstvenog zbroja: " + id);
+  else if (entry.props.get("countInTotal") !== "false" || entry.props.get("countsTowardUniqueTotal") !== "false") {
+    errors.push(id + ": zbirni/neusporedivi podatak mora biti izričito izuzet iz jedinstvenog zbroja.");
+  }
+}
+
 const expectedSlovenianCounts = new Map([
   ["trebce-slovenija", 10],
   ["rugarski-klanci-podstenice", 22],
