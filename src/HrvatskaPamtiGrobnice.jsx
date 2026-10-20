@@ -79,16 +79,34 @@ export const sites = [
   { id:"jama-grijalice",victimsFound:20,countInTotal:true,coordinates:null,coordinateNote:"Službena objava potvrđuje jamu Grijalice kod Delnica, ali ne objavljuje provjerljive koordinate ulaza ili mjesta ekshumacije.",croatianVictimsConfirmed:false,victimAttribution:"Službena objava opisuje žrtve Drugog svjetskog rata i/ili poslijeratnog razdoblja, ali ne utvrđuje u toj objavi njihovu nacionalnu pripadnost. Ne označavamo ih kao hrvatske žrtve bez dodatne potvrde.",foundLabel:"Najmanje 20 osoba ekshumirano; preliminarna obrada navela je 16 muškaraca i 4 žene.",name:"Jama Grijalice",area:"Delnice, Primorsko-goranska županija",period:"Drugi svjetski rat i poraće",year:"Ekshumacija objavljena 17. prosinca 2025.",status:"Službeno potvrđen nalaz; identiteti i nacionalnost nisu utvrđeni u objavi",certainty:"confirmed",detail:"Ministarstvo hrvatskih branitelja objavilo je 17. prosinca 2025. da su iz jame Grijalice kod Delnica ekshumirani posmrtni ostaci najmanje 20 žrtava iz Drugog svjetskog rata i/ili poslijeratnog razdoblja. Preliminarna obrada navela je 16 muškaraca i četiri žene. Nalaz, razdoblje i broj ekshumiranih potvrđeni su službenom objavom. Nacionalna pripadnost i pojedinačni identiteti nisu potvrđeni u toj objavi te ih ne pripisujemo žrtvama.",source:"Ministarstvo hrvatskih branitelja, 17. prosinca 2025.",sourceUrl:"https://branitelji.gov.hr/vijesti/iz-jame-grijalice-kod-delnica-ekshumirani-posmrtni-ostaci-najmanje-20-zrtava-drugog-svjetskog-rata-i-poslijeratnog-razdoblja/5096",publicLocation:"Jama Grijalice kod Delnica; precizne koordinate nisu navedene u službenoj objavi."},
 ];
 
-const filters = ["Sve lokacije", "Domovinski rat", "Drugi svjetski rat i poraće", "Rat u Bosni i Hercegovini 1992.–1995."];
-const countries = ["Sve države", "Hrvatska"];
+const periodOrder = [
+  "Domovinski rat",
+  "Potraga za nestalima iz Domovinskog rata",
+  "Drugi svjetski rat",
+  "Drugi svjetski rat i poraće",
+  "Rat u Bosni i Hercegovini 1992.–1995.",
+];
+const filters = [
+  "Sve lokacije",
+  ...Array.from(new Set(sites.map(site => site.period).filter(Boolean))).sort((a, b) => {
+    const ai = periodOrder.indexOf(a);
+    const bi = periodOrder.indexOf(b);
+    return (ai < 0 ? periodOrder.length : ai) - (bi < 0 ? periodOrder.length : bi) || a.localeCompare(b, "hr");
+  }),
+];
+const countries = [
+  "Sve države",
+  ...Array.from(new Set(sites.filter(site => site.certainty === "confirmed").map(site => site.country || "Hrvatska"))).sort((a, b) => a.localeCompare(b, "hr")),
+];
 export default function HrvatskaPamtiGrobnice() {
   const [query, setQuery] = useState("");
   const [period, setPeriod] = useState("Sve lokacije");
   const [country, setCountry] = useState("Sve države");
   const [expanded, setExpanded] = useState("");
-  // Glavni registar prikazuje samo lokacije s pouzdano potvrđenim hrvatskim žrtvama.
-  // Ostali početni zapisi ostaju izvan javnog popisa dok se ne provjere izvori i pripadnost žrtava.
+  // Prikazujemo potvrđene nalaze; nacionalnost i povezanost sa žrtvama navodimo zasebno prema izvorima.
+  // Kontekstualni zapisi bez potvrđenog nalaza ne ulaze u ovaj glavni popis.
   const confirmedSites = useMemo(() => sites.filter(site => site.certainty === "confirmed"), []);
+  const confirmedCountries = useMemo(() => [...new Set(confirmedSites.map(site => site.country || "Hrvatska"))], [confirmedSites]);
   const results = useMemo(() => confirmedSites.filter((site) => {
     const matchesPeriod = period === "Sve lokacije" || site.period === period;
     const matchesCountry = country === "Sve države" || (site.country || "Hrvatska") === country;
@@ -100,12 +118,12 @@ export default function HrvatskaPamtiGrobnice() {
     
     <section className="hp-register-hero">
       <span className="hp-section-kicker">DOKUMENTIRANJE · DOSTOJANSTVO · ISTINA</span>
-      <h1>Grobišta i nalazišta<br/><em>žrtava Domovinskog rata.</em></h1>
-      <p>Evidencija potvrđenih masovnih i pojedinačnih grobnica te drugih nalazišta dokumentiranih pouzdanim izvorima. Svaki zapis razlikuje broj pronađenih ili ekshumiranih osoba, identificirane osobe i područja istraživanja; neobjavljen broj nikada ne prikazujemo kao nulu.</p>
-      <div className="hp-register-stats"><div><strong>{confirmedSites.length.toString().padStart(2,"0")}</strong><span>zapisa s potvrđenim hrvatskim žrtvama</span></div><div><strong>{confirmedSites.filter(site => Number.isFinite(site.victimsFound) && typeof site.foundLabel === "string").length.toString().padStart(2,"0")}</strong><span>zapisa s brojčanim podatkom iz izvora — ne zbrajamo pronađene ostatke, identificirane osobe i žrtve</span></div><div><strong>1</strong><span>država trenutačno zastupljena u potvrđenim zapisima</span></div></div>
+      <h1>Grobišta i nalazišta<br/><em>žrtava ratova i poraća.</em></h1>
+      <p>Evidencija potvrđenih masovnih i pojedinačnih grobnica te drugih nalazišta iz različitih povijesnih razdoblja, dokumentiranih pouzdanim izvorima. Svaki zapis razlikuje broj pronađenih ili ekshumiranih osoba, identificirane osobe i područja istraživanja; nacionalnost žrtava navodimo samo kada je potvrđena, a neobjavljen broj nikada ne prikazujemo kao nulu.</p>
+      <div className="hp-register-stats"><div><strong>{confirmedSites.length.toString().padStart(2,"0")}</strong><span>zapisa s potvrđenim nalazom</span></div><div><strong>{confirmedSites.filter(site => Number.isFinite(site.victimsFound) && typeof site.foundLabel === "string").length.toString().padStart(2,"0")}</strong><span>zapisa s brojčanim podatkom iz izvora — ne zbrajamo pronađene ostatke, identificirane osobe i žrtve</span></div><div><strong>{confirmedCountries.length}</strong><span>država zastupljenih u potvrđenim zapisima</span></div></div>
     </section>
     <section className="hp-register-content" id="registar">
-      <div className="hp-section-heading"><div><span className="hp-section-kicker">POTVRĐENI ZAPISI</span><h2>Čuvamo <em>naše ljude</em></h2></div><p>Registar uključuje potvrđene masovne i pojedinačne grobnice te druga nalazišta s pouzdanim izvorima. Područja pretraživanja bez potvrđenog nalaza vode se odvojeno u dosjeu mjesta; nepoznat broj ne znači da žrtava nije bilo.</p></div>
+      <div className="hp-section-heading"><div><span className="hp-section-kicker">POTVRĐENI ZAPISI</span><h2>Čuvamo <em>naše ljude</em></h2></div><p>Registar uključuje potvrđene masovne i pojedinačne grobnice te druga nalazišta s pouzdanim izvorima. Razdoblje, država, potvrda nacionalnosti i status nalaza vode se odvojeno. Područja pretraživanja bez potvrđenog nalaza ne predstavljamo kao potvrđene grobnice; nepoznat broj ne znači da žrtava nije bilo.</p></div>
       <div className="hp-register-controls"><label>Pretraži naziv, područje ili opis<input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Npr. Vukovar, Kočevski Rog, Tomašica…"/></label><label>Država<select value={country} onChange={e=>setCountry(e.target.value)}>{countries.map(item=><option key={item} value={item}>{item}</option>)}</select></label><div className="hp-register-filter" role="group" aria-label="Filtriraj po razdoblju">{filters.map(item=><button type="button" key={item} className={period===item?"active":""} onClick={()=>setPeriod(item)}>{item}</button>)}</div></div>
       <p className="hp-register-count" aria-live="polite">Prikazano potvrđenih zapisa: {results.length} od {confirmedSites.length}</p>
       <div className="hp-register-table-wrap">
@@ -131,7 +149,7 @@ export default function HrvatskaPamtiGrobnice() {
       </div>
       {!results.length&&<div className="hp-catalog-empty"><strong>Nema pronađenih zapisa</strong><p>Promijeni pojam ili odaberi drugo razdoblje.</p></div>}
       <aside className="hp-register-principle"><span>✦</span><div><h3>Ne postoji žrtva drugog reda.</h3><p>Ovaj registar ne rangira patnju niti pretvara stradanje u natjecanje. Povijesno razdoblje, pripadnost i okolnosti navodimo precizno; odgovornost za zločine opisujemo na temelju dokaza, a ne kolektivne krivnje.</p></div></aside>
-      <p className="hp-register-disclaimer">Napomena o potpunosti: glavni registar namjerno prikazuje samo zapise za koje je u izvorima potvrđena masovna grobnica i hrvatske žrtve. Ostali ranije prikupljeni zapisi nisu izbrisani iz izvornog popisa podataka, ali se ne prikazuju u ovoj evidenciji dok se ne potvrde kriteriji. Broj ekshumiranih, broj identificiranih i ukupan broj žrtava nisu ista mjera i ne zbrajaju se u jednu ukupnu brojku. Statusi se ažuriraju prema novim službenim nalazima. Za svaku grobnicu objavljujemo koordinate same lokacije samo kada ih možemo povezati s provjerljivim izvorom. Kada je grobnica aktivno istraživana ili izvor navodi samo šire područje, jasno označavamo da koordinate još nisu potvrđene; ne izmišljamo točnost i ne predstavljamo središte naselja kao grobnicu. Uz unesene koordinate prikazujemo izvor i poveznicu radi neovisne provjere.</p>
+      <p className="hp-register-disclaimer">Napomena o potpunosti: glavni registar prikazuje zapise s potvrđenim nalazom ili službeno dokumentiranim statusom. To ne znači da je nacionalnost svake osobe utvrđena niti da je registar potpun. Broj ekshumiranih, broj identificiranih i ukupan broj žrtava nisu ista mjera i ne zbrajaju se u jednu ukupnu brojku. Statusi se ažuriraju prema novim službenim nalazima. Za svaku grobnicu objavljujemo koordinate same lokacije samo kada ih možemo povezati s provjerljivim izvorom. Kada je grobnica aktivno istraživana ili izvor navodi samo šire područje, jasno označavamo da koordinate još nisu potvrđene; ne izmišljamo točnost i ne predstavljamo središte naselja kao grobnicu. Uz unesene koordinate prikazujemo izvor i poveznicu radi neovisne provjere.</p>
     </section>
     
   <SiteFooter />
