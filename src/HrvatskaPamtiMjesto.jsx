@@ -100,7 +100,6 @@ export default function HrvatskaPamtiMjesto() {
   const linkedGraveRecords = graveSites.filter(site => site.placeSlug === slug || (record?.graveRegistryIds || []).includes(site.id));
   const linkedRecordsWithNumbers = linkedGraveRecords.filter(site => Number.isFinite(site.victimsFound));
   const countedFindings = linkedGraveRecords.filter(site => site.countInTotal === true && Number.isFinite(site.victimsFound));
-  const vukovarDocumentedFindings = countedFindings.reduce((sum, site) => sum + site.victimsFound, 0);
   const countedFindingsSummary = countedFindings.map(site => `${site.name}: ${site.victimsFound.toLocaleString("hr-HR")}`).join(" + ");
   const excludedFindingRecords = linkedGraveRecords.filter(site => site.countInTotal === false && (Number.isFinite(site.victimsFound) || Number.isFinite(site.identifiedCount) || Number.isFinite(site.boneFragmentsFoundAtLeast)));
   const excludedFindingsSummary = excludedFindingRecords.map(site => {
@@ -133,7 +132,7 @@ export default function HrvatskaPamtiMjesto() {
           const count = Number.isFinite(site.victimsFound) ? site.victimsFound : Number.isFinite(site.identifiedCount) ? site.identifiedCount : null;
           const countLabel = Number.isFinite(site.victimsFound) ? "pronađenih / ekshumiranih" : Number.isFinite(site.identifiedCount) ? "identificiranih osoba" : "broj nije naveden";
           return <article className="hp-place-finding-card" key={site.id}>
-            <div className="hp-place-finding-main"><span className="hp-place-finding-status">{site.countInTotal === true ? "UKLJUČENO U ZBROJ" : "PRIKAZANO ODVOJENO"}</span><h3>{site.name}</h3><p>{site.foundLabel || "Izvor potvrđuje istraživanje ili postojanje lokacije, ali ne navodi broj pronađenih osoba. Ne upisujemo nulu."}</p>{site.sourceUrl && <a href={site.sourceUrl} target="_blank" rel="noreferrer">Provjeri izvor ↗</a>}</div>
+            <div className="hp-place-finding-main"><span className="hp-place-finding-status">{site.countInTotal === true ? "UKLJUČENO U ZBROJ" : "PRIKAZANO ODVOJENO"}</span><h3>{site.name}</h3><p>{site.foundLabel || "Izvor potvrđuje istraživanje ili postojanje lokacije, ali ne navodi broj pronađenih osoba. Ne upisujemo nulu."}</p>{(Number.isFinite(site.exhumedCount) || Number.isFinite(site.identifiedCount) || Number.isFinite(site.buriedCount)) && <p className="hp-place-finding-counts">{Number.isFinite(site.exhumedCount) && <>Ekshumirano: <strong>{site.exhumedCount.toLocaleString("hr-HR")}</strong>. </>}{Number.isFinite(site.identifiedCount) && <>Identificirano: <strong>{site.identifiedCount.toLocaleString("hr-HR")}</strong>. </>}{Number.isFinite(site.buriedCount) && <>Naknadno pokopano: <strong>{site.buriedCount.toLocaleString("hr-HR")}</strong>.</>}</p>}{site.sourceUrl && <a href={site.sourceUrl} target="_blank" rel="noreferrer">Provjeri izvor ↗</a>}</div>
             <div className="hp-place-finding-count"><strong>{count === null ? "—" : count.toLocaleString("hr-HR")}</strong><span>{countLabel}</span>{Number.isFinite(site.boneFragmentsFoundAtLeast) && <small>+ više od {site.boneFragmentsFoundAtLeast.toLocaleString("hr-HR")} fragmenata kostiju</small>}</div>
           </article>;
         })}
