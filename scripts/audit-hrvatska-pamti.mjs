@@ -129,6 +129,15 @@ for (const { raw, props } of records) {
     errors.push(id + ": countInTotal je true, ali victimsFound nije broj.");
   }
 
+  // Broj na odredištu ukopa ili prenesenih ostataka ne smije ući u jedinstveni zbroj.
+  if (
+    props.get("countInTotal") === "false" &&
+    /^\d+(?:\.\d+)?\s*(?:,|$)/.test(props.get("victimsFound") ?? "") &&
+    props.get("countsTowardUniqueTotal") !== "false"
+  ) {
+    errors.push(id + ": broj je izuzet iz zbroja, ali countsTowardUniqueTotal nije izričito false.");
+  }
+
   const sourceUrl = props.get("sourceUrl")?.match(/^["']([^"']+)["']/)?.[1];
   if (sourceUrl) {
     try {
