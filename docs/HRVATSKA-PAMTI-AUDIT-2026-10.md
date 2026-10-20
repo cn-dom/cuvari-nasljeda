@@ -151,3 +151,9 @@ Službena objava Ministarstva od 27. kolovoza 2024. potvrđuje ukupno 42 osobe e
 ### Dodatna provjera: Bobota
 
 **Bobotsko mrcinište** (nalaz iz 2021., 12 osoba ekshumiranih; 11 osoba pokopano u Tenji 2022.) i **Bobota — Ekonomija** (nalaz iz siječnja 2025., dvije osobe) ostaju zasebnim zapisima. Službeni izvori opisuju različite lokalitete i različita razdoblja; nema osnove za njihovo spajanje. Izvor za Bobotsko mrcinište: [Ministarstvo, 4. ožujka 2022.](https://branitelji.gov.hr/vijesti/identificirane-zrtve-ekshumirane-iz-masovne-grobnice-u-boboti/4059). Izvor za Bobotu — Ekonomiju: [Ministarstvo, nalaz dviju osoba](https://branitelji.gov.hr/vijesti/kod-bobote-pronadjena-grobnica-s-posmrtnim-ostacima-dvije-zrtve-iz-domovinskog-rata/4830).
+
+### Zbirni brojevi Zagreba i razdvajanje mjera
+
+Službeni pregled od 28. svibnja 2026. navodi povijesne zbirne podatke za Gračane (294), Tuškanac (102), Peščenku (95), Savsku cestu (25) i Obernjak na Medvednici (41). Registar ih zadržava kao kontekstualne brojke uz izvor, ali su sada izričito isključeni iz automatskog zbroja jedinstvenih nalazišta dok se moguća preklapanja s pojedinačnim zapisima ne razriješe. Šuma Lešće (55) ostaje jedan ažurirani zbirni podatak umjesto zbrajanja ranijeg broja 23 s novijim brojem 55. [Službeni pregled Ministarstva](https://branitelji.gov.hr/vijesti/u-zagrebackoj-dubravi-jos-jedna-masovna-grobnica-iz-drugog-svjetskog-rata/5218).
+
+**Pravilo za brojke:** pronađeni posmrtni ostaci, ekshumirani ostaci, identificirane osobe i osobe pokopane na odredišnom mjestu nisu međusobno zamjenjive mjere. Za Vukovar je uklonjen jedan ukupni broj koji je zbrajao različite vrste evidencijskih podataka; prikazuju se pojedinačni zapisi s njihovom mjerom i izvorom. Macelj ostaje odredišni zbirni ukop i ne pribraja se nalazištima u Sloveniji. Tomašica je izuzeta jer „više od 400 slučajeva posmrtnih ostataka” nije automatski broj jedinstvenih identificiranih žrtava.
