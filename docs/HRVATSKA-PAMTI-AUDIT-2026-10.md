@@ -147,3 +147,7 @@ Ponavljanje URL-a nije automatski duplikat: jedan službeni dokument može obuhv
 ### Dodatna provjera: Šarviz Dola
 
 Službena objava Ministarstva od 27. kolovoza 2024. potvrđuje ukupno 42 osobe ekshumirane iz triju masovnih i jedne pojedinačne grobnice na Šarviz Doli te da su tada sve 42 bile identificirane. Registar sada broji 42 jednom kao zbirni nalaz; pojedinačne objave o identifikacijama ne pribrajaju se dodatno. [Izvor Ministarstva](https://branitelji.gov.hr/vijesti/u-vukovaru-identificirane-dvije-osobe-nestale-u-domovinskom-ratu-4714/4714).
+
+### Dodatna provjera: Bobota
+
+**Bobotsko mrcinište** (nalaz iz 2021., 12 osoba ekshumiranih; 11 osoba pokopano u Tenji 2022.) i **Bobota — Ekonomija** (nalaz iz siječnja 2025., dvije osobe) ostaju zasebnim zapisima. Službeni izvori opisuju različite lokalitete i različita razdoblja; nema osnove za njihovo spajanje. Izvor za Bobotsko mrcinište: [Ministarstvo, 4. ožujka 2022.](https://branitelji.gov.hr/vijesti/identificirane-zrtve-ekshumirane-iz-masovne-grobnice-u-boboti/4059). Izvor za Bobotu — Ekonomiju: [Ministarstvo, nalaz dviju osoba](https://branitelji.gov.hr/vijesti/kod-bobote-pronadjena-grobnica-s-posmrtnim-ostacima-dvije-zrtve-iz-domovinskog-rata/4830).
