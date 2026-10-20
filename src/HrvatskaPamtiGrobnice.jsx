@@ -213,6 +213,12 @@ export default function HrvatskaPamtiGrobnice() {
           <p>Ministarstvo navodi da se u potrazi kombiniraju iskazi svjedoka, analiza dokumentacije i satelitskih snimaka, snimanje terena iz zraka te, gdje je primjenjivo, geološke metode, georadar i potražni psi. Dobivene indicije provjeravaju se terenskim radom i probnim iskapanjima. Zato se moguća lokacija ne smije automatski prikazati kao potvrđena grobnica.</p>
           <a href="https://branitelji.gov.hr/vijesti/u-potrazi-za-prikrivenim-grobnicama-sudjeluju-i-potrazni-psi/5158?big=0" target="_blank" rel="noreferrer">Službena objava Ministarstva ↗</a>
         </article>
+        <article>
+          <span className="hp-research-date">21. TRAVNJA 2026.</span>
+          <h3>Crngrob u Sloveniji</h3>
+          <p>Na području Crngroba evidentirano je pet mikrolokacija povezanih s istraživanjem grobišta iz Drugog svjetskog rata i poslijeratnog razdoblja. Tri su ranije potvrđene probnim iskapanjima, dok se preostale dvije nastojalo preciznije locirati uz pomoć potražnih pasa HGSS-a. Objavljena vijest opisuje tijek istraživanja, a ne konačan broj žrtava; zato ga ovdje ne navodimo kao potvrđen broj ekshumiranih osoba.</p>
+          <a href="https://branitelji.gov.hr/vijesti/u-sloveniji-u-tijeku-terenska-istrazivanja-grobista-iz-drugog-svjetskog-rata-i-poslijeratnog-razdoblja/5180" target="_blank" rel="noreferrer">Službena objava Ministarstva ↗</a>
+        </article>
       <p className="hp-research-updates-note"><strong>Napomena o različitim razdobljima:</strong> pregled uključuje i nalaze iz Domovinskog rata. Ministarstvo je 15. listopada 2026. objavilo pronalazak primarne grobnice s posmrtnim ostacima jedne osobe kod Komareva; zapis je već u glavnom registru. U objavi od 3. listopada za Gornje Jame navodi se sedam ekshumiranih žrtava i deset osoba koje se još traže. Te se kategorije ne zbrajaju u zajedničku brojku. <a href="https://branitelji.gov.hr/vijesti/na-banovini-pronadjena-jos-jedna-grobnica-iz-domovinskog-rata/5285" target="_blank" rel="noreferrer">Komarevo ↗</a> · <a href="https://branitelji.gov.hr/vijesti/spomen-obiljezje-u-gornjim-jamama-za-zrtve-domovinskog-rata/5275" target="_blank" rel="noreferrer">Gornje Jame ↗</a>. Ministarstvo je u objavi od 28. svibnja 2026. navelo da je tijekom 2026. do tada ekshumirano najmanje 142 žrtve iz Drugog svjetskog rata i poraća. To je zbirni podatak za više nalazišta i ne dodaje se na pojedinačne zapise u registru.</p>
     </section>
     <section className="hp-register-content" id="registar">
