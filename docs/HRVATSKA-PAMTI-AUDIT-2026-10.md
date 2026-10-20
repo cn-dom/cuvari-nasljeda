@@ -129,7 +129,7 @@ Ponavljanje URL-a nije automatski duplikat: jedan službeni dokument može obuhv
 
 1. Jedan ID po jedinstvenom nalazištu ili jasno označenom pregledu; povezani mikrolokaliteti moraju imati `duplicateReview` ili opis veze.
 2. Svaki broj mora navesti što mjeri: pronađene ostatke, ekshumirane ostatke, identificirane osobe, broj pokopanih na odredištu ili procjenu ukupnih žrtava.
-3. Ako je isti broj uključen u zbirni pregled i zaseban lokalitet, ne zbrajati ga bez dokaza da su skupine disjunktne.
+3. Ako je isti broj uključen u zbirni pregled i zaseban lokalitet, ne zbrajati ga bez dokaza da su skupine disjunktne. Automatski audit sada štiti i poznate rizične slučajeve: Novo groblje (938), Petrovačku dolu (38), Velepromet (19 i dvije osobe iz ranijih probnih iskapanja) te primarnu/sekundarnu grobnicu u Sotinu (3 nasuprot zajedničkom broju 13).
 4. Svaka lokacija treba imati najizravniji raspoloživi izvor; zbirne objave označiti kao zbirne i potražiti zasebnu objavu ili arhivski dokument.
 5. Koordinate same grobnice dodavati samo uz provjerljiv izvor za tu točku; inače prikazivati šire područje i jasno označiti ograničenje.
 6. Izvan Hrvatske nalaze se lokacije iz Slovenije, Austrije i Bosne i Hercegovine. One moraju ostati jasno označene državom i ne smiju se predstavljati kao nalazišta unutar granica Hrvatske.
