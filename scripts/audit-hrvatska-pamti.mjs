@@ -134,7 +134,7 @@ for (const { raw, props } of records) {
       errors.push(id + ": sourceUrl nije valjan URL.");
     }
   } else {
-    warnings.push(id + ": nema izravnog sourceUrl; izvor treba moći otvoriti iz zapisa.");
+    errors.push(id + ": nema izravnog sourceUrl; svaki zapis mora imati otvoriv izvor.");
   }
 
   const coordinates = props.get("coordinates");
