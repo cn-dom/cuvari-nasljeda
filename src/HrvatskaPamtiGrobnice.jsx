@@ -183,6 +183,12 @@ export default function HrvatskaPamtiGrobnice() {
           <a href="https://branitelji.gov.hr/vijesti/u-zagrebackoj-dubravi-jos-jedna-masovna-grobnica-iz-drugog-svjetskog-rata/5218" target="_blank" rel="noreferrer">Izvor Ministarstva ↗</a>
         </article>
         <article>
+          <span className="hp-research-date">STANJE OBJAVLJENO 15. LISTOPADA 2026.</span>
+          <h3>Potraga za nestalima još traje</h3>
+          <p>Ministarstvo hrvatskih branitelja navelo je da Hrvatska još traga za 1.725 nestalih i smrtno stradalih osoba iz Domovinskog rata za koje nije poznato mjesto ukopa. To je stanje potrage objavljeno određenog datuma, a ne broj pronađenih žrtava ni broj grobnica. Podatak treba ažurirati samo prema novijoj službenoj objavi.</p>
+          <a href="https://branitelji.gov.hr/vijesti/na-banovini-pronadjena-jos-jedna-grobnica-iz-domovinskog-rata/5285" target="_blank" rel="noreferrer">Službena objava Ministarstva ↗</a>
+        </article>
+        <article>
           <span className="hp-research-date">3. LISTOPADA 2026.</span>
           <h3>Gornje Jame kod Gline</h3>
           <p>Ministarstvo je potvrdilo da su na području Gornjih Jama pronađene jedna masovna i četiri pojedinačne grobnice, iz kojih su ekshumirani posmrtni ostaci sedam žrtava Domovinskog rata. Za još deset osoba potraga se nastavlja, među njima za troje djece. Broj pronađenih i broj osoba koje se još traže vodimo odvojeno.</p>
