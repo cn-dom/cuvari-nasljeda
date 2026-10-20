@@ -208,6 +208,8 @@ const mustExcludeFromUniqueTotals = [
   "savska-cesta",
   "obernjak-medvednica",
   "tomasica",
+  "granesiski-novaki",
+  "ljubijska-ulica",
 ];
 for (const id of mustExcludeFromUniqueTotals) {
   const entry = records.find(({ raw }) => raw.includes('id:"' + id + '"'));
@@ -215,6 +217,49 @@ for (const id of mustExcludeFromUniqueTotals) {
   else if (entry.props.get("countInTotal") !== "false" || entry.props.get("countsTowardUniqueTotal") !== "false") {
     errors.push(id + ": zbirni/neusporedivi podatak mora biti izričito izuzet iz jedinstvenog zbroja.");
   }
+}
+
+// U ključnim auditiranim zapisima mjera brojčanog podatka mora biti izričita.
+const measureRequiredIds = [
+  "ovcara",
+  "ovcara-individual-2025",
+  "ovcara-2025",
+  "sarviz-dola",
+  "novo-groblje-vukovar",
+  "petrovacka-dola",
+  "lesce",
+  "bacin",
+  "bobota-ekonomija-2025",
+  "bobotsko-mrciniste",
+  "sveta-nedelja-lipje-trebez",
+  "mostisce-sudovac",
+  "biokovo-zagvozd",
+  "medvidja-jama",
+  "vrgorac-imotski",
+  "macesnova-gorica",
+  "huda-jama",
+  "trebce-slovenija",
+  "rugarski-klanci-podstenice",
+  "kosnica-pri-celju",
+  "cerklje-na-krki",
+  "macelj-zajednicki-ukop-2026",
+  "jama-golubinka",
+  "oporovecki-vinogradi",
+  "gornje-jame",
+  "stari-seles-domovinski-rat",
+  "negoslavci-masovna-2024",
+  "ilaca-domovinski-rat",
+  "komarevo",
+  "suma-jelas",
+  "sotin-primarna-sekundarna-2013",
+  "sotin-nalaz-2019",
+  "bogdanovci-lipica",
+  "cucerje",
+];
+for (const id of measureRequiredIds) {
+  const entry = records.find(({ raw }) => raw.includes('id:"' + id + '"'));
+  if (!entry) errors.push("Nedostaje zapis s obveznom mjerom brojčanog podatka: " + id);
+  else if (!entry.props.get("countMeasure")) errors.push(id + ": nedostaje countMeasure koji razlikuje vrstu brojčanog podatka.");
 }
 
 const expectedSlovenianCounts = new Map([
