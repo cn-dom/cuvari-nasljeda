@@ -110,7 +110,7 @@ export default function HrvatskaPamtiGrobnice() {
   const [expanded, setExpanded] = useState("");
   // Prikazujemo potvrđene nalaze; nacionalnost i povezanost sa žrtvama navodimo zasebno prema izvorima.
   // Kontekstualni zapisi bez potvrđenog nalaza ne ulaze u ovaj glavni popis.
-  const confirmedSites = useMemo(() => sites.filter(site => site.certainty === "confirmed"), []);
+  const confirmedSites = useMemo(() => sites.filter(site => site.certainty === "confirmed" || site.duplicateReview?.startsWith("possible-overlap:")), []);
   const confirmedCountries = useMemo(() => [...new Set(confirmedSites.map(site => site.country || "Hrvatska"))], [confirmedSites]);
   const results = useMemo(() => confirmedSites.filter((site) => {
     const matchesPeriod = period === "Sve lokacije" || site.period === period;
