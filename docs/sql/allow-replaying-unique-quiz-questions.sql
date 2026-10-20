@@ -4,9 +4,10 @@
 -- Quiz from becoming unavailable after a player has used every question once.
 -- Applied to Supabase project azerctpwfzdivydsxyex.
 --
--- This function retains the existing authentication, attempt ownership,
--- advisory lock, and answer payload behavior. It removes only the historical
--- exclusion that prevented questions used in earlier attempts from being reused.
+-- This function retains authentication, attempt ownership, advisory locking,
+-- within-round deduplication, and answer payload behavior. Croatian quiz rounds
+-- now draw from every active category when p_category is NULL; a non-NULL category
+-- remains supported for backward compatibility. Questions can be reused in later rounds.
 
 CREATE OR REPLACE FUNCTION private.start_quiz_attempt(p_quiz_type text, p_category text DEFAULT NULL::text, p_city_slug text DEFAULT NULL::text)
  RETURNS jsonb
@@ -59,7 +60,7 @@ begin
             order by random()
           ) as duplicate_rank
         from public.quiz_questions q
-        where q.active and q.category = p_category
+        where q.active and (p_category is null or q.category = p_category)
                 ) deduplicated
       where duplicate_rank = 1
       order by random()
@@ -85,7 +86,7 @@ begin
   end if;
 
   if coalesce(array_length(v_ids, 1), 0) < 10 then
-    raise exception 'Nema dovoljno neodigranih jedinstvenih pitanja za ovaj kviz. Kad se potroše sva pitanja iz kategorije, potrebno je dodati nova pitanja.';
+    raise exception 'Nema dovoljno aktivnih, jedinstvenih pitanja za ovaj kviz.';
   end if;
 
   if p_quiz_type = 'city' then
