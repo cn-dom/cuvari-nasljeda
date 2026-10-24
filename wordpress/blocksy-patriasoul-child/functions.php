@@ -8,15 +8,19 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Load the child stylesheet late, without relying on a parent-theme handle
+ * that may change between Blocksy releases. Blocksy itself remains in charge
+ * of its header/footer builder, layout, and Customizer settings.
+ */
 add_action('wp_enqueue_scripts', function () {
-    $parent_style = 'blocksy-styles';
     wp_enqueue_style(
         'patriasoul-blocksy-child',
         get_stylesheet_uri(),
-        array($parent_style),
+        array(),
         wp_get_theme()->get('Version')
     );
-}, 20);
+}, 99);
 
 add_action('after_setup_theme', function () {
     add_theme_support('custom-logo', array(
