@@ -22,6 +22,21 @@ Ne uvoditi alternativne slogane, nove naslove ni zamjenske oznake umjesto postoj
 - Podtema dodaje responzivne prilagodbe logotipa, diskretnu hrvatsku crveno-bijelo-plavu crtu i vidljive indikatore fokusa za tipkovnicu.
 - Dodatne lokacije izbornika mogu se dodijeliti u WordPressu, ali Blocksy i dalje upravlja stvarnim rasporedom zaglavlja i podnožja.
 
+## Kriteriji za proglašenje teme gotovom
+
+Tema se neće označiti kao gotova samo zato što prolazi statičku provjeru. Prije završnog ZIP-a moraju biti potvrđene sve stavke:
+
+- [ ] službeni PatriaSoul logo uključen ili pouzdano postavljen bez tekstualne zamjene
+- [ ] stvarno zaglavlje i podnožje uspoređeni s postojećom aplikacijom, uključujući doslovan tekst i redoslijed
+- [ ] desktop, tablet i mobilni prikaz provjereni u WordPressu s Blocksyjem
+- [ ] glavni i mobilni izbornik rade, bez ručnog popravljanja nakon instalacije
+- [ ] podnožje prikazuje oba dogovorena reda i može se uređivati
+- [ ] stranice i sadržaj ostaju uređivi kroz WordPress
+- [ ] provjera aktivacije, deaktivacije i instalacije u čistom testnom WordPressu
+- [ ] svi automatizirani testovi prolaze
+
+Trenutačno je tema razvojna osnova verzije 0.2.0. CSS i paleta uređivača su pripremljeni, ali još nije potvrđen potpuni vizualni paritet niti instalacija bez ručnih zahvata. Ne smatra se gotovom.
+
 ## Važno
 1. Roditeljska tema `blocksy` mora već biti instalirana.
 2. Službeni logotip postavlja se kroz **Izgled → Prilagodi → Identitet web-mjesta**; tema ne izmišlja tekstualni logotip i ne ugrađuje kopiju slike.
