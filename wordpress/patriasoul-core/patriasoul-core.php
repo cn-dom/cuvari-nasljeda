@@ -330,6 +330,51 @@ final class PatriaSoul_Core {
         return ob_get_clean();
     }
 
+    private static function render_public_metadata($post_id) {
+        $post_type = get_post_type($post_id);
+        $rows = array();
+        if ($post_type === 'ps_memorial_dossier') {
+            $location = get_post_meta($post_id, 'ps_location', true);
+            $period = get_post_meta($post_id, 'ps_historical_period', true);
+            $status = get_post_meta($post_id, 'ps_verification_status', true) ?: 'not_checked';
+            if ($location) {
+                $rows[] = '<span><strong>Lokacija:</strong> ' . esc_html($location) . '</span>';
+            }
+            if ($period) {
+                $rows[] = '<span><strong>Razdoblje:</strong> ' . esc_html($period) . '</span>';
+            }
+            $labels = array(
+                'not_checked' => 'Status: nije provjereno',
+                'in_review' => 'Status: provjera u tijeku',
+                'verified' => 'Status: provjereno',
+                'disputed' => 'Status: sporni / proturječni podaci',
+            );
+            $rows[] = '<span class="ps-core__status ps-core__status--' . esc_attr($status) . '">' . esc_html(isset($labels[$status]) ? $labels[$status] : $labels['not_checked']) . '</span>';
+        } else {
+            $date = get_post_meta($post_id, 'ps_object_date', true);
+            $origin = get_post_meta($post_id, 'ps_object_origin', true);
+            if ($date) {
+                $rows[] = '<span><strong>Datacija:</strong> ' . esc_html($date) . '</span>';
+            }
+            if ($origin) {
+                $rows[] = '<span><strong>Podrijetlo:</strong> ' . esc_html($origin) . '</span>';
+            }
+        }
+
+        $source_title = get_post_meta($post_id, 'ps_source_title', true);
+        $source_url = get_post_meta($post_id, 'ps_source_url', true);
+        if ($source_title && $source_url && strtolower((string) wp_parse_url($source_url, PHP_URL_SCHEME)) === 'https') {
+            $rows[] = '<span class="ps-core__source">Izvor: <a href="' . esc_url($source_url) . '" target="_blank" rel="noopener noreferrer">' . esc_html($source_title) . '</a></span>';
+        } elseif ($source_title) {
+            $rows[] = '<span class="ps-core__source">Izvor: ' . esc_html($source_title) . '</span>';
+        }
+
+        if (!$rows) {
+            return;
+        }
+        echo '<div class="ps-core__metadata">' . implode('', array_map(function ($row) { return '<p>' . $row . '</p>'; }, $rows)) . '</div>';
+    }
+
     private static function archive_shortcode($post_type, $title, $description, $empty_message) {
         self::enqueue_assets();
         $items = new WP_Query(array(
@@ -356,6 +401,7 @@ final class PatriaSoul_Core {
                                 <a class="ps-core__image" href="<?php the_permalink(); ?>"><?php the_post_thumbnail('large', array('loading' => 'lazy')); ?></a>
                             <?php endif; ?>
                             <h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+                            <?php self::render_public_metadata(get_the_ID()); ?>
                             <p><?php echo esc_html(wp_trim_words(get_the_excerpt() ?: wp_strip_all_tags(get_the_content()), 32)); ?></p>
                             <a class="ps-core__link" href="<?php the_permalink(); ?>">Otvori opis <span aria-hidden="true">→</span></a>
                         </article>
