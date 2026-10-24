@@ -142,9 +142,9 @@ final class PatriaSoul_Core {
         ));
         add_settings_section(
             'patriasoul_core_main',
-            'Povezivanje s postojećom aplikacijom',
+            'Povezivanje i identitet podnožja',
             function () {
-                echo '<p>Ovdje se postavlja poveznica na postojeću aplikaciju. Ova postavka ne povezuje niti premješta korisničke račune i bazu.</p>';
+                echo '<p>Ovdje se postavlja poveznica na postojeću aplikaciju i uređuje potpis podnožja. Ova postavka ne povezuje niti premješta korisničke račune i bazu.</p>';
             },
             'patriasoul-core'
         );
