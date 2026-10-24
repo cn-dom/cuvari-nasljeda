@@ -8,6 +8,7 @@ Ovo je početna podtema za postojeću instalaciju Blocksyja. Ne sadrži Blocksy 
 - Sačuvati postojeći identitet i službeni logotip, kao i prepoznatljivu hrvatsku crveno-bijelo-plavu crtu.
 - Ujednačiti prikaz službenog logotipa na računalu i mobitelu te dodati vidljiv fokus za tipkovničku navigaciju.
 - Zadržati Blocksy Customizer i uređivanje sadržaja u WordPressu.
+- Registrirati zasebne opcionalne lokacije za glavni izbornik i izbornik podnožja PatriaSoul, bez mijenjanja postojećih Blocksy postavki.
 
 ## Tekst zaglavlja i podnožja — obvezno
 Pri prijenosu treba usporediti tekst s postojećom PatriaSoul stranicom i prenijeti ga doslovno. Posebno sačuvati postojeći tekst podnožja:
