@@ -105,6 +105,16 @@ jobs:
           cp wordpress/blocksy-patriasoul-child/README.md dist/README-THEME-STATUS.md
           (cd dist && zip -q ../patriasoul-wordpress-candidate.zip README-PACKAGE-CANDIDATE.txt README-THEME-STATUS.md patriasoul-blocksy-child-candidate.zip patriasoul-core-candidate.zip)
           mv patriasoul-wordpress-candidate.zip dist/
+      - name: Validate generated archives and bundled logo
+        run: |
+          set -euo pipefail
+          test "$(od -An -tx1 -N8 wordpress/blocksy-patriasoul-child/assets/patriasoul-logo.png | tr -d ' \n')" = '89504e470d0a1a0a'
+          unzip -t dist/patriasoul-blocksy-child-candidate.zip
+          unzip -t dist/patriasoul-core-candidate.zip
+          unzip -t dist/patriasoul-wordpress-candidate.zip
+          unzip -l dist/patriasoul-blocksy-child-candidate.zip | grep -q 'blocksy-patriasoul-child/assets/patriasoul-logo.png'
+          unzip -l dist/patriasoul-wordpress-candidate.zip | grep -q 'patriasoul-blocksy-child-candidate.zip'
+          unzip -l dist/patriasoul-wordpress-candidate.zip | grep -q 'patriasoul-core-candidate.zip'
       - name: Upload candidate archives for internal verification
         uses: actions/upload-artifact@v4
         with:
