@@ -30,3 +30,10 @@
 .ps-core__status--in_review{border-color:#d3a54b;background:rgba(139,93,13,.2);color:#ffe1a3}
 .ps-core__status--disputed{border-color:#d65a63;background:rgba(150,31,43,.22);color:#ffc2c7}
 .ps-core__status--not_checked{color:#e0e6ee}
+
+/* Editable PatriaSoul footer signature, used by [patriasoul_footer]. */
+.ps-brand-footer{max-width:100%;margin:.5rem auto;padding:.5rem 1rem;text-align:center;color:var(--ps-muted)}
+.ps-brand-footer p{margin:.3rem 0;line-height:1.6}
+.ps-brand-footer__line1{font-size:.88rem;letter-spacing:.08em}
+.ps-brand-footer__line2{font-size:.8rem;font-weight:800;letter-spacing:.14em}
+@media(max-width:640px){.ps-brand-footer__line1{font-size:.8rem;letter-spacing:.03em}.ps-brand-footer__line2{font-size:.75rem;letter-spacing:.08em}}
