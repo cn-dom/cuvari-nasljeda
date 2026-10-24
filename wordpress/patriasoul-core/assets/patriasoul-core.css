@@ -37,3 +37,12 @@
 .ps-brand-footer__line1{font-size:.88rem;letter-spacing:.08em}
 .ps-brand-footer__line2{font-size:.8rem;font-weight:800;letter-spacing:.14em}
 @media(max-width:640px){.ps-brand-footer__line1{font-size:.8rem;letter-spacing:.03em}.ps-brand-footer__line2{font-size:.75rem;letter-spacing:.08em}}
+
+
+/* Accessible pagination for long museum and memorial archives. */
+.ps-core__pagination{margin:1.5rem 0 0}
+.ps-core__pagination ul{display:flex;flex-wrap:wrap;justify-content:center;gap:.45rem;list-style:none;margin:0;padding:0}
+.ps-core__pagination li{margin:0;padding:0}
+.ps-core__pagination a,.ps-core__pagination span{display:inline-flex;align-items:center;justify-content:center;min-width:2.5rem;min-height:2.5rem;padding:.45rem .75rem;border:1px solid var(--ps-line);border-radius:9px;background:var(--ps-panel);color:var(--ps-text);text-decoration:none}
+.ps-core__pagination a:hover,.ps-core__pagination .current{border-color:#4c83bb;background:#173d64;color:#fff}
+.ps-core__pagination a:focus-visible{outline:3px solid #e1b955;outline-offset:3px}
