@@ -4,6 +4,10 @@ Ova mapa je razvojni temelj za prijenos u WordPress. Nije završni instalacijski
 
 ## Što je dodano u ovoj fazi
 
+- Dokumentirana modularna arhitektura u `wordpress/ARCHITECTURE.md` i pravila za buduće dodatke u `wordpress/modules/README.md`.
+- Pregled modula u **Postavke → PatriaSoul moduli**. Prikazuje status planiranih dodataka i nudi proširenje kroz filter `patriasoul_core_modules`; ne aktivira dodatke automatski.
+- Podtema registrira izborne lokacije izbornika PatriaSoul, bez zamjene Blocksyjevih vlastitih postavki zaglavlja i podnožja.
+
 - Namjenski WordPress dodatak u `wordpress/patriasoul-core/`.
 - Dva uređiva tipa sadržaja: muzejski predmeti i dosjei registra Hrvatska pamti.
 - Kratki kodovi `[patriasoul_portal]`, `[patriasoul_museum]`, `[patriasoul_memorials]` i `[patriasoul_footer]`.
@@ -14,12 +18,18 @@ Ova mapa je razvojni temelj za prijenos u WordPress. Nije završni instalacijski
 
 ## Što ova faza još NE radi
 
+- Planirani moduli zajednice, kviza, medija i integracija još nisu funkcionalno migrirani; pregled modula ne znači da su gotovi.
+
 - Ne prenosi postojeće Supabase korisnike, prijavu ili sesije.
 - Ne implementira funkcionalni zid, prijateljstva, privatne poruke, obavijesti ili grupne razgovore.
 - Ne prenosi sustav kviza, bodove, značke ni njegove RPC funkcije.
 - Ne uvozi stvarne muzejske predmete ni dosjee iz postojećeg registra.
 - Ne povezuje podatke s postojećom bazom.
 - Ne mijenja produkcijsku aplikaciju, Cloudflare ili Supabase.
+
+## Modularno pravilo
+
+Tema sadrži samo prezentacijski kod. Funkcionalnosti se razvijaju u odvojenim dodacima koji koriste zajednički ugovor Core-a. Svaki dodatak mora imati vlastite provjere ovlasti, nonce, sanitizaciju, escaping, testove aktivacije/deaktivacije i plan migracije/povratka. Rank Math SEO ostaje zaseban dodatak.
 
 ## Zašto je povezivanje baze odgođeno
 
