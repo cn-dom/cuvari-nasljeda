@@ -19,6 +19,9 @@ final class PatriaSoul_Core {
 
     public static function boot() {
         add_action('init', array(__CLASS__, 'register_content_types'));
+        add_action('add_meta_boxes', array(__CLASS__, 'add_editor_boxes'));
+        add_action('save_post_ps_museum_item', array(__CLASS__, 'save_editor_fields'));
+        add_action('save_post_ps_memorial_dossier', array(__CLASS__, 'save_editor_fields'));
         add_action('wp_enqueue_scripts', array(__CLASS__, 'register_assets'));
         add_action('admin_menu', array(__CLASS__, 'add_settings_page'));
         add_action('admin_init', array(__CLASS__, 'register_settings'));
@@ -176,6 +179,116 @@ final class PatriaSoul_Core {
         do_settings_sections('patriasoul-core');
         submit_button('Spremi postavke');
         echo '</form><hr><p><strong>Sigurnosna napomena:</strong> nikad ne unosite Supabase service-role ključ ili druge tajne u ovu postavku, WordPress sadržaj ili javni JavaScript.</p></div>';
+    }
+
+    /**
+     * Structured editorial fields keep source and verification details separate
+     * from narrative copy. Values are saved only by authorized editors.
+     */
+    public static function add_editor_boxes() {
+        add_meta_box(
+            'ps_museum_details',
+            'Podaci o predmetu i izvorima',
+            array(__CLASS__, 'render_editor_box'),
+            'ps_museum_item',
+            'normal',
+            'high'
+        );
+        add_meta_box(
+            'ps_memorial_details',
+            'Lokacija, provjera i izvori',
+            array(__CLASS__, 'render_editor_box'),
+            'ps_memorial_dossier',
+            'normal',
+            'high'
+        );
+    }
+
+    public static function render_editor_box($post) {
+        wp_nonce_field('ps_save_editor_fields', 'ps_editor_nonce');
+        $is_memorial = $post->post_type === 'ps_memorial_dossier';
+        $fields = $is_memorial
+            ? array(
+                'ps_location' => array('Lokacija (mjesto, općina, država)', 'text'),
+                'ps_historical_period' => array('Povijesno razdoblje', 'text'),
+                'ps_verification_status' => array('Status provjere', 'status'),
+                'ps_source_title' => array('Naziv glavnog izvora', 'text'),
+                'ps_source_url' => array('Poveznica na izvor', 'url'),
+                'ps_source_notes' => array('Bilješke o provjeri / dodatni izvori', 'textarea'),
+                'ps_coordinates' => array('Koordinate (samo ako su pouzdano potvrđene)', 'text'),
+            )
+            : array(
+                'ps_object_date' => array('Datacija / razdoblje', 'text'),
+                'ps_object_origin' => array('Podrijetlo / mjesto', 'text'),
+                'ps_source_title' => array('Naziv glavnog izvora', 'text'),
+                'ps_source_url' => array('Poveznica na izvor', 'url'),
+                'ps_source_notes' => array('Bilješke o izvoru i atribuciji', 'textarea'),
+            );
+
+        echo '<p>Unesite provjerljive podatke. Razlikujte dokumentiranu činjenicu, tumačenje i predaju; ne izmišljajte izvore.</p>';
+        foreach ($fields as $key => $definition) {
+            $value = get_post_meta($post->ID, $key, true);
+            echo '<p><label for="' . esc_attr($key) . '"><strong>' . esc_html($definition[0]) . '</strong></label><br>';
+            if ($definition[1] === 'textarea') {
+                echo '<textarea class="widefat" rows="3" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '">' . esc_textarea($value) . '</textarea>';
+            } elseif ($definition[1] === 'status') {
+                $statuses = array(
+                    'not_checked' => 'Nije provjereno',
+                    'in_review' => 'Provjera u tijeku',
+                    'verified' => 'Provjereno',
+                    'disputed' => 'Sporni / proturječni podaci',
+                );
+                echo '<select id="' . esc_attr($key) . '" name="' . esc_attr($key) . '">';
+                foreach ($statuses as $status => $label) {
+                    echo '<option value="' . esc_attr($status) . '"' . selected($value ?: 'not_checked', $status, false) . '>' . esc_html($label) . '</option>';
+                }
+                echo '</select>';
+            } else {
+                echo '<input class="widefat" type="' . esc_attr($definition[1]) . '" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '" value="' . esc_attr($value) . '">';
+            }
+            echo '</p>';
+        }
+        if ($is_memorial) {
+            echo '<p><strong>Važno:</strong> unesene koordinate same po sebi ne znače da je lokacija potvrđena. U javnom prikazu treba jasno navesti status i izvor.</p>';
+        }
+    }
+
+    public static function save_editor_fields($post_id) {
+        if (
+            !isset($_POST['ps_editor_nonce']) ||
+            !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['ps_editor_nonce'])), 'ps_save_editor_fields') ||
+            (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) ||
+            wp_is_post_revision($post_id) ||
+            !current_user_can('edit_post', $post_id)
+        ) {
+            return;
+        }
+
+        $is_memorial = get_post_type($post_id) === 'ps_memorial_dossier';
+        $keys = $is_memorial
+            ? array('ps_location', 'ps_historical_period', 'ps_verification_status', 'ps_source_title', 'ps_source_url', 'ps_source_notes', 'ps_coordinates')
+            : array('ps_object_date', 'ps_object_origin', 'ps_source_title', 'ps_source_url', 'ps_source_notes');
+
+        foreach ($keys as $key) {
+            if (!isset($_POST[$key])) {
+                continue;
+            }
+            $raw = wp_unslash($_POST[$key]);
+            if ($key === 'ps_source_url') {
+                $value = esc_url_raw(trim((string) $raw));
+                if ($value && strtolower((string) wp_parse_url($value, PHP_URL_SCHEME)) !== 'https') {
+                    $value = '';
+                }
+            } elseif ($key === 'ps_source_notes') {
+                $value = sanitize_textarea_field($raw);
+            } elseif ($key === 'ps_verification_status') {
+                $allowed = array('not_checked', 'in_review', 'verified', 'disputed');
+                $value = in_array($raw, $allowed, true) ? $raw : 'not_checked';
+            } else {
+                $value = sanitize_text_field($raw);
+            }
+            update_post_meta($post_id, $key, $value);
+        }
     }
 
     private static function portal_cards() {
