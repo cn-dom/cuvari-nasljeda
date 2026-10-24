@@ -63,6 +63,9 @@ jobs:
           grep -q "Theme Name: Blocksy Child" "$theme"
           grep -q "Template: blocksy" "$theme"
           grep -q "add_theme_support('custom-logo'" "$functions"
+          grep -q "editor-color-palette" "$functions"
+          grep -q "patriasoul-footer" "$functions"
+          grep -q "Version: 0.2.0" "$theme"
           grep -q "Hrvatska · povijest · znanje · identitet" "$guide"
           grep -q "Znanje · Ponos · Nasljeđe" "$guide"
           echo 'Static checks passed; this does not replace testing inside WordPress.'
