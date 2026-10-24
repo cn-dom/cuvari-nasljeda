@@ -1,0 +1,38 @@
+name: PatriaSoul WordPress plugin check
+
+on:
+  pull_request:
+    paths:
+      - "wordpress/**"
+      - ".github/workflows/wordpress-plugin-check.yml"
+  push:
+    branches:
+      - "wordpress/migration-foundation"
+    paths:
+      - "wordpress/**"
+      - ".github/workflows/wordpress-plugin-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  php-lint:
+    name: PHP syntax and package structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          coverage: none
+      - name: Check PHP syntax
+        run: php -l wordpress/patriasoul-core/patriasoul-core.php
+      - name: Check required plugin files
+        run: |
+          test -s wordpress/patriasoul-core/patriasoul-core.php
+          test -s wordpress/patriasoul-core/assets/patriasoul-core.css
+          test -s wordpress/README.md
+      - name: Check plugin header
+        run: grep -q "Plugin Name: PatriaSoul" wordpress/patriasoul-core/patriasoul-core.php
