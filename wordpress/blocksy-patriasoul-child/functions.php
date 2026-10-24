@@ -42,7 +42,7 @@ add_filter('get_custom_logo', function ($html) {
     $alt = $site_name ? $site_name . ' – službeni logotip' : 'PatriaSoul – službeni logotip';
 
     return sprintf(
-        '<a href="%1$s" class="custom-logo-link" rel="home" aria-current="page"><img src="%2$s" class="custom-logo" alt="%3$s" decoding="async" fetchpriority="high"></a>',
+        '<a href="%1$s" class="custom-logo-link" rel="home"><img src="%2$s" class="custom-logo" alt="%3$s" width="512" height="512" decoding="async" fetchpriority="high"></a>',
         esc_url(home_url('/')),
         esc_url($logo_url),
         esc_attr($alt)
