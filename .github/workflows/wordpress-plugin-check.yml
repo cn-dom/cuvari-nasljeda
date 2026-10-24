@@ -55,6 +55,8 @@ jobs:
           grep -q "patriasoul_museum" "$plugin"
           grep -q "patriasoul_memorials" "$plugin"
           grep -q "patriasoul_footer" "$plugin"
+          grep -q "ps-core__pagination" "$plugin"
+          grep -q "'ps_page'" "$plugin"
           ! grep -q '<p class="ps-core__footer">' "$plugin"
           grep -q "class-patriasoul-module-manager.php" "$plugin"
           grep -q "patriasoul_core_modules" wordpress/patriasoul-core/includes/class-patriasoul-module-manager.php
