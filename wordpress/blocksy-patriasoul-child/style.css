@@ -4,7 +4,7 @@ Theme URI: https://cuvari-nasljeda.patriasoul.workers.dev/
 Description: Prilagodljiva PatriaSoul vizualna osnova za Blocksy. Funkcionalnosti ostaju u dodatku.
 Author: PatriaSoul
 Template: blocksy
-Version: 0.1.0
+Version: 0.2.0
 Text Domain: patriasoul-blocksy-child
 */
 
@@ -15,6 +15,8 @@ Text Domain: patriasoul-blocksy-child
   --ps-brand-red: #d92736;
   --ps-brand-white: #f5f7fb;
   --ps-brand-muted: #c1ccda;
+  --ps-brand-gold: #e1b955;
+  --ps-brand-border: rgba(255, 255, 255, .13);
 }
 
 /* Visual identity; Blocksy remains responsible for layout and its customizer. */
@@ -24,6 +26,7 @@ body {
 
 .site-logo-container img,
 .custom-logo {
+  display: block;
   max-height: 76px;
   width: auto;
   object-fit: contain;
@@ -36,14 +39,32 @@ body {
 }
 
 #header [data-row] {
-  border-bottom: 1px solid rgba(255,255,255,.1);
+  border-bottom: 1px solid var(--ps-brand-border);
 }
 
 #header [data-row]::after {
   content: "";
   display: block;
   height: 3px;
-  background: linear-gradient(110deg, var(--ps-brand-red) 0 33.3%, #fff 33.3% 66.6%, var(--ps-brand-blue) 66.6%);
+  background: linear-gradient(
+    110deg,
+    var(--ps-brand-red) 0 33.3%,
+    #fff 33.3% 66.6%,
+    var(--ps-brand-blue) 66.6% 100%
+  );
+}
+
+#header a,
+#header .ct-icon {
+  transition: color .15s ease;
+}
+
+#header a:focus-visible,
+#footer a:focus-visible,
+.site-logo-container a:focus-visible {
+  outline: 3px solid var(--ps-brand-gold);
+  outline-offset: 3px;
+  border-radius: 3px;
 }
 
 .entry-content a:not(.wp-element-button),
@@ -51,8 +72,37 @@ body {
   text-underline-offset: .18em;
 }
 
+.entry-content .wp-block-button__link,
+.entry-content .wp-element-button {
+  border-radius: 9px;
+  font-weight: 700;
+  transition: filter .15s ease, transform .15s ease;
+}
+
+.entry-content .wp-block-button__link:hover,
+.entry-content .wp-element-button:hover {
+  filter: brightness(1.12);
+}
+
+.entry-content .wp-block-button__link:focus-visible,
+.entry-content .wp-element-button:focus-visible {
+  outline: 3px solid var(--ps-brand-gold);
+  outline-offset: 3px;
+}
+
 .ps-core {
   color: var(--ps-brand-white);
+}
+
+/* Optional branded footer signature provided by the Core shortcode. */
+.ps-brand-footer {
+  width: 100%;
+  border-top: 1px solid var(--ps-brand-border);
+}
+
+.ps-brand-footer__line1,
+.ps-brand-footer__line2 {
+  overflow-wrap: anywhere;
 }
 
 /* Improve keyboard focus without overriding the user's chosen Blocksy palette. */
@@ -60,8 +110,9 @@ a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
-textarea:focus-visible {
-  outline: 3px solid #e1b955;
+textarea:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--ps-brand-gold);
   outline-offset: 3px;
 }
 
@@ -69,5 +120,17 @@ textarea:focus-visible {
   .site-logo-container img,
   .custom-logo {
     max-height: 58px;
+  }
+
+  #header [data-row]::after {
+    height: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #header a,
+  .entry-content .wp-block-button__link,
+  .entry-content .wp-element-button {
+    transition: none;
   }
 }
