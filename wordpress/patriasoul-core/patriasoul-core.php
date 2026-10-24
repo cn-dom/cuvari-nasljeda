@@ -382,7 +382,6 @@ final class PatriaSoul_Core {
                     </article>
                 <?php endforeach; ?>
             </div>
-            <p class="ps-core__footer">Znanje · Ponos · Nasljeđe</p>
         </section>
         <?php
         return ob_get_clean();
