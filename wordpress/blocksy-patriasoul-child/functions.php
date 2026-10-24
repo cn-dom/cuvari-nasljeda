@@ -31,8 +31,15 @@ add_action('after_setup_theme', function () {
     ));
     add_theme_support('editor-styles');
     add_editor_style('style.css');
+    add_theme_support('editor-color-palette', array(
+        array('name' => 'PatriaSoul – tamnoplava', 'slug' => 'patriasoul-navy', 'color' => '#081629'),
+        array('name' => 'PatriaSoul – plava', 'slug' => 'patriasoul-blue', 'color' => '#2462a4'),
+        array('name' => 'PatriaSoul – crvena', 'slug' => 'patriasoul-red', 'color' => '#d92736'),
+        array('name' => 'PatriaSoul – bijela', 'slug' => 'patriasoul-white', 'color' => '#f5f7fb'),
+        array('name' => 'PatriaSoul – zlatna', 'slug' => 'patriasoul-gold', 'color' => '#e1b955'),
+    ));
 
-    // Register PatriaSoul locations without replacing Blocksy's own header/footer builder.
+    // Register optional PatriaSoul menu locations without replacing Blocksy's builder.
     register_nav_menus(array(
         'patriasoul-primary' => 'PatriaSoul – glavni izbornik',
         'patriasoul-footer'  => 'PatriaSoul – izbornik podnožja',
