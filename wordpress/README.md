@@ -11,7 +11,7 @@ Ova mapa je razvojni temelj za prijenos u WordPress. Nije završni instalacijski
 - Namjenski WordPress dodatak u `wordpress/patriasoul-core/`.
 - Dva uređiva tipa sadržaja: muzejski predmeti i dosjei registra Hrvatska pamti.
 - Kratki kodovi `[patriasoul_portal]`, `[patriasoul_museum]`, `[patriasoul_memorials]` i `[patriasoul_footer]`.
-- Uredivi tekstovi PatriaSoul podnožja u **Postavke → PatriaSoul**. Zadani redovi su „Hrvatska · povijest · znanje · identitet” i „Znanje · Ponos · Nasljeđe”. Kratki kod `[patriasoul_footer]` može se dodati u područje podnožja kroz Blocksy Footer Builder.
+- Uredivi tekstovi PatriaSoul podnožja u **Postavke → PatriaSoul**. Zadani redovi su „Hrvatska · povijest · znanje · identitet” i „Znanje · Ponos · Nasljeđe”. Kratki kod `[patriasoul_footer]` može se dodati u područje podnožja kroz Blocksy Footer Builder; potpis nije ponovljen unutar sadržaja početne stranice.
 - Osnovni tamnoplavi dizajn s diskretnom crveno-bijelo-plavom crtom, karticama i responzivnim rasporedom.
 - Postavka javne adrese postojeće aplikacije, bez pohrane API tajni.
 - Pri aktivaciji se stvaraju tri početne stranice kao **skice** samo ako slug još ne postoji. Postojeće stranice se ne prepisuju.
