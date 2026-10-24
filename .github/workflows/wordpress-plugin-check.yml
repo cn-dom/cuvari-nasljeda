@@ -103,7 +103,8 @@ jobs:
           The package has not been visually tested on the target WordPress host.
           EOF
           cp wordpress/blocksy-patriasoul-child/README.md dist/README-THEME-STATUS.md
-          (cd dist && zip -q ../patriasoul-wordpress-candidate.zip README-PACKAGE-CANDIDATE.txt README-THEME-STATUS.md patriasoul-blocksy-child-candidate.zip patriasoul-core-candidate.zip)\n          mv patriasoul-wordpress-candidate.zip dist/
+          (cd dist && zip -q ../patriasoul-wordpress-candidate.zip README-PACKAGE-CANDIDATE.txt README-THEME-STATUS.md patriasoul-blocksy-child-candidate.zip patriasoul-core-candidate.zip)
+          mv patriasoul-wordpress-candidate.zip dist/
       - name: Upload candidate archives for internal verification
         uses: actions/upload-artifact@v4
         with:
