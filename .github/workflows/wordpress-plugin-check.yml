@@ -90,8 +90,8 @@ jobs:
       - name: Package child theme and Core plugin candidates
         run: |
           set -euo pipefail
-          zip -qr dist/patriasoul-blocksy-child-candidate.zip wordpress/blocksy-patriasoul-child
-          zip -qr dist/patriasoul-core-candidate.zip wordpress/patriasoul-core
+          (cd wordpress && zip -qr ../dist/patriasoul-blocksy-child-candidate.zip blocksy-patriasoul-child)
+          (cd wordpress && zip -qr ../dist/patriasoul-core-candidate.zip patriasoul-core)
           cat > dist/README-PACKAGE-CANDIDATE.txt <<'EOF'
           PatriaSoul WordPress package candidate
           
