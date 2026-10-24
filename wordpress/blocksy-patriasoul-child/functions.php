@@ -22,6 +22,33 @@ add_action('wp_enqueue_scripts', function () {
     );
 }, 99);
 
+/**
+ * Use the official PatriaSoul crest bundled with the release package when
+ * the site administrator has not selected a custom logo. Never override a
+ * logo already chosen in WordPress.
+ */
+add_filter('get_custom_logo', function ($html) {
+    if (has_custom_logo()) {
+        return $html;
+    }
+
+    $logo_file = get_stylesheet_directory() . '/assets/patriasoul-logo.png';
+    if (!is_readable($logo_file)) {
+        return $html;
+    }
+
+    $logo_url = get_stylesheet_directory_uri() . '/assets/patriasoul-logo.png';
+    $site_name = get_bloginfo('name', 'display');
+    $alt = $site_name ? $site_name . ' – službeni logotip' : 'PatriaSoul – službeni logotip';
+
+    return sprintf(
+        '<a href="%1$s" class="custom-logo-link" rel="home" aria-current="page"><img src="%2$s" class="custom-logo" alt="%3$s" decoding="async" fetchpriority="high"></a>',
+        esc_url(home_url('/')),
+        esc_url($logo_url),
+        esc_attr($alt)
+    );
+});
+
 add_action('after_setup_theme', function () {
     add_theme_support('custom-logo', array(
         'height'      => 120,
