@@ -38,8 +38,8 @@ Tema se neće označiti kao gotova samo zato što prolazi statičku provjeru. Pr
 Trenutačno je tema razvojna osnova verzije 0.2.0. CSS i paleta uređivača su pripremljeni, ali još nije potvrđen potpuni vizualni paritet niti instalacija bez ručnih zahvata. Ne smatra se gotovom.
 
 ## Važno
-1. Roditeljska tema `blocksy` mora već biti instalirana.
-2. Službeni logotip postavlja se kroz **Izgled → Prilagodi → Identitet web-mjesta**; tema ne izmišlja tekstualni logotip i ne ugrađuje kopiju slike.
+1. Roditeljska tema `blocksy` potrebna je za samu podtemu; instalacijski paket trenutačno još ne instalira sve dijelove jednim klikom.
+2. Kandidat paketa preuzima službeni logotip iz repozitorija aplikacije i stavlja ga u `assets/patriasoul-logo.png`. Ako administrator već odabere drugi logotip u WordPressu, njegov izbor ima prednost; ako nema odabranog logotipa, podtema prikazuje službeni logotip iz paketa.
 3. Ovo je razvojna osnova, ne dovršena tema. Zaglavlje, podnožje, navigacija i predlošci još zahtijevaju vizualnu provjeru na testnoj WordPress instalaciji.
 4. Funkcionalnosti kviza, članova, muzeja i registra ne smiju ovisiti o ovoj temi; one pripadaju zasebnom dodatku.
 5. Ne instalirati kao završno rješenje dok se ne obave testovi na testnoj stranici.
