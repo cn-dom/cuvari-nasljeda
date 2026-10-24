@@ -462,13 +462,14 @@ final class PatriaSoul_Core {
 
     private static function archive_shortcode($post_type, $title, $description, $empty_message) {
         self::enqueue_assets();
+        $current_page = isset($_GET['ps_page']) ? max(1, absint(wp_unslash($_GET['ps_page']))) : 1;
         $items = new WP_Query(array(
             'post_type' => $post_type,
             'post_status' => 'publish',
             'posts_per_page' => 12,
+            'paged' => $current_page,
             'orderby' => 'date',
             'order' => 'DESC',
-            'no_found_rows' => true,
         ));
         ob_start();
         ?>
@@ -492,6 +493,21 @@ final class PatriaSoul_Core {
                         </article>
                     <?php endwhile; ?>
                 </div>
+                <?php if ($items->max_num_pages > 1) : ?>
+                    <nav class="ps-core__pagination" aria-label="Straničenje zbirke">
+                        <?php
+                        echo wp_kses_post(paginate_links(array(
+                            'base' => add_query_arg('ps_page', '%#%'),
+                            'format' => '',
+                            'current' => $current_page,
+                            'total' => (int) $items->max_num_pages,
+                            'type' => 'list',
+                            'prev_text' => '← Prethodna',
+                            'next_text' => 'Sljedeća →',
+                        )));
+                        ?>
+                    </nav>
+                <?php endif; ?>
             <?php else : ?>
                 <div class="ps-core__empty">
                     <p><?php echo esc_html($empty_message); ?></p>
