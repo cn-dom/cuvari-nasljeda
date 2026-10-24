@@ -236,7 +236,34 @@ final class PatriaSoul_Core {
         settings_fields('patriasoul_core_settings');
         do_settings_sections('patriasoul-core');
         submit_button('Spremi postavke');
-        echo '</form><hr><p><strong>Sigurnosna napomena:</strong> nikad ne unosite Supabase service-role ključ ili druge tajne u ovu postavku, WordPress sadržaj ili javni JavaScript.</p></div>';
+        echo '</form><hr><h2>Početno postavljanje</h2>';
+        echo '<p>Pregledajte stranice i dovršite izgled u Blocksyju. Postojeći sadržaj se ne prepisuje, a nove stranice se namjerno stvaraju kao skice.</p>';
+        $setup_pages = array(
+            array('PatriaSoul', 'patriasoul', '[patriasoul_portal]'),
+            array('Virtualni muzej', 'virtualni-muzej', '[patriasoul_museum]'),
+            array('Hrvatska pamti', 'hrvatska-pamti', '[patriasoul_memorials]'),
+        );
+        echo '<table class="widefat striped"><thead><tr><th>Stranica</th><th>Status</th><th>Uređivanje</th><th>Kratki kod</th></tr></thead><tbody>';
+        foreach ($setup_pages as $page_config) {
+            $page = get_page_by_path($page_config[1], OBJECT, 'page');
+            echo '<tr><td><strong>' . esc_html($page_config[0]) . '</strong></td>';
+            if ($page) {
+                echo '<td>' . esc_html(get_post_status_object($page->post_status)->label) . '</td>';
+                echo '<td><a href="' . esc_url(get_edit_post_link($page->ID, '')) . '">Uredi stranicu</a></td>';
+                echo '<td><code>' . esc_html($page_config[2]) . '</code></td>';
+            } else {
+                echo '<td>Nije pronađena</td><td>—</td><td><code>' . esc_html($page_config[2]) . '</code></td>';
+            }
+            echo '</tr>';
+        }
+        echo '</tbody></table>';
+        echo '<h3>Prije javne objave</h3><ul>';
+        echo '<li>Uredite i objavite samo stranice koje ste provjerili.</li>';
+        echo '<li>U Blocksy Header Builder postavite službeni logotip i izbornik Zid / Domovina / Zajednica / Kultura i znanje / Mediji.</li>';
+        echo '<li>U Blocksy Footer Builder dodajte element kratkog koda <code>[patriasoul_footer]</code>.</li>';
+        echo '<li>Usporedite zaglavlje, podnožje i mobilni prikaz s postojećom aplikacijom.</li>';
+        echo '<li>Ne povezujte Supabase dok ne potvrdite kanonski projekt, prijavu i RLS pravila.</li>';
+        echo '</ul><hr><p><strong>Sigurnosna napomena:</strong> nikad ne unosite Supabase service-role ključ ili druge tajne u ovu postavku, WordPress sadržaj ili javni JavaScript.</p></div>';
     }
 
     /**
