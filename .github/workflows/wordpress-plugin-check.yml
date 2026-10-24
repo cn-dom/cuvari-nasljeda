@@ -32,6 +32,9 @@ jobs:
       - name: Check required package files
         run: |
           test -s wordpress/patriasoul-core/patriasoul-core.php
+          test -s wordpress/patriasoul-core/includes/class-patriasoul-module-manager.php
+          test -s wordpress/ARCHITECTURE.md
+          test -s wordpress/modules/README.md
           test -s wordpress/patriasoul-core/assets/patriasoul-core.css
           test -s wordpress/blocksy-patriasoul-child/style.css
           test -s wordpress/blocksy-patriasoul-child/functions.php
@@ -52,6 +55,9 @@ jobs:
           grep -q "patriasoul_museum" "$plugin"
           grep -q "patriasoul_memorials" "$plugin"
           grep -q "patriasoul_footer" "$plugin"
+          grep -q "class-patriasoul-module-manager.php" "$plugin"
+          grep -q "patriasoul_core_modules" wordpress/patriasoul-core/includes/class-patriasoul-module-manager.php
+          grep -q "patriasoul-primary" "$functions"
           grep -q "Hrvatska · povijest · znanje · identitet" "$plugin"
           grep -q "Znanje · Ponos · Nasljeđe" "$plugin"
           grep -q "Theme Name: Blocksy Child" "$theme"
