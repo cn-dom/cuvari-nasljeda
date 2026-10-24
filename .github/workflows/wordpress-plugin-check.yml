@@ -1,0 +1,129 @@
+name: PatriaSoul WordPress plugin and theme check
+
+on:
+  pull_request:
+    paths:
+      - "wordpress/**"
+      - ".github/workflows/wordpress-plugin-check.yml"
+  push:
+    branches:
+      - "wordpress/migration-foundation"
+    paths:
+      - "wordpress/**"
+      - ".github/workflows/wordpress-plugin-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  php-lint:
+    name: PHP syntax and package structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          coverage: none
+      - name: Check PHP syntax in plugin and child theme
+        run: find wordpress -type f -name '*.php' -print0 | xargs -0 -r -n1 php -l
+      - name: Check required package files
+        run: |
+          test -s wordpress/patriasoul-core/patriasoul-core.php
+          test -s wordpress/patriasoul-core/includes/class-patriasoul-module-manager.php
+          test -s wordpress/ARCHITECTURE.md
+          test -s wordpress/modules/README.md
+          test -s wordpress/patriasoul-core/assets/patriasoul-core.css
+          test -s wordpress/blocksy-patriasoul-child/style.css
+          test -s wordpress/blocksy-patriasoul-child/functions.php
+          test -s wordpress/README.md
+      - name: Check plugin safeguards and child theme identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          plugin='wordpress/patriasoul-core/patriasoul-core.php'
+          theme='wordpress/blocksy-patriasoul-child/style.css'
+          functions='wordpress/blocksy-patriasoul-child/functions.php'
+          guide='wordpress/blocksy-patriasoul-child/README.md'
+          grep -q "Plugin Name: PatriaSoul" "$plugin"
+          grep -q "if (!defined('ABSPATH'))" "$plugin"
+          grep -q "wp_verify_nonce" "$plugin"
+          grep -q "current_user_can('edit_post'" "$plugin"
+          grep -q "patriasoul_portal" "$plugin"
+          grep -q "patriasoul_museum" "$plugin"
+          grep -q "patriasoul_memorials" "$plugin"
+          grep -q "patriasoul_footer" "$plugin"
+          grep -q "ps-core__pagination" "$plugin"
+          grep -q "'ps_page'" "$plugin"
+          ! grep -q '<p class="ps-core__footer">' "$plugin"
+          grep -q "class-patriasoul-module-manager.php" "$plugin"
+          grep -q "patriasoul_core_modules" wordpress/patriasoul-core/includes/class-patriasoul-module-manager.php
+          grep -q "patriasoul-primary" "$functions"
+          grep -q "Hrvatska · povijest · znanje · identitet" "$plugin"
+          grep -q "Znanje · Ponos · Nasljeđe" "$plugin"
+          grep -q "Theme Name: Blocksy Child" "$theme"
+          grep -q "Template: blocksy" "$theme"
+          grep -q "add_theme_support('custom-logo'" "$functions"
+          grep -q "add_filter('get_custom_logo'" "$functions"
+          grep -q "assets/patriasoul-logo.png" "$functions"
+          grep -q "editor-color-palette" "$functions"
+          grep -q "patriasoul-footer" "$functions"
+          grep -q "Version: 0.2.0" "$theme"
+          grep -q "Hrvatska · povijest · znanje · identitet" "$guide"
+          grep -q "Znanje · Ponos · Nasljeđe" "$guide"
+          echo 'Static checks passed; this does not replace testing inside WordPress.'
+
+  package-candidate:
+    name: Build install candidate archives
+    runs-on: ubuntu-latest
+    needs: php-lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Fetch official logo asset from the repository
+        run: |
+          set -euo pipefail
+          mkdir -p wordpress/blocksy-patriasoul-child/assets dist
+          curl --fail --location --retry 3 \
+            https://raw.githubusercontent.com/cn-dom/cuvari-nasljeda/main/public/assets/images/1000000982.png \
+            --output wordpress/blocksy-patriasoul-child/assets/patriasoul-logo.png
+          file wordpress/blocksy-patriasoul-child/assets/patriasoul-logo.png
+          test -s wordpress/blocksy-patriasoul-child/assets/patriasoul-logo.png
+      - name: Package child theme and Core plugin candidates
+        run: |
+          set -euo pipefail
+          (cd wordpress && zip -qr ../dist/patriasoul-blocksy-child-candidate.zip blocksy-patriasoul-child)
+          (cd wordpress && zip -qr ../dist/patriasoul-core-candidate.zip patriasoul-core)
+          cat > dist/README-PACKAGE-CANDIDATE.txt <<'EOF'
+          PatriaSoul WordPress package candidate
+          
+          This is a development candidate, not the final one-click installer.
+          Install Blocksy parent theme separately, then the PatriaSoul child theme
+          and PatriaSoul Core plugin. The official logo is bundled in the child theme.
+          The package has not been visually tested on the target WordPress host.
+          EOF
+          cp wordpress/blocksy-patriasoul-child/README.md dist/README-THEME-STATUS.md
+          (cd dist && zip -q ../patriasoul-wordpress-candidate.zip README-PACKAGE-CANDIDATE.txt README-THEME-STATUS.md patriasoul-blocksy-child-candidate.zip patriasoul-core-candidate.zip)
+          mv patriasoul-wordpress-candidate.zip dist/
+      - name: Validate generated archives and bundled logo
+        run: |
+          set -euo pipefail
+          test "$(od -An -tx1 -N8 wordpress/blocksy-patriasoul-child/assets/patriasoul-logo.png | tr -d ' \n')" = '89504e470d0a1a0a'
+          unzip -t dist/patriasoul-blocksy-child-candidate.zip
+          unzip -t dist/patriasoul-core-candidate.zip
+          unzip -t dist/patriasoul-wordpress-candidate.zip
+          unzip -l dist/patriasoul-blocksy-child-candidate.zip | grep -q 'blocksy-patriasoul-child/assets/patriasoul-logo.png'
+          unzip -l dist/patriasoul-wordpress-candidate.zip | grep -q 'patriasoul-blocksy-child-candidate.zip'
+          unzip -l dist/patriasoul-wordpress-candidate.zip | grep -q 'patriasoul-core-candidate.zip'
+      - name: Upload candidate archives for internal verification
+        uses: actions/upload-artifact@v4
+        with:
+          name: patriasoul-wordpress-candidate
+          path: |
+            dist/patriasoul-blocksy-child-candidate.zip
+            dist/patriasoul-core-candidate.zip
+            dist/patriasoul-wordpress-candidate.zip
+            dist/README-THEME-STATUS.md
+          if-no-files-found: error
