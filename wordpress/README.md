@@ -6,7 +6,8 @@ Ova mapa je razvojni temelj za prijenos u WordPress. Nije završni instalacijski
 
 - Namjenski WordPress dodatak u `wordpress/patriasoul-core/`.
 - Dva uređiva tipa sadržaja: muzejski predmeti i dosjei registra Hrvatska pamti.
-- Kratki kodovi `[patriasoul_portal]`, `[patriasoul_museum]` i `[patriasoul_memorials]`.
+- Kratki kodovi `[patriasoul_portal]`, `[patriasoul_museum]`, `[patriasoul_memorials]` i `[patriasoul_footer]`.
+- Uredivi tekstovi PatriaSoul podnožja u **Postavke → PatriaSoul**. Zadani redovi su „Hrvatska · povijest · znanje · identitet” i „Znanje · Ponos · Nasljeđe”. Kratki kod `[patriasoul_footer]` može se dodati u područje podnožja kroz Blocksy Footer Builder.
 - Osnovni tamnoplavi dizajn s diskretnom crveno-bijelo-plavom crtom, karticama i responzivnim rasporedom.
 - Postavka javne adrese postojeće aplikacije, bez pohrane API tajni.
 - Pri aktivaciji se stvaraju tri početne stranice kao **skice** samo ako slug još ne postoji. Postojeće stranice se ne prepisuju.
@@ -31,6 +32,8 @@ Tehnička provjera postojećeg projekta bilježi dva Supabase projekta s različ
 3. Provjeriti da su tri stranice dodane kao skice, bez izmjene postojećih stranica.
 4. Objaviti željenu skicu tek nakon uređivanja.
 5. Dodati probni muzejski predmet i probni dosje; objaviti ih i provjeriti prikaz kratkih kodova.
-6. Testirati izgled na mobitelu i računalu te provjeriti logove PHP-a.
+6. U Blocksy Footer Builder dodati blok/element kratkog koda s `[patriasoul_footer]` i provjeriti oba reda podnožja.
+7. Usporediti zaglavlje, navigaciju i podnožje s postojećom PatriaSoul stranicom; tekstove ne prepravljati i ne zamjenjivati.
+8. Testirati izgled na mobitelu i računalu te provjeriti logove PHP-a.
 
 Ovaj opis bilježi implementacijski temelj, a ne potvrđuje da su testovi na korisnikovom WordPress hostingu izvršeni.
