@@ -31,4 +31,10 @@ add_action('after_setup_theme', function () {
     ));
     add_theme_support('editor-styles');
     add_editor_style('style.css');
+
+    // Register PatriaSoul locations without replacing Blocksy's own header/footer builder.
+    register_nav_menus(array(
+        'patriasoul-primary' => 'PatriaSoul – glavni izbornik',
+        'patriasoul-footer'  => 'PatriaSoul – izbornik podnožja',
+    ));
 });
