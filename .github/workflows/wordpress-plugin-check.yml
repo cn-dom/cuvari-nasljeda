@@ -28,11 +28,22 @@ jobs:
           php-version: "8.2"
           coverage: none
       - name: Check PHP syntax
-        run: php -l wordpress/patriasoul-core/patriasoul-core.php
+        run: find wordpress/patriasoul-core -type f -name '*.php' -print0 | xargs -0 -r -n1 php -l
       - name: Check required plugin files
         run: |
           test -s wordpress/patriasoul-core/patriasoul-core.php
           test -s wordpress/patriasoul-core/assets/patriasoul-core.css
           test -s wordpress/README.md
-      - name: Check plugin header
-        run: grep -q "Plugin Name: PatriaSoul" wordpress/patriasoul-core/patriasoul-core.php
+      - name: Check plugin header and safeguards
+        shell: bash
+        run: |
+          set -euo pipefail
+          plugin='wordpress/patriasoul-core/patriasoul-core.php'
+          grep -q "Plugin Name: PatriaSoul" "$plugin"
+          grep -q "if (!defined('ABSPATH'))" "$plugin"
+          grep -q "wp_verify_nonce" "$plugin"
+          grep -q "current_user_can('edit_post'" "$plugin"
+          grep -q "patriasoul_portal" "$plugin"
+          grep -q "patriasoul_museum" "$plugin"
+          grep -q "patriasoul_memorials" "$plugin"
+          echo 'Static checks passed; this does not replace testing inside WordPress.'
