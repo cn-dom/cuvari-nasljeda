@@ -16,6 +16,8 @@ if (!defined('ABSPATH')) {
 final class PatriaSoul_Core {
     const VERSION = '0.2.0';
     const OPTION_APP_URL = 'patriasoul_core_app_url';
+    const OPTION_FOOTER_LINE1 = 'patriasoul_core_footer_line1';
+    const OPTION_FOOTER_LINE2 = 'patriasoul_core_footer_line2';
 
     public static function boot() {
         add_action('init', array(__CLASS__, 'register_content_types'));
@@ -28,6 +30,7 @@ final class PatriaSoul_Core {
         add_shortcode('patriasoul_portal', array(__CLASS__, 'portal_shortcode'));
         add_shortcode('patriasoul_museum', array(__CLASS__, 'museum_shortcode'));
         add_shortcode('patriasoul_memorials', array(__CLASS__, 'memorials_shortcode'));
+        add_shortcode('patriasoul_footer', array(__CLASS__, 'footer_shortcode'));
     }
 
     public static function activate() {
@@ -150,6 +153,30 @@ final class PatriaSoul_Core {
             'patriasoul-core',
             'patriasoul_core_main'
         );
+        add_settings_field(
+            self::OPTION_FOOTER_LINE1,
+            'Tekst podnožja – prvi red',
+            array(__CLASS__, 'render_footer_line1_field'),
+            'patriasoul-core',
+            'patriasoul_core_main'
+        );
+        add_settings_field(
+            self::OPTION_FOOTER_LINE2,
+            'Tekst podnožja – drugi red',
+            array(__CLASS__, 'render_footer_line2_field'),
+            'patriasoul-core',
+            'patriasoul_core_main'
+        );
+        register_setting('patriasoul_core_settings', self::OPTION_FOOTER_LINE1, array(
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => 'Hrvatska · povijest · znanje · identitet',
+        ));
+        register_setting('patriasoul_core_settings', self::OPTION_FOOTER_LINE2, array(
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => 'Znanje · Ponos · Nasljeđe',
+        ));
     }
 
     public static function sanitize_app_url($value) {
@@ -168,6 +195,35 @@ final class PatriaSoul_Core {
             esc_attr(get_option(self::OPTION_APP_URL, 'https://cuvari-nasljeda.patriasoul.workers.dev/'))
         );
         echo '<p class="description">Javna adresa aplikacije, bez API ključeva ili tajnih podataka.</p>';
+    }
+
+    public static function render_footer_line1_field() {
+        printf(
+            '<input class="regular-text" type="text" name="%1$s" value="%2$s" />',
+            esc_attr(self::OPTION_FOOTER_LINE1),
+            esc_attr(get_option(self::OPTION_FOOTER_LINE1, 'Hrvatska · povijest · znanje · identitet'))
+        );
+    }
+
+    public static function render_footer_line2_field() {
+        printf(
+            '<input class="regular-text" type="text" name="%1$s" value="%2$s" />',
+            esc_attr(self::OPTION_FOOTER_LINE2),
+            esc_attr(get_option(self::OPTION_FOOTER_LINE2, 'Znanje · Ponos · Nasljeđe'))
+        );
+    }
+
+    /**
+     * Place [patriasoul_footer] in the Blocksy footer builder to render
+     * the two editable PatriaSoul brand lines without hardcoding a theme hook.
+     */
+    public static function footer_shortcode($atts = array()) {
+        $line1 = get_option(self::OPTION_FOOTER_LINE1, 'Hrvatska · povijest · znanje · identitet');
+        $line2 = get_option(self::OPTION_FOOTER_LINE2, 'Znanje · Ponos · Nasljeđe');
+        return '<div class="ps-core ps-brand-footer" role="contentinfo">'
+            . '<p class="ps-brand-footer__line1">' . esc_html($line1) . '</p>'
+            . '<p class="ps-brand-footer__line2">' . esc_html($line2) . '</p>'
+            . '</div>';
     }
 
     public static function render_settings_page() {
