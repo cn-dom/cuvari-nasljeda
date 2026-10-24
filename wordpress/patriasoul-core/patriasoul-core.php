@@ -13,6 +13,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+require_once __DIR__ . '/includes/class-patriasoul-module-manager.php';
+
 final class PatriaSoul_Core {
     const VERSION = '0.2.0';
     const OPTION_APP_URL = 'patriasoul_core_app_url';
