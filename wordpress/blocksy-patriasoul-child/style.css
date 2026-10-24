@@ -1,0 +1,73 @@
+/*
+Theme Name: Blocksy Child – PatriaSoul
+Theme URI: https://cuvari-nasljeda.patriasoul.workers.dev/
+Description: Prilagodljiva PatriaSoul vizualna osnova za Blocksy. Funkcionalnosti ostaju u dodatku.
+Author: PatriaSoul
+Template: blocksy
+Version: 0.1.0
+Text Domain: patriasoul-blocksy-child
+*/
+
+:root {
+  --ps-brand-navy: #081629;
+  --ps-brand-panel: #10243d;
+  --ps-brand-blue: #2462a4;
+  --ps-brand-red: #d92736;
+  --ps-brand-white: #f5f7fb;
+  --ps-brand-muted: #c1ccda;
+}
+
+/* Visual identity; Blocksy remains responsible for layout and its customizer. */
+body {
+  text-rendering: optimizeLegibility;
+}
+
+.site-logo-container img,
+.custom-logo {
+  max-height: 76px;
+  width: auto;
+  object-fit: contain;
+}
+
+#header,
+#header [data-row],
+#header [data-column] {
+  --theme-link-initial-color: var(--ps-brand-white);
+}
+
+#header [data-row] {
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+
+#header [data-row]::after {
+  content: "";
+  display: block;
+  height: 3px;
+  background: linear-gradient(110deg, var(--ps-brand-red) 0 33.3%, #fff 33.3% 66.6%, var(--ps-brand-blue) 66.6%);
+}
+
+.entry-content a:not(.wp-element-button),
+.entry-content a:not(.wp-block-button__link) {
+  text-underline-offset: .18em;
+}
+
+.ps-core {
+  color: var(--ps-brand-white);
+}
+
+/* Improve keyboard focus without overriding the user's chosen Blocksy palette. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #e1b955;
+  outline-offset: 3px;
+}
+
+@media (max-width: 689px) {
+  .site-logo-container img,
+  .custom-logo {
+    max-height: 58px;
+  }
+}
