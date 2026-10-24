@@ -17,6 +17,11 @@ Pri prijenosu treba usporediti tekst s postojećom PatriaSoul stranicom i prenij
 
 Ne uvoditi alternativne slogane, nove naslove ni zamjenske oznake umjesto postojećih. Zaglavlje, navigacija i podnožje moraju izgledati kao na sadašnjoj stranici, uz prilagodbu responzivnom prikazu WordPressa. Tekst treba ostati uređiv u WordPressu.
 
+## Prilagodljivost teme
+- Paleta boja PatriaSoul dostupna je i u WordPress blok-uređivaču.
+- Podtema dodaje responzivne prilagodbe logotipa, diskretnu hrvatsku crveno-bijelo-plavu crtu i vidljive indikatore fokusa za tipkovnicu.
+- Dodatne lokacije izbornika mogu se dodijeliti u WordPressu, ali Blocksy i dalje upravlja stvarnim rasporedom zaglavlja i podnožja.
+
 ## Važno
 1. Roditeljska tema `blocksy` mora već biti instalirana.
 2. Službeni logotip postavlja se kroz **Izgled → Prilagodi → Identitet web-mjesta**; tema ne izmišlja tekstualni logotip i ne ugrađuje kopiju slike.
