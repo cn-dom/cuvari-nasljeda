@@ -220,6 +220,7 @@ final class PatriaSoul_Core {
      * the two editable PatriaSoul brand lines without hardcoding a theme hook.
      */
     public static function footer_shortcode($atts = array()) {
+        self::enqueue_assets();
         $line1 = get_option(self::OPTION_FOOTER_LINE1, 'Hrvatska · povijest · znanje · identitet');
         $line2 = get_option(self::OPTION_FOOTER_LINE2, 'Znanje · Ponos · Nasljeđe');
         return '<div class="ps-core ps-brand-footer" role="contentinfo">'
