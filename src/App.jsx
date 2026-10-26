@@ -475,8 +475,14 @@ function App() {
     // Let Supabase's INITIAL_SESSION event be the single source of truth.
     // Running getSession() at the same time can race the auth callback and
     // overwrite a newly restored session with a stale null value.
-    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data } = supabase.auth.onAuthStateChange((event, nextSession) => {
       setSession(nextSession);
+      if (event === "PASSWORD_RECOVERY") {
+        setAuthMode("new-password");
+        setAuthPassword("");
+        setAuthMessage("Upiši novu lozinku za svoj račun.");
+        setAuthOpen(true);
+      }
       if (nextSession?.user) {
         setAuthOpen(false);
         setAuthMessage("");
@@ -550,7 +556,14 @@ function App() {
           redirectTo: window.location.origin,
         });
         if (error) throw error;
-        setAuthMessage("Ako je račun povezan s ovom adresom, poslana je uputa za obnovu lozinke.");
+        setAuthMessage("Ako je račun povezan s ovom adresom, poslana je uputa za obnovu lozinke. Provjeri i mapu Neželjena pošta.");
+      } else if (authMode === "new-password") {
+        const { error } = await supabase.auth.updateUser({ password: authPassword });
+        if (error) throw error;
+        setAuthPassword("");
+        setAuthMode("login");
+        setAuthMessage("Lozinka je uspješno promijenjena. Možeš se prijaviti novom lozinkom.");
+        setAuthOpen(true);
       } else if (authMode === "register") {
         const { data, error } = await supabase.auth.signUp({
           email: authEmail.trim(),
@@ -3052,26 +3065,30 @@ function App() {
                 </>
               )}
               <form className="auth-form" onSubmit={submitAuth}>
-                <label htmlFor="auth-email">E-pošta</label>
-                <input id="auth-email" type="email" autoComplete="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} required placeholder="ime@primjer.hr" />
-                {authMode !== "reset" && (
+                {authMode !== "new-password" && (
                   <>
-                    <label htmlFor="auth-password">Lozinka</label>
-                    <input id="auth-password" type="password" autoComplete={authMode === "register" ? "new-password" : "current-password"} value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} required minLength={8} placeholder="Najmanje 8 znakova" />
+                    <label htmlFor="auth-email">E-pošta</label>
+                    <input id="auth-email" type="email" autoComplete="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} required placeholder="ime@primjer.hr" />
                   </>
                 )}
-                <button className="auth-submit" type="submit" disabled={!isSupabaseConfigured || authBusy}>{authBusy ? "Molimo pričekaj…" : authMode === "register" ? "Registriraj se" : authMode === "reset" ? "Pošalji upute" : "Prijavi se"}</button>
+                {authMode !== "reset" && (
+                  <>
+                    <label htmlFor="auth-password">{authMode === "new-password" ? "Nova lozinka" : "Lozinka"}</label>
+                    <input id="auth-password" type="password" autoComplete={authMode === "register" || authMode === "new-password" ? "new-password" : "current-password"} value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} required minLength={8} placeholder="Najmanje 8 znakova" />
+                  </>
+                )}
+                <button className="auth-submit" type="submit" disabled={!isSupabaseConfigured || authBusy}>{authBusy ? "Molimo pričekaj…" : authMode === "register" ? "Registriraj se" : authMode === "reset" ? "Pošalji upute" : authMode === "new-password" ? "Spremi novu lozinku" : "Prijavi se"}</button>
               </form>
               {authMessage && <p className="auth-message" role="status">{authMessage}</p>}
               {authMode === "login" && (
                 <p className="auth-switch"><button type="button" onClick={() => { setAuthMode("reset"); setAuthMessage(""); }}>Zaboravljena lozinka?</button></p>
               )}
-              <p className="auth-switch">
+              {authMode !== "new-password" && <p className="auth-switch">
                 {authMode === "register" ? "Već imaš račun?" : authMode === "reset" ? "Sjetio/la si se lozinke?" : "Nemaš račun?"}{" "}
                 <button type="button" onClick={() => { setAuthMode(authMode === "register" || authMode === "reset" ? "login" : "register"); setAuthMessage(""); }}>
                   {authMode === "register" || authMode === "reset" ? "Prijava" : "Registracija"}
                 </button>
-              </p>
+              </p>}
               <p className="auth-footnote">Koristi samo testni račun dok ne provjerimo postavke i pravila pristupa.</p>
             </section>
           )}
