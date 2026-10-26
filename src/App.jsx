@@ -471,10 +471,10 @@ function App() {
 
   useEffect(() => {
     if (!supabase) return undefined;
-    supabase.auth.getSession().then(({ data, error }) => {
-      if (error) setAuthMessage("Sesiju nije moguće učitati. Pokušaj ponovno.");
-      setSession(data?.session ?? null);
-    });
+
+    // Let Supabase's INITIAL_SESSION event be the single source of truth.
+    // Running getSession() at the same time can race the auth callback and
+    // overwrite a newly restored session with a stale null value.
     const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession);
       if (nextSession?.user) {
