@@ -484,8 +484,10 @@ function App() {
         setAuthOpen(true);
       }
       if (nextSession?.user) {
-        setAuthOpen(false);
-        setAuthMessage("");
+        if (event !== "PASSWORD_RECOVERY") {
+          setAuthOpen(false);
+          setAuthMessage("");
+        }
       } else {
         setProfileLoadedForUserId(null);
         setNicknamePromptedForUserId(null);
