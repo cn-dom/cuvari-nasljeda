@@ -2429,3 +2429,34 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
 .auth-remember-row > span { display: flex; flex-direction: column; gap: 3px; }
 .auth-remember-row strong { font-size: 12px; }
 .auth-remember-row small { color: #697582; font-size: 11px; line-height: 1.4; }
+
+/* Keep the remember-me checkbox compact despite the general auth input rules. */
+.auth-layout-card .auth-form .auth-remember-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 2px 0 14px;
+  padding: 11px 12px;
+  border: 1px solid #dce4ec;
+  border-radius: 10px;
+  background: #f7f9fc;
+  color: #243f5b;
+  cursor: pointer;
+}
+.auth-layout-card .auth-form .auth-remember-row > input {
+  width: 17px;
+  min-height: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  margin: 2px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  box-shadow: none;
+  accent-color: #24537d;
+}
+.auth-layout-card .auth-form .auth-remember-row > input:focus { box-shadow: none; }
+.auth-layout-card .auth-form .auth-remember-row > span { display: flex; flex-direction: column; gap: 3px; }
+.auth-layout-card .auth-form .auth-remember-row strong { font-size: 12px; }
+.auth-layout-card .auth-form .auth-remember-row small { color: #697582; font-size: 11px; line-height: 1.4; }
