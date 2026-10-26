@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
+import { isSupabaseConfigured, setAuthRememberMePreference, supabase } from "./lib/supabase.js";
 import FloatingGlobalChat from "./FloatingGlobalChat.jsx";
 import BadgeShowcase, { BadgeRow } from "./HeritageBadges.jsx";
 import { useIsMobile } from "./hooks/use-mobile.js";
@@ -195,6 +195,7 @@ function App() {
   const [authMode, setAuthMode] = useState("login");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
+  const [authRememberMe, setAuthRememberMe] = useState(false);
   const [authBusy, setAuthBusy] = useState(false);
   const [authMessage, setAuthMessage] = useState("");
   const [session, setSession] = useState(null);
@@ -523,6 +524,8 @@ function App() {
     setAuthBusy(true);
     setAuthMessage("");
     try {
+      if (authMode === "login") setAuthRememberMePreference(authRememberMe);
+      else setAuthRememberMePreference(true);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo: window.location.origin },
@@ -567,6 +570,7 @@ function App() {
         setAuthMessage("Lozinka je uspješno promijenjena. Možeš se prijaviti novom lozinkom.");
         setAuthOpen(true);
       } else if (authMode === "register") {
+        setAuthRememberMePreference(true);
         const { data, error } = await supabase.auth.signUp({
           email: authEmail.trim(),
           password: authPassword,
@@ -578,6 +582,7 @@ function App() {
           : "Registracija je zaprimljena. Ako je potvrda e-pošte uključena, otvori poruku za potvrdu računa.");
         if (data.session) setAuthOpen(false);
       } else {
+        setAuthRememberMePreference(authRememberMe);
         const { error } = await supabase.auth.signInWithPassword({
           email: authEmail.trim(),
           password: authPassword,
@@ -3078,6 +3083,12 @@ function App() {
                     <label htmlFor="auth-password">{authMode === "new-password" ? "Nova lozinka" : "Lozinka"}</label>
                     <input id="auth-password" type="password" autoComplete={authMode === "register" || authMode === "new-password" ? "new-password" : "current-password"} value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} required minLength={8} placeholder="Najmanje 8 znakova" />
                   </>
+                )}
+                {authMode === "login" && (
+                  <label className="auth-remember-row" htmlFor="auth-remember-me">
+                    <input id="auth-remember-me" type="checkbox" checked={authRememberMe} onChange={(event) => setAuthRememberMe(event.target.checked)} />
+                    <span><strong>Zapamti me</strong><small>Ostani prijavljen/a na ovom uređaju.</small></span>
+                  </label>
                 )}
                 <button className="auth-submit" type="submit" disabled={!isSupabaseConfigured || authBusy}>{authBusy ? "Molimo pričekaj…" : authMode === "register" ? "Registriraj se" : authMode === "reset" ? "Pošalji upute" : authMode === "new-password" ? "Spremi novu lozinku" : "Prijavi se"}</button>
               </form>
