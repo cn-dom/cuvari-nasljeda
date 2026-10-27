@@ -2733,7 +2733,7 @@ function App() {
         </div>
       </header>
 
-      <main className="page-layout" id="pocetna">
+      <main className={`page-layout${activeNav === "Poruke" ? " messages-page-open" : ""}`} id="pocetna">
         <aside className="left-sidebar">
           <section className="community-card community-profile-card">
             <div className="community-banner"><span>HRVATSKA · POVIJEST · ZAJEDNIŠTVO</span><span className="community-status"><i /> ZAJEDNICA</span></div>
@@ -2843,7 +2843,7 @@ function App() {
           </div>
         </aside>
 
-        <section className={`feed-column${profileOpen || (profileViewId && profileViewId !== session?.user?.id) ? " profile-page-open" : ""}`} aria-label="PatriaSoul – Čuvari nasljeđa">
+        <section className={`feed-column${profileOpen || (profileViewId && profileViewId !== session?.user?.id) ? " profile-page-open" : ""}${activeNav === "Poruke" ? " messages-page-open" : ""}`} aria-label="PatriaSoul – Čuvari nasljeđa">
           <section className="welcome-panel" aria-label="Dobrodošlica u PatriaSoul">
             <div className="welcome-photo-layer" aria-hidden="true">
               <img
