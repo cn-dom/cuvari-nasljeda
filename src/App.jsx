@@ -271,6 +271,21 @@ function App() {
   }, [memberQuickListOpen]);
 
   useEffect(() => {
+    if (!globalSearchOpen) return undefined;
+    const closeGlobalSearch = (event) => {
+      if (event.key === "Escape" || !event.target.closest?.(".global-search-wrap")) {
+        setGlobalSearchOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", closeGlobalSearch);
+    document.addEventListener("keydown", closeGlobalSearch);
+    return () => {
+      document.removeEventListener("pointerdown", closeGlobalSearch);
+      document.removeEventListener("keydown", closeGlobalSearch);
+    };
+  }, [globalSearchOpen]);
+
+  useEffect(() => {
     if (!messageQuickOpen && !notificationQuickOpen) return undefined;
     const closeQuickPanels = (event) => {
       if (!event.target.closest?.(".header-quick-wrap")) {
