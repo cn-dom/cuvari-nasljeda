@@ -86,6 +86,16 @@ const APPROXIMATE_LOCALITIES = {
   "krasic-hrzenik": { lat:45.65627, lng:15.48728, label:"Hrženik, Krašić", precision:"Približna lokacija naselja — nije točka grobnice" },
   "betin-dvor": { lat:45.5500, lng:18.7400, label:"Betin Dvor kod Tenje", precision:"Približno područje — nije točka grobnice" },
   "stari-seles-domovinski-rat": { lat:45.5200, lng:18.7000, label:"Stari Seleš", precision:"Približno područje — nije točka grobnice" },
+  // Približne koordinate naselja ili memorijalnog područja — nikada točka grobnice.
+  "kampor-spomen-groblje": { lat:44.775, lng:14.71861, label:"Kampor, otok Rab — spomen-groblje", precision:"Približna lokacija naselja i memorijalnog područja — nije točka pojedinačnog groba", sourceUrl:"https://mapcarta.com/18781478" },
+  "jama-grijalice": { lat:45.40083, lng:14.79972, label:"Delnice — šire područje", precision:"Približna lokacija grada Delnica — nije koordinata jame Grijalice", sourceUrl:"https://www.geodatos.net/en/coordinates/croatia/delnice" },
+  "trebce-slovenija": { lat:46.0476, lng:15.63266, label:"Trebče, Bistrica ob Sotli", precision:"Približna lokacija naselja — nije koordinata masovne grobnice", sourceUrl:"https://mapcarta.com/18723484" },
+  "rugarski-klanci-podstenice": { lat:45.71638, lng:15.01553, label:"Podstenice, Slovenija", precision:"Približna lokacija naselja — nije koordinata jame u Rugarskim klancima", sourceUrl:"https://en.wikipedia.org/wiki/Podstenice" },
+  "kosnica-pri-celju": { lat:46.217475, lng:15.2425139, label:"Košnica pri Celju, Slovenija", precision:"Približna lokacija naselja — nije koordinata masovne grobnice", sourceUrl:"https://en.wikipedia.org/wiki/Ko%C5%A1nica_pri_Celju" },
+  "cerklje-na-krki": { lat:45.8844417, lng:15.5202444, label:"Cerklje ob Krki, Slovenija", precision:"Približna lokacija naselja — nije koordinata grobnice na aerodromu", sourceUrl:"https://en.wikipedia.org/wiki/Cerklje_ob_Krki" },
+  "macelj-zajednicki-ukop-2026": { lat:46.223, lng:15.845, label:"Donji Macelj — Spomen-crkva Muke Isusove", precision:"Približna lokacija naselja/memorijalnog područja — nije koordinata pojedinačnog groba", sourceUrl:"https://www.djurmanec.hr/donji-macelj/" },
+  "krizanov-jarek-macelj": { lat:46.223, lng:15.845, label:"Maceljska gora — područje Križanovog jareka", precision:"Približno područje Donjeg Maclja — nije točka masovne grobnice", sourceUrl:"https://branitelji.gov.hr/vijesti/ekshumirani-posmrtni-ostaci-na-maceljskoj-gori/3696" },
+  "lepa-bukva-macelj": { lat:46.223, lng:15.845, label:"Maceljska gora — područje Lepe Bukve", precision:"Približno područje Donjeg Maclja — nije točka sekundarne grobnice", sourceUrl:"https://branitelji.gov.hr/vijesti/zavrsena-terenska-istrazivanja-na-podrucju-maceljske-gore/3707" },
 };
 
 function getMapLocation(site) {
@@ -106,7 +116,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
   const [mapQuery, setMapQuery] = useState("");
   const [placeMatches, setPlaceMatches] = useState([]);
   const mappedSites = sites
-     .filter((site) => site.certainty === "confirmed" && getMapLocation(site))
+     .filter((site) => (site.certainty === "confirmed" || site.id === "loibacher-feld") && getMapLocation(site))
     .map((site) => ({ ...site, mapLocation: getMapLocation(site) }));
   const searchMatches = mapQuery.trim().length < 2 ? [] : sites.filter((site) => [site.name, site.area, site.period, site.detail, getMapLocation(site)?.label].filter(Boolean).join(" ").toLocaleLowerCase("hr").includes(mapQuery.trim().toLocaleLowerCase("hr"))).slice(0, 8);
 
@@ -235,9 +245,11 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
         mappedSites.forEach((site) => {
           const markerElement = document.createElement("button");
           markerElement.type = "button";
-          markerElement.className = site.mapLocation.approximate
-            ? "hp-grave-map-marker hp-grave-map-marker-approximate"
-            : "hp-grave-map-marker";
+          markerElement.className = site.id === "loibacher-feld"
+            ? "hp-grave-map-marker hp-grave-map-marker-context"
+            : site.mapLocation.approximate
+              ? "hp-grave-map-marker hp-grave-map-marker-approximate"
+              : "hp-grave-map-marker";
           markerElement.setAttribute("aria-label", "Otvori zapis: " + site.name);
           markerElement.innerHTML = '<span aria-hidden="true">✦</span>';
 
