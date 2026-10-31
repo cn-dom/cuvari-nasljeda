@@ -86,6 +86,14 @@ const APPROXIMATE_LOCALITIES = {
   "krasic-hrzenik": { lat:45.65627, lng:15.48728, label:"Hrženik, Krašić", precision:"Približna lokacija naselja — nije točka grobnice" },
   "betin-dvor": { lat:45.5500, lng:18.7400, label:"Betin Dvor kod Tenje", precision:"Približno područje — nije točka grobnice" },
   "stari-seles-domovinski-rat": { lat:45.5200, lng:18.7000, label:"Stari Seleš", precision:"Približno područje — nije točka grobnice" },
+  // Približne koordinate naselja ili memorijalnog područja — nikada točka grobnice.
+  "kampor-spomen-groblje": { lat:44.775, lng:14.71861, label:"Kampor, otok Rab — spomen-groblje", precision:"Približna lokacija naselja i memorijalnog područja — nije točka pojedinačnog groba", sourceUrl:"https://mapcarta.com/18781478" },
+  "jama-grijalice": { lat:45.40083, lng:14.79972, label:"Delnice — šire područje", precision:"Približna lokacija grada Delnica — nije koordinata jame Grijalice", sourceUrl:"https://www.geodatos.net/en/coordinates/croatia/delnice" },
+  "trebce-slovenija": { lat:46.0476, lng:15.63266, label:"Trebče, Bistrica ob Sotli", precision:"Približna lokacija naselja — nije koordinata masovne grobnice", sourceUrl:"https://mapcarta.com/18723484" },
+  "rugarski-klanci-podstenice": { lat:45.71638, lng:15.01553, label:"Podstenice, Slovenija", precision:"Približna lokacija naselja — nije koordinata jame u Rugarskim klancima", sourceUrl:"https://en.wikipedia.org/wiki/Podstenice" },
+  "kosnica-pri-celju": { lat:46.217475, lng:15.2425139, label:"Košnica pri Celju, Slovenija", precision:"Približna lokacija naselja — nije koordinata masovne grobnice", sourceUrl:"https://en.wikipedia.org/wiki/Ko%C5%A1nica_pri_Celju" },
+  "cerklje-na-krki": { lat:45.8844417, lng:15.5202444, label:"Cerklje ob Krki, Slovenija", precision:"Približna lokacija naselja — nije koordinata grobnice na aerodromu", sourceUrl:"https://en.wikipedia.org/wiki/Cerklje_ob_Krki" },
+  "macelj-zajednicki-ukop-2026": { lat:46.223, lng:15.845, label:"Donji Macelj — Spomen-crkva Muke Isusove", precision:"Približna lokacija naselja/memorijalnog područja — nije koordinata pojedinačnog groba", sourceUrl:"https://www.djurmanec.hr/donji-macelj/" },
 };
 
 function getMapLocation(site) {
