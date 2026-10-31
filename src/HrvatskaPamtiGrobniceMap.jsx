@@ -269,6 +269,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
           recordLink.type = "button";
           recordLink.textContent = "Otvori evidencijski zapis";
           recordLink.addEventListener("click", () => {
+            window.dispatchEvent(new CustomEvent("hp-open-site-record", { detail: { siteId: site.id } }));
             document.getElementById("hp-site-" + site.id)?.scrollIntoView({ behavior: "smooth", block: "center" });
           });
           actions.appendChild(recordLink);
