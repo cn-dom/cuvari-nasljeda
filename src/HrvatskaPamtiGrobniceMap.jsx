@@ -94,6 +94,8 @@ const APPROXIMATE_LOCALITIES = {
   "kosnica-pri-celju": { lat:46.217475, lng:15.2425139, label:"Košnica pri Celju, Slovenija", precision:"Približna lokacija naselja — nije koordinata masovne grobnice", sourceUrl:"https://en.wikipedia.org/wiki/Ko%C5%A1nica_pri_Celju" },
   "cerklje-na-krki": { lat:45.8844417, lng:15.5202444, label:"Cerklje ob Krki, Slovenija", precision:"Približna lokacija naselja — nije koordinata grobnice na aerodromu", sourceUrl:"https://en.wikipedia.org/wiki/Cerklje_ob_Krki" },
   "macelj-zajednicki-ukop-2026": { lat:46.223, lng:15.845, label:"Donji Macelj — Spomen-crkva Muke Isusove", precision:"Približna lokacija naselja/memorijalnog područja — nije koordinata pojedinačnog groba", sourceUrl:"https://www.djurmanec.hr/donji-macelj/" },
+  "krizanov-jarek-macelj": { lat:46.223, lng:15.845, label:"Maceljska gora — područje Križanovog jareka", precision:"Približno područje Donjeg Maclja — nije točka masovne grobnice", sourceUrl:"https://branitelji.gov.hr/vijesti/ekshumirani-posmrtni-ostaci-na-maceljskoj-gori/3696" },
+  "lepa-bukva-macelj": { lat:46.223, lng:15.845, label:"Maceljska gora — područje Lepe Bukve", precision:"Približno područje Donjeg Maclja — nije točka sekundarne grobnice", sourceUrl:"https://branitelji.gov.hr/vijesti/zavrsena-terenska-istrazivanja-na-podrucju-maceljske-gore/3707" },
 };
 
 function getMapLocation(site) {
