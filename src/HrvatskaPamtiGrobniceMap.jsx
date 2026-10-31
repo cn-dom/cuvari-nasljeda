@@ -116,7 +116,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
   const [mapQuery, setMapQuery] = useState("");
   const [placeMatches, setPlaceMatches] = useState([]);
   const mappedSites = sites
-     .filter((site) => site.certainty === "confirmed" && getMapLocation(site))
+     .filter((site) => (site.certainty === "confirmed" || site.id === "loibacher-feld") && getMapLocation(site))
     .map((site) => ({ ...site, mapLocation: getMapLocation(site) }));
   const searchMatches = mapQuery.trim().length < 2 ? [] : sites.filter((site) => [site.name, site.area, site.period, site.detail, getMapLocation(site)?.label].filter(Boolean).join(" ").toLocaleLowerCase("hr").includes(mapQuery.trim().toLocaleLowerCase("hr"))).slice(0, 8);
 
@@ -245,9 +245,11 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
         mappedSites.forEach((site) => {
           const markerElement = document.createElement("button");
           markerElement.type = "button";
-          markerElement.className = site.mapLocation.approximate
-            ? "hp-grave-map-marker hp-grave-map-marker-approximate"
-            : "hp-grave-map-marker";
+          markerElement.className = site.id === "loibacher-feld"
+            ? "hp-grave-map-marker hp-grave-map-marker-context"
+            : site.mapLocation.approximate
+              ? "hp-grave-map-marker hp-grave-map-marker-approximate"
+              : "hp-grave-map-marker";
           markerElement.setAttribute("aria-label", "Otvori zapis: " + site.name);
           markerElement.innerHTML = '<span aria-hidden="true">✦</span>';
 
