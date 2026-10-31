@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import HrvatskaPamtiGrobniceMap from "./HrvatskaPamtiGrobniceMap.jsx";
 import "./HrvatskaPamti.css";
 import SiteChrome, { SiteFooter } from "./SiteChrome.jsx";
@@ -112,6 +112,15 @@ export default function HrvatskaPamtiGrobnice() {
   const [period, setPeriod] = useState("Sve lokacije");
   const [country, setCountry] = useState("Sve države");
   const [expanded, setExpanded] = useState("");
+  const contextSites = useMemo(() => sites.filter(site => site.certainty === "context"), []);
+  useEffect(() => {
+    const openRecord = (event) => {
+      const siteId = event?.detail?.siteId;
+      if (siteId) setExpanded(siteId);
+    };
+    window.addEventListener("hp-open-site-record", openRecord);
+    return () => window.removeEventListener("hp-open-site-record", openRecord);
+  }, []);
   // Prikazujemo potvrđene nalaze; nacionalnost i povezanost sa žrtvama navodimo zasebno prema izvorima.
   // Kontekstualni zapisi bez potvrđenog nalaza ne ulaze u ovaj glavni popis.
   const confirmedSites = useMemo(() => sites.filter(site => site.certainty === "confirmed" || site.duplicateReview?.startsWith("possible-overlap:")), []);
@@ -276,6 +285,34 @@ export default function HrvatskaPamtiGrobnice() {
         })}
       </div>
       {!results.length&&<div className="hp-catalog-empty"><strong>Nema pronađenih zapisa</strong><p>Promijeni pojam ili odaberi drugo razdoblje.</p></div>}
+      {contextSites.length > 0 && <section className="hp-context-records" aria-labelledby="hp-context-records-title">
+        <div className="hp-research-updates-heading">
+          <span className="hp-section-kicker">POVIJESNI KONTEKST · ODVOJENO OD GROBNICA</span>
+          <h2 id="hp-context-records-title">Mjesta predaje i <em>sjećanja.</em></h2>
+          <p>Ovi zapisi dokumentiraju povijesna mjesta važna za razumijevanje stradanja i poraća. Ne predstavljaju potvrđene grobnice i ne ulaze u broj potvrđenih nalazišta.</p>
+        </div>
+        <div className="hp-register-cards" aria-label="Kartice povijesnih mjesta i konteksta">
+          {contextSites.map((site,index) => {
+            const expandedSite = expanded === site.id;
+            return <article className={`hp-grave-card hp-grave-card-context ${expandedSite ? "is-expanded" : ""}`} id={"hp-site-" + site.id} key={site.id}>
+              <div className="hp-grave-card-topline">
+                <span className="hp-grave-card-number">POVIJESNI KONTEKST / {String(index+1).padStart(2,"0")}</span>
+                <span className="hp-grave-card-location-tag is-area">Nije potvrđena grobnica</span>
+              </div>
+              <div className="hp-grave-card-main"><div className="hp-grave-card-symbol" aria-hidden="true">✦</div><div className="hp-grave-card-title"><h3>{site.name}</h3><p>{site.area}{site.country ? " · " + site.country : ""}</p></div></div>
+              <div className="hp-grave-card-meta"><span>{site.period}</span><span>{site.year}</span></div>
+              <p className="hp-grave-card-summary">{site.foundLabel || "Povijesni kontekst; broj žrtava na samom mjestu nije potvrđen ovim zapisom."}</p>
+              <div className="hp-grave-card-status">{site.status}</div>
+              {expandedSite && <div className="hp-grave-card-detail">
+                <section><span>POVIJESNI OPIS</span><p>{site.detail}</p></section>
+                <section><span>LOKACIJA I PRECIZNOST</span><p>{site.publicLocation || site.coordinateNote || "Približno područje; nije točka pojedinačnog groba."}</p></section>
+                <section><span>IZVOR I PROVJERA</span><p>{site.source || "Izvor nije zasebno naveden u ovom zapisu."}{site.sourceUrl && <> · <a href={site.sourceUrl} target="_blank" rel="noreferrer">Otvori izvor ↗</a></>}</p></section>
+              </div>}
+              <button className="hp-grave-card-action" type="button" aria-expanded={expandedSite} onClick={() => setExpanded(expandedSite ? "" : site.id)}>{expandedSite ? "Zatvori zapis" : "Otvori cijeli zapis"}<span>{expandedSite ? "−" : "+"}</span></button>
+            </article>;
+          })}
+        </div>
+      </section>}
       <aside className="hp-register-principle"><span>✦</span><div><h3>Ne postoji žrtva drugog reda.</h3><p>Ovaj registar ne rangira patnju niti pretvara stradanje u natjecanje. Povijesno razdoblje, pripadnost i okolnosti navodimo precizno; odgovornost za zločine opisujemo na temelju dokaza, a ne kolektivne krivnje.</p></div></aside>
       <p className="hp-register-disclaimer">Napomena o potpunosti: glavni registar prikazuje zapise s potvrđenim nalazom ili službeno dokumentiranim statusom. To ne znači da je nacionalnost svake osobe utvrđena niti da je registar potpun. Broj ekshumiranih, broj identificiranih i ukupan broj žrtava nisu ista mjera i ne zbrajaju se u jednu ukupnu brojku. Statusi se ažuriraju prema novim službenim nalazima. Za svaku grobnicu objavljujemo koordinate same lokacije samo kada ih možemo povezati s provjerljivim izvorom. Kada je grobnica aktivno istraživana ili izvor navodi samo šire područje, jasno označavamo da koordinate još nisu potvrđene; ne izmišljamo točnost i ne predstavljamo središte naselja kao grobnicu. Uz unesene koordinate prikazujemo izvor i poveznicu radi neovisne provjere.</p>
     </section>
