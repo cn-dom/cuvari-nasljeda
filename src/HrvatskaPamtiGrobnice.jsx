@@ -253,7 +253,8 @@ export default function HrvatskaPamtiGrobnice() {
       <HrvatskaPamtiGrobniceMap sites={results} />
       <div className="hp-register-cards" aria-label="Kartični prikaz potvrđenih nalazišta">
         {results.map((site,index)=>{
-          const exactCoordinate=Boolean(site.coordinates && !String(site.coordinates.precision||"").toLocaleLowerCase("hr").includes("približ"));
+          const precisionText=String(site.coordinates?.precision || "").toLocaleLowerCase("hr");
+          const exactCoordinate=Boolean(site.coordinates && /(točna|tocna|precizna|provjerena|exact)/.test(precisionText) && !/(približ|pribliz|okvirn|područj|podrucj)/.test(precisionText));
           const expandedSite=expanded===site.id;
           return <article className={`hp-grave-card ${expandedSite?"is-expanded":""}`} id={"hp-site-"+site.id} key={site.id}>
             <div className="hp-grave-card-topline"><span className="hp-grave-card-number">EVIDENCIJA / {String(index+1).padStart(2,"0")}</span><span className={`hp-grave-card-location-tag ${exactCoordinate?"is-exact":"is-area"}`}>{exactCoordinate?"Provjerena koordinata":"Područje / naselje"}</span></div>
