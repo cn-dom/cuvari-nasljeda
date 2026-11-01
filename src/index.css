@@ -27,9 +27,28 @@ button:focus-visible, a:focus-visible, textarea:focus-visible { outline: 3px sol
 a { color: inherit; text-decoration: none; }
 button { -webkit-tap-highlight-color: transparent; }
 .app-shell { min-height: 100vh; }
-.preview-ribbon { min-height: 32px; display: flex; align-items: center; justify-content: center; gap: 9px; padding: 6px 16px; color: #e9edf2; background: #101f32; font-size: 10px; font-weight: 800; letter-spacing: .1em; }
-.preview-ribbon > span:last-child { color: #bdc8d4; font-size: 11px; font-weight: 400; letter-spacing: 0; margin-left: 8px; }
-.status-dot { width: 7px; height: 7px; border-radius: 50%; background: #d9b86d; box-shadow: 0 0 0 3px #ffffff15; }
+.community-welcome-ribbon { position: relative; min-height: 42px; display: flex; align-items: center; overflow: hidden; color: #f4f0e6; background: linear-gradient(105deg, #0b1c31 0%, #142d49 52%, #0b1c31 100%); border-bottom: 1px solid #b99a5a66; }
+.community-welcome-ribbon::before,
+.community-welcome-ribbon::after { content: ""; position: absolute; z-index: 1; top: 0; bottom: 0; width: 34px; pointer-events: none; }
+.community-welcome-ribbon::before { left: 0; background: linear-gradient(90deg, #0b1c31, transparent); }
+.community-welcome-ribbon::after { right: 0; background: linear-gradient(270deg, #0b1c31, transparent); }
+.community-welcome-track { display: flex; width: max-content; flex: 0 0 auto; animation: community-welcome-scroll 58s linear infinite; }
+.community-welcome-ribbon:hover .community-welcome-track,
+.community-welcome-ribbon:focus-within .community-welcome-track { animation-play-state: paused; }
+.community-welcome-message { display: inline-flex; align-items: center; gap: 22px; flex: 0 0 auto; padding: 10px 30px; white-space: nowrap; font-size: 11px; letter-spacing: .015em; }
+.community-welcome-message strong { color: #e4c47f; font-size: 10px; letter-spacing: .11em; }
+.community-welcome-message i { color: #e4eaf1; font-style: normal; }
+.community-welcome-message em { color: #f1d99f; font-style: italic; }
+@keyframes community-welcome-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+  .community-welcome-track { animation: none; transform: none; }
+  .community-welcome-message:nth-child(2) { display: none; }
+}
+@media (max-width: 760px) {
+  .community-welcome-ribbon { min-height: 40px; }
+  .community-welcome-message { gap: 14px; padding: 9px 22px; font-size: 10px; }
+  .community-welcome-message strong { font-size: 9px; }
+}
 .topbar { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 0 max(24px, calc((100vw - 1420px) / 2)); background: #fff; border-bottom: 1px solid var(--line); }
 .brand { display: inline-flex; align-items: center; gap: 12px; flex-shrink: 0; }
 .brand-mark { display: block; width: 42px; height: 42px; flex: 0 0 42px; object-fit: contain; object-position: center; position: relative; overflow: hidden; border-radius: 10px; border: 1px solid #e0e5e9; background: #fff; box-shadow: 0 3px 8px #152c4612; }
