@@ -96,6 +96,12 @@ const APPROXIMATE_LOCALITIES = {
   "macelj-zajednicki-ukop-2026": { lat:46.223, lng:15.845, label:"Donji Macelj — Spomen-crkva Muke Isusove", precision:"Približna lokacija naselja/memorijalnog područja — nije koordinata pojedinačnog groba", sourceUrl:"https://www.djurmanec.hr/donji-macelj/" },
   "krizanov-jarek-macelj": { lat:46.223, lng:15.845, label:"Maceljska gora — područje Križanovog jareka", precision:"Približno područje Donjeg Maclja — nije točka masovne grobnice", sourceUrl:"https://branitelji.gov.hr/vijesti/ekshumirani-posmrtni-ostaci-na-maceljskoj-gori/3696" },
   "lepa-bukva-macelj": { lat:46.223, lng:15.845, label:"Maceljska gora — područje Lepe Bukve", precision:"Približno područje Donjeg Maclja — nije točka sekundarne grobnice", sourceUrl:"https://branitelji.gov.hr/vijesti/zavrsena-terenska-istrazivanja-na-podrucju-maceljske-gore/3707" },
+
+  "jazovka": { lat:45.7350, lng:15.4140, label:"Jama Jazovka — šire područje Sošica", precision:"Približno područje naselja i šume — nije koordinata ulaza u jamu", sourceUrl:"https://branitelji.gov.hr/vijesti/odrzan-posljednji-ispracaj-i-ukop-814-zrtava-iz-masovne-grobnice-jame-jazovke/5025" },
+  "gospic-sv-marija-magdalena": { lat:44.5458, lng:15.3735, label:"Gospić — groblje sv. Marije Magdalene", precision:"Približna lokacija groblja i okolnog područja — nije točka iskopa", sourceUrl:"https://branitelji.gov.hr/vijesti/zavrsena-ekshumacija-posmrtnih-ostataka-zrtava-drugog-svjetskog-rata-i-poslijeratnog-razdoblja-u-gospicu/4480" },
+  "prudnice-brdovec": { lat:45.8650, lng:15.7380, label:"Prudnice, Brdovec", precision:"Približna lokacija naselja/područja — nije točka grobne jame", sourceUrl:"https://branitelji.gov.hr/vijesti/u-laducu-pokopane-133-zrtve-poslijeratnog-razdoblja-drugog-svjetskog-rata/4116" },
+  "francikovac-senj": { lat:44.9890, lng:14.9050, label:"Senj — šire područje", precision:"Približna lokacija grada/područja — nije točka grobnice", sourceUrl:"https://vlada.gov.hr/hrvatska-preuzela-od-slovenije-posmrtne-ostatke-500-hrvatskih-zrtava-iz-drugog-svjetskog-rata-i-poslijeratnog-razdoblja/46678" },
+  "tomasica-garesnica": { lat:45.5750, lng:16.9300, label:"Tomašica kod Garešnice", precision:"Približna lokacija naselja — nije točka grobnice", sourceUrl:"https://branitelji.gov.hr/print.aspx?id=3629&url=print" },
 };
 
 function getMapLocation(site) {
