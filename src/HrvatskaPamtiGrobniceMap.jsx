@@ -104,6 +104,21 @@ const APPROXIMATE_LOCALITIES = {
   "prudnice-brdovec": { lat:45.8650, lng:15.7380, label:"Prudnice, Brdovec", precision:"Približna lokacija naselja/područja — nije točka grobne jame", sourceUrl:"https://branitelji.gov.hr/vijesti/u-laducu-pokopane-133-zrtve-poslijeratnog-razdoblja-drugog-svjetskog-rata/4116" },
   "francikovac-senj": { lat:44.9890, lng:14.9050, label:"Senj — šire područje", precision:"Približna lokacija grada/područja — nije točka grobnice", sourceUrl:"https://vlada.gov.hr/hrvatska-preuzela-od-slovenije-posmrtne-ostatke-500-hrvatskih-zrtava-iz-drugog-svjetskog-rata-i-poslijeratnog-razdoblja/46678" },
   "tomasica-garesnica": { lat:45.5750, lng:16.9300, label:"Tomašica kod Garešnice", precision:"Približna lokacija naselja — nije točka grobnice", sourceUrl:"https://branitelji.gov.hr/print.aspx?id=3629&url=print" },
+
+  "crngrob-mikrolokacije-1-2-5": { lat:46.19998, lng:14.30734, label:"Crngrob — šire šumsko područje", precision:"Približna lokacija sela i šumskog područja — nije točka grobišta 1, 2 ili 5", sourceUrl:"https://branitelji.gov.hr/vijesti/u-sloveniji-u-tijeku-terenska-istrazivanja-grobista-iz-drugog-svjetskog-rata-i-poslijeratnog-razdoblja/5180" },
+  "celje-klukec": { lat:46.2300, lng:15.2600, label:"Golovec, Celje", precision:"Približno područje Golovca — nije točka iskopa kod Klukeca", sourceUrl:"https://hrcak.srce.hr/file/423862" },
+  "celje-zgornja-hudinja": { lat:46.2450, lng:15.2750, label:"Zgornja Hudinja, Celje", precision:"Približno područje naselja i škole — nije točka iskopa u protutenkovskom rovu", sourceUrl:"https://hrcak.srce.hr/file/423862" },
+  "mostec-protitankovski-rov": { lat:45.90015, lng:15.62863, label:"Mostec kod Brežica", precision:"Približna lokacija naselja — nije trasa protutenkovskog rova ni točka iskopa", sourceUrl:"https://www.arheologija.si/files/2023/06/Arheologija-v-letu-2022-WEB.pdf" },
+  "raduse-zancani": { lat:46.48333, lng:15.06667, label:"Raduše — područje Ježevce", precision:"Približna lokacija naselja Raduše — nije točka grobišta Žančani", sourceUrl:"https://hrcak.srce.hr/file/423862" },
+  "lobnica-ruska-koca-areh-3": { lat:46.49505, lng:15.50823, label:"Areh, Pohorje", precision:"Približna lokacija Ruške koče — nije točka grobišta Areh 3", sourceUrl:"https://hrcak.srce.hr/file/423862" },
+  "glazuta-brezno-konfin-1": { lat:45.64852, lng:14.72860, label:"Brezno pri Konfinu 1", precision:"Približna zemljopisna oznaka jame — nije koordinata ulaza ni grobišta", sourceUrl:"https://www.fhs.hr/_download/repository/Kultura%20sje%C4%87anja%20na%20ratne%20i%20poratne%20žrtve%20sken%202.pdf" },
+  "kamnik-cuzakov-travnik": { lat:46.2250, lng:14.6120, label:"Kamnik — područje tvornice Svit", precision:"Približno područje tvornice Svit — nije točka pet grobova", sourceUrl:"https://ojs.srce.hr/casopis-za-suvremenu-povijest/article/download/23843/13440/97820" },
+  "podstenice-brezno-3": { lat:45.71638, lng:15.01553, label:"Podstenice, Kočevski Rog", precision:"Približna lokacija naselja — nije točka Brezna 3", sourceUrl:"https://hrcak.srce.hr/file/423862" },
+  "zgornja-lipnica-lancovo-1": { lat:46.32505, lng:14.17167, label:"Zgornja Lipnica — Lancovo", precision:"Približna lokacija naselja — nije točka grobišta Lancovo 1", sourceUrl:"https://hrcak.srce.hr/file/423862" },
+  "ples-vinagora-1": { lat:46.1000, lng:15.7200, label:"Ples — šire područje", precision:"Približna lokacija mjesta Ples — nije točka grobišta pod hribom Vinagora 1", sourceUrl:"https://hrcak.srce.hr/file/423862" },
+  "zavrse-herlah": { lat:46.4700, lng:15.1700, label:"Završe — šire područje", precision:"Približna lokacija naselja Završe — nije točka grobišta pri domaćiji Herlah", sourceUrl:"https://hrcak.srce.hr/file/423862" },
+  "tezno-gozd-4-5-6": { lat:46.5300, lng:15.6800, label:"Tezenski gozd, Dogoše", precision:"Približno područje Dogoša i Tezenskog gozda — nije točka grobišta 4, 5 ili 6", sourceUrl:"https://hrcak.srce.hr/file/423862" },
+
 };
 
 function getMapLocation(site) {
