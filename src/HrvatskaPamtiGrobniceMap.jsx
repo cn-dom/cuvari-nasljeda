@@ -115,8 +115,8 @@ const APPROXIMATE_LOCALITIES = {
   "kamnik-cuzakov-travnik": { lat:46.2250, lng:14.6120, label:"Kamnik — područje tvornice Svit", precision:"Približno područje tvornice Svit — nije točka pet grobova", sourceUrl:"https://ojs.srce.hr/casopis-za-suvremenu-povijest/article/download/23843/13440/97820" },
   "podstenice-brezno-3": { lat:45.71638, lng:15.01553, label:"Podstenice, Kočevski Rog", precision:"Približna lokacija naselja — nije točka Brezna 3", sourceUrl:"https://hrcak.srce.hr/file/423862" },
   "zgornja-lipnica-lancovo-1": { lat:46.32505, lng:14.17167, label:"Zgornja Lipnica — Lancovo", precision:"Približna lokacija naselja — nije točka grobišta Lancovo 1", sourceUrl:"https://hrcak.srce.hr/file/423862" },
-  "ples-vinagora-1": { lat:46.1000, lng:15.7200, label:"Ples — šire područje", precision:"Približna lokacija mjesta Ples — nije točka grobišta pod hribom Vinagora 1", sourceUrl:"https://hrcak.srce.hr/file/423862" },
-  "zavrse-herlah": { lat:46.4700, lng:15.1700, label:"Završe — šire područje", precision:"Približna lokacija naselja Završe — nije točka grobišta pri domaćiji Herlah", sourceUrl:"https://hrcak.srce.hr/file/423862" },
+  "ples-vinagora-1": { lat:46.07471, lng:15.65315, label:"Ples, Bistrica ob Sotli", precision:"Približna lokacija naselja Ples — nije točka grobišta pod hribom Vinagora 1", sourceUrl:"https://hrcak.srce.hr/file/423862" },
+  "zavrse-herlah": { lat:46.42087, lng:15.16172, label:"Završe, Mislinja", precision:"Približna lokacija naselja Završe — nije točka grobišta pri domaćiji Herlah, kućni broj 86", sourceUrl:"https://hrcak.srce.hr/file/423862" },
   "tezno-gozd-4-5-6": { lat:46.5300, lng:15.6800, label:"Tezenski gozd, Dogoše", precision:"Približno područje Dogoša i Tezenskog gozda — nije točka grobišta 4, 5 ili 6", sourceUrl:"https://hrcak.srce.hr/file/423862" },
 
 };
