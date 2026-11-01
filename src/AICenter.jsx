@@ -228,7 +228,21 @@ export default function AICenter() {
 
   return <main className="ai-center-page">
     <SiteChrome section="Kultura i znanje" links={[{"label":"PatriaSoul Centar","href":"/ai-centar.html"},{"label":"AI alati","href":"#ai-tools"},{"label":"Pravila korištenja","href":"/pravila-koristenja.html"}]}/>
-    <div className="ai-center-layout">
+    <section className="ai-research-welcome">
+      <div className="ai-research-welcome-copy">
+        <span className="ai-kicker">PATRiASOUL · ISTRAŽIVAČKI PROSTOR</span>
+        <h1>Upoznaj Hrvatsku. Istraži njezino nasljeđe.</h1>
+        <p>Mir i dobro! Ovdje možeš postavljati pitanja AI vodiču, učiti, analizirati fotografije i dokumente te nastaviti prema provjerenim tematskim sadržajima PatriaSoula.</p>
+      </div>
+      <a className="ai-return-chat" href="/?otvori-domoljubni-chat=1"><ArrowLeft size={16}/> Natrag u Domoljubni chat</a>
+    </section>
+    <nav className="ai-research-shortcuts" aria-label="Povezani sadržaji PatriaSoula">
+      <a href="/hrvatska-pamti-grobnice.html"><span>✝</span><strong>Hrvatska pamti</strong><small>Memorijalni zapisi i mjesta sjećanja</small></a>
+      <a href="/virtualni-muzej.html"><span>▧</span><strong>Virtualni muzej</strong><small>Predmeti, priče i kulturna baština</small></a>
+      <a href="/kviz/"><span>🧠</span><strong>PatriaSoul kviz</strong><small>Provjeri i proširi svoje znanje</small></a>
+      <a href="/forum.html"><span>▤</span><strong>Domoljubni forum</strong><small>Teme i razgovori zajednice</small></a>
+    </nav>
+    <div className="ai-center-layout" id="ai-tools">
       <nav className="ai-tools-nav" aria-label="AI alati">
         {modes.map((item) => { const ItemIcon = item.icon; return <button key={item.id} type="button" className={mode === item.id ? "ai-tool-tab active" : "ai-tool-tab"} onClick={() => { setMode(item.id); setError(""); setStatus(""); }}><ItemIcon size={18} /><span><strong>{item.label}</strong><small>{item.description}</small></span></button>; })}
       </nav>
@@ -238,7 +252,7 @@ export default function AICenter() {
         {status && <div className="ai-alert success" role="status"><CheckCircle2 size={17} />{status}</div>}
         {(mode === "guide" || mode === "study" || mode === "voice") && <>
           <div className="ai-chat-log" aria-live="polite">
-            {!messages.length && <div className="ai-empty-state"><BrainCircuit size={30} /><h2>Što želiš istražiti?</h2><p>Pitaj o povijesti, gradovima, običajima, sakralnoj baštini ili pojmu koji želiš bolje razumjeti.</p><div className="ai-suggestions">{STARTER_QUESTIONS.map((item) => <button key={item} type="button" onClick={() => setPrompt(item)}>{item}</button>)}</div></div>}
+            {!messages.length && <div className="ai-empty-state"><BrainCircuit size={30} /><h2>Što želiš istražiti?</h2><p>Postavi pitanje o hrvatskoj povijesti, gradovima, običajima, vjeri ili baštini. Za konkretne memorijalne zapise, muzejske sadržaje i kviz otvori povezane cjeline iznad.</p><div className="ai-suggestions">{STARTER_QUESTIONS.map((item) => <button key={item} type="button" onClick={() => setPrompt(item)}>{item}</button>)}</div></div>}
             {messages.map((item, index) => <article key={index} className={"ai-message " + item.role}><span>{item.role === "user" ? "Ti" : "PatriaSoul AI"}</span><p>{item.content}</p></article>)}
             {busy && <div className="ai-thinking"><LoaderCircle size={17} className="ai-spin" /> AI priprema odgovor…</div>}
           </div>
