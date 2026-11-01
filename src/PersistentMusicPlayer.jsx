@@ -20,7 +20,7 @@ export default function PersistentMusicPlayer() {
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const [minimized, setMinimized] = useState(false);
+  const [minimized, setMinimized] = useState(true);
   const [position, setPosition] = useState(null);
   const dragRef = useRef(null);
   const iframeRef = useRef(null);
@@ -290,90 +290,115 @@ export default function PersistentMusicPlayer() {
   const panelStyle = {
     position: "fixed", zIndex: 10000,
     ...(position ? { left: position.x, top: position.y, right: "auto", bottom: "auto" } : { right: 18, bottom: 18 }),
-    width: minimized ? "min(300px, calc(100vw - 24px))" : "min(380px, calc(100vw - 24px))",
-    maxHeight: "min(82vh, 680px)", overflowY: "auto", padding: 12, display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) auto", gap: 10, alignItems: "start",
-    color: "#fff", background: "linear-gradient(145deg, #071b35, #12345a)",
-    border: "1px solid rgba(255,255,255,.18)", borderRadius: 16,
+    width: minimized ? 58 : "min(380px, calc(100vw - 24px))",
+    height: minimized ? 58 : "auto",
+    maxHeight: minimized ? 58 : "min(82vh, 680px)",
+    overflow: minimized ? "visible" : "auto",
+    padding: minimized ? 4 : 12,
+    display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto",
+    gap: 10, alignItems: "start", color: "#fff",
+    background: "linear-gradient(145deg, #071b35, #12345a)",
+    border: "1px solid rgba(255,255,255,.2)",
+    borderRadius: minimized ? 999 : 16,
     boxShadow: "0 12px 40px rgba(0,0,0,.38)", touchAction: "auto"
+  };
+
+  const iconButtonStyle = {
+    cursor: "pointer", border: "1px solid rgba(255,255,255,.22)",
+    borderRadius: 9, color: "#fff", background: "rgba(255,255,255,.1)",
+    width: 32, height: 32, display: "grid", placeItems: "center",
+    fontSize: 17, flexShrink: 0
   };
 
   return (
     <aside aria-label="Hrvatski Val Player — nastavi slušanje" style={panelStyle}>
-      <div style={{ minWidth: 0 }}>
-        <div
-          onPointerDown={startDrag}
-          onPointerMove={moveDrag}
-          onPointerUp={endDrag}
-          onPointerCancel={endDrag}
-          style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: minimized ? 0 : 8, cursor: "move", touchAction: "none", userSelect: "none" }}
-          title="Povuci za pomicanje playera"
+      {minimized ? (
+        <button
+          type="button"
+          onClick={() => setMinimized(false)}
+          aria-label="Otvori Hrvatski Val Player"
+          title={track?.title ? `Otvori player — ${track.title}` : "Otvori Hrvatski Val Player"}
+          style={{ width: 48, height: 48, border: 0, borderRadius: "50%", padding: 5, cursor: "pointer", display: "grid", placeItems: "center", position: "relative", background: "rgba(255,255,255,.08)" }}
         >
-          <img src="/assets/images/1000000982.png" alt="" style={{ width: 28, height: 28, objectFit: "contain", pointerEvents: "none" }} />
-          <div style={{ minWidth: 0, flex: 1, pointerEvents: "none" }}>
-            <strong style={{ display: "block", fontSize: 11, letterSpacing: ".08em" }}>HRVATSKI VAL PLAYER</strong>
-            <span style={{ display: "block", fontSize: 12, opacity: .82, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{track?.title || "Odaberi pjesmu"}</span>
-          </div>
-          <span aria-hidden="true" style={{ fontSize: 12, opacity: .6 }}>⠿</span>
-        </div>
-
-        {!minimized && <>
-          <form onSubmit={searchTracks} style={{ display: "flex", gap: 6, marginBottom: 9 }}>
-            <input
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              onFocus={() => setSearchOpen(true)}
-              placeholder="Pronađi pjesmu ili izvođača…"
-              aria-label="Pretraži pjesme"
-              style={{ minWidth: 0, width: "100%", padding: "9px 10px", borderRadius: 9, border: "1px solid rgba(255,255,255,.22)", background: "rgba(255,255,255,.1)", color: "#fff", fontSize: 12, outlineOffset: 2 }}
-            />
-            <button type="submit" disabled={searching || !query.trim()} style={{ flexShrink: 0, padding: "0 10px", border: 0, borderRadius: 9, color: "#fff", background: "#c52d3a", fontWeight: 700, fontSize: 12, cursor: searching ? "wait" : "pointer", opacity: searching || !query.trim() ? .65 : 1 }}>
-              {searching ? "…" : "Traži"}
-            </button>
-          </form>
-
-          {searchOpen && (results.length > 0 || searchError || searching) && (
-            <div style={{ display: "grid", gap: 6, marginBottom: 9 }}>
-              {searching && <span style={{ fontSize: 12, opacity: .8 }}>Tražim pjesme…</span>}
-              {searchError && <span role="status" style={{ fontSize: 12, color: "#ffd2d6" }}>{searchError}</span>}
-              {results.map((result) => (
-                <button key={result.id} type="button" onClick={() => playTrack(result, results)} style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", minWidth: 0, padding: 6, textAlign: "left", border: "1px solid rgba(255,255,255,.13)", borderRadius: 9, background: "rgba(255,255,255,.07)", color: "#fff", cursor: "pointer" }}>
-                  <img src={result.thumbnail} alt="" style={{ width: 54, height: 34, flexShrink: 0, objectFit: "cover", borderRadius: 5, background: "#000" }} />
-                  <span style={{ minWidth: 0, flex: 1 }}>
-                    <strong style={{ fontSize: 11, lineHeight: 1.35, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{result.title}</strong>
-                    <small style={{ display: "block", marginTop: 2, fontSize: 10, opacity: .7, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{result.artist}</small>
-                  </span>
-                  <span aria-hidden="true" style={{ color: "#ffb8c0", fontSize: 16 }}>▶</span>
-                </button>
-              ))}
+          <img src="/assets/images/1000000982.png" alt="" style={{ width: 38, height: 38, objectFit: "contain" }} />
+          <span aria-hidden="true" style={{ position: "absolute", right: -1, bottom: -1, width: 19, height: 19, borderRadius: "50%", display: "grid", placeItems: "center", background: "#c52d3a", border: "2px solid #0b2440", color: "#fff", fontSize: 9 }}>{track ? "♫" : "▶"}</span>
+        </button>
+      ) : (
+        <>
+          <div style={{ minWidth: 0 }}>
+            <div
+              onPointerDown={startDrag}
+              onPointerMove={moveDrag}
+              onPointerUp={endDrag}
+              onPointerCancel={endDrag}
+              style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, cursor: "move", touchAction: "none", userSelect: "none" }}
+              title="Povuci za pomicanje playera"
+            >
+              <img src="/assets/images/1000000982.png" alt="" style={{ width: 28, height: 28, objectFit: "contain", pointerEvents: "none" }} />
+              <div style={{ minWidth: 0, flex: 1, pointerEvents: "none" }}>
+                <strong style={{ display: "block", fontSize: 11, letterSpacing: ".08em" }}>HRVATSKI VAL PLAYER</strong>
+                <span style={{ display: "block", fontSize: 12, opacity: .82, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{track?.title || "Odaberi pjesmu"}</span>
+              </div>
+              <span aria-hidden="true" style={{ fontSize: 12, opacity: .6 }}>⠿</span>
             </div>
-          )}
 
-          {track && <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 9 }}>
-            <button type="button" onClick={() => stepQueue(-1)} disabled={!(Number(track.queueIndex ?? -1) > 0)} aria-label="Prethodna pjesma" title="Prethodna pjesma" style={{ padding: "7px 10px", border: "1px solid rgba(255,255,255,.2)", borderRadius: 8, color: "#fff", background: "rgba(255,255,255,.1)", cursor: "pointer" }}>⏮</button>
-            <button type="button" onClick={() => stepQueue(1)} disabled={!Array.isArray(track.queue) || Number(track.queueIndex ?? -1) >= track.queue.length - 1} aria-label="Sljedeća pjesma" title="Sljedeća pjesma" style={{ padding: "7px 10px", border: "1px solid rgba(255,255,255,.2)", borderRadius: 8, color: "#fff", background: "rgba(255,255,255,.1)", cursor: "pointer" }}>⏭</button>
-            <label style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0, flex: 1, fontSize: 11 }}><span aria-hidden="true">{volume === 0 ? "🔇" : "🔊"}</span><input aria-label="Glasnoća glazbe" type="range" min="0" max="100" value={volume} onChange={(event) => changeVolume(event.target.value)} style={{ minWidth: 0, width: "100%", accentColor: "#ff6672" }} /><span style={{ width: 30, textAlign: "right" }}>{volume}%</span></label>
-          </div>}
-          {track ? <p style={{ margin: "9px 0 0", fontSize: 11, opacity: .72 }}>Povuci gornju traku za pomicanje. Smanji player da ne smeta čitanju.</p> : <p style={{ margin: "9px 0 0", fontSize: 11, opacity: .72 }}>Player je spreman. Pretraži pjesmu i slušaj dok pregledavaš PatriaSoul.</p>}
-        </>}
-        {track && <iframe
-          key={track.id}
-          title={`Hrvatski Val Player — ${track.title}`}
-          src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(track.id)}?autoplay=1&playsinline=1&rel=0&enablejsapi=1`}
-          ref={iframeRef}
-          allow="autoplay; encrypted-media; picture-in-picture"
-          referrerPolicy="strict-origin-when-cross-origin"
-          style={minimized
-            ? { position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none", left: 0, bottom: 0, border: 0 }
-            : { display: "block", width: "100%", aspectRatio: "16 / 9", border: 0, borderRadius: 9, background: "#000" }}
-        />}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <button type="button" onClick={() => setMinimized((value) => !value)} aria-label={minimized ? "Proširi player" : "Smanji player"} title={minimized ? "Proširi player" : "Smanji player"} style={{ cursor: "pointer", border: "1px solid rgba(255,255,255,.25)", borderRadius: 9, color: "#fff", background: "rgba(255,255,255,.1)", width: 32, height: 32, fontSize: 16 }}>{minimized ? "□" : "−"}</button>
-        <button type="button" onClick={closePlayer} aria-label="Zaustavi i zatvori player" title="Zaustavi glazbu" style={{ cursor: "pointer", border: "1px solid rgba(255,255,255,.25)", borderRadius: 9, color: "#fff", background: "rgba(255,255,255,.1)", width: 32, height: 32, fontSize: 19 }}>×</button>
-        <a href="/hrvatski-val.html" title="Otvori Hrvatski Val Player" style={{ display: "grid", placeItems: "center", width: 32, height: 32, borderRadius: 9, color: "#fff", background: "#c52d3a", textDecoration: "none", fontWeight: 700 }}>♫</a>
-      </div>
+            <form onSubmit={searchTracks} style={{ display: "flex", gap: 6, marginBottom: 9 }}>
+              <input
+                type="search" value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                onFocus={() => setSearchOpen(true)}
+                placeholder="Pronađi pjesmu ili izvođača…"
+                aria-label="Pretraži pjesme"
+                style={{ minWidth: 0, width: "100%", padding: "9px 10px", borderRadius: 9, border: "1px solid rgba(255,255,255,.22)", background: "rgba(255,255,255,.1)", color: "#fff", fontSize: 12, outlineOffset: 2 }}
+              />
+              <button type="submit" disabled={searching || !query.trim()} style={{ flexShrink: 0, padding: "0 10px", border: 0, borderRadius: 9, color: "#fff", background: "#c52d3a", fontWeight: 700, fontSize: 12, cursor: searching ? "wait" : "pointer", opacity: searching || !query.trim() ? .65 : 1 }}>
+                {searching ? "…" : "Traži"}
+              </button>
+            </form>
+
+            {searchOpen && (results.length > 0 || searchError || searching) && (
+              <div style={{ display: "grid", gap: 6, marginBottom: 9 }}>
+                {searching && <span style={{ fontSize: 12, opacity: .8 }}>Tražim pjesme…</span>}
+                {searchError && <span role="status" style={{ fontSize: 12, color: "#ffd2d6" }}>{searchError}</span>}
+                {results.map((result) => (
+                  <button key={result.id} type="button" onClick={() => playTrack(result, results)} style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", minWidth: 0, padding: 6, textAlign: "left", border: "1px solid rgba(255,255,255,.13)", borderRadius: 9, background: "rgba(255,255,255,.07)", color: "#fff", cursor: "pointer" }}>
+                    <img src={result.thumbnail} alt="" style={{ width: 54, height: 34, flexShrink: 0, objectFit: "cover", borderRadius: 5, background: "#000" }} />
+                    <span style={{ minWidth: 0, flex: 1 }}>
+                      <strong style={{ fontSize: 11, lineHeight: 1.35, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{result.title}</strong>
+                      <small style={{ display: "block", marginTop: 2, fontSize: 10, opacity: .7, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{result.artist}</small>
+                    </span>
+                    <span aria-hidden="true" style={{ color: "#ffb8c0", fontSize: 16 }}>▶</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {track && <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 9 }}>
+              <button type="button" onClick={() => stepQueue(-1)} disabled={!(Number(track.queueIndex ?? -1) > 0)} aria-label="Prethodna pjesma" title="Prethodna pjesma" style={{ ...iconButtonStyle, width: 36 }}>⏮</button>
+              <button type="button" onClick={() => stepQueue(1)} disabled={!Array.isArray(track.queue) || Number(track.queueIndex ?? -1) >= track.queue.length - 1} aria-label="Sljedeća pjesma" title="Sljedeća pjesma" style={{ ...iconButtonStyle, width: 36 }}>⏭</button>
+              <label style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0, flex: 1, fontSize: 11 }}><span aria-hidden="true">{volume === 0 ? "🔇" : "🔊"}</span><input aria-label="Glasnoća glazbe" type="range" min="0" max="100" value={volume} onChange={(event) => changeVolume(event.target.value)} style={{ minWidth: 0, width: "100%", accentColor: "#ff6672" }} /><span style={{ width: 30, textAlign: "right" }}>{volume}%</span></label>
+            </div>}
+            {track ? <p style={{ margin: "9px 0 0", fontSize: 11, opacity: .72 }}>Slušaj dok pregledavaš PatriaSoul. Smanji player kada želiš više prostora.</p> : <p style={{ margin: "9px 0 0", fontSize: 11, opacity: .72 }}>Pretraži pjesmu i slušaj dok pregledavaš PatriaSoul.</p>}
+
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <button type="button" onClick={() => setMinimized(true)} aria-label="Smanji player" title="Smanji player" style={iconButtonStyle}>−</button>
+            <button type="button" onClick={closePlayer} aria-label="Zaustavi i zatvori player" title="Zaustavi glazbu" style={iconButtonStyle}>×</button>
+            <a href="/hrvatski-val.html" title="Otvori Hrvatski Val Player" style={{ ...iconButtonStyle, background: "#c52d3a", textDecoration: "none", fontWeight: 700 }}>♫</a>
+          </div>
+        </>
+      )}
+      {track && <iframe
+        key={track.id}
+        title={`Hrvatski Val Player — ${track.title}`}
+        src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(track.id)}?autoplay=1&playsinline=1&rel=0&enablejsapi=1`}
+        ref={iframeRef}
+        allow="autoplay; encrypted-media; picture-in-picture"
+        referrerPolicy="strict-origin-when-cross-origin"
+        style={minimized
+          ? { position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none", left: 0, bottom: 0, border: 0 }
+          : { display: "block", width: "100%", aspectRatio: "16 / 9", border: 0, borderRadius: 9, background: "#000" }}
+      />}
     </aside>
   );
 }
