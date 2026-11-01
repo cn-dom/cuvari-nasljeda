@@ -379,15 +379,7 @@ export default function PersistentMusicPlayer() {
               <label style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0, flex: 1, fontSize: 11 }}><span aria-hidden="true">{volume === 0 ? "🔇" : "🔊"}</span><input aria-label="Glasnoća glazbe" type="range" min="0" max="100" value={volume} onChange={(event) => changeVolume(event.target.value)} style={{ minWidth: 0, width: "100%", accentColor: "#ff6672" }} /><span style={{ width: 30, textAlign: "right" }}>{volume}%</span></label>
             </div>}
             {track ? <p style={{ margin: "9px 0 0", fontSize: 11, opacity: .72 }}>Slušaj dok pregledavaš PatriaSoul. Smanji player kada želiš više prostora.</p> : <p style={{ margin: "9px 0 0", fontSize: 11, opacity: .72 }}>Pretraži pjesmu i slušaj dok pregledavaš PatriaSoul.</p>}
-            {track && <iframe
-              key={track.id}
-              title={`Hrvatski Val Player — ${track.title}`}
-              src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(track.id)}?autoplay=1&playsinline=1&rel=0&enablejsapi=1`}
-              ref={iframeRef}
-              allow="autoplay; encrypted-media; picture-in-picture"
-              referrerPolicy="strict-origin-when-cross-origin"
-              style={{ display: "block", width: "100%", aspectRatio: "16 / 9", border: 0, borderRadius: 9, background: "#000" }}
-            />}
+
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <button type="button" onClick={() => setMinimized(true)} aria-label="Smanji player" title="Smanji player" style={iconButtonStyle}>−</button>
@@ -396,6 +388,17 @@ export default function PersistentMusicPlayer() {
           </div>
         </>
       )}
+      {track && <iframe
+        key={track.id}
+        title={`Hrvatski Val Player — ${track.title}`}
+        src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(track.id)}?autoplay=1&playsinline=1&rel=0&enablejsapi=1`}
+        ref={iframeRef}
+        allow="autoplay; encrypted-media; picture-in-picture"
+        referrerPolicy="strict-origin-when-cross-origin"
+        style={minimized
+          ? { position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none", left: 0, bottom: 0, border: 0 }
+          : { display: "block", width: "100%", aspectRatio: "16 / 9", border: 0, borderRadius: 9, background: "#000" }}
+      />}
     </aside>
   );
 }
