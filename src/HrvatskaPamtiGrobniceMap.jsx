@@ -96,6 +96,7 @@ const APPROXIMATE_LOCALITIES = {
   "macelj-zajednicki-ukop-2026": { lat:46.223, lng:15.845, label:"Donji Macelj — Spomen-crkva Muke Isusove", precision:"Približna lokacija naselja/memorijalnog područja — nije koordinata pojedinačnog groba", sourceUrl:"https://www.djurmanec.hr/donji-macelj/" },
   "krizanov-jarek-macelj": { lat:46.223, lng:15.845, label:"Maceljska gora — područje Križanovog jareka", precision:"Približno područje Donjeg Maclja — nije točka masovne grobnice", sourceUrl:"https://branitelji.gov.hr/vijesti/ekshumirani-posmrtni-ostaci-na-maceljskoj-gori/3696" },
     "kamenjarka-radasinovci": { lat:43.9000, lng:15.5800, label:"Radašinovci — područje Kamenjarke", precision:"Približno područje naselja i Parka prirode Vransko jezero — nije koordinata ulaza u jamu", sourceUrl:"https://branitelji.gov.hr/vijesti/u-jami-kamenjarka-pronadjeni-posmrtni-ostaci-zrtava-iz-drugog-svjetskog-rata/5290" },
+  "dobrava-memorijalni-park": { lat:46.5184, lng:15.6963, label:"Memorijalno groblje Dobrava, Maribor", precision:"Lokacija memorijalnog groblja prema Vijeću Europe; nije primarno mjesto stradanja niti točka pojedinačne grobnice", sourceUrl:"https://www.coe.int/en/web/cultural-routes/-/maribor-funerary-company-d-d-" },
   "lepa-bukva-macelj": { lat:46.223, lng:15.845, label:"Maceljska gora — područje Lepe Bukve", precision:"Približno područje Donjeg Maclja — nije točka sekundarne grobnice", sourceUrl:"https://branitelji.gov.hr/vijesti/zavrsena-terenska-istrazivanja-na-podrucju-maceljske-gore/3707" },
 
   "jazovka": { lat:45.7350, lng:15.4140, label:"Jama Jazovka — šire područje Sošica", precision:"Približno područje naselja i šume — nije koordinata ulaza u jamu", sourceUrl:"https://branitelji.gov.hr/vijesti/odrzan-posljednji-ispracaj-i-ukop-814-zrtava-iz-masovne-grobnice-jame-jazovke/5025" },
@@ -123,7 +124,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
   const [mapQuery, setMapQuery] = useState("");
   const [placeMatches, setPlaceMatches] = useState([]);
   const mappedSites = sites
-     .filter((site) => (site.certainty === "confirmed" || site.id === "loibacher-feld") && getMapLocation(site))
+     .filter((site) => (site.certainty === "confirmed" || site.id === "loibacher-feld" || site.id === "dobrava-memorijalni-park") && getMapLocation(site))
     .map((site) => ({ ...site, mapLocation: getMapLocation(site) }));
   const searchMatches = mapQuery.trim().length < 2 ? [] : sites.filter((site) => [site.name, site.area, site.period, site.detail, getMapLocation(site)?.label].filter(Boolean).join(" ").toLocaleLowerCase("hr").includes(mapQuery.trim().toLocaleLowerCase("hr"))).slice(0, 8);
 
@@ -268,8 +269,12 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
           area.textContent = site.area + " · " + site.period;
           const status = document.createElement("p");
           status.textContent = site.foundLabel || "Broj pronađenih osoba nije zasebno potvrđen u ovom zapisu.";
+          const detail = document.createElement("p");
+          detail.textContent = site.detail || "Detaljan povijesni opis nije zasebno naveden u ovom zapisu.";
+          const attribution = document.createElement("p");
+          attribution.textContent = site.victimAttribution || "Pripadnost žrtava navodi se samo u opsegu potvrde iz izvora.";
           const precision = document.createElement("small");
-          precision.textContent = (site.mapLocation.label || site.name) + " — " + (site.mapLocation.precision || (site.mapLocation.approximate ? "Približna lokacija — nije potvrđena točna točka grobnice" : "Koordinate preuzete iz evidencijskog zapisa"));
+          precision.textContent = (site.publicLocation || site.mapLocation.label || site.name) + " — " + (site.mapLocation.precision || (site.mapLocation.approximate ? "Približna lokacija — nije potvrđena točna točka grobnice" : "Koordinate preuzete iz evidencijskog zapisa"));
           const actions = document.createElement("div");
           actions.className = "hp-grave-map-popup-actions";
           const recordLink = document.createElement("button");
@@ -288,7 +293,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
             sourceLink.textContent = "Provjeri izvor ↗";
             actions.appendChild(sourceLink);
           }
-          popupContent.append(heading, area, status, precision, actions);
+          popupContent.append(heading, area, status, detail, attribution, precision, actions);
           const popup = new maplibregl.Popup({ offset: 18, maxWidth: "320px" }).setDOMContent(popupContent);
           const marker = new maplibregl.Marker({ element: markerElement, anchor: "center" })
             .setLngLat([site.mapLocation.lng, site.mapLocation.lat])
