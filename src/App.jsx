@@ -2626,10 +2626,12 @@ function App() {
           </div>}
         </section>
       )}
-      <div className="preview-ribbon">
-        <span className="status-dot" /> RAZVOJNI PREGLED
-        <span>Zajednica je u razvoju · povezivanje i pojedine funkcije još se provjeravaju.</span>
-      </div>
+      <section className="community-welcome-ribbon" aria-label="Dobrodošlica zajednici Čuvara nasljeđa">
+        <div className="community-welcome-track" aria-hidden="true">
+          <span className="community-welcome-message"><strong>✦ DOBRO DOŠAO U ZAJEDNICU ČUVARA NASLJEĐA</strong><i>Mjesto susreta, razgovora, zajedništva i ljubavi prema Hrvatskoj.</i><i>Čuvajmo vjeru, obitelj, domovinu i sjećanje na one koji su nam ostavili nasljeđe.</i><em>„Ako Gospodin kuću ne gradi, uzalud se muče graditelji.” — Psalam 127,1</em></span>
+          <span className="community-welcome-message"><strong>✦ DOBRO DOŠAO U ZAJEDNICU ČUVARA NASLJEĐA</strong><i>Mjesto susreta, razgovora, zajedništva i ljubavi prema Hrvatskoj.</i><i>Čuvajmo vjeru, obitelj, domovinu i sjećanje na one koji su nam ostavili nasljeđe.</i><em>„Ako Gospodin kuću ne gradi, uzalud se muče graditelji.” — Psalam 127,1</em></span>
+        </div>
+      </section>
 
       <header className="topbar">
         <a className="brand" href="#pocetna" onClick={() => setActiveNav("PatriaSoul")}>
