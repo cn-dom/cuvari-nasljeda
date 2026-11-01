@@ -115,3 +115,27 @@
 @media (prefers-reduced-motion: reduce) {
   .fgc-realtime-status { transition: none !important; }
 }
+
+
+/* Početni izbor: istraživanje ili zajednički razgovor. */
+.fgc-choice { display:flex; flex:1; min-height:0; flex-direction:column; align-items:center; justify-content:center; overflow:auto; padding:22px 18px 18px; text-align:center; background:radial-gradient(circle at 50% 0%,#163d5a 0,#0a2033 48%,#071827 100%); }
+.fgc-choice-emblem { display:grid; place-items:center; width:64px; height:64px; margin-bottom:12px; padding:5px; border:1px solid #527590; border-radius:18px; background:#ffffff0b; box-shadow:0 8px 26px #020a14a8; }
+.fgc-choice-emblem img { width:100%; height:100%; object-fit:contain; }
+.fgc-choice-kicker { color:#d7b978; font-size:9px; font-weight:850; letter-spacing:.16em; }
+.fgc-choice h2 { margin:9px 0 7px; color:#f4f8fc; font-family:Georgia,serif; font-size:21px; line-height:1.2; }
+.fgc-choice > p { max-width:310px; margin:0 0 18px; color:#b8cad9; font-size:11px; line-height:1.7; }
+.fgc-choice-actions { display:grid; width:100%; gap:10px; }
+.fgc-choice-action { display:flex; align-items:center; gap:11px; width:100%; padding:13px 12px; border:1px solid #315775; border-radius:13px; color:#eff7ff; background:linear-gradient(135deg,#123651,#0b263b); text-align:left; cursor:pointer; transition:transform .18s ease,border-color .18s ease,background .18s ease; }
+.fgc-choice-action:hover { transform:translateY(-1px); border-color:#78a9ce; background:linear-gradient(135deg,#174768,#10304a); }
+.fgc-choice-action-icon { display:grid; place-items:center; flex:0 0 36px; width:36px; height:36px; border-radius:10px; color:#fff; background:#ffffff16; font-size:22px; }
+.fgc-choice-action > span:nth-child(2) { display:grid; flex:1; min-width:0; gap:4px; }
+.fgc-choice-action strong { color:#fff; font-size:11px; letter-spacing:.06em; }
+.fgc-choice-action small { color:#b4c9da; font-size:10px; line-height:1.5; }
+.fgc-choice-action > b { color:#d7b978; font-size:19px; }
+.fgc-choice-motto { margin-top:16px; color:#7898b2; font-size:9px; letter-spacing:.04em; }
+.fgc-back-choice { margin-top:9px; border:0; color:#9fc8e8; background:transparent; font-size:11px; cursor:pointer; }
+.fgc-welcome-message { align-self:stretch; padding:11px 12px; border:1px solid #355a75; border-radius:11px; background:linear-gradient(135deg,#102f48,#0b2235); }
+.fgc-welcome-message strong { color:#e6c98d; font-size:11px; }
+.fgc-welcome-message p { margin:5px 0 0; color:#c3d5e4; font-size:10px; line-height:1.6; }
+.fgc-toolbar > button:first-child { margin-right:auto; }
+@media (prefers-reduced-motion: reduce) { .fgc-choice-action { transition:none; } }
