@@ -141,6 +141,8 @@ function FaithSidebar() {
 function App() {
   const isMobile = useIsMobile();
   const [posts, setPosts] = useState([]);
+  const [remoteGlobalSearchResults, setRemoteGlobalSearchResults] = useState({ posts: [], members: [] });
+  const [globalSearchBusy, setGlobalSearchBusy] = useState(false);
   const [draft, setDraft] = useState("");
   const [communityActionTitle, setCommunityActionTitle] = useState("");
   const [communityActionDetails, setCommunityActionDetails] = useState("");
@@ -2155,15 +2157,90 @@ function App() {
     return matchesFilter && matchesSearch;
   }), [posts, feedFilter, feedSearch]);
 
+  useEffect(() => {
+    const query = String(feedSearch || "").trim().replace(/[,%_()]/g, " ").replace(/\s+/g, " ").slice(0, 80);
+    if (query.length < 2 || !supabase || !session?.user?.id) {
+      setRemoteGlobalSearchResults({ posts: [], members: [] });
+      setGlobalSearchBusy(false);
+      return undefined;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      setGlobalSearchBusy(true);
+      try {
+        const pattern = `%${query}%`;
+        const [postResult, memberResult] = await Promise.all([
+          supabase.from("posts")
+            .select("id, author_id, body, image_path, created_at, profiles:profiles!posts_author_id_fkey(display_name, username, avatar_url)")
+            .ilike("body", pattern)
+            .order("created_at", { ascending: false })
+            .limit(12),
+          supabase.from("profiles")
+            .select("id, display_name, username, bio, avatar_url, created_at")
+            .or(`display_name.ilike.${pattern},username.ilike.${pattern},bio.ilike.${pattern}`)
+            .order("display_name", { ascending: true })
+            .limit(12),
+        ]);
+        if (cancelled) return;
+        const blockedIds = new Set(blockedMembers.map((member) => member.id));
+        const remotePosts = (postResult.data || []).filter((row) => !blockedIds.has(row.author_id)).map((row) => {
+          const profile = row.profiles || {};
+          const author = profile.display_name || "Čuvar nasljeđa";
+          return {
+            id: row.id,
+            authorId: row.author_id,
+            initials: author.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN",
+            avatarUrl: profile.avatar_url || "",
+            author,
+            handle: "@" + (normalizeUsername(profile.username) || "clan"),
+            time: row.created_at ? new Date(row.created_at).toLocaleString("hr-HR", { dateStyle: "medium", timeStyle: "short" }) : "",
+            tag: "ZAJEDNICA",
+            text: row.body || "",
+            imageUrl: "",
+            imagePath: row.image_path || "",
+            likes: 0,
+            comments: 0,
+            icon: "💬",
+            owner: Boolean(session?.user?.id && row.author_id === session.user.id),
+          };
+        });
+        setRemoteGlobalSearchResults({
+          posts: postResult.error ? [] : remotePosts,
+          members: memberResult.error ? [] : (memberResult.data || []).filter((member) => !blockedIds.has(member.id) && member.id !== session.user.id),
+        });
+      } catch (error) {
+        if (!cancelled) {
+          setRemoteGlobalSearchResults({ posts: [], members: [] });
+          console.error("PatriaSoul global search failed", error);
+        }
+      } finally {
+        if (!cancelled) setGlobalSearchBusy(false);
+      }
+    }, 250);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [feedSearch, session?.user?.id, blockedMembers, supabase]);
+
   const globalSearchResults = useMemo(() => {
     const query = normalizeSearchText(feedSearch);
     if (!query) return { posts: [], members: [], groups: [] };
+    const mergeUnique = (primary, secondary, key) => {
+      const seen = new Set();
+      return [...primary, ...secondary].filter((item) => {
+        const value = item?.[key];
+        if (!value || seen.has(value)) return false;
+        seen.add(value);
+        return true;
+      }).slice(0, 4);
+    };
     return {
-      posts: posts.filter((post) => normalizeSearchText(`${post.author || ""} ${post.handle || ""} ${post.tag || ""} ${post.text || ""}`).includes(query)).slice(0, 4),
-      members: memberDirectory.filter((member) => normalizeSearchText(`${member.display_name || ""} ${member.username || ""} ${member.bio || ""}`).includes(query)).slice(0, 4),
+      posts: mergeUnique(remoteGlobalSearchResults.posts, posts.filter((post) => normalizeSearchText(`${post.author || ""} ${post.handle || ""} ${post.tag || ""} ${post.text || ""}`).includes(query)), "id"),
+      members: mergeUnique(remoteGlobalSearchResults.members, memberDirectory.filter((member) => normalizeSearchText(`${member.display_name || ""} ${member.username || ""} ${member.bio || ""}`).includes(query)), "id"),
       groups: groupChats.filter((group) => normalizeSearchText(`${group.name || ""} ${(group.members || []).map((member) => member.display_name || member.username || "").join(" ")}`).includes(query)).slice(0, 4),
     };
-  }, [feedSearch, posts, memberDirectory, groupChats]);
+  }, [feedSearch, posts, memberDirectory, groupChats, remoteGlobalSearchResults]);
 
   async function publishPost() {
     const text = draft.trim();
@@ -2661,15 +2738,15 @@ function App() {
             <div className="global-search-results-heading">Rezultati pretrage <button type="button" onClick={() => setGlobalSearchOpen(false)}>Zatvori</button></div>
             <section className="global-search-result-section">
               <strong>Objave</strong>
-              {globalSearchResults.posts.length ? globalSearchResults.posts.map((post) => <button type="button" className="global-search-result" key={post.id} onClick={() => { setFeedSearch(""); setFeedFilter("Sve objave"); setActiveNav("PatriaSoul"); setGlobalSearchOpen(false); window.setTimeout(() => document.getElementById("objava-" + post.id)?.scrollIntoView({ behavior: "smooth", block: "center" }), 80); }}>
+              {globalSearchResults.posts.length ? globalSearchResults.posts.map((post) => <button type="button" className="global-search-result" key={post.id} onClick={() => { setPosts((current) => current.some((item) => item.id === post.id) ? current : [post, ...current]); setFeedSearch(""); setFeedFilter("Sve objave"); setActiveNav("PatriaSoul"); setGlobalSearchOpen(false); window.setTimeout(() => document.getElementById("objava-" + post.id)?.scrollIntoView({ behavior: "smooth", block: "center" }), 160); }}>
                 <span className="global-search-result-icon">▤</span><span><b>{post.author || "Čuvar nasljeđa"}</b><small>{String(post.text || post.tag || "Objava bez teksta").slice(0, 105)}</small></span>
-              </button>) : <p>Nema pronađenih objava.</p>}
+              </button>) : <p>{globalSearchBusy ? "Pretražujem objave u bazi…" : "Nema pronađenih objava."}</p>}
             </section>
             <section className="global-search-result-section">
               <strong>Članovi</strong>
               {globalSearchResults.members.length ? globalSearchResults.members.map((member) => <button type="button" className="global-search-result" key={member.id} onClick={() => { setFeedSearch(""); setGlobalSearchOpen(false); openMemberProfile(member.id); }}>
                 <Avatar initials={(member.display_name || member.username || "ČN").split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toLocaleUpperCase("hr") || "ČN"} src={member.avatar_url || ""} /><span><b>{member.display_name || member.username || "Čuvar nasljeđa"}</b><small>@{normalizeUsername(member.username) || "clan"}{member.bio ? " · " + String(member.bio).slice(0, 70) : ""}</small></span>
-              </button>) : <p>Nema pronađenih članova ili imenik još nije učitan.</p>}
+              </button>) : <p>{globalSearchBusy ? "Pretražujem članove u bazi…" : "Nema pronađenih članova ili imenik još nije učitan."}</p>}
             </section>
             <section className="global-search-result-section">
               <strong>Grupe</strong>
