@@ -9,7 +9,8 @@ function initialsFor(profile) {
 }
 
 export default function FloatingGlobalChat({ supabase, session, onLoginRequest }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(() => new URLSearchParams(window.location.search).get("otvori-domoljubni-chat") === "1");
+  const [panelView, setPanelView] = useState(() => new URLSearchParams(window.location.search).get("otvori-domoljubni-chat") === "1" ? "chat" : "choice");
   const [muted, setMuted] = useState(false);
   const [settingsReady, setSettingsReady] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -275,11 +276,28 @@ export default function FloatingGlobalChat({ supabase, session, onLoginRequest }
             </div>
             <button type="button" className="fgc-icon-button" onClick={() => setOpen(false)} aria-label="Minimiziraj chat">−</button>
           </header>
-          {!userId ? (
-            <div className="fgc-login-state"><span>✦</span><h3>Razgovor zajednice</h3><p>Prijavi se kako bi se pridružio razgovoru s ostalim Čuvarima nasljeđa.</p><button type="button" onClick={onLoginRequest}>Prijava / Registracija</button></div>
+          {panelView === "choice" ? (
+            <div className="fgc-choice">
+              <div className="fgc-choice-emblem"><img src="/assets/images/1000000982.png" alt="PatriaSoul — Čuvari nasljeđa" /></div>
+              <span className="fgc-choice-kicker">VJERA · OBITELJ · DOMOVINA</span>
+              <h2>Mir i dobro, Čuvaru nasljeđa!</h2>
+              <p>Dobro došao u naš dom. Ovdje možeš istraživati hrvatsku povijest i baštinu ili razgovarati s članovima zajednice.</p>
+              <div className="fgc-choice-actions">
+                <button type="button" className="fgc-choice-action research" onClick={() => { window.location.href = "/ai-centar.html?izvor=domoljubni-chat"; }}>
+                  <span className="fgc-choice-action-icon">⌕</span><span><strong>ISTRAŽIVATI</strong><small>Otkrij povijest, mjesta, ljude, vjeru i hrvatsku baštinu uz PatriaSoul AI vodiča.</small></span><b>→</b>
+                </button>
+                <button type="button" className="fgc-choice-action chat" onClick={() => setPanelView("chat")}>
+                  <span className="fgc-choice-action-icon">✉</span><span><strong>CHATATI</strong><small>Pridruži se zajedničkom razgovoru Čuvara nasljeđa i napiši svoju poruku.</small></span><b>→</b>
+                </button>
+              </div>
+              <small className="fgc-choice-motto">Hrvatska · povijest · znanje · identitet</small>
+            </div>
+          ) : !userId ? (
+            <div className="fgc-login-state"><span>✦</span><h3>Dobro došao u Domoljubni chat</h3><p>Mir i dobro! Prijavi se kako bi mogao pisati poruke i razgovarati s ostalim Čuvarima nasljeđa.</p><button type="button" onClick={onLoginRequest}>Prijava / Registracija</button><button type="button" className="fgc-back-choice" onClick={() => setPanelView("choice")}>← Natrag na izbor</button></div>
           ) : (
             <>
               <div className="fgc-toolbar">
+                <button type="button" onClick={() => setPanelView("choice")}>← Izbor</button>
                 <span><i className={muted ? "fgc-status-dot muted" : "fgc-status-dot"} />{muted ? "Obavijesti utišane" : "Chat aktivan"}</span>
                 {isModerator && <button type="button" onClick={() => {
                   const nextOpen = !adminReportsOpen;
@@ -312,6 +330,7 @@ export default function FloatingGlobalChat({ supabase, session, onLoginRequest }
                 </section>
               ) : <>
               <div className="fgc-messages" role="log" aria-live="polite" aria-label="Poruke Domoljubnog chata">
+                <div className="fgc-welcome-message"><strong>Mir i dobro, Čuvari nasljeđa!</strong><p>Dobro došli u Domoljubni chat. Poštujmo jedni druge, čuvajmo dostojanstvo razgovora i dijelimo znanje, iskustva i ljubav prema domovini.</p></div>
                 {loading && !messages.length ? <p className="fgc-empty">Učitavam razgovor…</p> : messages.length ? messages.map((message) => {
                   const author = profiles[message.sender_id] || {};
                   const own = message.sender_id === userId;
@@ -351,7 +370,7 @@ export default function FloatingGlobalChat({ supabase, session, onLoginRequest }
           )}
         </section>
       )}
-      <button type="button" className={muted ? "fgc-launcher muted" : "fgc-launcher"} onClick={() => { if (!userId) { onLoginRequest?.(); return; } setOpen((value) => !value); }} aria-expanded={open} aria-label={open ? "Zatvori Domoljubni chat" : "Otvori Domoljubni chat"} title={muted ? "Domoljubni chat · utišan" : "Domoljubni chat · aktivan"}>
+      <button type="button" className={muted ? "fgc-launcher muted" : "fgc-launcher"} onClick={() => { if (open) setOpen(false); else { setPanelView("choice"); setOpen(true); } }} aria-expanded={open} aria-label={open ? "Zatvori Domoljubni prostor" : "Otvori Domoljubni prostor"} title={muted ? "Domoljubni prostor · chat utišan" : "Domoljubni prostor · istraživanje i razgovor"}>
         <span className="fgc-launcher-icon"><img src="/assets/images/logo%20Patriasoul.png" alt="" /></span><span className="fgc-launcher-copy"><strong>Domoljubni chat</strong><small>{muted ? "Utišan" : "Zajedno smo jači"}</small></span><i className={muted ? "fgc-status-dot muted" : "fgc-status-dot"} aria-label={muted ? "Chat je utišan" : "Chat je aktivan"} />
         {unreadCount > 0 && !open && <b className="fgc-unread">{unreadCount > 99 ? "99+" : unreadCount}</b>}
       </button>
