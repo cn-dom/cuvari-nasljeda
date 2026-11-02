@@ -243,3 +243,54 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-ser
 .admin-page .admin-search,.admin-page input,.admin-page select,.admin-page textarea{background:#081a2b;color:#edf4fb;border:1px solid #36536d;border-radius:10px}
 .admin-page .admin-table th{color:#e0bf7a}
 .admin-page .admin-table td{border-color:rgba(139,174,207,.16);color:#dce7f1}
+
+
+/* PatriaSoul motion system — subtle, shared effects across the platform */
+@keyframes ps-page-arrive{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ps-soft-glow{0%,100%{opacity:.28;transform:scale(.96)}50%{opacity:.58;transform:scale(1.04)}}
+@keyframes ps-border-sheen{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes ps-card-arrive{from{opacity:0;transform:translateY(16px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes ps-gold-pulse{0%,100%{box-shadow:0 0 0 0 rgba(217,184,117,0)}50%{box-shadow:0 0 22px 1px rgba(217,184,117,.13)}}
+@keyframes ps-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+:where(.app-shell,.community-section-page,.hp-page,.admin-page,.vm-page,.ai-center-page,.video-page,.val-page){animation:ps-page-arrive .62s cubic-bezier(.2,.75,.25,1) both}
+:where(.app-shell,.community-section-page,.hp-page,.admin-page) :where(.card,.post-card,.composer,.community-hub-card,.quiz-hub-card,.ai-hub-card,.owner-admin-panel,.profile-panel,.notifications-panel,.group-chat-panel,.member-directory-panel,.community-section-card,.community-topic,.community-page-tile,.community-event-card,.hp-collection-card,.hp-place-card,.hp-grave-card,.admin-table-card,.admin-security-card,.vm-card,.museum-card,.video-card){
+  position:relative;
+  border-color:rgba(139,174,207,.22);
+  box-shadow:0 12px 32px rgba(0,0,0,.16);
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s ease,border-color .28s ease,background-color .28s ease;
+  animation:ps-card-arrive .58s cubic-bezier(.2,.75,.25,1) both;
+}
+:where(.app-shell,.community-section-page,.hp-page,.admin-page) :where(.card,.post-card,.composer,.community-hub-card,.quiz-hub-card,.ai-hub-card,.community-section-card,.community-topic,.community-page-tile,.community-event-card,.hp-collection-card,.hp-place-card,.hp-grave-card,.admin-table-card,.admin-security-card,.vm-card,.museum-card,.video-card):hover{
+  transform:translateY(-4px);
+  border-color:rgba(105,182,244,.48);
+  box-shadow:0 20px 42px rgba(0,0,0,.25),0 0 0 1px rgba(105,182,244,.06);
+}
+:where(.app-shell,.community-section-page,.hp-page,.admin-page) :where(.card,.post-card,.community-hub-card,.quiz-hub-card,.ai-hub-card,.community-section-card,.community-page-tile,.community-event-card,.hp-collection-card,.hp-place-card,.hp-grave-card,.admin-table-card,.admin-security-card)::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  opacity:0;
+  background:linear-gradient(112deg,transparent 20%,rgba(255,255,255,.055) 48%,transparent 72%);
+  background-size:220% 100%;
+  transition:opacity .25s ease;
+}
+:where(.app-shell,.community-section-page,.hp-page,.admin-page) :where(.card,.post-card,.community-hub-card,.quiz-hub-card,.ai-hub-card,.community-section-card,.community-page-tile,.community-event-card,.hp-collection-card,.hp-place-card,.hp-grave-card,.admin-table-card,.admin-security-card):hover::after{opacity:1;animation:ps-border-sheen 1.15s ease}
+:where(.app-shell,.community-section-page,.hp-page,.admin-page) :where(.topbar,.ps-site-header,.admin-topbar){backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+:where(.app-shell,.community-section-page,.hp-page,.admin-page) :where(.topnav-link,.side-link,.ps-site-primary a,.ps-site-subnav a,.admin-side-nav a,.admin-side-nav button){transition:color .22s ease,background .22s ease,border-color .22s ease,transform .22s ease,box-shadow .22s ease}
+:where(.app-shell,.community-section-page,.hp-page,.admin-page) :where(.topnav-link,.side-link,.ps-site-primary a,.ps-site-subnav a,.admin-side-nav a,.admin-side-nav button):hover{transform:translateY(-2px)}
+:where(.app-shell,.community-section-page,.hp-page,.admin-page) :where(.welcome-panel,.community-section-header,.hp-hero,.admin-page-heading){isolation:isolate}
+:where(.app-shell,.community-section-page,.hp-page,.admin-page) :where(.welcome-panel,.community-section-header,.hp-hero,.admin-page-heading)::before{pointer-events:none}
+.hp-page .hp-hero::after{animation:ps-soft-glow 8s ease-in-out infinite}
+.hp-page .hp-primary-cta,.app-shell .login-button,.app-shell .primary-button,.community-section-primary{transition:transform .24s ease,box-shadow .24s ease,filter .24s ease}
+.hp-page .hp-primary-cta:hover,.app-shell .login-button:hover,.app-shell .primary-button:hover,.community-section-primary:hover{transform:translateY(-3px);filter:brightness(1.08);box-shadow:0 12px 28px rgba(0,0,0,.25)}
+.ps-site-brand img,.app-shell .brand-mark{transition:transform .35s cubic-bezier(.2,.8,.2,1),filter .35s ease}
+.ps-site-brand:hover img,.app-shell .brand:hover .brand-mark{transform:rotate(-4deg) scale(1.06);filter:drop-shadow(0 0 10px rgba(217,184,117,.28))}
+@media(prefers-reduced-motion:reduce){
+ :where(.app-shell,.community-section-page,.hp-page,.admin-page,.vm-page,.ai-center-page,.video-page,.val-page),
+ :where(.app-shell,.community-section-page,.hp-page,.admin-page) *,
+ :where(.app-shell,.community-section-page,.hp-page,.admin-page) *::before,
+ :where(.app-shell,.community-section-page,.hp-page,.admin-page) *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+ :where(.app-shell,.community-section-page,.hp-page,.admin-page) :where(.card,.post-card,.community-hub-card,.quiz-hub-card,.ai-hub-card,.community-section-card,.community-page-tile,.community-event-card,.hp-collection-card,.hp-place-card,.hp-grave-card,.admin-table-card,.admin-security-card):hover{transform:none}
+}
