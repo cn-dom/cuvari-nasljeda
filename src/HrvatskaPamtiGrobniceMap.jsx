@@ -1,18 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-const MAP_STYLE = {
-  version: 8,
-  sources: {
-    "osm-raster": {
-      type: "raster",
-      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-      tileSize: 256,
-      attribution: "© OpenStreetMap contributors",
-    },
-  },
-  layers: [{ id: "osm-raster-layer", type: "raster", source: "osm-raster", minzoom: 0, maxzoom: 19 }],
-};
+// CARTO dark vector basemap: clearer roads, borders and labels on the dark memorial register.
+const MAP_STYLE = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 
 // Približne točke naselja odvojene su od točnih koordinata grobnica.
 const APPROXIMATE_LOCALITIES = {
@@ -136,6 +126,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
   const maplibreRef = useRef(null);
   const searchMarkerRef = useRef(null);
   const [mapError, setMapError] = useState(false);
+  const [is3D, setIs3D] = useState(true);
   const [mapQuery, setMapQuery] = useState("");
   const [placeMatches, setPlaceMatches] = useState([]);
   const mappedSites = sites
@@ -260,6 +251,9 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
           maxZoom: 17,
           attributionControl: true,
           cooperativeGestures: true,
+          pitch: 42,
+          bearing: -8,
+          maxPitch: 68,
         });
         mapRef.current = mapInstance;
         maplibreRef.current = maplibregl;
@@ -336,7 +330,22 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
         window.addEventListener("hp-focus-grave-map", focusMarker);
 
         mapInstance.on("load", () => {
-          if (!cancelled) setMapError(false);
+          if (cancelled) return;
+          setMapError(false);
+          // Optional global elevation data adds real 3D relief without changing record coordinates.
+          try {
+            if (!mapInstance.getSource("hp-terrain-dem")) {
+              mapInstance.addSource("hp-terrain-dem", {
+                type: "raster-dem",
+                url: "https://tiles.mapterhorn.com/tilejson.json",
+                tileSize: 256,
+                attribution: "© Mapterhorn",
+              });
+            }
+            mapInstance.setTerrain({ source: "hp-terrain-dem", exaggeration: 1.18 });
+          } catch {
+            // The 2D map remains fully usable if elevation tiles are unavailable.
+          }
         });
         mapInstance.on("error", (event) => {
           // Tile-level 404/temporary network errors must not hide a usable map.
@@ -373,7 +382,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
   }, [sites]);
 
   return (
-    <section className="hp-grave-map-section" aria-labelledby="hp-grave-map-title">
+    <section className="hp-grave-map-section hp-grave-map-section-cinematic" aria-labelledby="hp-grave-map-title">
       <div className="hp-grave-map-heading">
         <div><span className="hp-section-kicker">GEOGRAFSKI PREGLED</span><h2 id="hp-grave-map-title">Grobnice na <em>karti</em></h2></div>
         <p>Odaberi oznaku za pregled zapisa, broja pronađenih ostataka i izvora lokacije. Pune oznake su provjerene koordinate grobnica; isprekidane su približne lokacije naselja ili područja.</p>
@@ -389,10 +398,24 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
           {!searchMatches.length && !placeMatches.length && <p>Tražim mjesta na karti… Ako se ništa ne pojavi, pokušaj precizniji naziv.</p>}
         </div>}
       </div>
-      <div className="hp-grave-map-shell">
+      <div className="hp-grave-map-shell hp-grave-map-shell-cinematic">
+        <div className="hp-map-cinematic-topbar" aria-label="Kontrole prikaza karte">
+          <div className="hp-map-live-status"><span /> MEMORIJALNI ATLAS <small>INTERAKTIVNI PREGLED</small></div>
+          <div className="hp-map-view-controls">
+            <button type="button" className={is3D ? "active" : ""} onClick={() => { setIs3D(true); mapRef.current?.easeTo({ pitch: 48, bearing: -10, duration: 950 }); }}>3D RELJEF</button>
+            <button type="button" className={!is3D ? "active" : ""} onClick={() => { setIs3D(false); mapRef.current?.easeTo({ pitch: 0, bearing: 0, duration: 950 }); }}>2D PREGLED</button>
+            <button type="button" className="hp-map-reset" aria-label="Vrati početni pogled" onClick={() => mapRef.current?.easeTo({ center: [17.9, 44.8], zoom: 5.8, pitch: is3D ? 48 : 0, bearing: is3D ? -10 : 0, duration: 1200 })}>↗</button>
+          </div>
+        </div>
+        <div className="hp-map-cinematic-vignette" aria-hidden="true" />
         <div ref={containerRef} className="hp-grave-map-canvas" aria-label="Interaktivna karta masovnih grobnica hrvatskih žrtava" />
+        <div className="hp-grave-map-legend" aria-label="Legenda oznaka karte">
+          <span><i className="hp-map-legend-exact" /> Potvrđena koordinata</span>
+          <span><i className="hp-map-legend-area" /> Približno područje</span>
+          <span><i className="hp-map-legend-context" /> Povijesni kontekst</span>
+        </div>
         {mapError && <div className="hp-grave-map-error" role="status">Karta se trenutačno ne može učitati. Evidencijski zapisi i njihove izvorne poveznice ostaju dostupni ispod.</div>}
-        <div className="hp-grave-map-caption"><span /> KARTA TEMELJENA NA PODACIMA OPENSTREETMAPA <small>© OpenStreetMap contributors</small></div>
+        <div className="hp-grave-map-caption"><span /> DIGITALNI MEMORIJALNI ATLAS · © OPENSTREETMAP · © CARTO · © MAPTERHORN</div>
       </div>
       <p className="hp-grave-map-note"><strong>{mappedSites.length}</strong> {mappedSites.length === 1 ? "lokacija" : "lokacije"} prikazane su na karti. Puna oznaka znači da je potvrđena javna koordinata grobnice. Isprekidana oznaka pokazuje približno naselje ili šire područje, a ne točku iskopa. Više zapisa na istom području može dijeliti približnu oznaku; to nije dokaz da je riječ o istoj grobnici.</p>
     </section>

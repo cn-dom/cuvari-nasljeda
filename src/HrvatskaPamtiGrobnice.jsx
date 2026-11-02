@@ -295,9 +295,9 @@ export default function HrvatskaPamtiGrobnice() {
           const precisionText=String(site.coordinates?.precision || "").toLocaleLowerCase("hr");
           const exactCoordinate=Boolean(site.coordinates && /(točna|tocna|precizna|provjerena|exact)/.test(precisionText) && !/(približ|pribliz|okvirn|područj|podrucj)/.test(precisionText));
           const expandedSite=expanded===site.id;
-          return <article className={`hp-grave-card ${expandedSite?"is-expanded":""}`} id={"hp-site-"+site.id} key={site.id}>
-            <div className="hp-grave-card-topline"><span className="hp-grave-card-number">EVIDENCIJA / {String(index+1).padStart(2,"0")}</span><span className={`hp-grave-card-location-tag ${exactCoordinate?"is-exact":"is-area"}`}>{exactCoordinate?"Provjerena koordinata":"Područje / naselje"}</span></div>
-            <div className="hp-grave-card-main"><div className="hp-grave-card-symbol" aria-hidden="true">✦</div><div className="hp-grave-card-title"><h3>{site.name}</h3><p>{site.area}</p></div></div>
+          return <article className={`hp-grave-card hp-grave-card-modern ${exactCoordinate?"has-exact-location":"has-area-location"} ${expandedSite?"is-expanded":""}`} id={"hp-site-"+site.id} key={site.id} style={{"--hp-card-order":index}}>
+            <div className="hp-grave-card-topline"><span className="hp-grave-card-number"><i aria-hidden="true" /> EVIDENCIJA / {String(index+1).padStart(2,"0")}</span><span className={`hp-grave-card-location-tag ${exactCoordinate?"is-exact":"is-area"}`}><i aria-hidden="true" />{exactCoordinate?"Provjerena koordinata":"Područje / naselje"}</span></div>
+            <div className="hp-grave-card-main"><div className="hp-grave-card-symbol" aria-hidden="true"><span>✦</span><small>{String(index+1).padStart(2,"0")}</small></div><div className="hp-grave-card-title"><h3>{site.name}</h3><p><span aria-hidden="true">⌖</span> {site.area}</p></div></div>
             <div className="hp-grave-card-meta"><span>{site.period}</span><span>{site.year}</span></div>
             <p className="hp-grave-card-summary">{site.foundLabel || "Broj osoba nije zasebno potvrđen u ovom zapisu."}</p>
             <div className="hp-grave-card-status">{site.status}</div>
@@ -321,7 +321,7 @@ export default function HrvatskaPamtiGrobnice() {
         <div className="hp-register-cards" aria-label="Kartice povijesnih mjesta i konteksta">
           {contextSites.map((site,index) => {
             const expandedSite = expanded === site.id;
-            return <article className={`hp-grave-card hp-grave-card-context ${expandedSite ? "is-expanded" : ""}`} id={"hp-site-" + site.id} key={site.id}>
+            return <article className={`hp-grave-card hp-grave-card-context hp-grave-card-modern hp-grave-card-history ${expandedSite ? "is-expanded" : ""}`} id={"hp-site-" + site.id} key={site.id} style={{"--hp-card-order":index}}>
               <div className="hp-grave-card-topline">
                 <span className="hp-grave-card-number">POVIJESNI KONTEKST / {String(index+1).padStart(2,"0")}</span>
                 <span className="hp-grave-card-location-tag is-area">{site.contextLabel || "Povijesni kontekst"}</span>

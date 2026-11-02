@@ -71,7 +71,7 @@
     <header class="ps-header">
       <div class="ps-header-inner">
         <a class="ps-brand" href="${links.home}" aria-label="PatriaSoul početna">
-          <img class="ps-logo" src="/assets/images/patriasoul-logo.jpg" alt="PatriaSoul">
+          <img class="ps-logo" src="/assets/images/1000000982.png" alt="PatriaSoul">
         </a>
         <nav class="ps-nav" aria-label="Glavna navigacija">
           <a href="${links.home}">⌂ Početna</a>
@@ -98,7 +98,7 @@
       <div class="ps-footer-inner">
         <div class="ps-footer-grid">
           <div>
-            <div class="ps-footer-logo-wrap"><img class="ps-footer-logo" src="/assets/images/patriasoul-logo.jpg" alt="PatriaSoul"></div>
+            <div class="ps-footer-logo-wrap"><img class="ps-footer-logo" src="/assets/images/1000000982.png" alt="PatriaSoul"></div>
             <p class="ps-footer-copy">Hrvatska · povijest · znanje · identitet.<br>Prostor za učenje, igru i čuvanje priča koje čine naše nasljeđe.</p>
             <div class="ps-motto"><span>Znanje</span><span>·</span><span>Ponos</span><span>·</span><span>Nasljeđe</span></div>
           </div>

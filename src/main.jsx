@@ -14,6 +14,7 @@ const HrvatskaPamtiGrobnice = lazy(() => import("./HrvatskaPamtiGrobnice.jsx"));
 const PatriaSoulVideo = lazy(() => import("./PatriaSoulVideo.jsx"));
 const HrvatskiVal = lazy(() => import("./HrvatskiVal.jsx"));
 import "./index.css";
+import "./patriasoul-unified.css";
 
 const route = window.location.pathname.replace(/\/$/, "");
 const Screen = route === "/hrvatska-pamti-grobnice.html"
@@ -21,7 +22,7 @@ const Screen = route === "/hrvatska-pamti-grobnice.html"
   : route === "/hrvatska-pamti-mjesto.html"
   ? HrvatskaPamtiMjesto
   : route === "/hrvatska-pamti.html"
-  ? HrvatskaPamtiGrobnice
+  ? HrvatskaPamti
   : route === "/video-arhiva.html"
   ? PatriaSoulVideo
   : (route === "/hrvatski-val.html" || route === "/hrvatski-val")
