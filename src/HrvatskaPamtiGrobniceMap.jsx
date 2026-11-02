@@ -1,18 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-const MAP_STYLE = {
-  version: 8,
-  sources: {
-    "osm-raster": {
-      type: "raster",
-      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-      tileSize: 256,
-      attribution: "© OpenStreetMap contributors",
-    },
-  },
-  layers: [{ id: "osm-raster-layer", type: "raster", source: "osm-raster", minzoom: 0, maxzoom: 19 }],
-};
+// CARTO dark vector basemap: clearer roads, borders and labels on the dark memorial register.
+const MAP_STYLE = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 
 // Približne točke naselja odvojene su od točnih koordinata grobnica.
 const APPROXIMATE_LOCALITIES = {
@@ -391,8 +381,13 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
       </div>
       <div className="hp-grave-map-shell">
         <div ref={containerRef} className="hp-grave-map-canvas" aria-label="Interaktivna karta masovnih grobnica hrvatskih žrtava" />
+        <div className="hp-grave-map-legend" aria-label="Legenda oznaka karte">
+          <span><i className="hp-map-legend-exact" /> Potvrđena koordinata</span>
+          <span><i className="hp-map-legend-area" /> Približno područje</span>
+          <span><i className="hp-map-legend-context" /> Povijesni kontekst</span>
+        </div>
         {mapError && <div className="hp-grave-map-error" role="status">Karta se trenutačno ne može učitati. Evidencijski zapisi i njihove izvorne poveznice ostaju dostupni ispod.</div>}
-        <div className="hp-grave-map-caption"><span /> KARTA TEMELJENA NA PODACIMA OPENSTREETMAPA <small>© OpenStreetMap contributors</small></div>
+        <div className="hp-grave-map-caption"><span /> INTERAKTIVNA KARTA · © OPENSTREETMAP · © CARTO</div>
       </div>
       <p className="hp-grave-map-note"><strong>{mappedSites.length}</strong> {mappedSites.length === 1 ? "lokacija" : "lokacije"} prikazane su na karti. Puna oznaka znači da je potvrđena javna koordinata grobnice. Isprekidana oznaka pokazuje približno naselje ili šire područje, a ne točku iskopa. Više zapisa na istom području može dijeliti približnu oznaku; to nije dokaz da je riječ o istoj grobnici.</p>
     </section>
