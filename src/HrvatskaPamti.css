@@ -544,3 +544,111 @@
 @keyframes hp-atlas-pulse{0%,100%{opacity:1;box-shadow:0 0 0 4px #d6b48b20,0 0 15px #d6b48b}50%{opacity:.55;box-shadow:0 0 0 7px #d6b48b10,0 0 7px #d6b48b}}
 @media(max-width:700px){.hp-grave-map-shell-cinematic{height:520px;min-height:520px}.hp-grave-map-shell-cinematic .hp-grave-map-canvas{min-height:520px}.hp-map-cinematic-topbar{top:9px;left:9px;right:9px;align-items:flex-start;flex-direction:column}.hp-map-live-status{font-size:8px;padding:8px 10px}.hp-map-view-controls{align-self:flex-end}.hp-map-view-controls button{padding:7px 8px;font-size:7px}.hp-grave-map-shell-cinematic .hp-grave-map-legend{right:9px;bottom:56px;padding:10px;font-size:8px}.hp-grave-map-shell-cinematic .hp-grave-map-caption{left:9px;bottom:9px;max-width:calc(100% - 18px);font-size:6px}}
 @media(prefers-reduced-motion:reduce){.hp-grave-map-marker:before,.hp-grave-map-marker:after,.hp-map-live-status>span{animation:none}}
+
+
+/* Hrvatska pamti — unified cinematic page atmosphere and redesigned record cards */
+.hp-register-content{
+  position:relative;
+  isolation:isolate;
+  background:
+    radial-gradient(ellipse at 12% 8%,rgba(39,91,119,.18),transparent 34%),
+    radial-gradient(ellipse at 88% 34%,rgba(151,62,69,.10),transparent 32%),
+    linear-gradient(180deg,#081522 0%,#0b1b29 48%,#091622 100%);
+}
+.hp-register-content:before{
+  content:"";position:absolute;z-index:-1;inset:0;pointer-events:none;opacity:.13;
+  background-image:linear-gradient(rgba(205,220,232,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(205,220,232,.10) 1px,transparent 1px);
+  background-size:76px 76px;mask-image:linear-gradient(180deg,#000,transparent 82%);
+}
+.hp-register-content .hp-register-cards{gap:18px;align-items:stretch}
+.hp-grave-card-modern{
+  position:relative;isolation:isolate;overflow:hidden;min-height:310px;padding:24px 24px 20px;
+  color:#eaf0f4;background:linear-gradient(145deg,rgba(20,43,60,.98),rgba(8,24,37,.98));
+  border:1px solid rgba(157,187,207,.22);border-radius:13px;
+  box-shadow:0 15px 38px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.045);
+  transform:translateY(0);transition:transform .35s cubic-bezier(.2,.8,.2,1),border-color .35s,box-shadow .35s,background .35s;
+  animation:hp-card-enter .65s both;animation-delay:calc(var(--hp-card-order,0)*55ms);
+}
+.hp-grave-card-modern:before{
+  content:"";position:absolute;z-index:-1;inset:0;opacity:.42;pointer-events:none;
+  background:radial-gradient(circle at 92% 8%,rgba(214,180,139,.18),transparent 34%),linear-gradient(120deg,transparent 54%,rgba(255,255,255,.035));
+}
+.hp-grave-card-modern:after{
+  content:"";position:absolute;top:0;left:24px;right:24px;height:2px;
+  background:linear-gradient(90deg,transparent,#d6b48b 22%,#f1dfc4 50%,#d6b48b 78%,transparent);opacity:.72;
+}
+.hp-grave-card-modern:hover{
+  transform:translateY(-7px);border-color:rgba(226,194,151,.62);
+  box-shadow:0 24px 58px rgba(0,0,0,.38),0 0 28px rgba(214,180,139,.09);
+  background:linear-gradient(145deg,#19364b,#0a1b2a);
+}
+.hp-grave-card-modern.is-expanded{
+  grid-column:span 2;min-height:0;border-color:rgba(226,194,151,.68);
+  box-shadow:0 24px 65px rgba(0,0,0,.42),0 0 34px rgba(214,180,139,.10);
+}
+.hp-grave-card-modern .hp-grave-card-number{display:inline-flex;align-items:center;gap:8px;color:#aebdca;font-size:8px;letter-spacing:.16em}
+.hp-grave-card-modern .hp-grave-card-number i,.hp-grave-card-modern .hp-grave-card-location-tag i{
+  width:6px;height:6px;border-radius:50%;background:#d6b48b;box-shadow:0 0 12px #d6b48b;display:inline-block
+}
+.hp-grave-card-modern .hp-grave-card-location-tag{
+  border-radius:30px;padding:7px 10px;background:rgba(214,180,139,.08);
+  border-color:rgba(214,180,139,.30);color:#e6d2b5;font-size:8px;letter-spacing:.045em
+}
+.hp-grave-card-modern .hp-grave-card-location-tag.is-exact{background:rgba(95,159,122,.12);border-color:rgba(117,190,146,.38);color:#bce5cb}
+.hp-grave-card-modern .hp-grave-card-location-tag.is-exact i{background:#83d5a0;box-shadow:0 0 12px #83d5a0}
+.hp-grave-card-modern .hp-grave-card-location-tag.is-area{background:rgba(214,180,139,.08);border-style:dashed}
+.hp-grave-card-modern .hp-grave-card-location-tag.is-area i{background:#d6b48b;box-shadow:0 0 10px #d6b48b}
+.hp-grave-card-modern .hp-grave-card-main{align-items:center;gap:16px;margin:27px 0 20px}
+.hp-grave-card-modern .hp-grave-card-symbol{
+  position:relative;flex:0 0 54px;width:54px;height:54px;border-radius:12px;
+  background:linear-gradient(145deg,#24445a,#10283b);border:1px solid rgba(214,180,139,.35);
+  color:#e7c99f;font-size:22px;box-shadow:inset 0 1px rgba(255,255,255,.10),0 8px 22px #0003
+}
+.hp-grave-card-modern .hp-grave-card-symbol span{filter:drop-shadow(0 0 9px #e5c48b99)}
+.hp-grave-card-modern .hp-grave-card-symbol small{
+  position:absolute;right:-5px;bottom:-5px;padding:3px 5px;border:1px solid #39566a;border-radius:5px;
+  background:#081522;color:#b8c9d5;font:800 8px Manrope,system-ui,sans-serif
+}
+.hp-grave-card-modern .hp-grave-card-title h3{color:#f3eee5;font:600 clamp(23px,2vw,29px)/1.08 "Cormorant Garamond",Georgia,serif;letter-spacing:.005em}
+.hp-grave-card-modern .hp-grave-card-title p{color:#9eafbd;font-size:10px}
+.hp-grave-card-modern .hp-grave-card-title p span{color:#d6b48b}
+.hp-grave-card-modern .hp-grave-card-meta{padding:12px 0;border-color:rgba(185,204,219,.15);color:#d6b48b;font-size:8px}
+.hp-grave-card-modern .hp-grave-card-summary{color:#c2cdd5;font-size:10px;line-height:1.8}
+.hp-grave-card-modern .hp-grave-card-status{
+  align-self:flex-start;max-width:100%;padding:8px 11px;border:1px solid rgba(214,180,139,.19);
+  border-left:2px solid #c18d66;border-radius:0 7px 7px 0;background:rgba(214,180,139,.07);
+  color:#e4d3bc;font-size:9px;line-height:1.65
+}
+.hp-grave-card-modern .hp-grave-card-detail{
+  padding:19px 0;margin:4px 0 17px;border-color:rgba(185,204,219,.17)
+}
+.hp-grave-card-modern .hp-grave-card-detail section>span{color:#d6b48b;font-size:8px;letter-spacing:.14em}
+.hp-grave-card-modern .hp-grave-card-detail p{color:#c4d0d9;font-size:10px}
+.hp-grave-card-modern .hp-grave-card-detail a{color:#f0c994}
+.hp-grave-card-modern .hp-grave-card-action{
+  min-height:46px;padding:12px 14px;border:1px solid rgba(214,180,139,.35);border-radius:7px;
+  background:linear-gradient(100deg,#17364b,#102638);color:#f0e3cf;font-size:9px;letter-spacing:.08em;
+  transition:background .25s,border-color .25s,box-shadow .25s
+}
+.hp-grave-card-modern .hp-grave-card-action:hover,.hp-grave-card-modern .hp-grave-card-action:focus-visible{
+  background:linear-gradient(100deg,#284e66,#18354a);border-color:#d6b48b;box-shadow:0 0 22px #d6b48b1e
+}
+.hp-grave-card-modern .hp-grave-card-action span{color:#e6c797}
+.hp-grave-card-history{background:linear-gradient(145deg,rgba(43,37,40,.98),rgba(16,26,37,.98));border-color:rgba(185,128,128,.27)}
+.hp-grave-card-history:after{background:linear-gradient(90deg,transparent,#b66a70 25%,#e1b2a8 50%,#b66a70 75%,transparent)}
+.hp-grave-card-history .hp-grave-card-symbol{background:linear-gradient(145deg,#54343a,#2b2630);border-color:rgba(203,139,143,.42);color:#e6b8ae}
+.hp-grave-card-history .hp-grave-card-number i{background:#cf8585;box-shadow:0 0 12px #cf8585}
+.hp-grave-card-history .hp-grave-card-status{border-left-color:#b66a70;background:rgba(182,106,112,.09)}
+.hp-grave-card-context.is-expanded{grid-column:span 2}
+@keyframes hp-card-enter{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:1100px){.hp-grave-card-modern.is-expanded,.hp-grave-card-context.is-expanded{grid-column:span 2}}
+@media(max-width:680px){
+  .hp-register-content .hp-register-cards{gap:13px}
+  .hp-grave-card-modern{min-height:0;padding:19px 17px 16px;border-radius:10px}
+  .hp-grave-card-modern .hp-grave-card-main{margin:22px 0 17px;gap:13px}
+  .hp-grave-card-modern .hp-grave-card-symbol{flex-basis:47px;width:47px;height:47px}
+  .hp-grave-card-modern .hp-grave-card-title h3{font-size:24px}
+  .hp-grave-card-modern.is-expanded,.hp-grave-card-context.is-expanded{grid-column:span 1}
+  .hp-grave-card-modern .hp-grave-card-detail{grid-template-columns:1fr;gap:13px}
+}
+@media(prefers-reduced-motion:reduce){.hp-grave-card-modern{animation:none;transition:none}.hp-grave-card-modern:hover{transform:none}}
