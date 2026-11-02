@@ -10,8 +10,19 @@ const MAP_STYLE = {
       tileSize: 256,
       attribution: "© OpenStreetMap contributors",
     },
+    "terrain-dem": {
+      type: "raster-dem",
+      tiles: ["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"],
+      tileSize: 256,
+      encoding: "terrarium",
+      maxzoom: 15,
+      attribution: "Terrain data: AWS Terrain Tiles",
+    },
   },
-  layers: [{ id: "osm-raster-layer", type: "raster", source: "osm-raster", minzoom: 0, maxzoom: 19 }],
+  layers: [
+    { id: "osm-raster-layer", type: "raster", source: "osm-raster", minzoom: 0, maxzoom: 19 },
+    { id: "terrain-hillshade", type: "hillshade", source: "terrain-dem", layout: { visibility: "visible" }, paint: { "hillshade-exaggeration": 0.18, "hillshade-shadow-color": "#172c3b", "hillshade-highlight-color": "#d8c6a2", "hillshade-accent-color": "#8ba0a9" } },
+  ],
 };
 
 // Približne točke naselja odvojene su od točnih koordinata grobnica.
@@ -136,6 +147,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
   const maplibreRef = useRef(null);
   const searchMarkerRef = useRef(null);
   const [mapError, setMapError] = useState(false);
+  const [is3D, setIs3D] = useState(true);
   const [mapQuery, setMapQuery] = useState("");
   const [placeMatches, setPlaceMatches] = useState([]);
   const mappedSites = sites
@@ -180,6 +192,22 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
       controller.abort();
     };
   }, [mapQuery]);
+
+  function toggleMapMode() {
+    const next3D = !is3D;
+    setIs3D(next3D);
+    const map = mapRef.current;
+    if (!map) return;
+    if (next3D) {
+      try { map.setTerrain({ source: "terrain-dem", exaggeration: 1.18 }); } catch { /* osnovna karta ostaje dostupna */ }
+      try { map.setLayoutProperty("terrain-hillshade", "visibility", "visible"); } catch { /* sloj može kasniti s učitavanjem */ }
+      map.easeTo({ pitch: 52, bearing: -14, duration: 950, essential: true });
+    } else {
+      try { map.setTerrain(null); } catch { /* kompatibilnost s trenutačnim stilom */ }
+      try { map.setLayoutProperty("terrain-hillshade", "visibility", "none"); } catch { /* sloj može kasniti s učitavanjem */ }
+      map.easeTo({ pitch: 0, bearing: 0, duration: 850, essential: true });
+    }
+  }
 
   function focusSite(siteId) {
     const entry = markersRef.current.find((item) => item.siteId === siteId);
@@ -256,8 +284,11 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
           style: MAP_STYLE,
           center: [17.9, 44.8],
           zoom: 5.8,
+          pitch: 52,
+          bearing: -14,
           minZoom: 4.5,
           maxZoom: 17,
+          maxPitch: 65,
           attributionControl: true,
           cooperativeGestures: true,
         });
@@ -314,7 +345,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
             .setLngLat([site.mapLocation.lng, site.mapLocation.lat])
             .setPopup(popup)
             .addTo(mapInstance);
-          markersRef.current.push({ siteId: site.id, marker, popup });
+          markersRef.current.push({ siteId: site.id, marker, popup, lngLat: [site.mapLocation.lng, site.mapLocation.lat] });
         });
 
         focusMarker = (event) => {
@@ -336,7 +367,26 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
         window.addEventListener("hp-focus-grave-map", focusMarker);
 
         mapInstance.on("load", () => {
-          if (!cancelled) setMapError(false);
+          if (cancelled) return;
+          setMapError(false);
+          try {
+            mapInstance.setTerrain({ source: "terrain-dem", exaggeration: 1.18 });
+            mapInstance.setLayoutProperty("terrain-hillshade", "visibility", "visible");
+          } catch {
+            // Ako DEM servis privremeno nije dostupan, osnovna karta i oznake ostaju funkcionalne.
+          }
+          mapInstance.easeTo({ pitch: 52, bearing: -14, duration: 1100 });
+        });
+        mapInstance.once("idle", () => {
+          if (cancelled || !mapInstance.queryTerrainElevation) return;
+          markersRef.current.forEach((entry) => {
+            try {
+              const elevation = mapInstance.queryTerrainElevation(entry.lngLat);
+              if (Number.isFinite(elevation)) entry.marker.setAltitude(elevation);
+            } catch {
+              // Visina oznake ostaje na osnovnoj razini ako DEM podatak nije dostupan.
+            }
+          });
         });
         mapInstance.on("error", (event) => {
           // Tile-level 404/temporary network errors must not hide a usable map.
@@ -391,6 +441,11 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
       </div>
       <div className="hp-grave-map-shell">
         <div ref={containerRef} className="hp-grave-map-canvas" aria-label="Interaktivna karta masovnih grobnica hrvatskih žrtava" />
+        <button className="hp-map-mode-toggle" type="button" onClick={toggleMapMode} aria-pressed={is3D} aria-label={is3D ? "Prijeđi na dvodimenzionalnu kartu" : "Uključi trodimenzionalni reljef"}>
+          <span className="hp-map-mode-icon" aria-hidden="true">{is3D ? "◇" : "▱"}</span>
+          <span><strong>{is3D ? "3D RELJEF" : "2D PREGLED"}</strong><small>{is3D ? "Nagib i reljef uključeni" : "Klasični prikaz karte"}</small></span>
+          <i aria-hidden="true">{is3D ? "ON" : "OFF"}</i>
+        </button>
         {mapError && <div className="hp-grave-map-error" role="status">Karta se trenutačno ne može učitati. Evidencijski zapisi i njihove izvorne poveznice ostaju dostupni ispod.</div>}
         <div className="hp-grave-map-caption"><span /> KARTA TEMELJENA NA PODACIMA OPENSTREETMAPA <small>© OpenStreetMap contributors</small></div>
       </div>
