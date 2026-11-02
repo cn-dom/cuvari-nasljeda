@@ -1,0 +1,60 @@
+/* PatriaSoul — unified visual system v1
+   Presentation-only layer. Existing React state, routes, Supabase calls and data flows stay untouched. */
+:root{--ps-bg:#081321;--ps-surface:#101f33;--ps-surface-2:#142740;--ps-line:#263c56;--ps-text:#edf4fb;--ps-muted:#9aadc1;--ps-blue:#5ca8ff;--ps-gold:#d9b875}
+html{background:var(--ps-bg);scroll-behavior:smooth}
+body{background:radial-gradient(ellipse at 72% -12%,rgba(35,79,119,.34),transparent 34rem),var(--ps-bg);color:var(--ps-text)}
+.app-shell{min-height:100vh;color:var(--ps-text)}
+.app-shell .topbar{position:sticky;top:0;z-index:45;min-height:76px;padding:10px clamp(16px,3vw,42px);background:rgba(8,19,33,.94);color:var(--ps-text);border-bottom:1px solid var(--ps-line);box-shadow:0 12px 32px rgba(0,0,0,.22);backdrop-filter:blur(16px)}
+.app-shell .brand{color:var(--ps-text)}
+.app-shell .brand-mark{width:44px;height:44px;border:1px solid rgba(217,184,117,.28);border-radius:12px;background:rgba(255,255,255,.035);box-shadow:0 8px 22px rgba(0,0,0,.22)}
+.app-shell .topnav{gap:5px}
+.app-shell .topnav-link{border:0;border-radius:10px;padding:10px 12px;color:#b7c7d8}
+.app-shell .topnav-link::before{inset:0;border-radius:10px;background:linear-gradient(120deg,rgba(65,139,202,.22),rgba(217,184,117,.08))}
+.app-shell .topnav-link:hover,.app-shell .topnav-link.active{color:#fff;border:0;background:#17314c}
+.app-shell .topnav-link.active{box-shadow:inset 0 -2px var(--ps-gold)}
+.app-shell .page-layout{max-width:1500px;margin:26px auto 64px;padding:0 clamp(14px,2.5vw,32px);gap:18px}
+.app-shell .community-card,.app-shell .card,.app-shell .post-card,.app-shell .composer,.app-shell .welcome-panel,.app-shell .community-hub-card,.app-shell .quiz-hub-card,.app-shell .ai-hub-card,.app-shell .owner-admin-panel,.app-shell .profile-panel,.app-shell .notifications-panel,.app-shell .group-chat-panel,.app-shell .member-directory-panel{background:linear-gradient(145deg,var(--ps-surface),#0d1b2c);color:var(--ps-text);border:1px solid var(--ps-line);border-radius:16px;box-shadow:0 16px 42px rgba(0,0,0,.18)}
+.app-shell .community-banner{background:linear-gradient(120deg,#10243a,#1c4568 68%,#642a3a);color:#f5dfaa}
+.app-shell .community-body,.app-shell .right-card,.app-shell .composer,.app-shell .post-card{color:var(--ps-text)}
+.app-shell .welcome-panel{min-height:218px;padding:clamp(22px,3vw,34px);background:radial-gradient(circle at 85% 20%,rgba(89,157,211,.2),transparent 20rem),linear-gradient(115deg,#0d2035,#173b5b 70%,#4c2938);border-color:#34516c}
+.app-shell .welcome-copy h1,.app-shell .welcome-copy p,.app-shell .welcome-panel h1,.app-shell .welcome-panel p{color:#f5f8fc}
+.app-shell .welcome-copy p{opacity:.78}
+.app-shell .composer{padding:18px}
+.app-shell .composer textarea,.app-shell .composer input,.app-shell .feed-search,.app-shell .feed-controls input,.app-shell .feed-controls select,.app-shell .edit-post-box textarea,.app-shell .comments-panel textarea,.app-shell .auth-form input:not([type=checkbox]),.app-shell .auth-form select,.app-shell .auth-form textarea{color:#edf4fb;background:#0a192a;border:1px solid #304962;border-radius:11px}
+.app-shell .composer textarea::placeholder,.app-shell input::placeholder,.app-shell textarea::placeholder{color:#7f95ac}
+.app-shell .composer textarea:focus,.app-shell input:focus,.app-shell textarea:focus,.app-shell select:focus{outline:2px solid rgba(92,168,255,.5);outline-offset:1px}
+.app-shell .feed-heading,.app-shell .feed-heading h2,.app-shell .post-author strong,.app-shell .post-text,.app-shell .member-directory-heading h2,.app-shell .member-directory-heading strong,.app-shell .right-card-title h3,.app-shell .community-card h2,.app-shell .community-card h3{color:#edf4fb}
+.app-shell .post-author span,.app-shell .post-metrics,.app-shell .feed-heading p,.app-shell .right-card p,.app-shell .right-card small,.app-shell .community-card p,.app-shell .member-directory-heading p,.app-shell .member-directory-heading small{color:var(--ps-muted)}
+.app-shell .post-card{padding:18px 18px 0;margin-bottom:15px}
+.app-shell .post-tag{color:var(--ps-gold)}
+.app-shell .post-actions{border-top:1px solid rgba(164,190,220,.13)}
+.app-shell .post-action,.app-shell .side-link,.app-shell .feed-filter,.app-shell .subtle-button,.app-shell .member-directory-card{color:#c5d4e3;background:#132940;border-color:#2b435d;border-radius:10px}
+.app-shell .side-link:hover,.app-shell .feed-filter:hover,.app-shell .post-action:hover{background:#1a3855;color:#fff}
+.app-shell .side-link.selected,.app-shell .feed-filter.active{background:#1d4a72;color:#fff;border-color:#477ca8}
+.app-shell .right-card{background:linear-gradient(145deg,#12243a,#0d1b2c);border:1px solid var(--ps-line);border-radius:15px;box-shadow:0 14px 34px rgba(0,0,0,.16)}
+.app-shell .right-card-title h3{color:#e8d19a}
+.app-shell .focus-link,.app-shell .activity-item,.app-shell .member-row{border-color:rgba(164,190,220,.13)}
+.app-shell .auth-panel,.app-shell .auth-layout-card{border-color:#304962}
+.app-shell .auth-layout-intro,.app-shell .auth-footnote{color:#a8bbcf}
+.app-shell .auth-submit,.app-shell .community-action-submit{background:linear-gradient(135deg,#e5c47d,#b98e45);color:#102033;border:1px solid #efd99d;border-radius:11px;font-weight:800}
+.app-shell button,.app-shell a{transition:background-color .18s ease,border-color .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease}
+.app-shell button:hover:not(:disabled){transform:translateY(-1px)}
+.app-shell .sidebar-foot,.app-shell .values-card{background:#102238;border:1px solid var(--ps-line);border-radius:14px;color:#dbe7f2}
+.app-shell .sidebar-foot p,.app-shell .values-card p{color:var(--ps-muted)}
+.app-shell .community-welcome-ribbon{background:linear-gradient(100deg,#081727,#173652,#081727);border-color:rgba(217,184,117,.28)}
+.app-shell .community-action-page{background:var(--ps-bg);color:var(--ps-text)}
+.app-shell .community-action-topbar{background:#0b1b2d;border-bottom:1px solid var(--ps-line)}
+.app-shell .community-action-guidance,.app-shell .community-action-ad{background:#102238;border:1px solid var(--ps-line);border-radius:14px;color:var(--ps-text)}
+.app-shell .community-action-form{background:#101f33;border:1px solid var(--ps-line);border-radius:16px}
+.app-shell .community-action-form label{color:#dbe7f2}
+.app-shell .community-action-form input,.app-shell .community-action-form select,.app-shell .community-action-form textarea{background:#09192a;color:#edf4fb;border:1px solid #304962;border-radius:10px}
+.ps-site-header{background:rgba(8,19,33,.96);border-bottom:1px solid var(--ps-line);box-shadow:0 12px 30px rgba(0,0,0,.16);backdrop-filter:blur(14px)}
+.ps-site-primary a:hover,.ps-site-primary a.active{background:#17314c;color:#fff;box-shadow:inset 0 -2px var(--ps-gold)}
+.ps-site-subnav{background:#0d1d30;border-bottom:1px solid var(--ps-line);color:#dbe7f2}
+.ps-site-subnav-label{color:#d9b875;border-color:#38516b}
+.ps-site-subnav a{color:#c2d1df}
+.ps-site-subnav a:hover{background:#183653;color:#fff}
+.ps-site-wall-link{border-color:#55718d;background:#132940}
+.community-site-footer{background:#061321;border-top:1px solid rgba(217,184,117,.22)}
+@media(max-width:1050px){.app-shell .page-layout{grid-template-columns:minmax(0,1fr);margin-top:16px}.app-shell .left-sidebar{order:0}.app-shell .feed-column{order:1}.app-shell .right-sidebar{order:2}}
+@media(max-width:760px){.app-shell .topbar{min-height:62px;padding:8px 12px;gap:8px}.app-shell .topnav{overflow-x:auto;max-width:100%;gap:3px}.app-shell .topnav-link{white-space:nowrap;padding:9px 10px;font-size:11px}.app-shell .page-layout{padding:0 12px;margin:14px auto 42px;gap:13px}.app-shell .welcome-panel{min-height:170px;padding:20px;border-radius:14px}.app-shell .post-card,.app-shell .composer{padding:14px}.app-shell .right-sidebar{display:grid;grid-template-columns:1fr;gap:12px}}
