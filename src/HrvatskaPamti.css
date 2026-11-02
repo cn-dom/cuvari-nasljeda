@@ -290,7 +290,7 @@
 .hp-grave-map-marker{width:32px;height:32px;display:grid;place-items:center;border-radius:50%;border:2px solid #f0d9b7;background:#a83c45;color:#fff;cursor:pointer;box-shadow:0 0 0 6px #b83d4730,0 5px 18px #0008;padding:0}
 .hp-grave-map-marker-approximate{background:#8a7049;border-style:dashed;box-shadow:0 0 0 6px #d6b48b24,0 5px 18px #0008}
 .hp-grave-map-marker span{font-size:15px;line-height:1}
-.hp-grave-map-marker:hover,.hp-grave-map-marker:focus-visible{transform:scale(1.12);outline:2px solid #fff;outline-offset:2px}
+.hp-grave-map-marker:hover,.hp-grave-map-marker:focus-visible{filter:brightness(1.16);outline:2px solid #fff;outline-offset:2px}
 .hp-grave-map-caption{position:absolute;z-index:2;left:12px;bottom:12px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;max-width:calc(100% - 24px);padding:9px 11px;background:#081522e8;color:#e0e7ec;font-size:8px;font-weight:800;letter-spacing:.12em}
 .hp-grave-map-caption>span{width:6px;height:6px;border-radius:50%;background:#d6b48b}
 .hp-grave-map-caption small{font-size:8px;letter-spacing:0;color:#aab9c7;font-weight:500}
@@ -572,7 +572,7 @@
 }
 .hp-register-content .hp-grave-map-marker:hover,
 .hp-register-content .hp-grave-map-marker:focus-visible {
-  transform: scale(1.18); filter: brightness(1.14);
+  filter: brightness(1.14);
   box-shadow: 0 0 0 8px rgba(214,180,139,.2), 0 10px 28px #000b;
 }
 .hp-register-content .hp-grave-map-caption {
@@ -645,8 +645,8 @@
   .hp-register-content .hp-grave-card *,
   .hp-register-content .hp-grave-map-marker,
   .hp-register-content .hp-grave-map-search input { transition: none !important; }
-  .hp-register-content .hp-grave-card:hover,
-  .hp-register-content .hp-grave-map-marker:hover { transform: none !important; }
+  .hp-register-content .hp-grave-card:hover { transform: none !important; }
+  .hp-register-content .hp-grave-map-marker:hover { filter: none !important; }
 }
 
 
@@ -684,7 +684,6 @@
   width: 38px;
   height: 38px;
   border-width: 2px;
-  animation: hp-marker-arrive .7s cubic-bezier(.2,.8,.2,1) both;
   filter: drop-shadow(0 5px 8px rgba(0,0,0,.55));
 }
 .hp-register-content .hp-grave-map-marker > span {
@@ -692,6 +691,7 @@
   font-size: 19px;
   line-height: 1;
   text-shadow: 0 1px 5px rgba(0,0,0,.45);
+  animation: hp-marker-arrive .7s cubic-bezier(.2,.8,.2,1) both;
 }
 .hp-register-content .hp-grave-map-marker-approximate { width: 32px; height: 32px; }
 .hp-register-content .hp-grave-map-marker-context { width: 35px; height: 35px; }
