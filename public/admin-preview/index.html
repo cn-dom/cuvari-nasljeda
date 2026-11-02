@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#091426">
+<title>PatriaSoul Admin — pregled</title>
+<style>
+:root{color-scheme:dark;--bg:#081321;--panel:#101f33;--panel2:#142740;--line:#243a55;--muted:#91a5bc;--text:#edf4fb;--blue:#5ca8ff;--blue2:#1c5e9d;--gold:#d9b875;--green:#5fc7a0;--red:#e57e82;--shadow:0 18px 45px #02091466}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 70% -10%,#183a5c 0,transparent 35%),var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button{font:inherit;color:inherit;cursor:pointer}.shell{min-height:100vh;display:grid;grid-template-columns:258px 1fr}.sidebar{background:#091727eF;border-right:1px solid var(--line);padding:25px 17px;display:flex;flex-direction:column;gap:28px}.brand{display:flex;align-items:center;gap:12px;padding:0 10px}.brand img{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 5px 12px #0008)}.brand strong{display:block;font-size:17px;letter-spacing:.11em}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:.16em;margin-top:2px}.workspace{padding:0 10px}.workspace label,.nav-label{color:#7189a3;text-transform:uppercase;font-size:10px;letter-spacing:.17em;font-weight:700}.workspace .site{margin-top:9px;padding:10px 12px;background:#12243a;border:1px solid var(--line);border-radius:11px;display:flex;justify-content:space-between;align-items:center}.site b{font-size:12px}.site span{color:var(--green);font-size:10px}.nav{display:grid;gap:5px}.nav-label{padding:0 12px;margin:2px 0 7px}.nav button{border:0;background:transparent;color:#9fb1c5;text-align:left;padding:11px 12px;border-radius:10px;display:flex;gap:12px;align-items:center;transition:.18s}.nav button:hover{background:#12263d;color:#fff}.nav button.active{background:linear-gradient(100deg,#1c4d7c,#163553);color:#fff;box-shadow:inset 3px 0 var(--blue)}.nav .ico{width:19px;text-align:center;font-size:16px}.nav .count{margin-left:auto;background:#25496a;color:#cde5ff;border-radius:20px;padding:2px 7px;font-size:10px}.side-bottom{margin-top:auto;border:1px solid var(--line);border-radius:13px;padding:14px;background:linear-gradient(145deg,#142b44,#0e1d30)}.side-bottom strong{font-size:12px}.side-bottom p{font-size:11px;color:var(--muted);margin:6px 0 12px}.side-bottom button{background:#1b4e7a;border:1px solid #316b9e;border-radius:8px;padding:8px 10px;font-size:11px;width:100%}
+main{min-width:0}.topbar{height:76px;border-bottom:1px solid #24374d99;display:flex;align-items:center;justify-content:space-between;padding:0 38px;gap:18px;background:#0916269c;backdrop-filter:blur(14px);position:sticky;top:0;z-index:5}.crumb{color:var(--muted);font-size:12px}.crumb b{color:#fff;font-weight:600}.top-actions{display:flex;align-items:center;gap:12px}.search{border:1px solid var(--line);background:#0e1d2e;border-radius:9px;padding:9px 12px;color:var(--muted);min-width:210px}.icon-btn{width:36px;height:36px;border:1px solid var(--line);background:#102137;border-radius:10px}.avatar{width:35px;height:35px;border-radius:50%;background:linear-gradient(145deg,#d9b875,#8c6334);display:grid;place-items:center;color:#142238;font-weight:800;font-size:12px}.content{max-width:1500px;margin:auto;padding:34px 38px 50px}.welcome{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:26px}.eyebrow{color:var(--gold);font-size:10px;letter-spacing:.2em;font-weight:800}.welcome h1{font-size:29px;letter-spacing:-.04em;margin:7px 0 5px}.welcome p{color:var(--muted);margin:0}.date{border:1px solid var(--line);border-radius:10px;padding:9px 13px;color:#b6c7d8;font-size:11px;background:#0e1d2e}.flagline{height:3px;width:68px;border-radius:5px;background:linear-gradient(90deg,#e54b56 0 33%,#f5f4ed 33% 66%,#3d83cb 66%);margin-top:15px;opacity:.9}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:18px}.stat,.panel{background:linear-gradient(145deg,#12243a,#0e1c2e);border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow)}.stat{padding:18px 19px;position:relative;overflow:hidden}.stat:after{content:"";position:absolute;width:90px;height:90px;border-radius:50%;background:#367cb21a;right:-25px;top:-30px}.stat-head{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:11px}.stat-icon{width:32px;height:32px;display:grid;place-items:center;border-radius:9px;background:#1b3c5a;color:#9dccff;font-size:15px}.stat strong{display:block;font-size:27px;letter-spacing:-.04em;margin:13px 0 3px}.trend{font-size:10px;color:var(--green)}.trend span{color:var(--muted);margin-left:5px}
+.grid-main{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,.85fr);gap:17px}.panel{padding:20px;margin-bottom:17px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:17px}.panel-head h2{font-size:14px;margin:0}.panel-head p{font-size:10px;color:var(--muted);margin:3px 0 0}.subtle-btn{background:#132a42;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:10px;color:#c5d7e8}.chart{height:178px;display:flex;align-items:flex-end;gap:13px;padding:8px 5px 0;border-bottom:1px solid var(--line);background:repeating-linear-gradient(to bottom,transparent 0 43px,#23395077 44px)}.bar-group{height:100%;flex:1;display:flex;align-items:flex-end;justify-content:center;gap:4px;position:relative}.bar{width:12px;max-width:25%;border-radius:5px 5px 1px 1px;background:linear-gradient(180deg,#68b6ff,#245783);min-height:8px}.bar.alt{background:linear-gradient(180deg,#d9b875,#896a3a)}.months{display:flex;justify-content:space-between;color:#8298b0;font-size:9px;padding:9px 4px 0}.legend{display:flex;gap:16px;color:var(--muted);font-size:10px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--blue);margin-right:6px}.dot.gold{background:var(--gold)}
+.activity{display:grid;gap:15px}.activity-item{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:start}.activity-icon{width:32px;height:32px;border-radius:9px;background:#1b3b58;display:grid;place-items:center;color:#a7d4ff}.activity-item b{display:block;font-size:11px;font-weight:600}.activity-item p{font-size:10px;color:var(--muted);margin:3px 0 0}.activity-item time{font-size:9px;color:#758da6;white-space:nowrap}.status{font-size:9px;padding:4px 7px;border-radius:20px;background:#214737;color:#85dfb9}.status.review{background:#493d25;color:#e8ca84}.status.draft{background:#29384b;color:#b2c4d8}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap}th{text-align:left;color:#8097af;text-transform:uppercase;letter-spacing:.1em;font-size:9px;font-weight:700;padding:0 10px 11px;border-bottom:1px solid var(--line)}td{padding:13px 10px;border-bottom:1px solid #21364c;font-size:11px;color:#cbd8e6}td:first-child{color:#f2f6fa;font-weight:600}.author{display:flex;align-items:center;gap:8px}.mini-avatar{width:25px;height:25px;border-radius:50%;background:#274968;display:grid;place-items:center;font-size:9px;color:#d9eaff}.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:17px}.quick{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.quick button{background:#132940;border:1px solid #2a4058;border-radius:11px;padding:14px;text-align:left;transition:.2s}.quick button:hover{border-color:#5798d3;transform:translateY(-2px)}.quick span{display:block;font-size:18px;margin-bottom:8px}.quick b{font-size:11px}.quick small{display:block;color:var(--muted);font-size:9px;margin-top:3px}.memorial{display:flex;gap:13px;align-items:center;background:linear-gradient(110deg,#1c344d,#14273b);border:1px solid #334d67;border-radius:12px;padding:14px}.memorial .symbol{width:42px;height:42px;border-radius:11px;background:#213e58;display:grid;place-items:center;font-size:20px}.memorial b{font-size:12px}.memorial p{font-size:10px;color:var(--muted);margin:3px 0}.memorial .arrow{margin-left:auto;color:#9fcfff;font-size:20px}
+.footer{text-align:center;color:#6e859e;font-size:9px;padding:18px 0 0;letter-spacing:.1em}
+@media(max-width:1050px){.shell{grid-template-columns:220px 1fr}.stats{grid-template-columns:repeat(2,1fr)}.grid-main{grid-template-columns:1fr}.content{padding:28px 24px}.topbar{padding:0 24px}}
+@media(max-width:700px){.shell{display:block}.sidebar{position:relative;padding:14px;gap:14px;border-right:0;border-bottom:1px solid var(--line)}.brand{padding:0 4px}.workspace,.side-bottom{display:none}.nav{display:flex;overflow:auto;gap:5px}.nav-label{display:none}.nav button{white-space:nowrap;padding:9px 11px;font-size:11px}.nav .ico{font-size:14px}.nav button:not(.active){background:#102137}.topbar{height:58px;padding:0 16px}.search{display:none}.content{padding:24px 15px 35px}.welcome{align-items:flex-start;flex-direction:column}.welcome h1{font-size:25px}.date{display:none}.stats{gap:9px}.stat{padding:14px}.stat strong{font-size:23px}.stat-head{font-size:10px}.grid-main{gap:0}.panel{padding:15px}.bottom-grid{grid-template-columns:1fr}.chart{gap:7px}.bar{width:9px}.footer{line-height:1.8}}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+  <div class="brand"><img src="/assets/images/1000000982.png" alt="PatriaSoul grb"><div><strong>PATRIASOUL</strong><small>ČUVARI NASLJEĐA</small></div></div>
+  <div class="workspace"><label>RADNI PROSTOR</label><div class="site"><b>PatriaSoul platforma</b><span>● Aktivno</span></div></div>
+  <nav class="nav" aria-label="Glavna navigacija">
+    <div class="nav-label">UPRAVLJANJE</div>
+    <button class="active" data-title="Pregled"><span class="ico">▦</span>Pregled</button>
+    <button data-title="Sadržaj"><span class="ico">▤</span>Sadržaj <span class="count">12</span></button>
+    <button data-title="Hrvatska pamti"><span class="ico">✥</span>Hrvatska pamti</button>
+    <button data-title="Korisnici"><span class="ico">♙</span>Korisnici</button>
+    <button data-title="Mediji"><span class="ico">▧</span>Mediji</button>
+    <div class="nav-label" style="margin-top:17px">ZAJEDNICA</div>
+    <button data-title="Objave zajednice"><span class="ico">▣</span>Objave zajednice</button>
+    <button data-title="Poruke"><span class="ico">✉</span>Poruke <span class="count">3</span></button>
+    <button data-title="Kvizovi"><span class="ico">✧</span>Kvizovi</button>
+    <div class="nav-label" style="margin-top:17px">SUSTAV</div>
+    <button data-title="Postavke"><span class="ico">⚙</span>Postavke</button>
+  </nav>
+  <div class="side-bottom"><strong>✦ Čuvamo ono što jesmo.</strong><p>Znanje · Ponos · Nasljeđe</p><button type="button" onclick="alert('Ovo je vizualni prototip — postavke još nisu povezane.')">Postavke platforme</button></div>
+</aside>
+<main>
+<header class="topbar"><div class="crumb">PatriaSoul <span style="color:#536b84">/</span> <b id="crumb">Pregled</b></div><div class="top-actions"><input class="search" aria-label="Pretraživanje" placeholder="⌕  Pretraži administraciju…"><button class="icon-btn" aria-label="Obavijesti" onclick="alert('Ovo je demo prikaz obavijesti.')">♧</button><div class="avatar" title="Administrator">PS</div></div></header>
+<div class="content">
+  <section class="welcome"><div><div class="eyebrow">PONOS · ZNANJE · NASLJEĐE</div><h1 id="heading">Dobro došao u PatriaSoul.</h1><p>Jedno mjesto za pregled i upravljanje cijelom zajednicom.</p><div class="flagline"></div></div><div class="date">◷ &nbsp; PONEDJELJAK, 2. STUDENOGA 2026.</div></section>
+  <section class="stats">
+    <article class="stat"><div class="stat-head">Registrirani korisnici <span class="stat-icon">♙</span></div><strong>2.486</strong><div class="trend">↗ 8,4% <span>u odnosu na prošli mjesec</span></div></article>
+    <article class="stat"><div class="stat-head">Objavljeni sadržaji <span class="stat-icon">▤</span></div><strong>184</strong><div class="trend">↗ 12 novih <span>ovaj mjesec</span></div></article>
+    <article class="stat"><div class="stat-head">Zapisi Hrvatska pamti <span class="stat-icon">✥</span></div><strong>78</strong><div class="trend">✓ Evidencija u provjeri <span>bez izmišljenih podataka</span></div></article>
+    <article class="stat"><div class="stat-head">Na čekanju pregleda <span class="stat-icon">◷</span></div><strong>12</strong><div class="trend" style="color:var(--gold)">• Potrebna urednička pažnja</div></article>
+  </section>
+  <div class="grid-main">
+    <section class="panel"><div class="panel-head"><div><h2>Aktivnost platforme</h2><p>Pregled aktivnosti kroz posljednjih 6 mjeseci · ogledni podaci</p></div><button class="subtle-btn" onclick="alert('Grafikon prikazuje ogledne podatke.')">Posljednjih 6 mjeseci⌄</button></div>
+      <div class="legend"><span><i class="dot"></i>Novi korisnici</span><span><i class="dot gold"></i>Nove objave</span></div>
+      <div class="chart" aria-label="Ogledni grafikon aktivnosti"><div class="bar-group"><i class="bar" style="height:35%"></i><i class="bar alt" style="height:24%"></i></div><div class="bar-group"><i class="bar" style="height:48%"></i><i class="bar alt" style="height:32%"></i></div><div class="bar-group"><i class="bar" style="height:43%"></i><i class="bar alt" style="height:38%"></i></div><div class="bar-group"><i class="bar" style="height:67%"></i><i class="bar alt" style="height:46%"></i></div><div class="bar-group"><i class="bar" style="height:58%"></i><i class="bar alt" style="height:52%"></i></div><div class="bar-group"><i class="bar" style="height:88%"></i><i class="bar alt" style="height:63%"></i></div></div>
+      <div class="months"><span>LIP</span><span>KOL</span><span>RUJ</span><span>TRA</span><span>SVI</span><span>LIS</span></div>
+    </section>
+    <section class="panel"><div class="panel-head"><div><h2>Posljednje aktivnosti</h2><p>Što se događa na platformi</p></div><button class="subtle-btn" onclick="alert('Cjelovita aktivnost bit će povezana u sljedećoj fazi.')">Sve aktivnosti ↗</button></div>
+      <div class="activity">
+        <div class="activity-item"><div class="activity-icon">✎</div><div><b>Novi članak čeka pregled</b><p>Domovina · urednički sadržaj</p></div><time>prije 12 min</time></div>
+        <div class="activity-item"><div class="activity-icon">♙</div><div><b>Novi korisnik se pridružio</b><p>Registracija na platformi</p></div><time>prije 38 min</time></div>
+        <div class="activity-item"><div class="activity-icon">✥</div><div><b>Ažuriran memorijalni zapis</b><p>Hrvatska pamti · izvor dopunjen</p></div><time>prije 1 h</time></div>
+        <div class="activity-item"><div class="activity-icon">▣</div><div><b>Nova objava u zajednici</b><p>Čuvari nasljeđa</p></div><time>prije 2 h</time></div>
+      </div>
+    </section>
+  </div>
+  <div class="grid-main">
+    <section class="panel"><div class="panel-head"><div><h2>Urednički pregled</h2><p>Sadržaj koji zahtijeva pažnju</p></div><button class="subtle-btn" onclick="setTab('Sadržaj')">Otvori sadržaj ↗</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Naslov</th><th>Kategorija</th><th>Status</th><th>Autor</th></tr></thead><tbody>
+      <tr><td>Priča hrvatske baštine</td><td>Kultura i znanje</td><td><span class="status review">Na pregledu</span></td><td><div class="author"><span class="mini-avatar">PS</span>PatriaSoul</div></td></tr>
+      <tr><td>Tragovi povijesti</td><td>Domovina</td><td><span class="status draft">Nacrt</span></td><td><div class="author"><span class="mini-avatar">ČN</span>Čuvari</div></td></tr>
+      <tr><td>Čuvanje lokalne baštine</td><td>Zajednica</td><td><span class="status">Objavljeno</span></td><td><div class="author"><span class="mini-avatar">PS</span>PatriaSoul</div></td></tr>
+      </tbody></table></div>
+    </section>
+    <section class="panel"><div class="panel-head"><div><h2>Brzi pristup</h2><p>Najčešće uredničke radnje</p></div></div><div class="quick">
+      <button onclick="setTab('Sadržaj')"><span>✎</span><b>Novi članak</b><small>Piši i uređuj sadržaj</small></button>
+      <button onclick="setTab('Hrvatska pamti')"><span>✥</span><b>Hrvatska pamti</b><small>Uredi evidenciju</small></button>
+      <button onclick="setTab('Korisnici')"><span>♙</span><b>Korisnici</b><small>Upravljanje članovima</small></button>
+      <button onclick="setTab('Mediji')"><span>▧</span><b>Medijska zbirka</b><small>Fotografije i video</small></button>
+    </div></section>
+  </div>
+  <section class="panel"><div class="panel-head"><div><h2>Hrvatska pamti</h2><p>Dostojanstvo · dokumentiranje · istina</p></div><button class="subtle-btn" onclick="setTab('Hrvatska pamti')">Otvori evidenciju ↗</button></div><div class="memorial"><div class="symbol">✥</div><div><b>Svaki zapis mora imati provjerljiv izvor.</b><p>Odvojeno prikazujemo potvrđene podatke, povijesni kontekst i lokacije koje nisu precizno utvrđene.</p></div><div class="arrow">→</div></div></section>
+  <div class="footer">HRVATSKA · POVIJEST · ZNANJE · IDENTITET &nbsp;|&nbsp; PATRIASOUL — ČUVARI NASLJEĐA</div>
+</div>
+</main>
+</div>
+<script>
+function setTab(name){document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.title===name));document.getElementById('crumb').textContent=name;document.getElementById('heading').textContent=name==='Pregled'?'Dobro došao u PatriaSoul.':name; if(name!=='Pregled') document.querySelector('.welcome p').textContent='Ovo je pregled budućeg modula — vizualni prototip bez povezivanja s bazom i postojećim funkcijama.';else document.querySelector('.welcome p').textContent='Jedno mjesto za pregled i upravljanje cijelom zajednicom.'}
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.title)));
+</script>
+</body>
+</html>
