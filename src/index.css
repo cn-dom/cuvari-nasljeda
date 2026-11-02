@@ -2525,3 +2525,79 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
   .private-messages { padding: 14px; border-radius: 12px; }
   .feed-column.messages-page-open { padding: 0; }
 }
+
+
+/* PatriaSoul — suptilni zajednički motion sustav (bez promjene sadržaja i rasporeda). */
+@keyframes ps-main-page-enter {
+  from { opacity: 0; transform: translateY(9px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ps-main-glow {
+  0%, 100% { opacity: .18; transform: translateX(-8%); }
+  50% { opacity: .34; transform: translateX(8%); }
+}
+.app-shell {
+  animation: ps-main-page-enter .55s cubic-bezier(.2,.7,.25,1) both;
+}
+.app-shell .welcome-panel,
+.app-shell .community-banner {
+  isolation: isolate;
+}
+.app-shell .welcome-panel::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -35% auto -35% -45%;
+  width: 42%;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,.10), transparent);
+  transform: skewX(-18deg);
+  animation: ps-main-glow 9s ease-in-out infinite;
+}
+.app-shell .card,
+.app-shell .community-card,
+.app-shell .values-card,
+.app-shell .principle-card,
+.app-shell .post-card,
+.app-shell .right-card {
+  transition: transform .28s cubic-bezier(.2,.75,.25,1),
+              box-shadow .28s ease, border-color .28s ease;
+}
+.app-shell .card:hover,
+.app-shell .community-card:hover,
+.app-shell .values-card:hover,
+.app-shell .principle-card:hover,
+.app-shell .post-card:hover,
+.app-shell .right-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(17,38,61,.10);
+  border-color: rgba(203,168,93,.38);
+}
+.app-shell button:not(:disabled),
+.app-shell a {
+  -webkit-tap-highlight-color: transparent;
+}
+.app-shell button:not(:disabled) {
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease,
+              background-color .2s ease, color .2s ease;
+}
+.app-shell button:not(:disabled):active {
+  transform: translateY(1px) scale(.99);
+}
+.app-shell .brand-mark,
+.app-shell .community-emblem {
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.app-shell .brand:hover .brand-mark,
+.app-shell .community-emblem:hover {
+  transform: translateY(-2px) rotate(-2deg);
+  box-shadow: 0 8px 20px rgba(23,44,70,.16);
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell, .app-shell *, .app-shell *::before, .app-shell *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}

@@ -763,3 +763,44 @@
   h2 { line-height: 1.18; }
   .patria-brand-wordmark { display: none; }
 }
+
+
+/* PatriaSoul Kviz — usklađeni, nenametljivi prijelazi i ulazne animacije. */
+@keyframes ps-quiz-page-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ps-quiz-gold-breathe {
+  0%, 100% { box-shadow: 0 10px 28px rgba(0,0,0,.16); }
+  50% { box-shadow: 0 14px 34px rgba(213,168,67,.12); }
+}
+#root {
+  animation: ps-quiz-page-enter .5s cubic-bezier(.2,.7,.25,1) both;
+}
+.patria-card, .patria-game-card, .patria-feature, .quiz-answer {
+  transition: transform .25s cubic-bezier(.2,.75,.25,1),
+              box-shadow .25s ease, border-color .25s ease,
+              background-color .25s ease;
+}
+.patria-card:hover, .patria-game-card:hover, .patria-feature:hover {
+  transform: translateY(-3px);
+  animation: ps-quiz-gold-breathe 3.2s ease-in-out infinite;
+}
+.patria-button, .patria-button-accent, .patria-portal-button,
+.patria-install-button, .patria-social-button {
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease,
+              background-color .2s ease, border-color .2s ease;
+}
+.patria-button:active, .patria-button-accent:active,
+.patria-portal-button:active, .patria-install-button:active,
+.patria-social-button:active {
+  transform: translateY(1px) scale(.99);
+}
+@media (prefers-reduced-motion: reduce) {
+  #root, #root *, #root *::before, #root *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
