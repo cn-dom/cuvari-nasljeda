@@ -476,3 +476,175 @@
 @media(max-width:680px){.hp-register-cards{grid-template-columns:1fr;gap:13px}.hp-grave-card.is-expanded{grid-column:span 1}.hp-grave-card{padding:18px}.hp-grave-card-detail{grid-template-columns:1fr}.hp-register-content .hp-grave-map-section{margin-left:-10px;margin-right:-10px;padding:16px}.hp-register-content .hp-grave-map-shell,.hp-register-content .hp-grave-map-canvas{height:340px;min-height:340px}.hp-register-content .hp-grave-map-heading{display:block}.hp-register-content .hp-grave-map-heading>p{margin-top:15px}}
 
 .hp-grave-map-marker-context{background:#344d70;border-color:#c8d6e8;border-style:dotted;box-shadow:0 0 0 6px #344d7040,0 5px 18px #0008}
+
+
+/* Hrvatska pamti — premium karta, oznake i kartice nalazišta */
+@keyframes hp-map-frame-in {
+  from { opacity: 0; transform: translateY(18px) scale(.992); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes hp-record-card-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes hp-marker-pulse {
+  0%, 100% { transform: scale(.88); opacity: .45; }
+  50% { transform: scale(1.45); opacity: 0; }
+}
+@keyframes hp-map-caption-glow {
+  0%, 100% { box-shadow: 0 5px 20px #0003, 0 0 0 rgba(214,180,139,0); }
+  50% { box-shadow: 0 8px 26px #0005, 0 0 22px rgba(214,180,139,.12); }
+}
+.hp-register-content .hp-grave-map-section {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  border-color: rgba(214,180,139,.28);
+  background:
+    radial-gradient(ellipse at 12% 0%, rgba(54,91,116,.22), transparent 42%),
+    linear-gradient(145deg,#0d2233 0%,#081522 72%);
+  box-shadow: 0 22px 60px rgba(4,15,25,.24), inset 0 1px 0 rgba(255,255,255,.045);
+  animation: hp-map-frame-in .7s cubic-bezier(.2,.75,.25,1) both;
+}
+.hp-register-content .hp-grave-map-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .22;
+  background: linear-gradient(115deg,transparent 15%,rgba(214,180,139,.07) 48%,transparent 72%);
+}
+.hp-register-content .hp-grave-map-heading,
+.hp-register-content .hp-grave-map-search,
+.hp-register-content .hp-grave-map-shell,
+.hp-register-content .hp-grave-map-note { position: relative; z-index: 1; }
+.hp-register-content .hp-grave-map-heading h2 { letter-spacing: -.025em; }
+.hp-register-content .hp-grave-map-search { position: relative; max-width: 520px; margin: 0 0 16px; }
+.hp-register-content .hp-grave-map-search > label {
+  display: block; margin-bottom: 7px; font-size: 9px; font-weight: 900;
+  letter-spacing: .13em; text-transform: uppercase; color: #e2c49e;
+}
+.hp-register-content .hp-grave-map-search input {
+  width: 100%; min-height: 46px; padding: 12px 15px; border-radius: 8px;
+  border: 1px solid rgba(214,180,139,.28); outline: none;
+  background: rgba(4,16,27,.72); color: #f5f2ec;
+  font: 500 12px Manrope,system-ui,sans-serif;
+  transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
+}
+.hp-register-content .hp-grave-map-search input:focus {
+  border-color: #d6b48b; background: rgba(4,16,27,.92);
+  box-shadow: 0 0 0 3px rgba(214,180,139,.13), 0 8px 24px #0003;
+}
+.hp-register-content .hp-grave-map-shell {
+  overflow: hidden; border-radius: 11px; border: 1px solid rgba(214,180,139,.26);
+  background: #102535; box-shadow: 0 16px 38px rgba(0,0,0,.3);
+}
+.hp-register-content .hp-grave-map-canvas { border-radius: inherit; }
+.hp-register-content .hp-grave-map-canvas .maplibregl-ctrl-group {
+  overflow: hidden; border-radius: 9px; border-color: rgba(214,180,139,.34);
+  box-shadow: 0 6px 18px #0005;
+}
+.hp-register-content .hp-grave-map-canvas .maplibregl-ctrl-group button:hover {
+  background-color: rgba(214,180,139,.2);
+}
+.hp-register-content .hp-grave-map-marker {
+  position: relative; width: 34px; height: 34px; z-index: 1;
+  border-width: 1.5px; border-color: #f3d9b5;
+  background: linear-gradient(145deg,#d35b5e,#8f2938);
+  box-shadow: 0 0 0 5px rgba(184,61,71,.18), 0 7px 22px #0009;
+  transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+}
+.hp-register-content .hp-grave-map-marker::before {
+  content: ""; position: absolute; inset: -7px; border-radius: 50%;
+  border: 1px solid rgba(235,190,151,.72); pointer-events: none;
+  animation: hp-marker-pulse 2.8s ease-out infinite;
+}
+.hp-register-content .hp-grave-map-marker-approximate {
+  background: linear-gradient(145deg,#a88a5b,#715a38);
+  border-style: dashed; box-shadow: 0 0 0 5px rgba(214,180,139,.14), 0 7px 22px #0009;
+}
+.hp-register-content .hp-grave-map-marker-approximate::before {
+  border-style: dashed; border-color: rgba(214,180,139,.58);
+}
+.hp-register-content .hp-grave-map-marker-context {
+  background: linear-gradient(145deg,#617fa4,#344d70);
+  border-color: #d7e3f0; box-shadow: 0 0 0 5px rgba(97,127,164,.18), 0 7px 22px #0009;
+}
+.hp-register-content .hp-grave-map-marker:hover,
+.hp-register-content .hp-grave-map-marker:focus-visible {
+  transform: scale(1.18); filter: brightness(1.14);
+  box-shadow: 0 0 0 8px rgba(214,180,139,.2), 0 10px 28px #000b;
+}
+.hp-register-content .hp-grave-map-caption {
+  border: 1px solid rgba(214,180,139,.22); border-radius: 8px;
+  backdrop-filter: blur(12px); animation: hp-map-caption-glow 4s ease-in-out infinite;
+}
+.hp-register-content .hp-grave-map-caption > span {
+  box-shadow: 0 0 0 4px rgba(214,180,139,.14), 0 0 12px rgba(214,180,139,.7);
+}
+.hp-register-content .hp-grave-map-note {
+  padding: 13px 15px; border: 1px solid rgba(214,180,139,.13);
+  border-radius: 8px; background: rgba(255,255,255,.025);
+}
+.hp-register-content .hp-register-cards { gap: 20px; }
+.hp-register-content .hp-grave-card {
+  position: relative; overflow: hidden; isolation: isolate;
+  border-radius: 12px; border-color: #d9d3c7;
+  box-shadow: 0 10px 28px rgba(11,29,43,.09);
+  animation: hp-record-card-in .55s cubic-bezier(.2,.75,.25,1) both;
+}
+.hp-register-content .hp-grave-card:nth-child(2) { animation-delay: .045s; }
+.hp-register-content .hp-grave-card:nth-child(3) { animation-delay: .09s; }
+.hp-register-content .hp-grave-card:nth-child(4) { animation-delay: .135s; }
+.hp-register-content .hp-grave-card:nth-child(5) { animation-delay: .18s; }
+.hp-register-content .hp-grave-card:nth-child(6) { animation-delay: .225s; }
+.hp-register-content .hp-grave-card::before {
+  content: ""; position: absolute; z-index: -1; inset: 0 0 auto; height: 3px;
+  background: linear-gradient(90deg,#9c343f,#d6b48b 48%,#365b75);
+  opacity: .78; transform: scaleX(.35); transform-origin: left;
+  transition: transform .35s ease, opacity .35s ease;
+}
+.hp-register-content .hp-grave-card:hover::before,
+.hp-register-content .hp-grave-card.is-expanded::before { transform: scaleX(1); opacity: 1; }
+.hp-register-content .hp-grave-card:hover {
+  transform: translateY(-6px);
+  border-color: #b99a72;
+  box-shadow: 0 22px 44px rgba(16,40,58,.17), 0 0 0 1px rgba(185,154,114,.12);
+}
+.hp-register-content .hp-grave-card-symbol {
+  border-radius: 9px; box-shadow: 0 7px 16px rgba(16,40,58,.16);
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.hp-register-content .hp-grave-card:hover .hp-grave-card-symbol {
+  transform: translateY(-2px) rotate(-5deg);
+  box-shadow: 0 10px 22px rgba(16,40,58,.22);
+}
+.hp-register-content .hp-grave-card-location-tag { border-radius: 999px; }
+.hp-register-content .hp-grave-card-action {
+  border-radius: 7px; box-shadow: 0 5px 14px rgba(16,40,58,.12);
+}
+.hp-register-content .hp-grave-card-action span { transition: transform .25s ease; }
+.hp-register-content .hp-grave-card-action:hover span { transform: translateX(3px); }
+.hp-register-content .hp-grave-card-detail {
+  animation: hp-record-card-in .32s ease both;
+}
+.hp-register-content .hp-grave-card.is-expanded {
+  border-color: #b99a72;
+  box-shadow: 0 20px 44px rgba(16,40,58,.15);
+}
+.hp-register-content .hp-context-records .hp-grave-card::before {
+  background: linear-gradient(90deg,#344d70,#91a9c4,#d6b48b);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hp-register-content .hp-grave-map-section,
+  .hp-register-content .hp-grave-map-caption,
+  .hp-register-content .hp-grave-card,
+  .hp-register-content .hp-grave-card-detail,
+  .hp-register-content .hp-grave-map-marker::before { animation: none !important; }
+  .hp-register-content .hp-grave-card,
+  .hp-register-content .hp-grave-card *,
+  .hp-register-content .hp-grave-map-marker,
+  .hp-register-content .hp-grave-map-search input { transition: none !important; }
+  .hp-register-content .hp-grave-card:hover,
+  .hp-register-content .hp-grave-map-marker:hover { transform: none !important; }
+}
