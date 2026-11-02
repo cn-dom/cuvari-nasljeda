@@ -55,3 +55,23 @@
   .community-footer-legal { grid-column: auto; }
   .community-footer-legal nav { gap: 10px 16px; }
 }
+
+/* PatriaSoul unified site navigation and footer — v2 */
+.ps-site-header{min-height:88px;padding:13px clamp(18px,4vw,58px);gap:clamp(14px,2vw,30px);
+ background:rgba(5,16,29,.96);border-bottom:1px solid rgba(217,184,117,.28);
+ box-shadow:0 14px 38px rgba(0,0,0,.24);backdrop-filter:blur(16px)}
+.ps-site-brand img{width:52px;height:52px;padding:4px;border:1px solid rgba(224,191,122,.42);border-radius:14px;background:#0b1e31}
+.ps-site-brand strong{font-size:20px;letter-spacing:.07em;font-weight:850;color:#fff}
+.ps-site-brand small{color:#dfc17e;letter-spacing:.2em}
+.ps-site-primary{gap:5px}
+.ps-site-primary a{padding:11px 14px;border-radius:11px;color:#c4d2df;font-size:12px;font-weight:750}
+.ps-site-primary a:hover,.ps-site-primary a.active{background:linear-gradient(135deg,#1a466a,#15324e);color:#fff;box-shadow:inset 0 -2px #e0bf7a}
+.ps-site-wall-link{border-color:#57748e;background:#122a41;border-radius:11px;padding:11px 15px}
+.ps-site-subnav{padding:10px clamp(18px,4vw,58px);background:#0b1d30;border-bottom:1px solid rgba(139,174,207,.2);color:#dce7f1}
+.ps-site-subnav-label{color:#e0bf7a;border-color:#3c536b}
+.ps-site-subnav a{color:#b9cadb;border-radius:9px}
+.ps-site-subnav a:hover{background:#173652;color:#fff}
+.ps-site-footer{margin-top:55px;padding:34px clamp(18px,4vw,58px);background:linear-gradient(180deg,#0a1b2c,#050e18);border-top:1px solid rgba(224,191,122,.25)}
+.ps-site-footer-brand img{width:48px;height:48px}
+.ps-site-footer nav a{color:#c1d0de}
+@media(max-width:620px){.ps-site-header{min-height:0}.ps-site-brand img{width:42px;height:42px}}
