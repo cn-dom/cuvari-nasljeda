@@ -1,0 +1,32 @@
+name: PatriaSoul Admin — preview
+on:
+  push:
+    branches:
+      - feature/patriasoul-admin-preview
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Preuzmi repozitorij
+        uses: actions/checkout@v4
+      - name: Postavi Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Izgradi preglednu verziju
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+      - name: Objavi odvojeni preview Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::Nedostaju Cloudflare Actions secrets."
+            exit 1
+          fi
+          npx --yes wrangler@4 deploy --config wrangler.jsonc --name patriasoul-admin-preview
