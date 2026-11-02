@@ -548,11 +548,11 @@
   background-color: rgba(214,180,139,.2);
 }
 .hp-register-content .hp-grave-map-marker {
-  position: relative; width: 34px; height: 34px; z-index: 1;
+  width: 34px; height: 34px; z-index: 1;
   border-width: 1.5px; border-color: #f3d9b5;
   background: linear-gradient(145deg,#d35b5e,#8f2938);
   box-shadow: 0 0 0 5px rgba(184,61,71,.18), 0 7px 22px #0009;
-  transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+  transition: box-shadow .25s ease, filter .25s ease;
 }
 .hp-register-content .hp-grave-map-marker::before {
   content: ""; position: absolute; inset: -7px; border-radius: 50%;
