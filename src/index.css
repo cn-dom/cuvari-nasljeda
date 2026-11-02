@@ -2525,3 +2525,68 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
   .private-messages { padding: 14px; border-radius: 12px; }
   .feed-column.messages-page-open { padding: 0; }
 }
+
+
+/* PatriaSoul — ujednačeni moderni motion sustav za cijeli projekt */
+@keyframes ps-page-arrive {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ps-card-arrive {
+  from { opacity: 0; transform: translateY(10px) scale(.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes ps-soft-glow {
+  0%, 100% { box-shadow: 0 8px 24px rgba(12, 34, 55, .08); }
+  50% { box-shadow: 0 14px 32px rgba(36, 83, 125, .15); }
+}
+@keyframes ps-border-sheen {
+  from { background-position: 0% 50%; }
+  to { background-position: 200% 50%; }
+}
+.app-shell {
+  animation: ps-page-arrive .48s cubic-bezier(.2,.75,.25,1) both;
+}
+.app-shell main, .app-shell .page-layout, .app-shell .community-section-page,
+.app-shell .admin-page, .app-shell .hp-page, .app-shell .vm-page,
+.app-shell .ai-center-page, .app-shell .video-page, .app-shell .val-page {
+  animation: ps-page-arrive .52s cubic-bezier(.2,.75,.25,1) both;
+}
+.app-shell .card, .app-shell .community-card, .app-shell .values-card,
+.app-shell .right-card, .app-shell .post-card, .app-shell .section-card {
+  transition: transform .28s cubic-bezier(.2,.8,.2,1), box-shadow .28s ease,
+    border-color .28s ease, background-color .28s ease;
+}
+.app-shell .card:hover, .app-shell .community-card:hover, .app-shell .values-card:hover,
+.app-shell .right-card:hover, .app-shell .post-card:hover, .app-shell .section-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(203,168,93,.42);
+  box-shadow: 0 16px 36px rgba(15,35,56,.12);
+}
+.app-shell .topbar {
+  transition: box-shadow .28s ease, background-color .28s ease, backdrop-filter .28s ease;
+}
+.app-shell .topnav-link, .app-shell .side-link, .app-shell .login-button,
+.app-shell .primary-button, .app-shell button {
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease,
+    color .2s ease, background-color .2s ease, border-color .2s ease;
+}
+.app-shell .login-button:hover, .app-shell .primary-button:hover,
+.app-shell button:not(:disabled):not(.topnav-link):hover {
+  box-shadow: 0 8px 20px rgba(23,44,70,.13);
+}
+.app-shell .brand-mark { transition: transform .3s ease, box-shadow .3s ease; }
+.app-shell .brand:hover .brand-mark {
+  transform: translateY(-2px) rotate(-2deg);
+  box-shadow: 0 8px 18px rgba(23,44,70,.16);
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell, .app-shell *, .app-shell *::before, .app-shell *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .app-shell .card:hover, .app-shell .community-card:hover, .app-shell .values-card:hover,
+  .app-shell .right-card:hover, .app-shell .post-card:hover, .app-shell .section-card:hover,
+  .app-shell .brand:hover .brand-mark { transform: none !important; }
+}

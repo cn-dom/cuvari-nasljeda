@@ -763,3 +763,25 @@
   h2 { line-height: 1.18; }
   .patria-brand-wordmark { display: none; }
 }
+
+
+/* PatriaSoul Kviz — usklađeni prijelazi i mikrointerakcije */
+@keyframes ps-quiz-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+#root > * { animation: ps-quiz-enter .5s cubic-bezier(.2,.75,.25,1) both; }
+#root [data-slot="card"], #root .quiz-card, #root .quiz-panel, #root .game-card {
+  transition: transform .26s cubic-bezier(.2,.8,.2,1), box-shadow .26s ease, border-color .26s ease;
+}
+#root [data-slot="card"]:hover, #root .quiz-card:hover, #root .quiz-panel:hover, #root .game-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(217,184,117,.5);
+  box-shadow: 0 16px 36px rgba(0,0,0,.24), 0 0 20px rgba(217,184,117,.07);
+}
+#root button:not(:disabled) { transition: transform .2s ease, box-shadow .2s ease, filter .2s ease; }
+#root button:not(:disabled):hover { transform: translateY(-1px); filter: brightness(1.05); }
+@media (prefers-reduced-motion: reduce) {
+  #root, #root *, #root *::before, #root *::after {
+    animation: none !important; transition: none !important; scroll-behavior: auto !important;
+  }
+  #root [data-slot="card"]:hover, #root .quiz-card:hover, #root .quiz-panel:hover,
+  #root .game-card:hover, #root button:not(:disabled):hover { transform: none !important; }
+}
