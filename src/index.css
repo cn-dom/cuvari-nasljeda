@@ -2590,3 +2590,83 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
   .app-shell .right-card:hover, .app-shell .post-card:hover, .app-shell .section-card:hover,
   .app-shell .brand:hover .brand-mark { transform: none !important; }
 }
+
+
+/* Globalni vizualni ritam — izraženiji, ali miran i ujednačen na svim modulima. */
+@keyframes ps-section-arrive {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ps-accent-glint {
+  0%, 100% { opacity: .28; transform: translateX(-35%); }
+  50% { opacity: .75; transform: translateX(35%); }
+}
+.app-shell > main,
+.app-shell .page-layout > .left-sidebar,
+.app-shell .page-layout > .feed-column,
+.app-shell .page-layout > .right-sidebar,
+.app-shell .community-section-page,
+.app-shell .admin-page,
+.app-shell .profile-page,
+.app-shell .messages-page-open {
+  animation: ps-section-arrive .62s cubic-bezier(.2,.75,.25,1) both;
+}
+.app-shell .feed-column > .card,
+.app-shell .feed-column > .post-card,
+.app-shell .right-sidebar > *,
+.app-shell .left-sidebar > *,
+.app-shell .profile-panel,
+.app-shell .community-action-page > *,
+.app-shell .admin-page > section {
+  animation: ps-card-arrive .58s cubic-bezier(.2,.75,.25,1) both;
+}
+.app-shell .feed-column > :nth-child(2),
+.app-shell .right-sidebar > :nth-child(2) { animation-delay: .06s; }
+.app-shell .feed-column > :nth-child(3),
+.app-shell .right-sidebar > :nth-child(3) { animation-delay: .12s; }
+.app-shell .feed-column > :nth-child(4) { animation-delay: .18s; }
+.app-shell .card,
+.app-shell .community-card,
+.app-shell .values-card,
+.app-shell .right-card,
+.app-shell .post-card,
+.app-shell .section-card,
+.app-shell .profile-panel,
+.app-shell .admin-card,
+.app-shell .quiz-card {
+  transition: transform .34s cubic-bezier(.2,.8,.2,1), box-shadow .34s ease,
+    border-color .3s ease, background-color .3s ease;
+}
+.app-shell .card:hover,
+.app-shell .community-card:hover,
+.app-shell .values-card:hover,
+.app-shell .right-card:hover,
+.app-shell .post-card:hover,
+.app-shell .section-card:hover,
+.app-shell .profile-panel:hover,
+.app-shell .admin-card:hover,
+.app-shell .quiz-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(203,168,93,.58);
+  box-shadow: 0 18px 40px rgba(15,35,56,.16);
+}
+.app-shell .topbar { box-shadow: 0 5px 22px rgba(15,35,56,.045); }
+.app-shell .topnav-link::after {
+  content: "";
+  position: absolute;
+  left: 15%; right: 15%; bottom: -3px; height: 2px;
+  background: linear-gradient(90deg,transparent,#cba85d,transparent);
+  opacity: 0;
+  transform: scaleX(.4);
+  transition: opacity .25s ease, transform .3s ease;
+}
+.app-shell .topnav-link:hover::after,
+.app-shell .topnav-link.active::after { opacity: .9; transform: scaleX(1); }
+.app-shell button:not(:disabled):active { transform: translateY(1px) scale(.985); }
+@media (prefers-reduced-motion: reduce) {
+  .app-shell .feed-column > *,
+  .app-shell .right-sidebar > *,
+  .app-shell .left-sidebar > *,
+  .app-shell .community-action-page > *,
+  .app-shell .admin-page > section { animation: none !important; }
+}
