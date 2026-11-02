@@ -763,3 +763,24 @@
   h2 { line-height: 1.18; }
   .patria-brand-wordmark { display: none; }
 }
+
+
+/* PatriaSoul Kviz — matching motion language */
+@keyframes ps-quiz-enter{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ps-quiz-glow{0%,100%{box-shadow:0 10px 28px rgba(0,0,0,.18)}50%{box-shadow:0 16px 38px rgba(39,91,139,.25)}}
+#root> *{animation:ps-quiz-enter .55s cubic-bezier(.2,.75,.25,1) both}
+#root [data-slot="card"],#root .quiz-card,#root .quiz-panel,#root .game-card{
+  transition:transform .26s cubic-bezier(.2,.8,.2,1),box-shadow .26s ease,border-color .26s ease;
+  animation:ps-quiz-enter .58s cubic-bezier(.2,.75,.25,1) both;
+}
+#root [data-slot="card"]:hover,#root .quiz-card:hover,#root .quiz-panel:hover,#root .game-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(217,184,117,.55);
+  box-shadow:0 18px 42px rgba(0,0,0,.28),0 0 22px rgba(217,184,117,.08);
+}
+#root button:not(:disabled){transition:transform .2s ease,box-shadow .2s ease,filter .2s ease}
+#root button:not(:disabled):hover{transform:translateY(-2px);filter:brightness(1.06)}
+@media(prefers-reduced-motion:reduce){
+ #root,#root *,#root *::before,#root *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+ #root [data-slot="card"]:hover,#root .quiz-card:hover,#root .quiz-panel:hover,#root .game-card:hover,#root button:not(:disabled):hover{transform:none}
+}
