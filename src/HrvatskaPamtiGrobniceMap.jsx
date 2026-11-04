@@ -147,7 +147,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
   const maplibreRef = useRef(null);
   const searchMarkerRef = useRef(null);
   const [mapError, setMapError] = useState(false);
-  const [is3D, setIs3D] = useState(true);
+  const [is3D, setIs3D] = useState(() => !(typeof window !== "undefined" && window.matchMedia("(max-width: 680px)").matches));
   const [mapQuery, setMapQuery] = useState("");
   const [placeMatches, setPlaceMatches] = useState([]);
   const mappedSites = sites
@@ -279,13 +279,14 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
     async function loadMap() {
       try {
         if (cancelled || !containerRef.current) return;
+        const isMobileViewport = window.matchMedia("(max-width: 680px)").matches;
         mapInstance = new maplibregl.Map({
           container: containerRef.current,
           style: MAP_STYLE,
           center: [17.9, 44.8],
           zoom: 5.8,
-          pitch: 52,
-          bearing: -14,
+          pitch: isMobileViewport ? 0 : 52,
+          bearing: isMobileViewport ? 0 : -14,
           minZoom: 4.5,
           maxZoom: 17,
           maxPitch: 65,
@@ -369,13 +370,15 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
         mapInstance.on("load", () => {
           if (cancelled) return;
           setMapError(false);
-          try {
-            mapInstance.setTerrain({ source: "terrain-dem", exaggeration: 1.18 });
-            mapInstance.setLayoutProperty("terrain-hillshade", "visibility", "visible");
-          } catch {
-            // Ako DEM servis privremeno nije dostupan, osnovna karta i oznake ostaju funkcionalne.
+          if (!isMobileViewport) {
+            try {
+              mapInstance.setTerrain({ source: "terrain-dem", exaggeration: 1.18 });
+              mapInstance.setLayoutProperty("terrain-hillshade", "visibility", "visible");
+            } catch {
+              // Ako DEM servis privremeno nije dostupan, osnovna karta i oznake ostaju funkcionalne.
+            }
+            mapInstance.easeTo({ pitch: 52, bearing: -14, duration: 1100 });
           }
-          mapInstance.easeTo({ pitch: 52, bearing: -14, duration: 1100 });
         });
         mapInstance.once("idle", () => {
           if (cancelled || !mapInstance.queryTerrainElevation) return;
@@ -396,7 +399,7 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
         if (mappedSites.length > 1) {
           const bounds = new maplibregl.LngLatBounds();
           mappedSites.forEach((site) => bounds.extend([site.mapLocation.lng, site.mapLocation.lat]));
-          mapInstance.fitBounds(bounds, { padding: 70, maxZoom: 7.5, duration: 0 });
+          mapInstance.fitBounds(bounds, { padding: isMobileViewport ? 28 : 70, maxZoom: isMobileViewport ? 6.4 : 7.5, duration: 0 });
         } else if (mappedSites.length === 1) {
           mapInstance.setCenter([mappedSites[0].mapLocation.lng, mappedSites[0].mapLocation.lat]);
           mapInstance.setZoom(8);
