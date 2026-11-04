@@ -785,3 +785,166 @@
   .hp-register-content .hp-map-mode-toggle:hover,
   .hp-register-content .hp-grave-card:hover { transform: none !important; }
 }
+
+
+/* Hrvatska pamti — čitljivost i upravljanje kartom na telefonima */
+@media (max-width: 680px) {
+  .hp-register-content .hp-grave-map-section {
+    margin: 22px -8px 28px;
+    padding: 15px 12px 16px;
+    border-radius: 12px;
+  }
+  .hp-register-content .hp-grave-map-heading {
+    display: block;
+    margin-bottom: 15px;
+  }
+  .hp-register-content .hp-grave-map-heading h2 {
+    font-size: clamp(34px, 9vw, 43px);
+    line-height: 1.02;
+  }
+  .hp-register-content .hp-grave-map-heading > p {
+    margin: 10px 0 0;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .hp-register-content .hp-grave-map-search {
+    max-width: none;
+    margin-bottom: 12px;
+  }
+  .hp-register-content .hp-grave-map-search > label {
+    font-size: 10px;
+    line-height: 1.5;
+  }
+  .hp-register-content .hp-grave-map-search input {
+    min-height: 48px;
+    padding: 12px 13px;
+    font-size: 16px;
+  }
+  .hp-register-content .hp-grave-map-shell {
+    height: clamp(420px, 58svh, 560px);
+    min-height: 420px;
+    border-radius: 10px;
+  }
+  .hp-register-content .hp-grave-map-canvas {
+    width: 100%;
+    height: 100%;
+    min-height: 0 !important;
+  }
+  .hp-register-content .hp-grave-map-canvas .maplibregl-ctrl-group button {
+    width: 42px;
+    height: 42px;
+  }
+  .hp-register-content .hp-grave-map-canvas .maplibregl-ctrl-top-right {
+    top: 8px;
+    right: 8px;
+  }
+  .hp-register-content .hp-grave-map-marker {
+    width: 42px;
+    height: 42px;
+  }
+  .hp-register-content .hp-grave-map-marker-approximate {
+    width: 38px;
+    height: 38px;
+  }
+  .hp-register-content .hp-grave-map-marker-context {
+    width: 40px;
+    height: 40px;
+  }
+  .hp-register-content .hp-map-mode-toggle {
+    top: 8px;
+    left: 8px;
+    min-height: 43px;
+    gap: 6px;
+    padding: 5px 7px;
+    border-radius: 8px;
+  }
+  .hp-register-content .hp-map-mode-icon {
+    width: 29px;
+    height: 29px;
+    font-size: 19px;
+  }
+  .hp-register-content .hp-map-mode-toggle strong {
+    font-size: 9px;
+    letter-spacing: .08em;
+  }
+  .hp-register-content .hp-map-mode-toggle small {
+    display: none;
+  }
+  .hp-register-content .hp-map-mode-toggle i {
+    margin-left: 1px;
+    font-size: 8px;
+  }
+  .hp-register-content .hp-grave-map-caption {
+    left: 7px;
+    right: 78px;
+    bottom: 7px;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 7px;
+    font-size: 7px;
+    line-height: 1.4;
+    letter-spacing: .06em;
+    text-align: center;
+  }
+  .hp-register-content .hp-grave-map-caption small {
+    font-size: 7px;
+    margin-left: 0;
+  }
+  .hp-register-content .maplibregl-popup {
+    max-width: calc(100vw - 36px) !important;
+  }
+  .hp-register-content .maplibregl-popup-content {
+    max-width: calc(100vw - 36px);
+    padding: 13px;
+    border-radius: 9px;
+    font-size: 12px;
+    line-height: 1.55;
+  }
+  .hp-register-content .hp-grave-map-popup strong {
+    display: block;
+    font-size: 14px;
+    line-height: 1.35;
+  }
+  .hp-register-content .hp-grave-map-popup p {
+    margin: 7px 0;
+    font-size: 11px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+  }
+  .hp-register-content .hp-grave-map-popup small {
+    display: block;
+    font-size: 10px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  .hp-register-content .hp-grave-map-popup-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .hp-register-content .hp-grave-map-popup-actions button,
+  .hp-register-content .hp-grave-map-popup-actions a {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 11px;
+    font-size: 11px;
+  }
+  .hp-register-content .hp-grave-map-note {
+    margin-top: 12px;
+    padding: 12px;
+    font-size: 11px;
+    line-height: 1.7;
+  }
+}
+@media (max-width: 380px) {
+  .hp-register-content .hp-grave-map-shell {
+    height: 430px;
+    min-height: 430px;
+  }
+  .hp-register-content .hp-grave-map-caption {
+    font-size: 6px;
+    letter-spacing: .025em;
+  }
+}
