@@ -291,7 +291,8 @@ export default function HrvatskaPamtiGrobniceMap({ sites = [] }) {
           maxZoom: 17,
           maxPitch: 65,
           attributionControl: true,
-          cooperativeGestures: true,
+          // Na mobitelu jedna ruka može pomicati kartu; sadržaj skočnog prozora ima vlastito pomicanje.
+          cooperativeGestures: !isMobileViewport,
         });
         mapRef.current = mapInstance;
         maplibreRef.current = maplibregl;
