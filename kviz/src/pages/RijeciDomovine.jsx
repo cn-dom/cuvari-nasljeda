@@ -22,7 +22,6 @@ const WORDS = [
   { word: "DOMOVINSKI RAT", category: "Povijest", level: 3, clue: "Rat za obranu neovisnosti i teritorijalne cjelovitosti Hrvatske 1991.–1995.", explanation: "Domovinski rat temeljno je razdoblje suvremene hrvatske povijesti; sjećanje na poginule, nestale i preživjele zahtijeva dostojanstvo i povijesnu točnost." },
   { word: "DUBROVNIK", category: "Domovina", level: 3, clue: "Povijesni grad na jugu Hrvatske, nekoć središte Dubrovačke Republike.", explanation: "Dubrovačka Republika razvila je snažnu pomorsku, trgovačku i diplomatsku tradiciju." },
   { word: "TAMBURICA", category: "Baština", level: 3, clue: "Žičano glazbalo snažno povezano s tradicijskom glazbom Slavonije.", explanation: "Tamburaška glazba važan je dio glazbene tradicije Slavonije i drugih hrvatskih krajeva." },
-  { word: "MILOSRĐE", category: "Vjera", level: 3, clue: "Vrlina koja se pokazuje djelima ljubavi, praštanja i pomoći.", explanation: "U kršćanskoj tradiciji milosrđe nije samo osjećaj nego i konkretno djelovanje prema bližnjemu." },
   { word: "DOMOVINA", category: "Domovina", level: 3, clue: "Zemlja kojoj pripadamo i s kojom nas povezuju povijest, ljudi i odgovornost.", explanation: "Domoljublje se može pokazivati znanjem, brigom za zajednicu, poštovanjem zakona i čuvanjem kulturne baštine." },
 ];
 
