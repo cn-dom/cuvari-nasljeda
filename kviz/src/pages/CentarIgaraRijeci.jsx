@@ -29,7 +29,10 @@ const BANK = [
   { word:"ŠIBENIK", clue:"Dalmatinski grad poznat po katedrali sv. Jakova.", group:"Gradovi" },
   { word:"ĐAKOVO", clue:"Slavonski grad poznat po katedrali i ergeli lipicanaca.", group:"Gradovi" },
   { word:"ČAKOVEC", clue:"Središte Međimurja.", group:"Gradovi" },
-  { word:"DŽAKOVO", clue:"Namjerno nije riječ u rječniku; provjera dijakritike ne smije stvarati lažne pojmove.", group:"Provjera" },
+  { word:"ANĐEO", clue:"Nebesko biće u kršćanskoj i drugim religijskim predajama.", group:"Vjera" },
+  { word:"OBITELJ", clue:"Zajednica osoba povezanih srodstvom, brakom ili posvojenjem.", group:"Zajednica" },
+  { word:"NASLJEĐE", clue:"Ono što se prenosi s prethodnih naraštaja na buduće.", group:"Baština" },
+  { word:"ETNOLOGIJA", clue:"Znanost koja proučava kulturu i način života ljudskih zajednica.", group:"Znanje" },
 ];
 const normalize = (value) => String(value ?? "").toLocaleUpperCase("hr").replace(/Đ/g,"D").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Z]/g,"");
 const shuffle = (items) => {
@@ -37,7 +40,7 @@ const shuffle = (items) => {
   for (let i=result.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [result[i],result[j]]=[result[j],result[i]]; }
   return result;
 };
-const WORDS = BANK.filter(item=>item.group!=="Provjera").map(item=>({...item,clean:normalize(item.word)}));
+const WORDS = BANK.map(item=>({...item,clean:normalize(item.word)}));
 const SCRAMBLE = WORDS.filter(item=>item.clean.length>=4 && item.clean.length<=10);
 const GROUPS = [
   {title:"Gradovi",words:["ZAGREB","SINJ","KNIN","VUKOVAR"]},
