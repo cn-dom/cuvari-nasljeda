@@ -235,10 +235,10 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
               <div className="rd-puzzle-label">SLOŽI SKRIVENU RIJEČ</div>
               <p>{current.clue}</p>
               <div className="rd-answer-slots" aria-label="Složena slova">
-                {current.letters.map((tile) => {
-                  const selectedIndex = selected.indexOf(tile.id);
-                  const isSelected = selectedIndex !== -1;
-                  return <button key={tile.id} onClick={() => removeLetter(tile.id)} disabled={!isSelected || checked || Boolean(typedAnswer)} className={`rd-answer-tile ${isSelected ? "filled" : ""}`}>{isSelected ? tile.letter : ""}</button>;
+                {Array.from({ length: current.letters.length }, (_, position) => {
+                  const tileId = selected[position];
+                  const tile = current.letters.find((letter) => letter.id === tileId);
+                  return <button key={position} onClick={() => tile && removeLetter(tile.id)} disabled={!tile || checked || Boolean(typedAnswer)} className={`rd-answer-tile ${tile ? "filled" : ""}`}>{tile?.letter || ""}</button>;
                 })}
               </div>
               <div className="rd-letter-bank">
