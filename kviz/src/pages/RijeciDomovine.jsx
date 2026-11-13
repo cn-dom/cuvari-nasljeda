@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Crown, Lightbulb, RotateCcw, Swords, Trophy } from "lucide-react";
 
 const WORDS = [
   { word: "HRVATSKA", category: "Domovina", level: 1, clue: "Država u kojoj živimo, između Jadrana i srednje Europe.", explanation: "Hrvatska je europska država čiji je glavni grad Zagreb." },
@@ -155,7 +154,7 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <button onClick={onBack} className="patria-button"><ArrowLeft className="mr-2 h-4 w-4" /> Natrag na kviz</button>
+        <button onClick={onBack} className="patria-button">Natrag na kviz</button>
         <span className="text-xs font-bold uppercase tracking-[.2em] text-[#f1d078]">PatriaSoul · Čuvari nasljeđa</span>
       </div>
 
@@ -172,10 +171,10 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
               <div className="mb-4 flex items-center gap-2 text-amber-200"><BookOpen className="h-5 w-5" /><span className="text-sm font-bold uppercase tracking-wider">Odaberi način igranja</span></div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <button onClick={() => setMode("solo")} className={`rounded-2xl border p-5 text-left transition ${mode === "solo" ? "border-amber-300 bg-amber-300/10" : "border-white/10 bg-white/[.03] hover:border-white/30"}`}>
-                  <BookOpen className="h-6 w-6 text-amber-200" /><h2 className="mt-3 text-xl font-bold text-white">Samostalno</h2><p className="mt-2 text-sm leading-6 text-white/60">Igraj svojim tempom, skupljaj bodove i poboljšavaj osobni rezultat.</p>
+                  <h2 className="mt-3 text-xl font-bold text-white">Samostalno</h2><p className="mt-2 text-sm leading-6 text-white/60">Igraj svojim tempom, skupljaj bodove i poboljšavaj osobni rezultat.</p>
                 </button>
                 <button onClick={() => setMode("duel")} className={`rounded-2xl border p-5 text-left transition ${mode === "duel" ? "border-amber-300 bg-amber-300/10" : "border-white/10 bg-white/[.03] hover:border-white/30"}`}>
-                  <Swords className="h-6 w-6 text-amber-200" /><h2 className="mt-3 text-xl font-bold text-white">Duel igrača</h2><p className="mt-2 text-sm leading-6 text-white/60">Dva igrača izmjenjuju se na istom uređaju. Pobjeđuje veći broj bodova.</p>
+                  <h2 className="mt-3 text-xl font-bold text-white">Duel igrača</h2><p className="mt-2 text-sm leading-6 text-white/60">Dva igrača izmjenjuju se na istom uređaju. Pobjeđuje veći broj bodova.</p>
                 </button>
               </div>
               {mode === "duel" && <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -191,10 +190,10 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
                 </div>
                 <p className="mt-3 text-xs leading-6 text-white/50">Runda sadrži 10 riječi iz područja domovine, povijesti, vjere i hrvatske baštine.</p>
               </div>
-              <button onClick={start} className="patria-button-accent mt-6 w-full justify-center"><ArrowRight className="mr-2 h-4 w-4" /> Započni igru</button>
+              <button onClick={start} className="patria-button-accent mt-6 w-full justify-center">Započni igru</button>
             </div>
             <aside className="rounded-2xl border border-amber-200/15 bg-gradient-to-br from-[#132f4b] to-[#0b1b2d] p-6">
-              <Trophy className="h-8 w-8 text-amber-200" />
+              
               <h2 className="mt-4 text-2xl font-bold text-white">Bodovanje</h2>
               <ul className="mt-4 space-y-3 text-sm text-white/70">
                 <li className="flex justify-between gap-3"><span>Laka riječ</span><strong className="text-white">10 bodova</strong></li>
@@ -223,17 +222,17 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
               <input value={answer} onChange={(event) => { setAnswer(event.target.value); if (feedback && !checked) setFeedback(""); }} onKeyDown={(event) => { if (event.key === "Enter") checked ? next() : checkAnswer(); }} disabled={checked} autoComplete="off" className="mt-2 w-full rounded-xl border border-white/15 bg-[#10263c] px-4 py-4 text-center text-xl font-bold uppercase tracking-widest text-white outline-none placeholder:text-white/25 focus:border-amber-300 disabled:opacity-70" placeholder="UPIŠI RIJEČ" />
               {feedback && <p className={`mt-3 text-sm font-semibold ${checked ? "text-emerald-300" : "text-amber-100"}`}>{feedback}</p>}
               <div className="mt-5 flex flex-wrap justify-center gap-3">
-                {!checked && <><button onClick={checkAnswer} disabled={!answer.trim()} className="patria-button-accent min-w-40">Provjeri riječ</button><button onClick={revealLetter} disabled={revealed} className="patria-button"><Lightbulb className="mr-2 h-4 w-4" /> Pomoć</button></>}
-                {checked && <button onClick={next} className="patria-button-accent min-w-40">Sljedeća riječ <ArrowRight className="ml-2 h-4 w-4" /></button>}
+                {!checked && <><button onClick={checkAnswer} disabled={!answer.trim()} className="patria-button-accent min-w-40">Provjeri riječ</button><button onClick={revealLetter} disabled={revealed} className="patria-button">Pomoć</button></>}
+                {checked && <button onClick={next} className="patria-button-accent min-w-40">Sljedeća riječ</button>}
               </div>
-              {checked && <div className="mt-7 rounded-2xl border border-emerald-300/15 bg-emerald-300/[.06] p-5 text-left"><div className="flex items-center gap-2 text-emerald-200"><CheckCircle2 className="h-5 w-5" /><strong>{current.word}</strong></div><p className="mt-2 text-sm leading-7 text-white/70">{current.explanation}</p></div>}
+              {checked && <div className="mt-7 rounded-2xl border border-emerald-300/15 bg-emerald-300/[.06] p-5 text-left"><div className="text-emerald-200"><strong>{current.word}</strong></div><p className="mt-2 text-sm leading-7 text-white/70">{current.explanation}</p></div>}
             </div>
           </div>
         )}
 
         {finished && (
           <div className="p-6 text-center sm:p-10">
-            <Crown className="mx-auto h-12 w-12 text-amber-200" />
+            
             <p className="mt-4 text-xs font-bold uppercase tracking-[.2em] text-amber-200">Izazov završen</p>
             <h2 className="mt-2 text-3xl font-bold text-white sm:text-4xl">{mode === "duel" ? winner === "Neriješeno" ? "Neriješen rezultat" : `Pobjednik: ${winner}` : "Odlično odigrano!"}</h2>
             <div className="mx-auto mt-6 grid max-w-xl grid-cols-2 gap-3">
@@ -241,7 +240,7 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
               {mode === "duel" && <div className="rounded-2xl border border-white/10 bg-white/[.04] p-5"><p className="text-sm text-white/55">{playerNames[1]}</p><p className="mt-2 text-3xl font-bold text-amber-100">{scores[1]}</p></div>}
             </div>
             {mode === "solo" && <p className="mt-4 text-sm text-white/60">Osobni najbolji rezultat na ovom uređaju: {bestScore}</p>}
-            <div className="mt-7 flex flex-wrap justify-center gap-3"><button onClick={start} className="patria-button-accent"><RotateCcw className="mr-2 h-4 w-4" /> Igraj ponovno</button><button onClick={reset} className="patria-button">Promijeni način igranja</button><button onClick={onBack} className="patria-button">Natrag na kviz</button></div>
+            <div className="mt-7 flex flex-wrap justify-center gap-3"><button onClick={start} className="patria-button-accent">Igraj ponovno</button><button onClick={reset} className="patria-button">Promijeni način igranja</button><button onClick={onBack} className="patria-button">Natrag na kviz</button></div>
           </div>
         )}
       </section>
