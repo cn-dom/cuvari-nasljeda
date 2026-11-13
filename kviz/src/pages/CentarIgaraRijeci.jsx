@@ -86,6 +86,7 @@ function LetterKeyboard({value,onChange,target,maxLength,disabled=false,matchMod
     </div>
     <p className="mt-2 text-center text-[11px] text-white/45">Dodirni slova redom. Zeleno je točno, crveno nije na pravom mjestu.</p>
   </div>;
+}
 
 function WordSearch({onBack}) {
   const target = "HRVATSKA";
