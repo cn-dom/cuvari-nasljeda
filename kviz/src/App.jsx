@@ -1082,7 +1082,7 @@ export default function App() {
             <h2 className="mt-3 text-3xl text-white sm:text-4xl">Odaberi svoju igru.</h2>
             <p className="mt-4 text-base leading-8 text-white/65">Svaka igra ima svoj karakter. Možeš istraživati široko znanje o Hrvatskoj, braniti svoj grad ili svaki dan prihvatiti novi izazov.</p>
           </div>
-          <div className="mt-9 grid gap-5 lg:grid-cols-3">
+          <div className="mt-9 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
             <a href="?mode=croatian" className="patria-game-card group">
               <div className="patria-game-number">01</div><div className="patria-icon-ring"><BookOpen className="h-5 w-5" /></div>
               <p className="mt-5 text-xs font-bold uppercase tracking-[.18em] text-[#f1d078]">Glavna igra</p>
