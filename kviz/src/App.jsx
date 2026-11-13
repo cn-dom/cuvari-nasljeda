@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Flag, FileText, Loader2, LogIn, LogOut, MapPin, RotateCcw, ShieldCheck, Trophy, UserRound, Medal, BookOpen, MessageCircle, Send, Reply, Trash2, AtSign } from "lucide-react";
 import Pravilnik from "./pages/Pravilnik";
 import QuizPlayer from "./pages/QuizPlayer";
-import RijeciDomovine from "./pages/RijeciDomovine";
+import CentarIgaraRijeci from "./pages/CentarIgaraRijeci";
 import { fetchCities } from "./lib/cityQuiz";
 import { getMainQuizCount } from "./lib/mainQuiz";
 import { getDailyQuizKey } from "./lib/dailyQuiz";
@@ -962,7 +962,7 @@ export default function App() {
           <a href="/kviz/?mode=croatian" className="transition hover:text-amber-300">📖 Hrvatski kviz</a>
           <a href="/kviz/?mode=city" className="transition hover:text-amber-300">📍 Brani svoj grad</a>
           <a href="/kviz/?mode=daily" className="transition hover:text-amber-300">📅 Dnevni kviz</a>
-          <a href="/kviz/?mode=words" className="transition hover:text-amber-300">Riječi domovine</a>
+          <a href="/kviz/?mode=words" className="transition hover:text-amber-300">Igre riječima</a>
           <a href="/kviz/?mode=leaderboard" className="transition hover:text-amber-300">🏅 Rang-lista</a>
         </nav>
       </div>
@@ -1108,7 +1108,7 @@ export default function App() {
               <div className="patria-game-number">04</div>
               <p className="mt-5 text-xs font-bold uppercase tracking-[.18em] text-[#f1d078]">Slova · znanje · nasljeđe</p>
               <h3 className="mt-2 text-2xl text-white">Riječi domovine</h3>
-              <p className="mt-3 text-sm leading-7 text-white/60">Složi riječi o Hrvatskoj, povijesti, vjeri i baštini. Igraj samostalno ili u duelu.</p>
+              <p className="mt-3 text-sm leading-7 text-white/60">Osam različitih igara riječima o Hrvatskoj, povijesti, vjeri i baštini. Igraj samostalno ili izazovi prijatelja.</p>
               <span className="mt-6 inline-flex items-center font-semibold text-white">Pokreni igru <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
             </a>
           </div>
@@ -1214,7 +1214,7 @@ export default function App() {
       </div>
     </main>}
 
-    {screen === "words" && <RijeciDomovine onBack={home} playerName={accountDisplayName} />}
+    {screen === "words" && <CentarIgaraRijeci onBack={home} playerName={accountDisplayName} />}
 
     {screen === "quiz" && <QuizPlayer questions={round} title={quizTitle} subtitle={quizSubtitle} timeLimit={20} attemptId={attemptId} onComplete={completeQuiz} onQuit={() => activeQuizType === "city" ? setScreen("cities") : activeQuizType === "daily" ? setScreen("daily") : setScreen("home")} />}
 
