@@ -97,7 +97,8 @@ function WordSearch({onBack}) {
 
 export default function CentarIgaraRijeci({onBack,playerName}) {
   const [active,setActive]=useState(null);
-  const [gameFilter,setGameFilter]=useState("Sve igre");\n  const [gameQuery,setGameQuery]=useState("");
+  const [gameFilter,setGameFilter]=useState("Sve igre");
+  const [gameQuery,setGameQuery]=useState("");
   const [score,setScore]=useState(0);
   const [best,setBest]=useState(()=>{try{return Number(localStorage.getItem("patriasoul_wordgames_best")||0);}catch{return 0;}});
   const [item,setItem]=useState(()=>shuffle(SCRAMBLE)[0]);
@@ -121,7 +122,8 @@ export default function CentarIgaraRijeci({onBack,playerName}) {
   const scrambled=useMemo(()=>shuffle(item.clean.split("")),[item]);
   const ladder=[{from:"MORE",to:"MORA",clue:"Promijeni jedno slovo: MORE → MORA (genitiv imenice „more”)."},{from:"KOSA",to:"KOLA",clue:"Promijeni jedno slovo: KOSA → KOLA (množina imenice „kolo”)."}];
   const currentLadder=ladder[ladderStep%ladder.length];
-  const filters=["Sve igre","Brze igre","Znanje i logika","Dnevni izazov"];\n  const visibleGames=GAMES.filter(game=>(gameFilter==="Sve igre"||game.type===gameFilter)&&`${game.title} ${game.desc}`.toLocaleLowerCase("hr").includes(gameQuery.trim().toLocaleLowerCase("hr")));
+  const filters=["Sve igre","Brze igre","Znanje i logika","Dnevni izazov"];
+  const visibleGames=GAMES.filter(game=>(gameFilter==="Sve igre"||game.type===gameFilter)&&`${game.title} ${game.desc}`.toLocaleLowerCase("hr").includes(gameQuery.trim().toLocaleLowerCase("hr")));
 
   useEffect(()=>{if(score>best){setBest(score);try{localStorage.setItem("patriasoul_wordgames_best",String(score));}catch{}}},[score,best]);
   useEffect(()=>{try{localStorage.setItem(dailyKey,JSON.stringify(dailyGuesses));}catch{}},[dailyKey,dailyGuesses]);
