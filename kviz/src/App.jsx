@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Flag, FileText, Loader2, LogIn, LogOut, MapPin, RotateCcw, ShieldCheck, Trophy, UserRound, Medal, BookOpen, MessageCircle, Send, Reply, Trash2, AtSign } from "lucide-react";
 import Pravilnik from "./pages/Pravilnik";
 import QuizPlayer from "./pages/QuizPlayer";
+import RijeciDomovine from "./pages/RijeciDomovine";
 import { fetchCities } from "./lib/cityQuiz";
 import { getMainQuizCount } from "./lib/mainQuiz";
 import { getDailyQuizKey } from "./lib/dailyQuiz";
@@ -814,6 +815,10 @@ export default function App() {
       openLeaderboard();
       return;
     }
+    if (mode === "words") {
+      setScreen("words");
+      return;
+    }
     if (mode === "account") {
       openAccount();
     }
@@ -864,11 +869,11 @@ export default function App() {
 
   useEffect(() => {
     const mode = new URLSearchParams(window.location.search).get("mode");
-    if (!mode || !["croatian", "city", "cities", "daily", "leaderboard", "account"].includes(mode)) return;
+    if (!mode || !["croatian", "city", "cities", "daily", "leaderboard", "account", "words"].includes(mode)) return;
 
     window.history.replaceState({}, "", window.location.pathname + window.location.hash);
 
-    if (mode === "croatian") {
+    if (mode === "croatian" || mode === "words") {
       handleDeepLink(mode);
       return;
     }
@@ -957,6 +962,7 @@ export default function App() {
           <a href="/kviz/?mode=croatian" className="transition hover:text-amber-300">📖 Hrvatski kviz</a>
           <a href="/kviz/?mode=city" className="transition hover:text-amber-300">📍 Brani svoj grad</a>
           <a href="/kviz/?mode=daily" className="transition hover:text-amber-300">📅 Dnevni kviz</a>
+          <a href="/kviz/?mode=words" className="transition hover:text-amber-300">Riječi domovine</a>
           <a href="/kviz/?mode=leaderboard" className="transition hover:text-amber-300">🏅 Rang-lista</a>
         </nav>
       </div>
@@ -1098,6 +1104,13 @@ export default function App() {
               <p className="mt-3 text-sm leading-7 text-white/60">Jedan službeni pokušaj dnevno. Isti dnevni skup pitanja za sve igrače.</p>
               <span className="mt-6 inline-flex items-center font-semibold text-white">Igraj danas <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
             </a>
+            <a href="?mode=words" className="patria-game-card group">
+              <div className="patria-game-number">04</div><div className="patria-icon-ring"><BookOpen className="h-5 w-5" /></div>
+              <p className="mt-5 text-xs font-bold uppercase tracking-[.18em] text-[#f1d078]">Slova · znanje · nasljeđe</p>
+              <h3 className="mt-2 text-2xl text-white">Riječi domovine</h3>
+              <p className="mt-3 text-sm leading-7 text-white/60">Složi riječi o Hrvatskoj, povijesti, vjeri i baštini. Igraj samostalno ili u duelu.</p>
+              <span className="mt-6 inline-flex items-center font-semibold text-white">Pokreni igru <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
+            </a>
           </div>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <a href="?mode=leaderboard" className="patria-feature group"><Medal className="h-6 w-6 text-[#f1d078]" /><h3 className="mt-4 text-lg text-white">Rang-lista</h3><p className="mt-2 text-sm text-white/60">Prati rezultate i vidi kako stojiš među igračima.</p><span className="mt-4 inline-flex items-center text-sm font-semibold text-white">Otvori rang-listu <ArrowRight className="ml-2 h-4 w-4" /></span></a>
@@ -1200,6 +1213,8 @@ export default function App() {
         </div>
       </div>
     </main>}
+
+    {screen === "words" && <RijeciDomovine onBack={home} playerName={accountDisplayName} />}
 
     {screen === "quiz" && <QuizPlayer questions={round} title={quizTitle} subtitle={quizSubtitle} timeLimit={20} attemptId={attemptId} onComplete={completeQuiz} onQuit={() => activeQuizType === "city" ? setScreen("cities") : activeQuizType === "daily" ? setScreen("daily") : setScreen("home")} />}
 
