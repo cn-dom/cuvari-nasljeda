@@ -168,7 +168,7 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
         {!started && !finished && (
           <div className="grid gap-6 p-5 sm:p-8 lg:grid-cols-[1.1fr_.9fr]">
             <div>
-              <div className="mb-4 flex items-center gap-2 text-amber-200"><BookOpen className="h-5 w-5" /><span className="text-sm font-bold uppercase tracking-wider">Odaberi način igranja</span></div>
+              <div className="mb-4 text-sm font-bold uppercase tracking-wider text-amber-200">Odaberi način igranja</div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <button onClick={() => setMode("solo")} className={`rounded-2xl border p-5 text-left transition ${mode === "solo" ? "border-amber-300 bg-amber-300/10" : "border-white/10 bg-white/[.03] hover:border-white/30"}`}>
                   <h2 className="mt-3 text-xl font-bold text-white">Samostalno</h2><p className="mt-2 text-sm leading-6 text-white/60">Igraj svojim tempom, skupljaj bodove i poboljšavaj osobni rezultat.</p>
