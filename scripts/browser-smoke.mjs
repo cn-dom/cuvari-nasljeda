@@ -6,7 +6,7 @@ const routes = [
   "/", "/forum.html", "/stranice.html", "/dogadaji.html",
   "/vjera-hrvata.html", "/na-danasnji-dan.html", "/administracija.html",
   "/ai-centar.html", "/virtualni-muzej.html", "/video-arhiva.html", "/hrvatski-val.html", "/vrijeme.html",
-  "/kviz/", "/kviz/hrvatski-kviz/", "/kviz/dnevni-kviz/",
+  "/kviz/", "/kviz/?mode=words", "/kviz/hrvatski-kviz/", "/kviz/dnevni-kviz/",
   "/kviz/gradovi-hrvatske/", "/kviz/brani-svoj-grad/",
 ];
 
