@@ -69,7 +69,6 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
   const [round, setRound] = useState([]);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState([]);
-  const [typedAnswer, setTypedAnswer] = useState("");
   const [scores, setScores] = useState([0, 0]);
   const [activePlayer, setActivePlayer] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -85,7 +84,7 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
   const current = round[index];
   const total = round.length;
   const answerFromTiles = selected.map((tile) => current?.letters.find((letter) => letter.id === tile)?.letter || "").join("");
-  const answer = typedAnswer || answerFromTiles;
+  const answer = answerFromTiles;
   const progress = total ? ((index + (checked ? 1 : 0)) / total) * 100 : 0;
   const playerNames = useMemo(() => [playerOne.trim() || "Igrač 1", playerTwo.trim() || "Igrač 2"], [playerOne, playerTwo]);
   const bestLabel = mode === "daily" ? "Najbolji dnevni rezultat" : "Osobni rekord";
@@ -94,7 +93,6 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
     setRound(createRound(mode));
     setIndex(0);
     setSelected([]);
-    setTypedAnswer("");
     setScores([0, 0]);
     setActivePlayer(0);
     setStreak(0);
@@ -105,9 +103,9 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
     setStarted(true);
   };
 
-  const clearAnswer = () => { setSelected([]); setTypedAnswer(""); setFeedback(""); };
+  const clearAnswer = () => { setSelected([]); setFeedback(""); };
   const chooseLetter = (id) => {
-    if (checked || typedAnswer || selected.includes(id)) return;
+    if (checked || selected.includes(id)) return;
     setSelected((previous) => [...previous, id]);
     setFeedback("");
   };
@@ -238,13 +236,12 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
                 {Array.from({ length: current.letters.length }, (_, position) => {
                   const tileId = selected[position];
                   const tile = current.letters.find((letter) => letter.id === tileId);
-                  return <button key={position} onClick={() => tile && removeLetter(tile.id)} disabled={!tile || checked || Boolean(typedAnswer)} className={`rd-answer-tile ${tile ? "filled" : ""}`}>{tile?.letter || ""}</button>;
+                  return <button key={position} onClick={() => tile && removeLetter(tile.id)} disabled={!tile || checked} className={`rd-answer-tile ${tile ? (normalize(tile.letter)===normalize(current.word)[position] ? "correct" : "wrong") : ""}`}>{tile?.letter || ""}</button>;
                 })}
               </div>
               <div className="rd-letter-bank">
-                {current.letters.map((tile) => <button key={tile.id} onClick={() => chooseLetter(tile.id)} disabled={selected.includes(tile.id) || checked || Boolean(typedAnswer)} className={`rd-letter-tile ${selected.includes(tile.id) ? "used" : ""}`}>{tile.letter}</button>)}
+                {current.letters.map((tile) => <button key={tile.id} onClick={() => chooseLetter(tile.id)} disabled={selected.includes(tile.id) || checked} className={`rd-letter-tile ${selected.includes(tile.id) ? "used" : ""}`}>{tile.letter}</button>)}
               </div>
-              <div className="rd-type-answer"><span>ILI UPIŠI ODGOVOR</span><input value={typedAnswer} onChange={(event) => { setTypedAnswer(event.target.value); setSelected([]); setFeedback(""); }} disabled={checked} autoComplete="off" placeholder="Upiši riječ..." onKeyDown={(event) => { if (event.key === "Enter") checked ? next() : checkAnswer(); }} /></div>
               {feedback && <div className={`rd-feedback ${checked ? "success" : "hint"}`}>{feedback}</div>}
               <div className="rd-actions">
                 {!checked ? <><button onClick={checkAnswer} disabled={!answer.trim()} className="rd-check">PROVJERI ODGOVOR</button><button onClick={clearAnswer} className="rd-secondary">OČISTI</button><button onClick={revealLetter} disabled={revealed} className="rd-secondary">POMOĆ</button></> : <button onClick={next} className="rd-check">SLJEDEĆI POJAM <span>→</span></button>}
@@ -289,14 +286,14 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
         .rd-game{padding:30px}.rd-game-top{display:flex;align-items:center;justify-content:space-between;gap:16px}.rd-game-top h2 span{color:#d8b66d;font-size:10px;letter-spacing:.12em}.rd-scoreline{display:flex;flex-wrap:wrap;gap:8px}.rd-scoreline span{border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:rgba(255,255,255,.6);font-size:10px}.rd-scoreline b{margin-left:8px;color:#f0d28c;font-size:14px}
         .rd-progress-meta{display:flex;justify-content:space-between;margin-top:25px;color:rgba(255,255,255,.42);font-size:9px;font-weight:800;letter-spacing:.13em}.rd-progress{height:5px;margin-top:9px;overflow:hidden;border-radius:9px;background:rgba(255,255,255,.09)}.rd-progress span{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#a77d3b,#efd58e);transition:width .3s}.rd-turn{margin-top:18px;color:rgba(255,255,255,.5);font-size:10px;letter-spacing:.1em;text-align:center}.rd-turn strong{color:#f0d28c}
         .rd-puzzle{max-width:720px;margin:30px auto 0;text-align:center}.rd-puzzle-label{color:#d9b66d;font-size:9px;font-weight:900;letter-spacing:.2em}.rd-puzzle>p{max-width:590px;margin:13px auto 25px;color:rgba(255,255,255,.72);font-size:16px;line-height:1.7}
-        .rd-answer-slots{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;min-height:54px}.rd-answer-tile,.rd-letter-tile{display:grid;width:42px;height:48px;place-items:center;border:1px solid rgba(225,194,129,.32);border-radius:8px;background:rgba(225,194,129,.08);color:#f2d89e;font-size:19px;font-weight:800;transition:transform .16s,background .16s,border-color .16s}.rd-answer-tile.filled{border-color:#e1bf78;background:rgba(225,191,120,.17);color:#fff}.rd-answer-tile:not(:disabled):hover,.rd-letter-tile:not(:disabled):hover{transform:translateY(-3px);border-color:#f1d18a}.rd-letter-bank{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin-top:16px}.rd-letter-tile{width:44px;height:50px;border-color:rgba(255,255,255,.13);background:linear-gradient(145deg,#173a58,#102a43);color:#fff;box-shadow:0 5px 12px rgba(0,0,0,.18)}.rd-letter-tile.used{opacity:.2;transform:scale(.94)}.rd-type-answer{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:12px;max-width:470px;margin:25px auto 0;text-align:left}.rd-type-answer span{color:rgba(255,255,255,.36);font-size:8px;font-weight:800;letter-spacing:.1em}.rd-type-answer input{min-width:0;border:1px solid rgba(255,255,255,.13);border-radius:8px;padding:12px;background:#0c2338;color:#fff;text-align:center;outline:none}.rd-type-answer input:focus{border-color:#d9b66d}
+        .rd-answer-slots{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;min-height:54px}.rd-answer-tile,.rd-letter-tile{display:grid;width:42px;height:48px;place-items:center;border:1px solid rgba(225,194,129,.32);border-radius:8px;background:rgba(225,194,129,.08);color:#f2d89e;font-size:19px;font-weight:800;transition:transform .16s,background .16s,border-color .16s}.rd-answer-tile.correct{border-color:#34d399;background:#059669;color:#fff;box-shadow:0 0 14px rgba(16,185,129,.2)}.rd-answer-tile.wrong{border-color:#fb7185;background:#e11d48;color:#fff;box-shadow:0 0 14px rgba(244,63,94,.18)}.rd-answer-tile:not(:disabled):hover,.rd-letter-tile:not(:disabled):hover{transform:translateY(-3px);border-color:#f1d18a}.rd-letter-bank{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin-top:16px}.rd-letter-tile{width:44px;height:50px;border-color:rgba(255,255,255,.13);background:linear-gradient(145deg,#173a58,#102a43);color:#fff;box-shadow:0 5px 12px rgba(0,0,0,.18)}.rd-letter-tile.used{opacity:.2;transform:scale(.94)}
         .rd-feedback{margin-top:16px;font-size:12px;font-weight:700}.rd-feedback.success{color:#9bd5b4}.rd-feedback.hint{color:#e8ca8b}.rd-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;margin-top:18px}.rd-actions .rd-check{width:auto;min-width:190px;margin:0}.rd-secondary{min-height:46px;border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:11px 16px;background:rgba(255,255,255,.045);color:rgba(255,255,255,.75);font-size:9px;font-weight:800;letter-spacing:.1em;transition:.2s}.rd-secondary:hover{border-color:#d9b66d;color:#fff}.rd-secondary:disabled{opacity:.35}
         .rd-explanation{margin-top:24px;border:1px solid rgba(125,188,151,.18);border-radius:12px;padding:17px;background:rgba(87,151,115,.07);text-align:left}.rd-explanation div{color:#9bd5b4;font-size:8px;font-weight:900;letter-spacing:.17em}.rd-explanation strong{display:block;margin-top:8px;color:#fff;font-size:20px}.rd-explanation p{margin-top:6px;color:rgba(255,255,255,.6);font-size:12px;line-height:1.65}
         .rd-game-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:26px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.36);font-size:9px;font-weight:800;letter-spacing:.1em}.rd-game-bottom b{margin-left:8px;color:#e8ca8b;font-size:13px}.rd-quit{color:rgba(255,255,255,.4);font-size:9px;font-weight:800;letter-spacing:.1em}.rd-quit:hover{color:#fff}
         .rd-finish{padding:65px 28px;text-align:center}.rd-finish h2{margin-top:12px;color:#fff;font-size:clamp(28px,5vw,42px);font-weight:800;letter-spacing:-.04em}.rd-finish>p{margin-top:10px;color:rgba(255,255,255,.55);font-size:13px}.rd-final-scores{display:flex;justify-content:center;gap:12px;margin-top:28px}.rd-final-scores>div{display:grid;min-width:155px;gap:5px;border:1px solid rgba(255,255,255,.12);border-radius:13px;padding:18px;background:rgba(255,255,255,.035)}.rd-final-scores span,.rd-final-scores small{color:rgba(255,255,255,.45);font-size:9px;font-weight:800;letter-spacing:.12em}.rd-final-scores strong{color:#f0d28c;font-size:36px}
         .rd-disclaimer{max-width:850px;margin:16px auto 0;color:rgba(255,255,255,.35);font-size:10px;line-height:1.7;text-align:center}
         @media(max-width:760px){.rd-hero{min-height:225px;padding:32px 22px}.rd-content{padding:22px}.rd-mode-grid{grid-template-columns:1fr}.rd-mode-card{min-height:175px}.rd-bottom-row{grid-template-columns:1fr}.rd-game{padding:22px}.rd-game-top{align-items:flex-start;flex-direction:column}.rd-record{min-width:110px;padding-left:14px}.rd-hero-meta{flex-wrap:wrap;gap:8px}.rd-hero-mark{right:3%;font-size:125px}.rd-intro-row h2{font-size:22px}}
-        @media(max-width:420px){.rd-intro-row{align-items:flex-start;flex-direction:column}.rd-record{grid-template-columns:auto auto;align-items:center;justify-items:start;column-gap:8px;border-left:0;padding:0}.rd-record strong{grid-row:2}.rd-record small{grid-column:2;grid-row:2}.rd-player-fields{grid-template-columns:1fr}.rd-answer-tile,.rd-letter-tile{width:35px;height:42px;font-size:16px}.rd-type-answer{grid-template-columns:1fr}.rd-type-answer span{text-align:center}.rd-scoring{gap:3px}.rd-scoreline{width:100%}.rd-scoreline span{flex:1}.rd-game-bottom{align-items:flex-start;flex-direction:column}}
+        @media(max-width:420px){.rd-intro-row{align-items:flex-start;flex-direction:column}.rd-record{grid-template-columns:auto auto;align-items:center;justify-items:start;column-gap:8px;border-left:0;padding:0}.rd-record strong{grid-row:2}.rd-record small{grid-column:2;grid-row:2}.rd-player-fields{grid-template-columns:1fr}.rd-answer-tile,.rd-letter-tile{width:35px;height:42px;font-size:16px}.rd-scoring{gap:3px}.rd-scoreline{width:100%}.rd-scoreline span{flex:1}.rd-game-bottom{align-items:flex-start;flex-direction:column}}
         @media(prefers-reduced-motion:reduce){.rd-page *{transition:none!important;animation:none!important}}
       `}</style>
     </main>
