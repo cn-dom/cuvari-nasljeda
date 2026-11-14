@@ -469,6 +469,15 @@ const GROUPS = [
   {title:"Crkveni pojmovi",words:["EUHARISTIJA","KRŠTENJE","ŽUPA","KATEDRALA"]},
   {title:"Hrvatske regije",words:["KORDUN","BANOVINA","MOSLAVINA","PODRAVINA"]},
   {title:"Tradicijski obrti",words:["KAMENOKLESARSTVO","ČIPKARSTVO","TKANJE","VEZ"]},
+  {title:"Gradovi – novi pojmovi",words:["DUBROVNIK","ŠIBENIK","ĐAKOVO","ČAKOVEC"]},
+  {title:"Baština – novi pojmovi",words:["BAŠTINA","NASLJEĐE","EUPHRASIANA","KATEDRALA SV JAKOVA"]},
+  {title:"Običaji – novi pojmovi",words:["SINJSKA ALKA","FAŠNIK","KARNEVAL","LICITARSKO SRCE"]},
+  {title:"Vjera – novi pojmovi",words:["ANĐEO","SVETIŠTE","HODOČAŠĆE","EVANĐELJE"]},
+  {title:"Povijest – novi pojmovi",words:["VUKOVARSKI VODOTORANJ","DOMOVINSKI RAT","KRALJ TOMISLAV","PETAR ZRINSKI"]},
+  {title:"Priroda – novi pojmovi",words:["MORE","MASLINA","JADRAN","KOPAČKI RIT"]},
+  {title:"Znanje – novi pojmovi",words:["ETNOLOGIJA","NIKOLA TESLA","RUĐER BOŠKOVIĆ","FAUST VRANČIĆ"]},
+  {title:"Zemljopis – novi pojmovi",words:["PELJEŠAC","VIS","BRAČ","RAB"]},
+  {title:"Kultura – novi pojmovi",words:["ANTUN GUSTAV MATOS","IVANA BRLIC MAZURANIC","MARKO MARULIC","AUGUST SENOA"]},
 ];
 const DAILY = WORDS.filter(item=>item.clean.length>=4&&item.clean.length<=10&&!item.word.includes(" ")).map(item=>item.word);
 const GAMES = [
