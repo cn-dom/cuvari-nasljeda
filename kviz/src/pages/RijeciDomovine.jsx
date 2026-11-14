@@ -171,7 +171,7 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
       <section className="rd-shell">
         <header className="rd-hero">
           <div className="rd-hero-glow" />
-          <img src="/images/Rije%C4%8Di%20domovine_%20Hrvatska%20ba%C5%A1tina.png" alt="Riječi domovine – Hrvatska baština" className="rd-hero-art" fetchPriority="high" />
+          <img src="/kviz/images/Rije%C4%8Di%20domovine_%20Hrvatska%20ba%C5%A1tina.png" alt="Riječi domovine – Hrvatska baština" className="rd-hero-art" fetchPriority="high" />
           <div className="relative z-10">
             <div className="rd-kicker"><span /> IGRA ZNANJA I VJEŠTINE</div>
             <h1>Riječi <em>domovine</em></h1>
