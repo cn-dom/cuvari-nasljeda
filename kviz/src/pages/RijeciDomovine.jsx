@@ -60,7 +60,7 @@ const WORDS = [
   { word: "HODOČAŠĆE", category: "Vjera", level: 2, clue: "Putovanje vjernika na sveto mjesto.", explanation: "Hodočašće je izraz vjere, molitve i duhovnog traženja." },
   { word: "EVANĐELJE", category: "Vjera", level: 2, clue: "Radosna vijest o Isusu Kristu i naziv za četiri novozavjetna spisa.", explanation: "Četiri kanonska evanđelja nalaze se na početku Novoga zavjeta." },
   { word: "BETLEHEM", category: "Vjera", level: 1, clue: "Mjesto Isusova rođenja prema evanđeoskoj predaji.", explanation: "Betlehem je grad u kojem se prema evanđeljima rodio Isus." },
-  { word: "MILOSRĐE", category: "Vjera", level: 2, clue: "Suosjećanje i djelatna ljubav prema čovjeku u nevolji.", explanation: "Milosrđe u kršćanskoj tradiciji znači konkretnu brigu za bližnjega." }
+  { word: "ZAHVALA", category: "Vjera", level: 1, clue: "Izražavanje priznanja za primljeno dobro.", explanation: "Zahvalnost je važan dio molitve i svakodnevnog odnosa prema bližnjima." }
 
 ];
 
