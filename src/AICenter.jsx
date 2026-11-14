@@ -238,7 +238,6 @@ export default function AICenter() {
     </section>
     <nav className="ai-research-shortcuts" aria-label="Povezani sadržaji PatriaSoula">
       <a href="/hrvatska-pamti-grobnice.html"><span>✝</span><strong>Hrvatska pamti</strong><small>Memorijalni zapisi i mjesta sjećanja</small></a>
-      <a href="/virtualni-muzej.html"><span>▧</span><strong>Virtualni muzej</strong><small>Predmeti, priče i kulturna baština</small></a>
       <a href="/kviz/"><span>🧠</span><strong>PatriaSoul kviz</strong><small>Provjeri i proširi svoje znanje</small></a>
       <a href="/forum.html"><span>▤</span><strong>Domoljubni forum</strong><small>Teme i razgovori zajednice</small></a>
     </nav>
