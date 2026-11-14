@@ -171,7 +171,7 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
       <section className="rd-shell">
         <header className="rd-hero">
           <div className="rd-hero-glow" />
-          <img src="/kviz/images/Rije%C4%8Di%20domovine_%20Hrvatska%20ba%C5%A1tina.png" alt="Riječi domovine – Hrvatska baština" className="rd-hero-art" fetchPriority="high" />
+          <img src={`${import.meta.env.BASE_URL}images/Riječi domovine_ Hrvatska baština.png`} alt="Riječi domovine – Hrvatska baština" className="rd-hero-art" fetchPriority="high" decoding="async" />
           <div className="relative z-10">
             <div className="rd-kicker"><span /> IGRA ZNANJA I VJEŠTINE</div>
             <h1>Riječi <em>domovine</em></h1>
@@ -270,9 +270,9 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
         .rd-back{border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:10px 16px;background:rgba(255,255,255,.045);color:#e8eaf0;font-size:13px;font-weight:700;transition:.2s}.rd-back:hover{border-color:#d9b66d;background:rgba(255,255,255,.08)}
         .rd-brand{color:#c9b88f;font-size:10px;font-weight:800;letter-spacing:.2em}.rd-brand span{color:#a9874c;padding:0 7px}
         .rd-hero{position:relative;overflow:hidden;min-height:250px;padding:40px 34px;background:radial-gradient(ellipse at 78% 20%,rgba(204,165,91,.17),transparent 32%),linear-gradient(115deg,#0e2b47,#102d49 55%,#0a2037);border-bottom:1px solid rgba(255,255,255,.08)}
-        .rd-hero-art{position:absolute;z-index:1;top:0;right:0;width:34%;height:100%;object-fit:cover;object-position:top center;opacity:.92;mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.55) 18%,#000 48%)}
-        .rd-hero>div.relative{max-width:68%;}
-        @media(max-width:760px){.rd-hero{min-height:245px;padding:30px 22px}.rd-hero-art{width:45%;opacity:.48;mask-image:linear-gradient(90deg,transparent 0%,#000 45%)}.rd-hero>div.relative{max-width:100%}}
+        .rd-hero-art{position:absolute;z-index:1;top:0;right:0;width:43%;height:100%;padding:12px 18px 12px 0;object-fit:contain;object-position:center right;opacity:1;filter:drop-shadow(0 12px 28px rgba(0,0,0,.28));mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.7) 15%,#000 38%)}
+        .rd-hero>div.relative{max-width:61%;}
+        @media(max-width:760px){.rd-hero{min-height:245px;padding:30px 22px}.rd-hero-art{width:48%;padding:10px 8px 10px 0;opacity:.86;mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.85) 20%,#000 48%)}.rd-hero>div.relative{max-width:62%}}
         .rd-hero:after{content:"";position:absolute;inset:auto 0 0;height:4px;background:linear-gradient(90deg,#8c2637 0 33%,#e9e4d8 33% 66%,#1b4165 66%)}
         .rd-hero-glow{position:absolute;width:340px;height:340px;right:8%;top:-240px;border:1px solid rgba(221,184,103,.2);border-radius:50%;box-shadow:0 0 0 32px rgba(221,184,103,.025),0 0 0 66px rgba(221,184,103,.02)}
         .rd-kicker{display:flex;align-items:center;gap:10px;color:#e3c786;font-size:10px;font-weight:800;letter-spacing:.22em}.rd-kicker span{width:25px;height:1px;background:#d9b66d}
