@@ -89,33 +89,101 @@ function LetterKeyboard({value,onChange,target,maxLength,disabled=false,matchMod
 }
 
 function WordSearch({onBack}) {
-  const target = "HRVATSKA";
-  const {grid,path} = useMemo(() => {
+  const words = ["HRVATSKA","DOMOVINA","ZAGREB","JADRAN","VUKOVAR","ŠKABRNJA","DUBROVNIK"];
+  const size = 11;
+  const gridRef = useRef(null);
+  const [board] = useState(() => {
+    const cells = Array(size*size).fill("");
+    const placements = [];
     const alphabet = "ABCČĆDEFGHIJKLMNOPRSŠTUVZŽ";
-    const rows = Array.from({length:8},()=>Array.from({length:8},()=>alphabet[Math.floor(Math.random()*alphabet.length)]));
-    const vertical = Math.random() < 0.5;
-    const reverse = Math.random() < 0.5;
-    const line = Math.floor(Math.random()*8);
-    const positions = Array.from({length:target.length},(_,i)=>vertical ? (reverse ? (7-i)*8+line : i*8+line) : (reverse ? line*8+7-i : line*8+i));
-    positions.forEach((position,index)=>{rows[Math.floor(position/8)][position%8]=target[index];});
-    return {grid:rows,path:positions};
-  },[]);
-  const [picked,setPicked] = useState([]);
-  const [message,setMessage] = useState("");
-  const [won,setWon] = useState(false);
-  const choose = (cell) => {
-    if(won) return;
-    const next=[...picked,cell];
-    if(next.length===path.length) {
-      if(next.every((value,index)=>value===path[index])) {setPicked(next);setWon(true);setMessage("Točno! Pronašao/la si skrivenu riječ.");}
-      else {setPicked(next);setMessage("Neka slova nisu na pravom mjestu. Poništi odabir i pokušaj ponovno.");}
-    } else setPicked(next);
+    words.forEach(word => {
+      let placed = false;
+      for(let attempt=0;attempt<500&&!placed;attempt++){
+        const vertical = Math.random()<0.5;
+        const reverse = Math.random()<0.5;
+        const row = Math.floor(Math.random()*(vertical?size-word.length+1:size));
+        const col = Math.floor(Math.random()*(vertical?size:size-word.length+1));
+        const letters = reverse?[...word].reverse():[...word];
+        const path = letters.map((_,i)=>(row+(vertical?i:0))*size+col+(vertical?0:i));
+        if(path.every((index,i)=>!cells[index]||cells[index]===letters[i])){
+          path.forEach((index,i)=>cells[index]=letters[i]);
+          placements.push({word,path});
+          placed=true;
+        }
+      }
+    });
+    return {cells:cells.map(letter=>letter||alphabet[Math.floor(Math.random()*alphabet.length)]),placements};
+  });
+  const [found,setFound] = useState([]);
+  const [drag,setDrag] = useState([]);
+  const [anchor,setAnchor] = useState(null);
+  const [message,setMessage] = useState("Povuci prstom ili mišem od prvog do zadnjeg slova riječi.");
+  const [lastFound,setLastFound] = useState([]);
+  const complete = found.length===words.length;
+
+  const makePath = (from,to) => {
+    if(from===null||to===null)return [];
+    const r1=Math.floor(from/size),c1=from%size,r2=Math.floor(to/size),c2=to%size;
+    if(r1!==r2&&c1!==c2)return [];
+    const dr=Math.sign(r2-r1),dc=Math.sign(c2-c1);
+    const distance=Math.max(Math.abs(r2-r1),Math.abs(c2-c1));
+    return Array.from({length:distance+1},(_,i)=>(r1+dr*i)*size+c1+dc*i);
   };
-  return <Frame title="Pronađi riječ" subtitle="Pronađi riječ HRVATSKA u mreži. Smjer može biti vodoravan ili okomit, naprijed ili unatrag." onBack={onBack}>
-    <div className="mb-4 text-center text-sm font-bold tracking-[.3em] text-amber-200">TRAŽI: H R V A T S K A</div>
-    <div className="mx-auto grid max-w-md grid-cols-8 gap-1.5" role="group" aria-label="Mreža slova">{grid.flat().map((letter,index)=><button key={index} type="button" aria-label={`Red ${Math.floor(index/8)+1}, stupac ${index%8+1}, slovo ${letter}`} aria-pressed={picked.includes(index)} onClick={()=>choose(index)} className={`aspect-square rounded-lg border text-sm font-black transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-200 sm:text-lg ${picked.includes(index)?(path[picked.indexOf(index)]===index?"border-emerald-400 bg-emerald-500 text-white":"border-rose-400 bg-rose-600 text-white"):"border-white/10 bg-white/5 text-white hover:bg-white/10"}`}>{letter}</button>)}</div>
-    {message&&<p className="mt-4 text-center text-sm text-amber-100" role="status">{message}</p>}
-    {won?<Success>Riječ je pronađena!</Success>:<button onClick={()=>{setPicked([]);setMessage("");}} className="mt-4 text-sm text-white/60 underline">Poništi odabir</button>}
+  const cellAtPoint = (event) => {
+    const element=document.elementFromPoint(event.clientX,event.clientY);
+    const cell=element?.closest?.("[data-cell-index]");
+    return cell&&gridRef.current?.contains(cell)?Number(cell.dataset.cellIndex):null;
+  };
+  const begin = (event,index) => {
+    if(complete)return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    setAnchor(index);setDrag([index]);setLastFound([]);
+    setMessage("Povuci do posljednjeg slova, vodoravno ili okomito.");
+  };
+  const move = (event) => {
+    if(anchor===null)return;
+    const index=cellAtPoint(event);
+    if(index===null)return;
+    const path=makePath(anchor,index);
+    if(path.length)setDrag(path);
+  };
+  const finish = () => {
+    if(anchor===null)return;
+    const chosen=drag;
+    const value=chosen.map(index=>board.cells[index]).join("");
+    const match=board.placements.find(item=>!found.includes(item.word)&&
+      (value===item.word||value===[...item.word].reverse().join("")));
+    if(match){
+      setFound(current=>[...current,match.word]);
+      setLastFound(chosen);
+      setMessage(`Odlično! Pronađena riječ: ${match.word}.`);
+    }else if(chosen.length>1){
+      setLastFound([]);
+      setMessage("To nije tražena riječ. Pokušaj ponovno.");
+    }else{
+      setMessage("Povuci preko svih slova riječi, od početka do kraja.");
+    }
+    setAnchor(null);setDrag([]);
+  };
+  const reset = () => {setFound([]);setDrag([]);setAnchor(null);setLastFound([]);setMessage("Pronađi sve riječi u mreži.");};
+
+  return <Frame title="Pronađi riječi" subtitle="Pronađi više hrvatskih riječi. Mogu biti vodoravno ili okomito, naprijed ili unatrag. Povuci mišem ili prstom preko slova." onBack={onBack}>
+    <div className="mb-4 rounded-2xl border border-amber-200/20 bg-white/[.04] p-3">
+      <div className="mb-2 flex items-center justify-between gap-2"><span className="text-xs font-bold tracking-widest text-amber-200">PRONAĐI RIJEČI</span><span className="text-xs font-bold text-white/65">{found.length}/{words.length} pronađeno</span></div>
+      <div className="flex flex-wrap gap-2">{words.map(word=><span key={word} className={`rounded-full border px-3 py-1.5 text-xs font-black tracking-wide transition ${found.includes(word)?"border-emerald-300/50 bg-emerald-500/20 text-emerald-200 line-through":"border-white/15 bg-white/5 text-white/75"}`}>{word}{found.includes(word)?" ✓":""}</span>)}</div>
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-black/30"><div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-300 transition-all duration-300" style={{width:`${found.length/words.length*100}%`}}/></div>
+    </div>
+    <div ref={gridRef} onPointerMove={move} onPointerUp={finish} onPointerCancel={()=>{setAnchor(null);setDrag([]);}} onContextMenu={event=>event.preventDefault()} className="mx-auto grid max-w-lg grid-cols-11 gap-1 rounded-2xl border border-white/10 bg-[#081a2b] p-2 shadow-inner sm:gap-1.5 sm:p-3" style={{touchAction:"none",userSelect:"none"}} role="group" aria-label="Mreža slova za pronalaženje riječi">
+      {board.cells.map((letter,index)=>{
+        const isDragging=drag.includes(index);
+        const isLast=lastFound.includes(index);
+        return <button key={index} type="button" data-cell-index={index} onPointerDown={event=>begin(event,index)} aria-label={`Red ${Math.floor(index/size)+1}, stupac ${index%size+1}, slovo ${letter}`} className={`aspect-square min-w-0 rounded-md border text-[11px] font-black transition sm:rounded-lg sm:text-base ${isDragging?"border-amber-200 bg-amber-300 text-slate-950 scale-105":isLast?"border-emerald-300 bg-emerald-500 text-white shadow-[0_0_12px_rgba(16,185,129,.3)]":"border-white/10 bg-white/[.055] text-white hover:border-amber-200/50 hover:bg-white/10"}`}>{letter}</button>;
+      })}
+    </div>
+    <p className="mt-4 min-h-10 text-center text-sm font-semibold text-amber-100" role="status" aria-live="polite">{complete?"Sjajno! Pronašao/la si sve riječi!":message}</p>
+    <div className="mt-3 flex justify-center">{complete?<Success>Sve riječi su pronađene!</Success>:<button type="button" onClick={reset} className="rounded-xl border border-white/15 px-4 py-2.5 text-sm font-bold text-white/75 transition hover:bg-white/10">Ponovi igru</button>}</div>
+    <p className="mt-3 text-center text-[11px] text-white/40">Na računalu: drži lijevu tipku miša i povuci. Na mobitelu: pritisni slovo i povuci prstom. Pusti na zadnjem slovu.</p>
   </Frame>;
 }
 
