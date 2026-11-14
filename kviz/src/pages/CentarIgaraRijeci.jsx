@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, Brain, CalendarDays, Check, Grid3X3, Link2, Search, Shuffle, Sparkles, Trophy } from "lucide-react";
 import RijeciDomovine from "./RijeciDomovine";
 
@@ -177,7 +177,7 @@ function WordSearch({onBack}) {
     <div ref={gridRef} onPointerMove={move} onPointerUp={finish} onPointerCancel={()=>{setAnchor(null);setDrag([]);}} onContextMenu={event=>event.preventDefault()} className="mx-auto grid max-w-lg grid-cols-11 gap-1 rounded-2xl border border-white/10 bg-[#081a2b] p-2 shadow-inner sm:gap-1.5 sm:p-3" style={{touchAction:"none",userSelect:"none"}} role="group" aria-label="Mreža slova za pronalaženje riječi">
       {board.cells.map((letter,index)=>{
         const isDragging=drag.includes(index);
-        const isLast=lastFound.includes(index);
+        const isLast=board.placements.some(item=>found.includes(item.word)&&item.path.includes(index));
         return <button key={index} type="button" data-cell-index={index} onPointerDown={event=>begin(event,index)} aria-label={`Red ${Math.floor(index/size)+1}, stupac ${index%size+1}, slovo ${letter}`} className={`aspect-square min-w-0 rounded-md border text-[11px] font-black transition sm:rounded-lg sm:text-base ${isDragging?"border-amber-200 bg-amber-300 text-slate-950 scale-105":isLast?"border-emerald-300 bg-emerald-500 text-white shadow-[0_0_12px_rgba(16,185,129,.3)]":"border-white/10 bg-white/[.055] text-white hover:border-amber-200/50 hover:bg-white/10"}`}>{letter}</button>;
       })}
     </div>
