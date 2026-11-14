@@ -1106,10 +1106,15 @@ export default function App() {
             </a>
             <a href="?mode=words" className="patria-game-card group">
               <div className="patria-game-number">04</div>
-              <p className="mt-5 text-xs font-bold uppercase tracking-[.18em] text-[#f1d078]">Slova · znanje · nasljeđe</p>
-              <h3 className="mt-2 text-2xl text-white">Riječi domovine</h3>
-              <p className="mt-3 text-sm leading-7 text-white/60">Osam različitih igara riječima o Hrvatskoj, povijesti, vjeri i baštini. Igraj samostalno ili izazovi prijatelja.</p>
-              <span className="mt-6 inline-flex items-center font-semibold text-white">Pokreni igru <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
+              <div className="mt-5 flex items-start gap-4">
+                <img src="/kviz/images/Rije%C4%8Di%20domovine_%20Hrvatska%20ba%C5%A1tina.png" alt="Riječi domovine – Hrvatska baština" loading="lazy" className="h-36 w-24 shrink-0 rounded-xl border border-amber-200/30 object-cover object-top shadow-lg transition duration-500 group-hover:scale-[1.03]" />
+                <div className="min-w-0">
+                  <p className="text-xs font-bold uppercase tracking-[.18em] text-[#f1d078]">Slova · znanje · nasljeđe</p>
+                  <h3 className="mt-2 text-2xl text-white">Riječi domovine</h3>
+                  <p className="mt-3 text-sm leading-7 text-white/60">Šest različitih igara riječima o Hrvatskoj, povijesti, vjeri i baštini. Igraj samostalno ili izazovi prijatelja.</p>
+                  <span className="mt-6 inline-flex items-center font-semibold text-white">Pokreni igru <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
+                </div>
+              </div>
             </a>
           </div>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
