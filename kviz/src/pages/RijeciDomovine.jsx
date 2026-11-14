@@ -118,7 +118,7 @@ const WORDS = [
   { word: "GOSPIĆ", category: "Domovina", level: 1, clue: "Grad u Lici, nedaleko od Smiljana i Memorijalnog centra Nikole Tesle.", explanation: "Gospić je regionalno središte Like, a Smiljan je rodno mjesto Nikole Tesle." },
   { word: "METKOVIĆ", category: "Domovina", level: 2, clue: "Grad na Neretvi, blizu arheološkog lokaliteta Narona.", explanation: "Metković je grad u dolini Neretve i polazište za upoznavanje delte i Narone." },
   { word: "OPATIJA", category: "Domovina", level: 2, clue: "Kvarnerski grad poznat po povijesti turizma i obalnoj šetnici.", explanation: "Opatija se razvila kao jedno od najstarijih turističkih središta na hrvatskoj obali." },
-  { word: "CAVTAT", category: "Domovina", level: 2, clue: "Primorsko mjesto južno od Dubrovnika, poznato po mauzoleju obitelji Račić.", explanation: "Cavtat je poznat po kulturnoj baštini i djelima kipara Ivana Meštrovića." }
+  { word: "CAVTAT", category: "Domovina", level: 2, clue: "Primorsko mjesto južno od Dubrovnika, poznato po mauzoleju obitelji Račić.", explanation: "Cavtat je poznat po kulturnoj baštini i djelima kipara Ivana Meštrovića." },
   { word: "KAMENICA", category: "Gradovi", level: 1, clue: "Naselje u Hrvatskoj; naziv nose brojna mjesta.", explanation: "Naselje u Hrvatskoj; naziv nose brojna mjesta." },
   { word: "IMOTSKI", category: "Gradovi", level: 1, clue: "Grad u Dalmatinskoj zagori poznat po Modrom i Crvenom jezeru.", explanation: "Grad u Dalmatinskoj zagori poznat po Modrom i Crvenom jezeru." },
   { word: "MAKARSKA", category: "Gradovi", level: 1, clue: "Primorski grad podno Biokova.", explanation: "Primorski grad podno Biokova." },
