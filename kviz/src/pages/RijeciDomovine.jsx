@@ -54,14 +54,13 @@ const WORDS = [
   { word: "ANTUN GUSTAV MATOŠ", category: "Kultura", level: 3, clue: "Hrvatski književnik, pjesnik i esejist rođen u Tovarniku.", explanation: "Matoš je jedan od najvažnijih predstavnika hrvatske moderne." },
   { word: "EUPRAZIJEVA BAZILIKA", category: "Baština", level: 3, clue: "Porečki ranokršćanski kompleks na UNESCO-ovu popisu.", explanation: "Kompleks je izniman primjer ranobizantske sakralne arhitekture i umjetnosti." },
   { word: "ŠIBENSKA KATEDRALA", category: "Baština", level: 3, clue: "Renesansna katedrala sv. Jakova, građena od kamena.", explanation: "Katedrala sv. Jakova u Šibeniku upisana je na UNESCO-ov popis svjetske baštine." },
-  { word: "BAŠĆANSKA PLOČA", category: "Baština", level: 3, clue: "Glagoljski kameni spomenik iz crkve svete Lucije na Krku.", explanation: "Bašćanska ploča važan je spomenik hrvatske pismenosti i jezika." },
   { word: "HRVATSKI SABOR", category: "Zajednica", level: 2, clue: "Predstavničko tijelo građana i nositelj zakonodavne vlasti.", explanation: "Hrvatski sabor donosi zakone i obavlja druge poslove određene Ustavom." },
   { word: "ZAJEDNIŠTVO", category: "Zajednica", level: 2, clue: "Povezanost ljudi koji surađuju i pomažu jedni drugima.", explanation: "Zajedništvo se gradi povjerenjem, odgovornošću i brigom za druge." },
   { word: "ZAVIČAJ", category: "Zajednica", level: 1, clue: "Kraj iz kojeg netko potječe ili s kojim je posebno povezan.", explanation: "Zavičaj obuhvaća prostor, ljude, običaje i sjećanja koja oblikuju osjećaj pripadnosti." },
   { word: "HODOČAŠĆE", category: "Vjera", level: 2, clue: "Putovanje vjernika na sveto mjesto.", explanation: "Hodočašće je izraz vjere, molitve i duhovnog traženja." },
   { word: "EVANĐELJE", category: "Vjera", level: 2, clue: "Radosna vijest o Isusu Kristu i naziv za četiri novozavjetna spisa.", explanation: "Četiri kanonska evanđelja nalaze se na početku Novoga zavjeta." },
   { word: "BETLEHEM", category: "Vjera", level: 1, clue: "Mjesto Isusova rođenja prema evanđeoskoj predaji.", explanation: "Betlehem je grad u kojem se prema evanđeljima rodio Isus." },
-  { word: "MILO SRĐE", category: "Vjera", level: 2, clue: "Suosjećanje i djelatna ljubav prema čovjeku u nevolji.", explanation: "Milosrđe u kršćanskoj tradiciji znači konkretnu brigu za bližnjega." }
+  { word: "MILOSRĐE", category: "Vjera", level: 2, clue: "Suosjećanje i djelatna ljubav prema čovjeku u nevolji.", explanation: "Milosrđe u kršćanskoj tradiciji znači konkretnu brigu za bližnjega." }
 
 ];
 
