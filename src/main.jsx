@@ -7,7 +7,6 @@ const Forum = lazy(() => import("./Forum.jsx"));
 const Pages = lazy(() => import("./Pages.jsx"));
 const Events = lazy(() => import("./Events.jsx"));
 const AICenter = lazy(() => import("./AICenter.jsx"));
-const VirtualMuseum = lazy(() => import("./VirtualMuseum.jsx"));
 const HrvatskaPamti = lazy(() => import("./HrvatskaPamti.jsx"));
 const HrvatskaPamtiMjesto = lazy(() => import("./HrvatskaPamtiMjesto.jsx"));
 const HrvatskaPamtiGrobnice = lazy(() => import("./HrvatskaPamtiGrobnice.jsx"));
@@ -26,8 +25,6 @@ const Screen = route === "/hrvatska-pamti-grobnice.html"
   ? PatriaSoulVideo
   : (route === "/hrvatski-val.html" || route === "/hrvatski-val")
   ? HrvatskiVal
-  : route === "/virtualni-muzej.html"
-  ? VirtualMuseum
   : route === "/ai-centar.html"
   ? AICenter
   : route === "/administracija.html"
