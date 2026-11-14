@@ -135,6 +135,6 @@ Ovaj izvještaj bilježi stanje provjere od 13. listopada. Nakon te provjere u r
 
 U administraciji kviza dodana je integracija s postojećim RPC funkcijama za statistiku i rezultate. Izgradnja i testovi provjeravaju sintaksu i isporuku aplikacije, ali ne zamjenjuju funkcionalni test s dva korisnička računa.
 
-PR za zajedničke značke treba sadržavati verzioniranu migraciju i povezivanje kataloga s profilima, imenikom i virtualnim muzejom. Sama prisutnost tablice `heritage_badge_awards` nije dokaz da su svi prikazi i okidači dodjele znački povezani.
+Zajedničke značke trebaju imati verzioniranu migraciju i povezivanje kataloga s profilima i imenikom. Sama prisutnost tablice `heritage_badge_awards` nije dokaz da su svi prikazi i okidači dodjele znački povezani.
 
 **Pravilo:** ne prebacivati Cloudflare URL, ne kopirati korisničke podatke i ne pokretati migracije naslijepo. Prije promjene produkcije potvrditi ciljnu bazu, sigurnosnu kopiju, shemu, RLS i stvarni rezultat testa.
