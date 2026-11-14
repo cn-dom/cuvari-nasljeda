@@ -141,7 +141,7 @@ const BANK = [
   { word:"PETAR KREŠIMIR", clue:"Hrvatski kralj iz 11. stoljeća, povezan s jačanjem kraljevstva.", group:"Povijest" },
   { word:"ZVONIMIR", clue:"Hrvatski kralj iz 11. stoljeća okrunjen u Solinu.", group:"Povijest" },
   { word:"BRANIMIR", clue:"Hrvatski knez iz 9. stoljeća čije je vrijeme povezano s pismom pape Ivana VIII.", group:"Povijest" },
-  { word:"LJUDЕVIT GAJ", clue:"Hrvatski preporoditelj i jedna od središnjih osoba ilirskog pokreta.", group:"Kultura" },
+  { word:"LJUDEVIT GAJ", clue:"Hrvatski preporoditelj i jedna od središnjih osoba ilirskog pokreta.", group:"Kultura" },
   { word:"IVAN MAŽURANIĆ", clue:"Hrvatski ban i književnik, autor Smrti Smail-age Čengića.", group:"Kultura" },
   { word:"JURAJ DOBRILA", clue:"Istarski biskup i preporoditelj koji se zalagao za obrazovanje na hrvatskom jeziku.", group:"Povijest" },
   { word:"VUKOVARSKA GOLUBICA", clue:"Prepoznatljiv naziv za spomen-obilježje na mjestu masovne grobnice na Ovčari.", group:"Povijest" },
@@ -194,6 +194,12 @@ const GROUPS = [
   {title:"Znanstvenici",words:["TESLA","BOŠKOVIĆ","VRANČIĆ","MOHOROVIČIĆ"]},
   {title:"Domovinski rat",words:["OLUJA","OVČARA","ŠKABRNJA","VUKOVARSKA BITKA"]},
   {title:"Zajednica",words:["OBITELJ","ZAJEDNIŠTVO","VOLONTERSTVO","ZAVIČAJ"]},
+  {title:"Rijeke",words:["KUPA","MURA","CETINA","ZRMANJA"]},
+  {title:"Nacionalni parkovi",words:["PLITVICE","KORNATI","MLJET","RISNJAK"]},
+  {title:"Hrvatske regije",words:["LIKA","SLAVONIJA","BARANJA","MEĐIMURJE"]},
+  {title:"Tradicijsko pjevanje i ples",words:["BEĆARAC","OJKANJE","GANGA","NIJEMO KOLO"]},
+  {title:"Povijesne osobe",words:["ZVONIMIR","BRANIMIR","PETAR KREŠIMIR","LJUDEVIT GAJ"]},
+  {title:"Tvrđave i dvorci",words:["NEHAJ","KLIS","TRAKOŠĆAN","KAMENITA VRATA"]},
 ];
 const DAILY = WORDS.filter(item=>item.clean.length>=4&&item.clean.length<=10&&!item.word.includes(" ")).map(item=>item.word);
 const GAMES = [
