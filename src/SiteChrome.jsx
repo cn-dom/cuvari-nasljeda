@@ -11,8 +11,8 @@ const primary = [
   { label: "Zajednica", href: "/forum.html", children: [
     { label: "Forum", href: "/forum.html" }, { label: "Grupe", href: "/#grupe" }, { label: "Događaji", href: "/dogadaji.html" },
   ]},
-  { label: "Kultura i znanje", href: "/virtualni-muzej.html", children: [
-    { label: "Virtualni muzej", href: "/virtualni-muzej.html" }, { label: "Kviz", href: "/kviz/" }, { label: "Vjera", href: "/vjera-hrvata.html" },
+  { label: "Kultura i znanje", href: "/kviz/", children: [
+    { label: "Kviz", href: "/kviz/" }, { label: "Vjera", href: "/vjera-hrvata.html" },
   ]},
   { label: "Mediji", href: "/video-arhiva.html", children: [
     { label: "Video arhiva", href: "/video-arhiva.html" }, { label: "Hrvatski Val Player", href: "/hrvatski-val.html" },
