@@ -60,9 +60,8 @@ const WORDS = [
   { word: "HODOČAŠĆE", category: "Vjera", level: 2, clue: "Putovanje vjernika na sveto mjesto.", explanation: "Hodočašće je izraz vjere, molitve i duhovnog traženja." },
   { word: "EVANĐELJE", category: "Vjera", level: 2, clue: "Radosna vijest o Isusu Kristu i naziv za četiri novozavjetna spisa.", explanation: "Četiri kanonska evanđelja nalaze se na početku Novoga zavjeta." },
   { word: "BETLEHEM", category: "Vjera", level: 1, clue: "Mjesto Isusova rođenja prema evanđeoskoj predaji.", explanation: "Betlehem je grad u kojem se prema evanđeljima rodio Isus." },
-  { word: "ZAHVALA", category: "Vjera", level: 1, clue: "Izražavanje priznanja za primljeno dobro.", explanation: "Zahvalnost je važan dio molitve i svakodnevnog odnosa prema bližnjima." }
-
-{ word: "KUPA", category: "Priroda", level: 1, clue: "Rijeka koja protječe kroz Karlovac i ulijeva se u Savu kod Siska.", explanation: "Kupa je važna rijeka središnje Hrvatske i prirodna poveznica Gorskog kotara i Posavine." },
+  { word: "ZAHVALA", category: "Vjera", level: 1, clue: "Izražavanje priznanja za primljeno dobro.", explanation: "Zahvalnost je važan dio molitve i svakodnevnog odnosa prema bližnjima." },
+  { word: "KUPA", category: "Priroda", level: 1, clue: "Rijeka koja protječe kroz Karlovac i ulijeva se u Savu kod Siska.", explanation: "Kupa je važna rijeka središnje Hrvatske i prirodna poveznica Gorskog kotara i Posavine." },
   { word: "MURA", category: "Priroda", level: 1, clue: "Rijeka koja čini dio hrvatske granice na sjeveru.", explanation: "Mura protječe uz Međimurje i važan je dio riječnog krajolika sjeverne Hrvatske." },
   { word: "CETINA", category: "Priroda", level: 1, clue: "Rijeka koja izvire u Dalmatinskoj zagori i protječe kroz Omiš.", explanation: "Cetina je poznata po izvoru, kanjonu i hidrološkim vrijednostima." },
   { word: "ZRMANJA", category: "Priroda", level: 2, clue: "Rijeka poznata po kanjonu i slapovima u sjevernoj Dalmaciji.", explanation: "Kanjon Zrmanje ističe se krškim reljefom i očuvanim prirodnim krajolikom." },
