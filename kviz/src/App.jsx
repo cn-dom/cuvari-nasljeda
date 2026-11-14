@@ -1106,8 +1106,9 @@ export default function App() {
             </a>
             <a href="?mode=words" className="patria-game-card group">
               <div className="patria-game-number z-10">04</div>
-              <div className="-mx-6 -mt-6 mb-5 flex h-52 items-center justify-center overflow-hidden border-b border-amber-200/15 bg-gradient-to-br from-[#102d4a] via-[#0b1d32] to-[#071426] sm:h-56">
+              <div className="-mx-6 -mt-6 mb-5 relative flex h-52 items-center justify-center overflow-hidden border-b border-amber-200/15 bg-gradient-to-br from-[#102d4a] via-[#0b1d32] to-[#071426] sm:h-56">
                 <img src={`${import.meta.env.BASE_URL}images/Riječi domovine_ Hrvatska baština.png`} alt="Riječi domovine — Hrvatska baština" loading="lazy" decoding="async" className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.03]" />
+                <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-black/25" />
               </div>
               <p className="text-xs font-bold uppercase tracking-[.18em] text-[#f1d078]">Slova · znanje · nasljeđe</p>
               <h3 className="mt-2 text-2xl text-white">Riječi domovine</h3>
