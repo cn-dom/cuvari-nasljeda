@@ -1105,7 +1105,7 @@ export default function App() {
               <span className="mt-6 inline-flex items-center font-semibold text-white">Igraj danas <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
             </a>
             <a href="?mode=words" className="patria-game-card group">
-              <div className="patria-game-number">04</div><div className="patria-icon-ring"><BookOpen className="h-5 w-5" /></div>
+              <div className="patria-game-number">04</div><div className="patria-icon-ring overflow-hidden p-0"><img src="/kviz/images/Rije%C4%8Di%20domovine_%20Hrvatska%20ba%C5%A1tina.png" alt="Riječi domovine — Hrvatska baština" className="h-full w-full object-cover" /></div>
               <p className="mt-5 text-xs font-bold uppercase tracking-[.18em] text-[#f1d078]">Slova · znanje · nasljeđe</p>
               <h3 className="mt-2 text-2xl text-white">Riječi domovine</h3>
               <p className="mt-3 text-sm leading-7 text-white/60">Šest različitih igara riječima o Hrvatskoj, povijesti, vjeri i baštini. Igraj samostalno ili izazovi prijatelja.</p>
