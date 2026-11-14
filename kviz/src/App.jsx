@@ -1105,8 +1105,11 @@ export default function App() {
               <span className="mt-6 inline-flex items-center font-semibold text-white">Igraj danas <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
             </a>
             <a href="?mode=words" className="patria-game-card group">
-              <div className="patria-game-number">04</div><div className="patria-icon-ring overflow-hidden p-0"><img src="/kviz/images/Rije%C4%8Di%20domovine_%20Hrvatska%20ba%C5%A1tina.png" alt="Riječi domovine — Hrvatska baština" className="h-full w-full object-cover" /></div>
-              <p className="mt-5 text-xs font-bold uppercase tracking-[.18em] text-[#f1d078]">Slova · znanje · nasljeđe</p>
+              <div className="patria-game-number z-10">04</div>
+              <div className="-mx-6 -mt-6 mb-5 flex h-40 items-center justify-center overflow-hidden border-b border-amber-200/15 bg-gradient-to-br from-[#102d4a] via-[#0b1d32] to-[#071426] sm:h-44">
+                <img src={`${import.meta.env.BASE_URL}images/Riječi domovine_ Hrvatska baština.png`} alt="Riječi domovine — Hrvatska baština" loading="lazy" decoding="async" className="h-full w-full object-contain px-3 py-2 transition duration-500 group-hover:scale-[1.03]" />
+              </div>
+              <p className="text-xs font-bold uppercase tracking-[.18em] text-[#f1d078]">Slova · znanje · nasljeđe</p>
               <h3 className="mt-2 text-2xl text-white">Riječi domovine</h3>
               <p className="mt-3 text-sm leading-7 text-white/60">Šest različitih igara riječima o Hrvatskoj, povijesti, vjeri i baštini. Igraj samostalno ili izazovi prijatelja.</p>
               <span className="mt-6 inline-flex items-center font-semibold text-white">Igraj riječima <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
