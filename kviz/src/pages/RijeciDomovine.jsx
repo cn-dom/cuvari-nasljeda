@@ -21,7 +21,47 @@ const WORDS = [
   { word: "DOMOVINSKI RAT", category: "Povijest", level: 3, clue: "Rat za obranu neovisnosti i teritorijalne cjelovitosti Hrvatske 1991.–1995.", explanation: "Domovinski rat temeljno je razdoblje suvremene hrvatske povijesti. Sjećanje na poginule, nestale i preživjele zahtijeva dostojanstvo i povijesnu točnost." },
   { word: "DUBROVNIK", category: "Domovina", level: 3, clue: "Povijesni grad na jugu Hrvatske, nekoć središte Dubrovačke Republike.", explanation: "Dubrovačka Republika razvila je snažnu pomorsku, trgovačku i diplomatsku tradiciju." },
   { word: "TAMBURICA", category: "Baština", level: 3, clue: "Žičano glazbalo snažno povezano s tradicijskom glazbom Slavonije.", explanation: "Tamburaška glazba važan je dio glazbene tradicije Slavonije i drugih hrvatskih krajeva." },
-  { word: "DOMOVINA", category: "Domovina", level: 3, clue: "Zemlja kojoj pripadamo i s kojom nas povezuju povijest, ljudi i odgovornost.", explanation: "Domoljublje se pokazuje znanjem, brigom za zajednicu i čuvanjem kulturne baštine." },
+  { word: "DOMOVINA", category: "Domovina", level: 3, clue: "Zemlja kojoj pripadamo i s kojom nas povezuju povijest, ljudi i odgovornost.", explanation: "Domoljublje se pokazuje znanjem, brigom za zajednicu i čuvanjem kulturne baštine." },,
+  { word: "OSIJEK", category: "Domovina", level: 1, clue: "Najveći grad Slavonije, smješten uz Dravu.", explanation: "Osijek je važno regionalno, kulturno i gospodarsko središte istočne Hrvatske." },
+  { word: "PULA", category: "Domovina", level: 1, clue: "Istarski grad poznat po rimskom amfiteatru.", explanation: "Pulska Arena jedan je od najbolje očuvanih rimskih amfiteatara." },
+  { word: "RIJEKA", category: "Domovina", level: 1, clue: "Veliki kvarnerski grad s važnom morskom lukom.", explanation: "Rijeka je važno prometno, lučko i kulturno središte." },
+  { word: "ZADAR", category: "Domovina", level: 1, clue: "Dalmatinski grad poznat po Morskim orguljama.", explanation: "Zadar ima bogatu antičku i srednjovjekovnu baštinu." },
+  { word: "PAG", category: "Domovina", level: 1, clue: "Otok poznat po čipki i proizvodnji soli.", explanation: "Paška čipka zaštićena je kao nematerijalna kulturna baština." },
+  { word: "HVAR", category: "Domovina", level: 1, clue: "Dalmatinski otok poznat po lavandi.", explanation: "Hvar je poznat po Starogradskom polju, povijesnim naseljima i mediteranskom krajoliku." },
+  { word: "VELEBIT", category: "Domovina", level: 1, clue: "Najduža hrvatska planina.", explanation: "Velebit je zaštićen kao park prirode, a njegovi dijelovi obuhvaćaju nacionalne parkove." },
+  { word: "SAVA", category: "Domovina", level: 1, clue: "Rijeka koja protječe kroz Zagreb.", explanation: "Sava je jedna od najvećih rijeka koje protječu Hrvatskom." },
+  { word: "DRAVA", category: "Domovina", level: 1, clue: "Rijeka uz koju leže Varaždin i Osijek.", explanation: "Drava je važan dio riječnog i prirodnog sustava sjeverne i istočne Hrvatske." },
+  { word: "MASLINA", category: "Baština", level: 1, clue: "Mediteransko stablo čiji se plod koristi za ulje.", explanation: "Maslinarstvo je važan dio tradicije i gospodarstva hrvatskog priobalja i otoka." },
+  { word: "ČIPKA", category: "Baština", level: 2, clue: "Ručno izrađen tekstilni ukras poznat u Pagu, Lepoglavi i na Hvaru.", explanation: "Hrvatska tradicija čipkarstva upisana je na UNESCO-ov popis nematerijalne baštine." },
+  { word: "MOREŠKA", category: "Baština", level: 2, clue: "Tradicionalni mačevni ples s Korčule.", explanation: "Moreška je poznata korčulanska plesna igra s mačevima." },
+  { word: "KUMPANIJA", category: "Baština", level: 2, clue: "Otočna viteška igra s mačevima koja se izvodi na Korčuli.", explanation: "Kumpanija je dio lokalne tradicije pojedinih korčulanskih mjesta." },
+  { word: "KARNEVAL", category: "Običaji", level: 2, clue: "Razdoblje pokladnih povorki, maski i veselja.", explanation: "Pokladni običaji u Hrvatskoj razlikuju se od kraja do kraja; riječki karneval jedan je od najpoznatijih." },
+  { word: "KOPAČKI RIT", category: "Priroda", level: 2, clue: "Močvarno područje uz ušće Drave u Dunav.", explanation: "Kopački rit jedan je od najvažnijih močvarnih i ornitoloških rezervata u ovom dijelu Europe." },
+  { word: "PLITVICE", category: "Priroda", level: 2, clue: "Nacionalni park poznat po jezerima i slapovima.", explanation: "Nacionalni park Plitvička jezera upisan je na UNESCO-ov popis svjetske baštine." },
+  { word: "KORNATI", category: "Priroda", level: 2, clue: "Nacionalni park otočja u sjevernoj Dalmaciji.", explanation: "Kornati su poznati po razvedenoj obali, otočićima i podmorju." },
+  { word: "NERETVA", category: "Priroda", level: 2, clue: "Rijeka koja oblikuje poznatu deltu u južnoj Dalmaciji.", explanation: "Dolina Neretve poznata je po močvarama, poljoprivredi i bogatom životinjskom svijetu." },
+  { word: "DUBROVAČKA REPUBLIKA", category: "Povijest", level: 3, clue: "Povijesna pomorska republika sa središtem u Dubrovniku.", explanation: "Dubrovačka Republika razvila je snažnu trgovačku, pomorsku i diplomatsku tradiciju." },
+  { word: "VINODOLSKI ZAKON", category: "Povijest", level: 3, clue: "Pravni spomenik sastavljen 1288. godine.", explanation: "Vinodolski zakon jedan je od najstarijih hrvatskih pravnih spomenika pisanih narodnim jezikom." },
+  { word: "KRALJ TOMISLAV", category: "Povijest", level: 3, clue: "Vladar kojeg hrvatska tradicija pamti kao prvoga kralja.", explanation: "Tomislav se u hrvatskoj historiografiji povezuje s učvršćivanjem ranosrednjovjekovne hrvatske države." },
+  { word: "PETAR ZRINSKI", category: "Povijest", level: 3, clue: "Hrvatski velikaš pogubljen 1671. godine.", explanation: "Petar Zrinski pogubljen je u Bečkom Novom Mjestu zajedno s Franom Krstom Frankopanom." },
+  { word: "FRAN KRSTO FRANKOPAN", category: "Povijest", level: 3, clue: "Hrvatski plemić i književnik pogubljen 1671. godine.", explanation: "Frankopan je bio pjesnik i velikaš, a njegovo se ime pamti uz Petra Zrinskog." },
+  { word: "NIKOLA TESLA", category: "Znanje", level: 3, clue: "Izumitelj i znanstvenik rođen u Smiljanu.", explanation: "Nikola Tesla dao je velik doprinos razvoju izmjenične električne energije i elektrotehnike." },
+  { word: "RUĐER BOŠKOVIĆ", category: "Znanje", level: 3, clue: "Dubrovčanin, znanstvenik i filozof iz 18. stoljeća.", explanation: "Ruđer Bošković bavio se matematikom, astronomijom, fizikom i filozofijom." },
+  { word: "FAUST VRANČIĆ", category: "Znanje", level: 3, clue: "Hrvatski izumitelj povezan s nacrtom padobrana.", explanation: "Faust Vrančić objavio je djelo Machinae Novae s prikazima tehničkih izuma." },
+  { word: "MARKO MARULIĆ", category: "Kultura", level: 3, clue: "Splitski humanist kojeg se naziva ocem hrvatske književnosti.", explanation: "Marulićev Judita iz 1501. godine jedno je od ključnih djela hrvatske književnosti." },
+  { word: "IVANA BRLIĆ MAŽURANIĆ", category: "Kultura", level: 3, clue: "Hrvatska književnica, autorica Priča iz davnine.", explanation: "Njezina djela ubrajaju se među najvažnija ostvarenja hrvatske dječje književnosti." },
+  { word: "AUGUST ŠENOA", category: "Kultura", level: 3, clue: "Hrvatski književnik i autor romana Zlatarovo zlato.", explanation: "Šenoa je snažno obilježio hrvatski književni život 19. stoljeća." },
+  { word: "ANTUN GUSTAV MATOŠ", category: "Kultura", level: 3, clue: "Hrvatski književnik, pjesnik i esejist rođen u Tovarniku.", explanation: "Matoš je jedan od najvažnijih predstavnika hrvatske moderne." },
+  { word: "EUPRAZIJEVA BAZILIKA", category: "Baština", level: 3, clue: "Porečki ranokršćanski kompleks na UNESCO-ovu popisu.", explanation: "Kompleks je izniman primjer ranobizantske sakralne arhitekture i umjetnosti." },
+  { word: "ŠIBENSKA KATEDRALA", category: "Baština", level: 3, clue: "Renesansna katedrala sv. Jakova, građena od kamena.", explanation: "Katedrala sv. Jakova u Šibeniku upisana je na UNESCO-ov popis svjetske baštine." },
+  { word: "HRVATSKI SABOR", category: "Zajednica", level: 2, clue: "Predstavničko tijelo građana i nositelj zakonodavne vlasti.", explanation: "Hrvatski sabor donosi zakone i obavlja druge poslove određene Ustavom." },
+  { word: "ZAJEDNIŠTVO", category: "Zajednica", level: 2, clue: "Povezanost ljudi koji surađuju i pomažu jedni drugima.", explanation: "Zajedništvo se gradi povjerenjem, odgovornošću i brigom za druge." },
+  { word: "ZAVIČAJ", category: "Zajednica", level: 1, clue: "Kraj iz kojeg netko potječe ili s kojim je posebno povezan.", explanation: "Zavičaj obuhvaća prostor, ljude, običaje i sjećanja koja oblikuju osjećaj pripadnosti." },
+  { word: "HODOČAŠĆE", category: "Vjera", level: 2, clue: "Putovanje vjernika na sveto mjesto.", explanation: "Hodočašće je izraz vjere, molitve i duhovnog traženja." },
+  { word: "EVANĐELJE", category: "Vjera", level: 2, clue: "Radosna vijest o Isusu Kristu i naziv za četiri novozavjetna spisa.", explanation: "Četiri kanonska evanđelja nalaze se na početku Novoga zavjeta." },
+  { word: "BETLEHEM", category: "Vjera", level: 1, clue: "Mjesto Isusova rođenja prema evanđeoskoj predaji.", explanation: "Betlehem je grad u kojem se prema evanđeljima rodio Isus." },
+  { word: "ZAHVALA", category: "Vjera", level: 1, clue: "Izražavanje priznanja za primljeno dobro.", explanation: "Zahvalnost je važan dio molitve i svakodnevnog odnosa prema bližnjima." }
+
 ];
 
 const normalize = (value) => String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleUpperCase("hr").replace(/[^A-Z]/g, "");
@@ -56,9 +96,27 @@ function dailySeed() {
 
 function createRound(mode) {
   const seed = mode === "daily" ? dailySeed() : null;
-  const easy = shuffle(WORDS.filter((item) => item.level === 1), seed).slice(0, mode === "daily" ? 2 : 3);
-  const medium = shuffle(WORDS.filter((item) => item.level === 2), seed ? seed + 17 : null).slice(0, mode === "daily" ? 2 : 4);
-  const hard = shuffle(WORDS.filter((item) => item.level === 3), seed ? seed + 31 : null).slice(0, mode === "daily" ? 1 : 3);
+  let easy, medium, hard;
+  if (mode === "daily") {
+    easy = shuffle(WORDS.filter((item) => item.level === 1), seed).slice(0, 2);
+    medium = shuffle(WORDS.filter((item) => item.level === 2), seed + 17).slice(0, 2);
+    hard = shuffle(WORDS.filter((item) => item.level === 3), seed + 31).slice(0, 1);
+  } else {
+    let history = [];
+    try { history = JSON.parse(window.localStorage.getItem("patriasoul_rijeci_word_history") || "[]"); } catch {}
+    const takeFresh = (pool, count) => {
+      const fresh = pool.filter((item) => !history.includes(item.word));
+      const recent = new Set(history.slice(-Math.max(1, Math.floor(pool.length * 0.45))));
+      const fallback = pool.filter((item) => !recent.has(item.word));
+      const chosen = shuffle(fresh.length >= count ? fresh : fallback.length >= count ? fallback : pool).slice(0, count);
+      history.push(...chosen.map((item) => item.word));
+      return chosen;
+    };
+    easy = takeFresh(WORDS.filter((item) => item.level === 1), 3);
+    medium = takeFresh(WORDS.filter((item) => item.level === 2), 4);
+    hard = takeFresh(WORDS.filter((item) => item.level === 3), 3);
+    try { window.localStorage.setItem("patriasoul_rijeci_word_history", JSON.stringify(history.slice(-WORDS.length))); } catch {}
+  }
   return [...easy, ...medium, ...hard].map((item, index) => ({ ...item, letters: scramble(item.word), roundId: `${item.word}-${index}` }));
 }
 
