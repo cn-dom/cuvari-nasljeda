@@ -33,6 +33,73 @@ const BANK = [
   { word:"OBITELJ", clue:"Zajednica osoba povezanih srodstvom, brakom ili posvojenjem.", group:"Zajednica" },
   { word:"NASLJEĐE", clue:"Ono što se prenosi s prethodnih naraštaja na buduće.", group:"Baština" },
   { word:"ETNOLOGIJA", clue:"Znanost koja proučava kulturu i način života ljudskih zajednica.", group:"Znanje" },
+  { word:"OSIJEK", clue:"Najveći grad Slavonije, smješten uz Dravu.", group:"Gradovi" },
+  { word:"PULA", clue:"Istarski grad poznat po rimskom amfiteatru.", group:"Gradovi" },
+  { word:"RIJEKA", clue:"Kvarnerski grad s važnom lukom i karnevalskom tradicijom.", group:"Gradovi" },
+  { word:"ZADAR", clue:"Dalmatinski grad poznat po Morskim orguljama i Pozdravu Suncu.", group:"Gradovi" },
+  { word:"KARLOVAC", clue:"Grad na četiri rijeke, poznat po zvjezdastoj jezgri.", group:"Gradovi" },
+  { word:"VARAŽDIN", clue:"Sjeverni hrvatski grad poznat po baroknoj jezgri i Špancirfestu.", group:"Gradovi" },
+  { word:"POREČ", clue:"Istarski grad čija je Eufrazijeva bazilika na UNESCO-ovu popisu.", group:"Gradovi" },
+  { word:"TROGIR", clue:"Povijesni grad čija je stara jezgra na UNESCO-ovu popisu.", group:"Gradovi" },
+  { word:"KORČULA", clue:"Otočni grad poznat po kamenim ulicama i moreškoj.", group:"Gradovi" },
+  { word:"PELJEŠAC", clue:"Poluotok poznat po vinogradima i pomorskoj tradiciji.", group:"Zemljopis" },
+  { word:"PAG", clue:"Otok poznat po čipki, soli i paškoj janjetini.", group:"Zemljopis" },
+  { word:"HVAR", clue:"Dalmatinski otok poznat po lavandi i Starogradskom polju.", group:"Zemljopis" },
+  { word:"KRK", clue:"Kvarnerski otok povezan s kopnom mostom.", group:"Zemljopis" },
+  { word:"CRES", clue:"Kvarnerski otok na kojem živi bjeloglavi sup.", group:"Zemljopis" },
+  { word:"KOPAČKI RIT", clue:"Park prirode i močvarno područje uz Dunav i Dravu.", group:"Priroda" },
+  { word:"PLITVICE", clue:"Nacionalni park poznat po jezerima i slapovima.", group:"Priroda" },
+  { word:"KRKA", clue:"Rijeka i nacionalni park poznati po sedrenim slapovima.", group:"Priroda" },
+  { word:"SAVA", clue:"Rijeka koja protječe kroz Zagreb i ulijeva se u Dunav.", group:"Priroda" },
+  { word:"DRAVA", clue:"Rijeka koja protječe kroz Varaždin i Osijek.", group:"Priroda" },
+  { word:"NERETVA", clue:"Rijeka koja se ulijeva u Jadran kod delte u južnoj Dalmaciji.", group:"Priroda" },
+  { word:"VELEBIT", clue:"Najduža hrvatska planina i park prirode.", group:"Priroda" },
+  { word:"BIOKOVO", clue:"Planina iznad Makarske rivijere.", group:"Priroda" },
+  { word:"KORNATI", clue:"Nacionalni park otočja u sjevernoj Dalmaciji.", group:"Priroda" },
+  { word:"BJELOGLAVI SUP", clue:"Velika zaštićena ptica koja gnijezdi na kvarnerskim otocima.", group:"Priroda" },
+  { word:"VUKOVARSKI VODOTORANJ", clue:"Prepoznatljiv simbol obrane Vukovara.", group:"Povijest" },
+  { word:"DOMOVINSKI RAT", clue:"Rat za obranu hrvatske neovisnosti i teritorijalne cjelovitosti 1991.–1995.", group:"Povijest" },
+  { word:"KRALJ TOMISLAV", clue:"Vladar kojeg hrvatska tradicija pamti kao prvoga hrvatskog kralja.", group:"Povijest" },
+  { word:"PETAR ZRINSKI", clue:"Hrvatski velikaš pogubljen u Bečkom Novom Mjestu 1671.", group:"Povijest" },
+  { word:"FRAN KRSTO FRANKOPAN", clue:"Hrvatski plemić i književnik pogubljen 1671. zajedno s Petrom Zrinskim.", group:"Povijest" },
+  { word:"ANTUN GUSTAV MATOS", clue:"Hrvatski književnik i esejist rođen u Tovarniku.", group:"Kultura" },
+  { word:"IVANA BRLIC MAZURANIC", clue:"Hrvatska književnica, autorica Priča iz davnine.", group:"Kultura" },
+  { word:"MARKO MARULIC", clue:"Splitski humanist kojeg se naziva ocem hrvatske književnosti.", group:"Kultura" },
+  { word:"AUGUST SENOA", clue:"Hrvatski književnik i autor romana Zlatarovo zlato.", group:"Kultura" },
+  { word:"NIKOLA TESLA", clue:"Izumitelj i znanstvenik rođen u Smiljanu.", group:"Znanje" },
+  { word:"RUĐER BOŠKOVIĆ", clue:"Dubrovčanin, znanstvenik i filozof iz 18. stoljeća.", group:"Znanje" },
+  { word:"FAUST VRANČIĆ", clue:"Hrvatski izumitelj povezan s nacrtom padobrana.", group:"Znanje" },
+  { word:"ANDRIJA MOHOROVIČIĆ", clue:"Hrvatski geofizičar po kojem je nazvan diskontinuitet u Zemljinoj kori.", group:"Znanje" },
+  { word:"VINKOVCI", clue:"Grad u kojem se nalazi jedan od najstarijih kontinuirano naseljenih prostora Europe.", group:"Gradovi" },
+  { word:"ILOK", clue:"Istočnoslavonski grad poznat po vinogradima i staroj jezgri.", group:"Gradovi" },
+  { word:"SINJSKA ALKA", clue:"Viteško natjecanje koje se održava u Sinju.", group:"Običaji" },
+  { word:"MOREŠKA", clue:"Tradicionalni mačevni ples s Korčule.", group:"Običaji" },
+  { word:"KUMPANIJA", clue:"Tradicionalna otočna viteška igra s mačevima na Korčuli.", group:"Običaji" },
+  { word:"FAŠNIK", clue:"Pokladni običaj i vrijeme maskiranja prije korizme.", group:"Običaji" },
+  { word:"KARNEVAL", clue:"Razdoblje pokladnih povorki, maski i veselja.", group:"Običaji" },
+  { word:"LICITARSKO SRCE", clue:"Ukrašeni tradicijski dar u obliku srca.", group:"Običaji" },
+  { word:"ČIPKA", clue:"Ručno izrađen tekstilni ukras, poznat u Lepoglavi, Pagu i Hvaru.", group:"Baština" },
+  { word:"EUPHRASIANA", clue:"Uobičajeni naziv za kompleks Eufrazijeve bazilike u Poreču.", group:"Baština" },
+  { word:"KATEDRALA SV JAKOVA", clue:"Šibenski renesansni spomenik na UNESCO-ovu popisu.", group:"Baština" },
+  { word:"ARENA", clue:"Rimski amfiteatar u Puli.", group:"Baština" },
+  { word:"DUBROVAČKE ZIDINE", clue:"Obrambeni sustav koji okružuje povijesnu jezgru Dubrovnika.", group:"Baština" },
+  { word:"VINODOLSKI ZAKON", clue:"Pravni spomenik iz 1288. godine.", group:"Povijest" },
+  { word:"HRVATSKI SABOR", clue:"Predstavničko tijelo građana i nositelj zakonodavne vlasti u Hrvatskoj.", group:"Zajednica" },
+  { word:"GLAGOLJAŠI", clue:"Ljudi koji su njegovali glagoljsko pismo i bogoslužje.", group:"Baština" },
+  { word:"KAMENI CVIJET", clue:"Spomenik žrtvama logora Jasenovac, djelo Bogdana Bogdanovića.", group:"Povijest" },
+  { word:"VUKOVARSKA BITKA", clue:"Bitka i opsada grada 1991. godine.", group:"Povijest" },
+  { word:"ŠKABRNJA", clue:"Ravno kotarsko mjesto stradalo u studenome 1991.", group:"Povijest" },
+  { word:"OVČARA", clue:"Mjesto stradanja ranjenika i civila odvedenih iz vukovarske bolnice 1991.", group:"Povijest" },
+  { word:"SVETIŠTE", clue:"Mjesto posebno posvećeno molitvi i hodočašću.", group:"Vjera" },
+  { word:"HODOČAŠĆE", clue:"Putovanje vjernika na sveto mjesto.", group:"Vjera" },
+  { word:"EVANĐELJE", clue:"Radosna vijest o Isusu Kristu; naziv za četiri novozavjetna spisa.", group:"Vjera" },
+  { word:"BETLEHEM", clue:"Mjesto Isusova rođenja prema evanđeoskoj predaji.", group:"Vjera" },
+  { word:"NAZARET", clue:"Mjesto u Galileji povezano s Isusovim odrastanjem.", group:"Vjera" },
+  { word:"MILOSRĐE", clue:"Suosjećajna i djelatna ljubav prema bližnjemu.", group:"Vjera" },
+  { word:"NADA", clue:"Pouzdanje u dobro i budućnost.", group:"Zajednica" },
+  { word:"ZAVIČAJ", clue:"Kraj iz kojeg netko potječe ili s kojim je povezan.", group:"Zajednica" },
+  { word:"ZAJEDNIŠTVO", clue:"Osjećaj povezanosti i suradnje među ljudima.", group:"Zajednica" },
+  { word:"VOLONTERSTVO", clue:"Dobrovoljno djelovanje za dobrobit drugih i zajednice.", group:"Zajednica" },
 ];
 const normalize = (value) => String(value ?? "").toLocaleUpperCase("hr").replace(/Đ/g,"D").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Z]/g,"");
 const shuffle = (items) => {
@@ -40,15 +107,37 @@ const shuffle = (items) => {
   for (let i=result.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [result[i],result[j]]=[result[j],result[i]]; }
   return result;
 };
+const pickFreshItems = (pool,key,count=1) => {
+  if(!pool.length)return [];
+  let history=[];
+  try{history=JSON.parse(localStorage.getItem(`patriasoul_wordgames_history_${key}`)||"[]");}catch{}
+  const fresh=pool.filter(item=>!history.includes(item.word||item.title));
+  const recentWindow=Math.max(1,Math.floor(pool.length*0.45));
+  const recent=new Set(history.slice(-recentWindow));
+  const fallback=pool.filter(item=>!recent.has(item.word||item.title));
+  const source=fresh.length>=count?fresh:fallback.length>=count?fallback:pool;
+  const picked=shuffle(source).slice(0,count);
+  try{localStorage.setItem(`patriasoul_wordgames_history_${key}`,JSON.stringify([...history,...picked.map(item=>item.word||item.title)].slice(-pool.length)));}catch{}
+  return picked;
+};
+
 const WORDS = BANK.map(item=>({...item,clean:normalize(item.word)}));
 const SCRAMBLE = WORDS.filter(item=>item.clean.length>=4 && item.clean.length<=10);
 const GROUPS = [
   {title:"Gradovi",words:["ZAGREB","SINJ","KNIN","VUKOVAR"]},
-  {title:"Baština",words:["GLAGOLJICA","PLETER","LICITAR","BAŠĆANSKA PLOČA"]},
-  {title:"Priroda",words:["MORE","MASLINA","DINARA","JADRAN"]},
+  {title:"Istarski i primorski gradovi",words:["PULA","POREČ","RIJEKA","ZADAR"]},
+  {title:"Otočje",words:["PAG","HVAR","KRK","CRES"]},
+  {title:"Rijeke",words:["SAVA","DRAVA","NERETVA","KRKA"]},
+  {title:"Planine i priroda",words:["DINARA","VELEBIT","BIOKOVO","KORNATI"]},
   {title:"Vjera",words:["MOLITVA","KRUNICA","USKRS","BIBLIJA"]},
+  {title:"Hrvatska baština",words:["GLAGOLJICA","PLETER","ČIPKA","BAŠĆANSKA PLOČA"]},
+  {title:"Tradicija",words:["ALKA","MOREŠKA","KUMPANIJA","LICITAR"]},
+  {title:"Književnici",words:["MARULIĆ","ŠENOA","MATOS","BRLIĆ MAŽURANIĆ"]},
+  {title:"Znanstvenici",words:["TESLA","BOŠKOVIĆ","VRANČIĆ","MOHOROVIČIĆ"]},
+  {title:"Domovinski rat",words:["OLUJA","OVČARA","ŠKABRNJA","VUKOVARSKA BITKA"]},
+  {title:"Zajednica",words:["OBITELJ","ZAJEDNIŠTVO","VOLONTERSTVO","ZAVIČAJ"]},
 ];
-const DAILY = ["MORE","SINJ","KNIN","OLUJA","PLETER","ZAGREB","VUKOVAR","MASLINA","GLAGOLJICA","ŠIBENIK","ČAKOVEC","ĐAKOVO"];
+const DAILY = WORDS.filter(item=>item.clean.length>=4&&item.clean.length<=10&&!item.word.includes(" ")).map(item=>item.word);
 const GAMES = [
   {id:"classic",title:"Riječi domovine",desc:"Složi slova, otkrij značenje i osvajaj bodove.",tag:"IZVORNA IGRA",type:"Brze igre",icon:BookOpen},
   {id:"search",title:"Pronađi riječ",desc:"Pronađi skrivenu riječ u mreži slova.",tag:"OPAŽANJE",type:"Brze igre",icon:Search},
@@ -87,7 +176,7 @@ function LetterKeyboard({value,onChange,target,maxLength,disabled=false,matchMod
 }
 
 function WordSearch({onBack}) {
-  const words = ["HRVATSKA","DOMOVINA","ZAGREB","JADRAN","VUKOVAR","ŠKABRNJA","DUBROVNIK"];
+  const [words] = useState(()=>pickFreshItems(WORDS.filter(item=>item.clean.length>=4&&item.clean.length<=11&&!item.word.includes(" ")), "search", 7).map(item=>item.word));
   const size = 11;
   const gridRef = useRef(null);
   const [board] = useState(() => {
@@ -191,15 +280,16 @@ export default function CentarIgaraRijeci({onBack,playerName}) {
   const [gameQuery,setGameQuery]=useState("");
   const [score,setScore]=useState(0);
   const [best,setBest]=useState(()=>{try{return Number(localStorage.getItem("patriasoul_wordgames_best")||0);}catch{return 0;}});
-  const [item,setItem]=useState(()=>shuffle(SCRAMBLE)[0]);
+  const [item,setItem]=useState(()=>pickFreshItems(SCRAMBLE,"scramble",1)[0]);
   const [typed,setTyped]=useState("");
   const [scramblePicked,setScramblePicked]=useState([]);
   const [feedback,setFeedback]=useState("");
   const [attempts,setAttempts]=useState(0);
   const [solved,setSolved]=useState(false);
   const [scrambleWins,setScrambleWins]=useState(0);
-  const [guessTarget,setGuessTarget]=useState(()=>shuffle(WORDS)[0]);
-  const [groupWords,setGroupWords]=useState(()=>shuffle(GROUPS.flatMap(group=>group.words)));
+  const [guessTarget,setGuessTarget]=useState(()=>pickFreshItems(WORDS,"guess",1)[0]);
+  const [activeGroups,setActiveGroups]=useState(()=>pickFreshItems(GROUPS,"groups",4));
+  const [groupWords,setGroupWords]=useState(()=>shuffle(activeGroups.flatMap(group=>group.words)));
   const [selected,setSelected]=useState([]);
   const [found,setFound]=useState([]);
   const todayKey=new Date().toLocaleDateString("sv-SE");
@@ -218,7 +308,7 @@ export default function CentarIgaraRijeci({onBack,playerName}) {
 
   const open=(id)=>{
     setActive(id);setTyped("");setScramblePicked([]);setFeedback("");setAttempts(0);setSolved(false);setSelected([]);setFound([]);setDailyGuesses(id==="daily"?(()=>{try{return JSON.parse(localStorage.getItem(dailyKey)||"[]");}catch{return [];}})():dailyGuesses);
-    setItem(shuffle(SCRAMBLE)[0]);setGuessTarget(shuffle(WORDS)[0]);setGroupWords(shuffle(GROUPS.flatMap(group=>group.words)));
+    setItem(pickFreshItems(SCRAMBLE,"scramble",1)[0]);setGuessTarget(pickFreshItems(WORDS,"guess",1)[0]);const nextGroups=pickFreshItems(GROUPS,"groups",4);setActiveGroups(nextGroups);setGroupWords(shuffle(nextGroups.flatMap(group=>group.words)));
   };
   const submitScramble=()=>{
     if(normalize(scrambleAnswer)===item.clean){setSolved(true);setScore(value=>value+20);setScrambleWins(value=>value+1);setFeedback("Točno! Osvojio/la si 20 bodova.");}
@@ -226,8 +316,7 @@ export default function CentarIgaraRijeci({onBack,playerName}) {
   };
   const nextScramble=()=>{
     const pool=SCRAMBLE.filter(word=>word.clean.length>=Math.min(4+Math.floor(scrambleWins/3),8));
-    const choices=pool.filter(word=>word.word!==item.word);
-    setItem(shuffle(choices.length?choices:SCRAMBLE)[0]);setTyped("");setScramblePicked([]);setFeedback("");setSolved(false);setAttempts(0);
+    setItem(pickFreshItems(pool.length?pool:SCRAMBLE,"scramble",1)[0]);setTyped("");setScramblePicked([]);setFeedback("");setSolved(false);setAttempts(0);
   };
   const submitGuess=()=>{
     if(normalize(typed)===guessTarget.clean){if(!solved){setSolved(true);setScore(value=>value+15);setFeedback("Bravo! Pogodio/la si riječ i osvojio/la 15 bodova.");}}
@@ -236,7 +325,7 @@ export default function CentarIgaraRijeci({onBack,playerName}) {
   const chooseGroupWord=(word)=>{
     if(selected.includes(word)||found.some(group=>group.words.includes(word)))return;
     const next=[...selected,word];setSelected(next);
-    if(next.length===4){const group=GROUPS.find(candidate=>candidate.words.every(value=>next.includes(value)));
+    if(next.length===4){const group=activeGroups.find(candidate=>candidate.words.every(value=>next.includes(value)));
       if(group){setFound(value=>[...value,group]);setScore(value=>value+40);setSelected([]);setFeedback(`Pronađena skupina: ${group.title}.`);}
       else{setFeedback("Ove četiri riječi ne pripadaju istoj skupini. Pokušaj ponovno.");setSelected([]);}
     }
@@ -265,7 +354,7 @@ export default function CentarIgaraRijeci({onBack,playerName}) {
   </main>;
   return <Frame title={GAMES.find(game=>game.id===active)?.title||"Igra"} subtitle="Riječi domovine · uči kroz igru" onBack={()=>setActive(null)}>
     {active==="scramble"&&<><div className="rounded-xl border border-white/10 bg-white/5 p-4 text-center"><p className="text-xs font-bold tracking-widest text-amber-200">POMOĆ · {item.group} · RAZINA {Math.min(1+Math.floor(scrambleWins/3),3)}</p><p className="mt-2 text-white/70">{item.clue}</p><p className="mt-5 text-[11px] font-bold tracking-widest text-white/45">SLOŽI RIJEČ DODIRIVANJEM SLOVA</p><div className="mt-3 flex min-h-12 flex-wrap justify-center gap-2" aria-label="Složena riječ">{Array.from({length:item.clean.length},(_,position)=>{const tileIndex=scramblePicked[position];const letter=tileIndex===undefined?"":scrambled[tileIndex];const correct=letter&&normalize(letter)===normalize(item.clean)[position];return <button key={position} type="button" onClick={()=>setScramblePicked(previous=>previous.filter((_,index)=>index!==position))} disabled={tileIndex===undefined||solved} aria-label={letter?"Ukloni slovo "+letter:"Prazno mjesto"} className={"grid h-12 min-w-10 place-items-center rounded-lg border-2 px-2 text-lg font-black transition "+(!letter?"border-white/15 bg-black/20 text-white/30":correct?"border-emerald-400 bg-emerald-500 text-white shadow-[0_0_14px_rgba(16,185,129,.25)]":"border-rose-400 bg-rose-600 text-white shadow-[0_0_14px_rgba(244,63,94,.2)]")+" disabled:cursor-default"}>{letter||"·"}</button>})}</div><div className="mt-4 flex flex-wrap justify-center gap-2">{scrambled.map((letter,index)=>{const selectedAt=scramblePicked.indexOf(index);const used=selectedAt!==-1;const correct=used&&normalize(letter)===normalize(item.clean)[selectedAt];return <button key={index} type="button" onClick={()=>setScramblePicked(previous=>[...previous,index])} disabled={solved||used||scramblePicked.length>=item.clean.length} aria-label={"Odaberi slovo "+letter} className={"grid h-12 w-12 place-items-center rounded-xl border-2 text-xl font-black shadow-lg transition active:scale-95 disabled:cursor-default "+(used?(correct?"border-emerald-400 bg-emerald-500 text-white shadow-[0_0_14px_rgba(16,185,129,.25)]":"border-rose-400 bg-rose-600 text-white shadow-[0_0_14px_rgba(244,63,94,.2)]"):"border-amber-200/30 bg-gradient-to-b from-[#315b7b] to-[#102a43] text-white hover:border-amber-200")}>{letter}</button>})}</div><button type="button" onClick={()=>setScramblePicked([])} disabled={!scramblePicked.length||solved} className="mt-3 text-xs font-bold text-white/55 underline underline-offset-4 disabled:opacity-30">Očisti odabir</button></div><button onClick={submitScramble} disabled={scramblePicked.length!==item.clean.length||solved} className="mt-3 w-full rounded-xl bg-amber-200 px-4 py-3 font-black text-slate-950 disabled:opacity-40">Provjeri odgovor</button>{feedback&&<p role="status" className="mt-3 text-sm text-amber-100">{feedback}</p>}{solved&&<button onClick={nextScramble} className="mt-3 w-full rounded-xl border border-white/15 px-4 py-3 font-bold text-white">Sljedeća riječ →</button>}</>}
-    {active==="guess"&&<><p className="rounded-xl bg-white/5 p-4 text-white/75">{guessTarget.clue}</p><LetterKeyboard value={typed} onChange={setTyped} target={guessTarget.clean} maxLength={guessTarget.clean.length} disabled={solved||attempts>=5}/><button onClick={submitGuess} disabled={!typed.trim()||solved||attempts>=5} className="mt-3 w-full rounded-xl bg-amber-200 px-4 py-3 font-black text-slate-950 disabled:opacity-40">Pogodi</button><p className="mt-3 text-sm text-white/60">Pokušaji: {attempts}/5</p>{feedback&&<p role="status" className="mt-2 text-sm text-amber-100">{feedback}</p>}{(solved||attempts>=5)&&<button onClick={()=>{setGuessTarget(shuffle(WORDS)[0]);setTyped("");setFeedback("");setAttempts(0);setSolved(false);}} className="mt-3 w-full rounded-xl border border-white/15 px-4 py-3 font-bold text-white">Nova riječ</button>}</>}
+    {active==="guess"&&<><p className="rounded-xl bg-white/5 p-4 text-white/75">{guessTarget.clue}</p><LetterKeyboard value={typed} onChange={setTyped} target={guessTarget.clean} maxLength={guessTarget.clean.length} disabled={solved||attempts>=5}/><button onClick={submitGuess} disabled={!typed.trim()||solved||attempts>=5} className="mt-3 w-full rounded-xl bg-amber-200 px-4 py-3 font-black text-slate-950 disabled:opacity-40">Pogodi</button><p className="mt-3 text-sm text-white/60">Pokušaji: {attempts}/5</p>{feedback&&<p role="status" className="mt-2 text-sm text-amber-100">{feedback}</p>}{(solved||attempts>=5)&&<button onClick={()=>{setGuessTarget(pickFreshItems(WORDS,"guess",1)[0]);setTyped("");setFeedback("");setAttempts(0);setSolved(false);}} className="mt-3 w-full rounded-xl border border-white/15 px-4 py-3 font-bold text-white">Nova riječ</button>}</>}
     {active==="groups"&&<><p className="mb-4 text-sm text-white/65">Odaberi četiri riječi koje pripadaju istoj skupini. Pronađeno: {found.length}/4.</p><div className="grid grid-cols-2 gap-2 sm:grid-cols-4">{groupWords.map(word=><button key={word} type="button" aria-pressed={selected.includes(word)} onClick={()=>chooseGroupWord(word)} disabled={found.some(group=>group.words.includes(word))} className={`rounded-xl border px-2 py-4 text-sm font-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-200 ${selected.includes(word)?"border-amber-200 bg-amber-200 text-slate-950":"border-white/10 bg-white/5 text-white"}`}>{word}</button>)}</div>{found.map(group=><div key={group.title} className="mt-3 rounded-xl border border-emerald-300/25 bg-emerald-300/10 p-3 text-emerald-100"><strong>{group.title}</strong><p className="text-sm">{group.words.join(" · ")}</p></div>)}{feedback&&<p role="status" className="mt-3 text-sm text-amber-100">{feedback}</p>}{found.length===4&&<Success>Sve skupine su pronađene!</Success>}</>}
     {active==="daily"&&<><p className="text-sm text-white/65">Tajna riječ ima {[...dailyWord].length} slova. Pokušaj je pogoditi u šest pokušaja. Današnji pokušaji čuvaju se na ovom uređaju.</p><LetterKeyboard value={typed} onChange={setTyped} target={normalize(dailyWord)} maxLength={normalize(dailyWord).length} disabled={dailyDone}/><button onClick={submitDaily} disabled={dailyDone||!typed.trim()} className="mt-3 w-full rounded-xl bg-amber-200 px-4 py-3 font-black text-slate-950 disabled:opacity-40">Provjeri riječ</button><div className="mt-4 space-y-2">{dailyGuesses.map((guess,index)=><div key={index} className="flex flex-wrap justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-2">{[...normalize(guess)].map((letter,position)=><span key={position} className={"grid h-8 min-w-8 place-items-center rounded-md border text-sm font-black text-white "+(letter===[...normalize(dailyWord)][position]?"border-emerald-400 bg-emerald-500":"border-rose-400 bg-rose-600")}>{letter}</span>)}</div>)}</div>{feedback&&<p role="status" className="mt-3 text-sm text-amber-100">{feedback}</p>}{dailyDone&&<Success>{dailyWon?"Bravo! Pronašao/la si današnju riječ.":`Današnja riječ bila je: ${dailyWord}`}</Success>}</>}
   </Frame>;
