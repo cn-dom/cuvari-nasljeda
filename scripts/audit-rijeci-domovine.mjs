@@ -94,6 +94,8 @@ for (const [from, to] of [
 assert.equal(getLocalDateKey(dateParts(2026, 2, 29)), "2026-03-29");
 
 assert.match(centerSource, /const DAILY = WORDS\.filter/);
+assert.ok(centerSource.includes('const DAILY = WORDS.filter(item=>item.clean.length>=4&&item.clean.length<=10).map(item=>item.word);'), "Daily challenge should include eligible multiword answers");
+assert.ok(centerSource.includes('Tajna riječ ima {normalize(dailyWord).length} slova.'), "Daily challenge should count normalized letters, not spaces");
 assert.match(centerSource, /DAILY\[getLocalCalendarDayNumber\(today\)%DAILY\.length\]/);
 assert.match(centerSource, /alphabet=\["A","B","C","Č","Ć","D","Đ"/);
 assert.match(centerSource, /"S","Š","T","U","V","Z","Ž"/);
