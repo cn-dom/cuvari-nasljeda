@@ -405,15 +405,15 @@ const BANK = [
   { word:"LOVAS", clue:"Naselje u istočnoj Slavoniji stradalo u Domovinskom ratu.", group:"Zemljopis" },
   { word:"PAŠKA ČIPKA", clue:"Tradicionalna iglena čipka s otoka Paga, dio hrvatskog čipkarstva upisanog na UNESCO-ov popis.", group:"Baština" },
   { word:"LEPOGLAVSKA ČIPKA", clue:"Čipka iz Lepoglave izrađuje se tehnikom čipkanja na batiće.", group:"Baština" },
-  { word:"HVARSKA ČIPKA", clue:"Čipka koju hvarske benediktinke izrađuju od niti iz srčike svježih listova agave.", group:"Baština" },
+  { word:"HVARSKA ČIPKA", clue:"Čipka koju hvarske benediktinke izrađuju od tankih niti dobivenih iz svježih listova agave.", group:"Baština" },
   { word:"LASTOVSKI POKLAD", clue:"Pokladni običaj otoka Lastova, prepoznat po povorci i slamnatoj lutki Pokladu.", group:"Običaji" },
   { word:"MEĐIMURSKA POPEVKA", clue:"Tradicijska vokalna glazba Međimurja, upisana 2018. na UNESCO-ov Reprezentativni popis.", group:"Glazba" },
   { word:"ZA KRIŽEN", clue:"Noćna procesija na otoku Hvaru koja se održava u noći s Velikog četvrtka na Veliki petak.", group:"Vjera" },
   { word:"FESTA SVETOG VLAHA", clue:"Tradicionalna proslava zaštitnika Dubrovnika, upisana 2009. na UNESCO-ov popis nematerijalne baštine.", group:"Običaji" },
   { word:"OSJEČKA TVRĐA", clue:"Povijesna barokna jezgra Osijeka, oblikovana kao vojna utvrda u 18. stoljeću.", group:"Baština" },
-  { word:"MORSKE ORGULJE", clue:"Zadarska instalacija u kojoj valovi i plima stvaraju zvuk kroz cijevi ugrađene ispod rive.", group:"Baština" },
+  { word:"MORSKE ORGULJE", clue:"Zadarska instalacija u kojoj valovi te plima i oseka stvaraju zvuk kroz cijevi ugrađene ispod rive.", group:"Baština" },
   { word:"POZDRAV SUNCU", clue:"Zadarska svjetlosna instalacija sastavljena od 300 višeslojnih staklenih solarnih ploča.", group:"Baština" },
-  { word:"ZLATNI RAT", clue:"Prepoznatljiva šljunčana plaža kod Bola na Braču, čiji se vrh mijenja pod utjecajem valova i morskih struja.", group:"Zemljopis" },
+  { word:"ZLATNI RAT", clue:"Prepoznatljiva šljunčana plaža kod Bola na Braču, čiji se vrh mijenja pod utjecajem vjetra, valova i morskih struja.", group:"Zemljopis" },
   { word:"RIMSKI FORUM", clue:"Ostaci rimskog javnog prostora u središtu Zadra, u blizini crkve sv. Donata.", group:"Povijest" },
 ];
 const shuffle = (items) => {
