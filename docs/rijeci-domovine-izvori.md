@@ -16,7 +16,7 @@ Ovaj popis bilježi provjerljive izvore za novije pojmove i ispravke u rječniku
 | Morske orgulje | Zadarska instalacija sa 35 cijevi; zvuk nastaje djelovanjem valova i morskih mijena | [Turistička zajednica grada Zadra – Morske orgulje](https://zadar.travel/hr/atrakcije/atrakcije/sea-organ) |
 | Pozdrav Suncu | Instalacija od 300 višeslojnih staklenih solarnih ploča, promjera 22 metra | [Turistička zajednica grada Zadra – Pozdrav Suncu](https://zadar.travel/hr/atrakcije/secret-zadar/pozdrav-suncu) |
 | Sveti Donat | Crkva u Zadru izgrađena u 9. stoljeću | [Turistička zajednica grada Zadra – Crkva sv. Donata](https://zadar.travel/hr/atrakcije/atrakcije/crkva-sv.-donata) |
-| Rimski forum | Arheološki ostaci rimskog foruma u povijesnoj jezgri Zadra, uz crkvu sv. Donata | [Turistička zajednica grada Zadra – Arheološki muzej](https://zadar.travel/hr/atrakcije/muzeji/arheolo%C5%A1ki-muzej) |
+| Rimski forum | Arheološki ostaci rimskog foruma u povijesnoj jezgri Zadra, uz crkvu sv. Donata | [Turistička zajednica grada Zadra – Arheološki muzej](https://zadar.travel/hr/atrakcije/atrakcije/trgovi) |
 | Zlatni rat | Plaža kod Bola na Braču; vrh se mijenja pod utjecajem valova i morskih struja | [Croatia.hr – Zlatni rat](https://www.dalmatia.hr/hr/destination/bol/) |
 
 ## Provjerene postojeće odrednice
