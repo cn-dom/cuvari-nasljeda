@@ -96,6 +96,16 @@ try {
       assert.equal(await page.getByRole("button", { name: /^Ukloni slovo / }).count(), 0, "the selection should be clearable by touch");
       const hasHorizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
       assert.equal(hasHorizontalOverflow, false, "the word game should fit a 390px mobile viewport without horizontal overflow");
+
+      for (const title of ["Pronađi riječ", "Pogodi riječ", "Poveži pojmove", "Dnevna riječ", "Riječi domovine"]) {
+        await page.getByRole("button", { name: "Sve igre" }).tap().catch(async () => {});
+        await page.getByRole("button", { name: `Otvori igru: ${title}` }).tap();
+        await page.waitForTimeout(150);
+        const gameOverflows = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+        assert.equal(gameOverflows, false, `${title} should fit a 390px mobile viewport without horizontal overflow`);
+        const backLabel = title === "Riječi domovine" ? "Natrag na kviz" : "Sve igre";
+        await page.getByRole("button", { name: backLabel }).waitFor({ state: "visible", timeout: 5000 });
+      }
       assert.deepEqual(pageErrors, [], `word game interaction produced browser errors: ${pageErrors.join("; ")}`);
       console.log("PASS word game supplied-letter tap and mobile layout");
     } catch (error) {
