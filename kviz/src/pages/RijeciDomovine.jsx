@@ -522,7 +522,6 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
     }
     setIndex((value) => value + 1);
     setSelected([]);
-    setTypedAnswer("");
     setFeedback("");
     setChecked(false);
     setRevealed(false);
