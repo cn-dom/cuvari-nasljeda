@@ -97,7 +97,7 @@ try {
       const hasHorizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
       assert.equal(hasHorizontalOverflow, false, "the word game should fit a 390px mobile viewport without horizontal overflow");
 
-      for (const title of ["Pronađi riječ", "Pogodi riječ", "Poveži pojmove", "Dnevna riječ", "Riječi domovine"]) {
+      for (const title of ["Pronađi riječ", "Pogodi riječ", "Poveži pojmove", "Dnevni pojam", "Riječi domovine"]) {
         await page.getByRole("button", { name: "Sve igre" }).tap();
         await page.getByRole("button", { name: `Otvori igru: ${title}` }).tap();
         await page.waitForTimeout(150);
