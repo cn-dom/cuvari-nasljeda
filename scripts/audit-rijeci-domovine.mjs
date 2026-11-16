@@ -53,6 +53,9 @@ function assertUniqueWords(entries, label) {
 assert.ok(bank.length >= 410, `Expected at least 410 words in the game centre; found ${bank.length}`);
 assert.ok(classicWords.length >= 370, `Expected at least 370 words in the classic game; found ${classicWords.length}`);
 assertUniqueWords(bank, "Centar igara");
+const dailyEligible = bank.filter((entry) => normalizeCroatianWord(entry.word).length >= 4 && normalizeCroatianWord(entry.word).length <= 10);
+assert.ok(dailyEligible.length >= 230, `Expected at least 230 daily words and phrases; found ${dailyEligible.length}`);
+assert.ok(dailyEligible.some((entry) => entry.word.includes(" ")), "Daily challenge must include multiword Croatian phrases");
 assertUniqueWords(classicWords, "Klasična igra");
 
 const groupTitles = new Set();
@@ -127,4 +130,4 @@ for (const word of requiredTerms) {
   assert.ok(classicWords.some((entry) => entry.word === word), `Missing classic-game word: ${word}`);
 }
 
-console.log(`Riječi domovine audit passed: ${bank.length} centre words, ${classicWords.length} classic words, ${groups.length} valid groups, Croatian diacritics and daily-date checks passed.`);
+console.log(`Riječi domovine audit passed: ${bank.length} centre words, ${classicWords.length} classic words, ${groups.length} valid groups, ${dailyEligible.length} daily words and phrases, Croatian diacritics and daily-date checks passed.`);
