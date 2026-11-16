@@ -29,6 +29,8 @@ jobs:
           node --check public/na-danasnji-dan.js
       - name: Provjeri integritet registra Hrvatska pamti
         run: npm run audit:hrvatska-pamti
+      - name: Provjeri rječnik i pravila igara Riječi domovine
+        run: npm run audit:rijeci-domovine
       - name: Provjeri produkcijsku izgradnju
         run: npm run build
       - name: Instaliraj Chromium za testove u pregledniku
