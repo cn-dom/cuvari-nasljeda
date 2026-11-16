@@ -100,7 +100,7 @@ assert.match(centerSource, /"S","Š","T","U","V","Z","Ž"/);
 const scrambleUi = sectionBetween(centerSource, '{active==="scramble"&&', '{active==="guess"&&');
 assert.match(scrambleUi, /Odaberi slovo/);
 assert.doesNotMatch(scrambleUi, /<LetterKeyboard/);
-assert.match(classicSource, /function scramble\(word\)\s*\{\s*const letters = normalize\(word\)\.split\("\.\?"\)/);
+assert.match(classicSource, /function scramble\(word\)\s*\{\s*const letters = normalize\(word\)\.split\(""/);
 assert.doesNotMatch(classicSource, /setTypedAnswer/);
 assert.match(classicSource, /patriasoul_rijeci_daily_best/);
 
