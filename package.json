@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "build:quiz": "vite build kviz --config kviz/vite.config.js",
     "test:browser": "node scripts/browser-smoke.mjs",
-    "audit:hrvatska-pamti": "node scripts/audit-hrvatska-pamti.mjs"
+    "audit:hrvatska-pamti": "node scripts/audit-hrvatska-pamti.mjs",
+    "audit:rijeci-domovine": "node scripts/audit-rijeci-domovine.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.3",

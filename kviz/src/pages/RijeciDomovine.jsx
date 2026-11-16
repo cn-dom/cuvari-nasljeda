@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { normalizeCroatianWord as normalize } from "../lib/croatianWords";
 
 const WORDS = [
   { word: "HRVATSKA", category: "Domovina", level: 1, clue: "Država između Jadrana i srednje Europe.", explanation: "Hrvatska je europska država čiji je glavni grad Zagreb." },
@@ -28,7 +29,7 @@ const WORDS = [
   { word: "ZADAR", category: "Domovina", level: 1, clue: "Dalmatinski grad poznat po Morskim orguljama.", explanation: "Zadar ima bogatu antičku i srednjovjekovnu baštinu." },
   { word: "PAG", category: "Domovina", level: 1, clue: "Otok poznat po čipki i proizvodnji soli.", explanation: "Paška čipka zaštićena je kao nematerijalna kulturna baština." },
   { word: "HVAR", category: "Domovina", level: 1, clue: "Dalmatinski otok poznat po lavandi.", explanation: "Hvar je poznat po Starogradskom polju, povijesnim naseljima i mediteranskom krajoliku." },
-  { word: "VELEBIT", category: "Domovina", level: 1, clue: "Najduža hrvatska planina.", explanation: "Velebit je zaštićen kao park prirode, a njegovi dijelovi obuhvaćaju nacionalne parkove." },
+  { word: "VELEBIT", category: "Domovina", level: 1, clue: "Najdulji hrvatski planinski masiv.", explanation: "Na Velebitu se nalaze Park prirode Velebit te nacionalni parkovi Sjeverni Velebit i Paklenica." },
   { word: "SAVA", category: "Domovina", level: 1, clue: "Rijeka koja protječe kroz Zagreb.", explanation: "Sava je jedna od najvećih rijeka koje protječu Hrvatskom." },
   { word: "DRAVA", category: "Domovina", level: 1, clue: "Rijeka uz koju leže Varaždin i Osijek.", explanation: "Drava je važan dio riječnog i prirodnog sustava sjeverne i istočne Hrvatske." },
   { word: "MASLINA", category: "Baština", level: 1, clue: "Mediteransko stablo čiji se plod koristi za ulje.", explanation: "Maslinarstvo je važan dio tradicije i gospodarstva hrvatskog priobalja i otoka." },
@@ -49,10 +50,10 @@ const WORDS = [
   { word: "RUĐER BOŠKOVIĆ", category: "Znanje", level: 3, clue: "Dubrovčanin, znanstvenik i filozof iz 18. stoljeća.", explanation: "Ruđer Bošković bavio se matematikom, astronomijom, fizikom i filozofijom." },
   { word: "FAUST VRANČIĆ", category: "Znanje", level: 3, clue: "Hrvatski izumitelj povezan s nacrtom padobrana.", explanation: "Faust Vrančić objavio je djelo Machinae Novae s prikazima tehničkih izuma." },
   { word: "MARKO MARULIĆ", category: "Kultura", level: 3, clue: "Splitski humanist kojeg se naziva ocem hrvatske književnosti.", explanation: "Marulićev Judita iz 1501. godine jedno je od ključnih djela hrvatske književnosti." },
-  { word: "IVANA BRLIĆ MAŽURANIĆ", category: "Kultura", level: 3, clue: "Hrvatska književnica, autorica Priča iz davnine.", explanation: "Njezina djela ubrajaju se među najvažnija ostvarenja hrvatske dječje književnosti." },
+  { word: "IVANA BRLIĆ-MAŽURANIĆ", category: "Kultura", level: 3, clue: "Hrvatska književnica, autorica Priča iz davnine.", explanation: "Njezina djela ubrajaju se među najvažnija ostvarenja hrvatske dječje književnosti." },
   { word: "AUGUST ŠENOA", category: "Kultura", level: 3, clue: "Hrvatski književnik i autor romana Zlatarovo zlato.", explanation: "Šenoa je snažno obilježio hrvatski književni život 19. stoljeća." },
   { word: "ANTUN GUSTAV MATOŠ", category: "Kultura", level: 3, clue: "Hrvatski književnik, pjesnik i esejist rođen u Tovarniku.", explanation: "Matoš je jedan od najvažnijih predstavnika hrvatske moderne." },
-  { word: "EUPRAZIJEVA BAZILIKA", category: "Baština", level: 3, clue: "Porečki ranokršćanski kompleks na UNESCO-ovu popisu.", explanation: "Kompleks je izniman primjer ranobizantske sakralne arhitekture i umjetnosti." },
+  { word: "EUFRAZIJEVA BAZILIKA", category: "Baština", level: 3, clue: "Porečki ranokršćanski kompleks na UNESCO-ovu popisu svjetske baštine.", explanation: "Episkopalni kompleks Eufrazijeve bazilike u povijesnoj jezgri Poreča upisan je na UNESCO-ov Popis svjetske baštine 1997. godine." },
   { word: "ŠIBENSKA KATEDRALA", category: "Baština", level: 3, clue: "Renesansna katedrala sv. Jakova, građena od kamena.", explanation: "Katedrala sv. Jakova u Šibeniku upisana je na UNESCO-ov popis svjetske baštine." },
   { word: "HRVATSKI SABOR", category: "Zajednica", level: 2, clue: "Predstavničko tijelo građana i nositelj zakonodavne vlasti.", explanation: "Hrvatski sabor donosi zakone i obavlja druge poslove određene Ustavom." },
   { word: "ZAJEDNIŠTVO", category: "Zajednica", level: 2, clue: "Povezanost ljudi koji surađuju i pomažu jedni drugima.", explanation: "Zajedništvo se gradi povjerenjem, odgovornošću i brigom za druge." },
@@ -77,13 +78,13 @@ const WORDS = [
   { word: "LIKA", category: "Domovina", level: 1, clue: "Planinska hrvatska regija između Velebita i Plješivice.", explanation: "Lika je povijesna regija poznata po planinskom krajoliku, rijekama i tradiciji." },
   { word: "SLAVONIJA", category: "Domovina", level: 1, clue: "Istočna hrvatska povijesna regija poznata po ravnicama i tradiciji.", explanation: "Slavonija je poznata po plodnim ravnicama, poljoprivredi, tamburaškoj glazbi i običajima." },
   { word: "BARANJA", category: "Domovina", level: 2, clue: "Regija između Drave i Dunava, poznata po vinima i tradiciji.", explanation: "Baranja je kulturno i prirodno raznolika regija na istoku Hrvatske." },
-  { word: "MEĐIMURJE", category: "Domovina", level: 2, clue: "Najsjevernija hrvatska regija između Mure i Drave.", explanation: "Međimurje njeguje prepoznatljive običaje, glazbu i kajkavsku književnu tradiciju." },
+  { word: "MEĐIMURJE", category: "Domovina", level: 2, clue: "Povijesno-geografska regija između Mure i Drave.", explanation: "Na području Međimurja nalazi se Međimurska županija, poznata po tradicijskoj glazbi, običajima i kajkavskoj književnoj baštini." },
   { word: "ZAGORJE", category: "Domovina", level: 1, clue: "Hrvatska regija s brežuljcima, dvorcima i tradicijskim običajima.", explanation: "Hrvatsko zagorje poznato je po dvorcima, vinogradima i tradicijskom načinu života." },
   { word: "ISTRA", category: "Domovina", level: 1, clue: "Poluotok na sjevernom Jadranu s bogatom kulturnom baštinom.", explanation: "Istra je poznata po spoju hrvatskih, talijanskih i drugih kulturnih utjecaja." },
   { word: "SALONA", category: "Povijest", level: 3, clue: "Antički grad i arheološko nalazište pokraj Solina.", explanation: "Salona je bila važno središte rimske provincije Dalmacije." },
   { word: "NARONA", category: "Povijest", level: 3, clue: "Antičko rimsko naselje čiji se ostaci nalaze u Vidu kod Metkovića.", explanation: "Narona je bila značajno rimsko naselje, a njezini se nalazi čuvaju u Arheološkom muzeju Narona." },
   { word: "TRAKOŠĆAN", category: "Baština", level: 3, clue: "Poznati dvorac i povijesno imanje u Hrvatskom zagorju.", explanation: "Dvorac Trakošćan jedan je od najpoznatijih hrvatskih dvoraca." },
-  { word: "NEHAJ", category: "Baština", level: 2, clue: "Tvrđava iznad Senja, povezana s uskocima.", explanation: "Tvrđava Nehaj izgrađena je u 16. stoljeću i simbol je senjske usk očke povijesti." },
+  { word: "NEHAJ", category: "Baština", level: 2, clue: "Tvrđava iznad Senja, povezana s uskocima.", explanation: "Tvrđava Nehaj izgrađena je u 16. stoljeću i simbol je senjske uskočke povijesti." },
   { word: "KLIS", category: "Baština", level: 3, clue: "Tvrđava iznad Splita s važnom ulogom u hrvatskoj povijesti.", explanation: "Tvrđava Klis stoljećima je imala stratešku ulogu u obrani prostora između obale i zaleđa." },
   { word: "KAMENITA VRATA", category: "Baština", level: 2, clue: "Zagrebački prolaz i svetište s likom Majke Božje od Kamenitih vrata.", explanation: "Kamenita vrata dio su povijesne jezgre Gornjega grada i važno zagrebačko marijansko svetište." },
   { word: "TRSAT", category: "Vjera", level: 2, clue: "Riječko svetište i hodočasničko mjesto na Trsatskom brijegu.", explanation: "Svetište Majke Božje Trsatske jedno je od najpoznatijih marijanskih svetišta u Hrvatskoj." },
@@ -119,13 +120,12 @@ const WORDS = [
   { word: "METKOVIĆ", category: "Domovina", level: 2, clue: "Grad na Neretvi, blizu arheološkog lokaliteta Narona.", explanation: "Metković je grad u dolini Neretve i polazište za upoznavanje delte i Narone." },
   { word: "OPATIJA", category: "Domovina", level: 2, clue: "Kvarnerski grad poznat po povijesti turizma i obalnoj šetnici.", explanation: "Opatija se razvila kao jedno od najstarijih turističkih središta na hrvatskoj obali." },
   { word: "CAVTAT", category: "Domovina", level: 2, clue: "Primorsko mjesto južno od Dubrovnika, poznato po mauzoleju obitelji Račić.", explanation: "Cavtat je poznat po kulturnoj baštini i djelima kipara Ivana Meštrovića." },
-  { word: "KAMENICA", category: "Gradovi", level: 1, clue: "Naselje u Hrvatskoj; naziv nose brojna mjesta.", explanation: "Naselje u Hrvatskoj; naziv nose brojna mjesta." },
-  { word: "IMOTSKI", category: "Gradovi", level: 1, clue: "Grad u Dalmatinskoj zagori poznat po Modrom i Crvenom jezeru.", explanation: "Grad u Dalmatinskoj zagori poznat po Modrom i Crvenom jezeru." },
+    { word: "IMOTSKI", category: "Gradovi", level: 1, clue: "Grad u Dalmatinskoj zagori poznat po Modrom i Crvenom jezeru.", explanation: "Grad u Dalmatinskoj zagori poznat po Modrom i Crvenom jezeru." },
   { word: "MAKARSKA", category: "Gradovi", level: 1, clue: "Primorski grad podno Biokova.", explanation: "Primorski grad podno Biokova." },
   { word: "OMIŠ", category: "Gradovi", level: 1, clue: "Grad na ušću Cetine u Jadransko more.", explanation: "Grad na ušću Cetine u Jadransko more." },
   { word: "BIOGRAD", category: "Gradovi", level: 1, clue: "Obalni grad između Zadra i Šibenika.", explanation: "Obalni grad između Zadra i Šibenika." },
   { word: "VODICE", category: "Gradovi", level: 1, clue: "Turistički grad na šibenskoj rivijeri.", explanation: "Turistički grad na šibenskoj rivijeri." },
-  { word: "NOVIGRAD", category: "Gradovi", level: 1, clue: "Ime više hrvatskih mjesta; poznat je istarski i dalmatinski Novigrad.", explanation: "Ime više hrvatskih mjesta; poznat je istarski i dalmatinski Novigrad." },
+  { word: "NOVIGRAD", category: "Gradovi", level: 1, clue: "Istarski grad na sjeverozapadnoj obali poluotoka, poznat po očuvanoj staroj jezgri.", explanation: "Ovaj Novigrad nalazi se u Istri; isto ime nose i druga hrvatska mjesta, među njima Novigrad u Dalmaciji." },
   { word: "UMAG", category: "Gradovi", level: 1, clue: "Istarski grad na sjeverozapadnoj obali.", explanation: "Istarski grad na sjeverozapadnoj obali." },
   { word: "LABIN", category: "Gradovi", level: 1, clue: "Istarski grad na brežuljku iznad Rapca.", explanation: "Istarski grad na brežuljku iznad Rapca." },
   { word: "BUZET", category: "Gradovi", level: 1, clue: "Istarski grad poznat kao središte tartufarstva.", explanation: "Istarski grad poznat kao središte tartufarstva." },
@@ -199,7 +199,7 @@ const WORDS = [
   { word: "RAVNA GORA", category: "Priroda", level: 1, clue: "Planina u Hrvatskom zagorju.", explanation: "Planina u Hrvatskom zagorju." },
   { word: "SJEVERNI VELEBIT", category: "Priroda", level: 1, clue: "Nacionalni park u sjevernom dijelu Velebita.", explanation: "Nacionalni park u sjevernom dijelu Velebita." },
   { word: "BRIJUNI", category: "Priroda", level: 1, clue: "Nacionalni park otočja uz zapadnu obalu Istre.", explanation: "Nacionalni park otočja uz zapadnu obalu Istre." },
-  { word: "PLITVIČKA JEZERA", category: "Priroda", level: 1, clue: "Nacionalni park poznat po jezerima i slapovima.", explanation: "Nacionalni park poznat po jezerima i slapovima." },
+  { word: "PLITVIČKA JEZERA", category: "Priroda", level: 1, clue: "Najstariji hrvatski nacionalni park, poznat po jezerima i sedrenim slapovima.", explanation: "Nacionalni park proglašen je 1949., a na UNESCO-ov Popis svjetske baštine upisan je 1979. godine." },
   { word: "KRAPINSKE TOPLICE", category: "Priroda", level: 1, clue: "Poznato termalno lječilište u Hrvatskom zagorju.", explanation: "Poznato termalno lječilište u Hrvatskom zagorju." },
   { word: "TOPUSKO", category: "Priroda", level: 1, clue: "Mjesto poznato po termalnim izvorima.", explanation: "Mjesto poznato po termalnim izvorima." },
   { word: "DOBRA", category: "Priroda", level: 1, clue: "Rijeka koja protječe kroz Ogulin i Karlovac.", explanation: "Rijeka koja protječe kroz Ogulin i Karlovac." },
@@ -219,7 +219,6 @@ const WORDS = [
   { word: "DUNAV", category: "Priroda", level: 1, clue: "Velika europska rijeka koja protječe uz Vukovar i Ilok.", explanation: "Velika europska rijeka koja protječe uz Vukovar i Ilok." },
   { word: "SUTLA", category: "Priroda", level: 1, clue: "Rijeka koja dijelom čini granicu Hrvatske i Slovenije.", explanation: "Rijeka koja dijelom čini granicu Hrvatske i Slovenije." },
   { word: "JESENICE", category: "Povijest", level: 3, clue: "Ime više hrvatskih mjesta; nije povijesni događaj.", explanation: "Ime više hrvatskih mjesta; nije povijesni događaj." },
-  { word: "DUBROVAČKA REPUBLIKA", category: "Povijest", level: 2, clue: "Povijesna pomorska republika sa sjedištem u Dubrovniku.", explanation: "Povijesna pomorska republika sa sjedištem u Dubrovniku." },
   { word: "PAVLINSKI RED", category: "Povijest", level: 2, clue: "Katolički red koji je imao važnu ulogu u hrvatskoj povijesti.", explanation: "Katolički red koji je imao važnu ulogu u hrvatskoj povijesti." },
   { word: "HABSBURŠKA MONARHIJA", category: "Povijest", level: 3, clue: "Vladarska zajednica kojoj su pripadale hrvatske zemlje.", explanation: "Vladarska zajednica kojoj su pripadale hrvatske zemlje." },
   { word: "ILIRSKI POKRET", category: "Povijest", level: 2, clue: "Kulturno-politički pokret hrvatskog narodnog preporoda.", explanation: "Kulturno-politički pokret hrvatskog narodnog preporoda." },
@@ -296,16 +295,14 @@ const WORDS = [
   { word: "ZLATNA VRATA", category: "Baština", level: 2, clue: "Monumentalni ulaz u Dioklecijanovu palaču.", explanation: "Monumentalni ulaz u Dioklecijanovu palaču." },
   { word: "SREBRNA VRATA", category: "Baština", level: 1, clue: "Jedan od povijesnih ulaza u Dioklecijanovu palaču.", explanation: "Jedan od povijesnih ulaza u Dioklecijanovu palaču." },
   { word: "JUPITEROV HRAM", category: "Baština", level: 1, clue: "Antički hram u Dioklecijanovoj palači.", explanation: "Antički hram u Dioklecijanovoj palači." },
-  { word: "EUPRAZIJEVA BAZILIKA", category: "Baština", level: 2, clue: "Ranosrednjovjekovni kompleks u Poreču pod zaštitom UNESCO-a.", explanation: "Ranosrednjovjekovni kompleks u Poreču pod zaštitom UNESCO-a." },
-  { word: "SVETI DONAT", category: "Baština", level: 1, clue: "Predromanička crkva u Zadru.", explanation: "Predromanička crkva u Zadru." },
-  { word: "KATEDRALA SVETE STOŠIJE", category: "Baština", level: 1, clue: "Zadarska katedrala posvećena svetoj Anastaziji.", explanation: "Zadarska katedrala posvećena svetoj Anastaziji." },
+  { word: "SVETI DONAT", category: "Baština", level: 1, clue: "Predromanička crkva u Zadru, podignuta u 9. stoljeću.", explanation: "Crkva sv. Donata jedan je od najpoznatijih srednjovjekovnih spomenika Zadra." },
+  { word: "KATEDRALA SVETE STOŠIJE", category: "Baština", level: 1, clue: "Zadarska katedrala posvećena svetoj Anastaziji.", explanation: "Zadarska katedrala posvećena svetoj Anastaziji." },
   { word: "KATEDRALA SVETOG DUJMA", category: "Baština", level: 2, clue: "Splitska katedrala smještena u nekadašnjem Dioklecijanovu mauzoleju.", explanation: "Splitska katedrala smještena u nekadašnjem Dioklecijanovu mauzoleju." },
   { word: "KATEDRALA SVETOG LOVRE", category: "Baština", level: 1, clue: "Katedrala u Trogiru poznata po Radovanovu portalu.", explanation: "Katedrala u Trogiru poznata po Radovanovu portalu." },
   { word: "RADOVANOV PORTAL", category: "Baština", level: 1, clue: "Romanički portal trogirske katedrale iz 13. stoljeća.", explanation: "Romanički portal trogirske katedrale iz 13. stoljeća." },
-  { word: "ŠIBENSKA KATEDRALA", category: "Baština", level: 2, clue: "Katedrala sv. Jakova; UNESCO-ova svjetska baština.", explanation: "Katedrala sv. Jakova; UNESCO-ova svjetska baština." },
   { word: "STARI GRAD DUBROVNIK", category: "Baština", level: 1, clue: "Povijesna jezgra Dubrovnika pod zaštitom UNESCO-a.", explanation: "Povijesna jezgra Dubrovnika pod zaštitom UNESCO-a." },
   { word: "STARI GRAD TROGIR", category: "Baština", level: 1, clue: "Povijesna jezgra Trogira pod zaštitom UNESCO-a.", explanation: "Povijesna jezgra Trogira pod zaštitom UNESCO-a." },
-  { word: "STAROGRADSKO POLJE", category: "Baština", level: 2, clue: "Kulturni krajolik na Hvaru pod zaštitom UNESCO-a.", explanation: "Kulturni krajolik na Hvaru pod zaštitom UNESCO-a." },
+  { word: "STAROGRADSKO POLJE", category: "Baština", level: 2, clue: "Kulturni krajolik na Hvaru oblikovan još u doba grčkih kolonista u 4. stoljeću prije Krista.", explanation: "Starogradsko polje upisano je 2008. na UNESCO-ov Popis svjetske baštine; antička parcelacija i poljoprivredna tradicija očuvane su do danas." },
   { word: "STEĆCI", category: "Baština", level: 1, clue: "Srednjovjekovni nadgrobni spomenici rasprostranjeni u više zemalja.", explanation: "Srednjovjekovni nadgrobni spomenici rasprostranjeni u više zemalja." },
   { word: "SREDNJOVJEKOVNI GRAD", category: "Baština", level: 1, clue: "Utvrđeno naselje ili sjedište vlastelinstva iz srednjeg vijeka.", explanation: "Utvrđeno naselje ili sjedište vlastelinstva iz srednjeg vijeka." },
   { word: "DVORAC PEJAČEVIĆ", category: "Baština", level: 2, clue: "Povijesni dvorac u Našicama.", explanation: "Povijesni dvorac u Našicama." },
@@ -364,9 +361,20 @@ const WORDS = [
   { word: "BABINA GREDA", category: "Zemljopis", level: 1, clue: "Selo u županjskoj Posavini.", explanation: "Selo u županjskoj Posavini." },
   { word: "TOVARNIK", category: "Zemljopis", level: 1, clue: "Istočnoslavonsko mjesto rodno mjesto Antuna Gustava Matoša.", explanation: "Istočnoslavonsko mjesto rodno mjesto Antuna Gustava Matoša." },
   { word: "LOVAS", category: "Zemljopis", level: 1, clue: "Naselje u istočnoj Slavoniji stradalo u Domovinskom ratu.", explanation: "Naselje u istočnoj Slavoniji stradalo u Domovinskom ratu." },
+  { word: "PAŠKA ČIPKA", category: "Baština", level: 2, clue: "Tradicionalna iglena čipka s otoka Paga.", explanation: "Paška čipka jedna je od triju hrvatskih čipkarskih tradicija obuhvaćenih UNESCO-ovim upisom iz 2009. godine." },
+  { word: "LEPOGLAVSKA ČIPKA", category: "Baština", level: 3, clue: "Čipka iz Lepoglave izrađuje se tehnikom čipkanja na batiće.", explanation: "Lepoglavska čipka dio je hrvatskog čipkarstva upisanog 2009. na UNESCO-ov Reprezentativni popis nematerijalne kulturne baštine." },
+  { word: "HVARSKA ČIPKA", category: "Baština", level: 3, clue: "Čipka koju hvarske benediktinke izrađuju od tankih niti dobivenih iz svježih listova agave.", explanation: "Hvarska čipka jedna je od triju tradicija hrvatskog čipkarstva koje je UNESCO prepoznao 2009. godine." },
+  { word: "LASTOVSKI POKLAD", category: "Običaji", level: 3, clue: "Pokladni običaj otoka Lastova, prepoznat po povorci i slamnatoj lutki Pokladu.", explanation: "UNESCO ga je 2025. uvrstio u Registar dobrih praksi očuvanja nematerijalne kulturne baštine." },
+  { word: "MEĐIMURSKA POPEVKA", category: "Glazba", level: 3, clue: "Tradicijska vokalna glazba Međimurja, upisana 2018. na UNESCO-ov Reprezentativni popis.", explanation: "Popevka je važan dio glazbenog identiteta Međimurja i prenosi se naraštajima." },
+  { word: "ZA KRIŽEN", category: "Vjera", level: 3, clue: "Noćna procesija na otoku Hvaru koja se održava u noći s Velikog četvrtka na Veliki petak.", explanation: "Procesija Za Križen upisana je 2009. na UNESCO-ov Reprezentativni popis nematerijalne kulturne baštine." },
+  { word: "FESTA SVETOG VLAHA", category: "Običaji", level: 3, clue: "Tradicionalna proslava zaštitnika Dubrovnika.", explanation: "Festa sv. Vlaha upisana je 2009. na UNESCO-ov Reprezentativni popis nematerijalne kulturne baštine." },
+  { word: "OSJEČKA TVRĐA", category: "Baština", level: 3, clue: "Povijesna barokna jezgra Osijeka, oblikovana kao vojna utvrda u 18. stoljeću.", explanation: "Tvrđa je nastala na strateškom položaju uz Dravu i čuva prepoznatljivu baroknu urbanističku strukturu." },
+  { word: "MORSKE ORGULJE", category: "Baština", level: 2, clue: "Zadarska instalacija u kojoj valovi te plima i oseka stvaraju zvuk kroz cijevi ugrađene ispod rive.", explanation: "Morske orgulje koriste energiju mora; zvuk nastaje strujanjem zraka kroz cijevi." },
+  { word: "POZDRAV SUNCU", category: "Baština", level: 2, clue: "Zadarska svjetlosna instalacija sastavljena od 300 višeslojnih staklenih solarnih ploča.", explanation: "Kružna instalacija promjera 22 metra prikuplja Sunčevu energiju i pretvara je u električnu energiju za noćni svjetlosni prikaz." },
+  { word: "ZLATNI RAT", category: "Zemljopis", level: 2, clue: "Prepoznatljiva šljunčana plaža kod Bola na otoku Braču.", explanation: "Vrh plaže mijenja oblik pod utjecajem vjetra, valova i morskih struja." },
+  { word: "RIMSKI FORUM", category: "Povijest", level: 3, clue: "Ostaci rimskog javnog prostora u središtu Zadra, u blizini crkve sv. Donata.", explanation: "Rimski forum važan je arheološki prostor povijesne jezgre Zadra." },
 ];
 
-const normalize = (value) => String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleUpperCase("hr").replace(/[^A-Z]/g, "");
 const pointsFor = (level) => level === 1 ? 10 : level === 2 ? 20 : 30;
 
 function shuffle(items, seed = null) {
@@ -384,7 +392,7 @@ function shuffle(items, seed = null) {
 }
 
 function scramble(word) {
-  const letters = word.replace(/\s/g, "").split("");
+  const letters = normalize(word).split("");
   let mixed = shuffle(letters);
   if (mixed.join("") === letters.join("") && mixed.length > 1) mixed = [...mixed.slice(1), mixed[0]];
   return mixed.map((letter, index) => ({ id: index, letter }));
@@ -437,9 +445,17 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
   const [revealed, setRevealed] = useState(false);
   const [finished, setFinished] = useState(false);
   const [started, setStarted] = useState(false);
-  const [bestScore, setBestScore] = useState(() => {
-    try { return Number(window.localStorage.getItem("patriasoul_rijeci_best") || 0); } catch { return 0; }
+  const [bestScores, setBestScores] = useState(() => {
+    try {
+      return {
+        solo: Number(window.localStorage.getItem("patriasoul_rijeci_best") || 0),
+        daily: Number(window.localStorage.getItem("patriasoul_rijeci_daily_best") || 0),
+      };
+    } catch {
+      return { solo: 0, daily: 0 };
+    }
   });
+  const bestScore = mode === "daily" ? bestScores.daily : bestScores.solo;
 
   const current = round[index];
   const total = round.length;
@@ -496,16 +512,16 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
       setStarted(false);
       if (mode !== "duel") {
         const finalScore = scores[0];
+        const recordKey = mode === "daily" ? "patriasoul_rijeci_daily_best" : "patriasoul_rijeci_best";
         if (finalScore > bestScore) {
-          setBestScore(finalScore);
-          try { window.localStorage.setItem("patriasoul_rijeci_best", String(finalScore)); } catch {}
+          setBestScores((previous) => ({ ...previous, [mode]: finalScore }));
+          try { window.localStorage.setItem(recordKey, String(finalScore)); } catch {}
         }
       }
       return;
     }
     setIndex((value) => value + 1);
     setSelected([]);
-    setTypedAnswer("");
     setFeedback("");
     setChecked(false);
     setRevealed(false);
@@ -515,7 +531,7 @@ export default function RijeciDomovine({ onBack, playerName = "" }) {
   const revealLetter = () => {
     if (!current || revealed || checked) return;
     setRevealed(true);
-    setFeedback(`Pomoć: riječ počinje slovom ${current.word.replace(/\s/g, "")[0]}. Točan odgovor vrijedi 5 bodova manje.`);
+    setFeedback(`Pomoć: riječ počinje slovom ${normalize(current.word)[0]}. Točan odgovor vrijedi 5 bodova manje.`);
   };
 
   const winner = scores[0] === scores[1] ? "Neriješeno" : scores[0] > scores[1] ? playerNames[0] : playerNames[1];
