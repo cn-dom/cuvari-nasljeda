@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, Brain, CalendarDays, Check, Grid3X3, Link2, Search, Shuffle, Sparkles, Trophy } from "lucide-react";
 import RijeciDomovine from "./RijeciDomovine";
+import { getLocalCalendarDayNumber, getLocalDateKey, normalizeCroatianWord as normalize } from "../lib/croatianWords";
 
 const BANK = [
   { word:"HRVATSKA", clue:"Država na istočnoj obali Jadrana i u srednjoj Europi.", group:"Domovina" },
@@ -53,7 +54,7 @@ const BANK = [
   { word:"SAVA", clue:"Rijeka koja protječe kroz Zagreb i ulijeva se u Dunav.", group:"Priroda" },
   { word:"DRAVA", clue:"Rijeka koja protječe kroz Varaždin i Osijek.", group:"Priroda" },
   { word:"NERETVA", clue:"Rijeka koja se ulijeva u Jadran kod delte u južnoj Dalmaciji.", group:"Priroda" },
-  { word:"VELEBIT", clue:"Najduža hrvatska planina i park prirode.", group:"Priroda" },
+  { word:"VELEBIT", clue:"Najdulji hrvatski planinski masiv, na kojem se nalaze Park prirode Velebit te nacionalni parkovi Sjeverni Velebit i Paklenica.", group:"Priroda" },
   { word:"BIOKOVO", clue:"Planina iznad Makarske rivijere.", group:"Priroda" },
   { word:"KORNATI", clue:"Nacionalni park otočja u sjevernoj Dalmaciji.", group:"Priroda" },
   { word:"BJELOGLAVI SUP", clue:"Velika zaštićena ptica koja gnijezdi na kvarnerskim otocima.", group:"Priroda" },
@@ -62,15 +63,15 @@ const BANK = [
   { word:"KRALJ TOMISLAV", clue:"Vladar kojeg hrvatska tradicija pamti kao prvoga hrvatskog kralja.", group:"Povijest" },
   { word:"PETAR ZRINSKI", clue:"Hrvatski velikaš pogubljen u Bečkom Novom Mjestu 1671.", group:"Povijest" },
   { word:"FRAN KRSTO FRANKOPAN", clue:"Hrvatski plemić i književnik pogubljen 1671. zajedno s Petrom Zrinskim.", group:"Povijest" },
-  { word:"ANTUN GUSTAV MATOS", clue:"Hrvatski književnik i esejist rođen u Tovarniku.", group:"Kultura" },
-  { word:"IVANA BRLIC MAZURANIC", clue:"Hrvatska književnica, autorica Priča iz davnine.", group:"Kultura" },
-  { word:"MARKO MARULIC", clue:"Splitski humanist kojeg se naziva ocem hrvatske književnosti.", group:"Kultura" },
-  { word:"AUGUST SENOA", clue:"Hrvatski književnik i autor romana Zlatarovo zlato.", group:"Kultura" },
+  { word:"ANTUN GUSTAV MATOŠ", clue:"Hrvatski književnik i esejist rođen u Tovarniku.", group:"Kultura" },
+  { word:"IVANA BRLIĆ-MAŽURANIĆ", clue:"Hrvatska književnica, autorica Priča iz davnine.", group:"Kultura" },
+  { word:"MARKO MARULIĆ", clue:"Splitski humanist kojeg se naziva ocem hrvatske književnosti.", group:"Kultura" },
+  { word:"AUGUST ŠENOA", clue:"Hrvatski književnik i autor romana Zlatarovo zlato.", group:"Kultura" },
   { word:"NIKOLA TESLA", clue:"Izumitelj i znanstvenik rođen u Smiljanu.", group:"Znanje" },
   { word:"RUĐER BOŠKOVIĆ", clue:"Dubrovčanin, znanstvenik i filozof iz 18. stoljeća.", group:"Znanje" },
   { word:"FAUST VRANČIĆ", clue:"Hrvatski izumitelj povezan s nacrtom padobrana.", group:"Znanje" },
   { word:"ANDRIJA MOHOROVIČIĆ", clue:"Hrvatski geofizičar po kojem je nazvan diskontinuitet u Zemljinoj kori.", group:"Znanje" },
-  { word:"VINKOVCI", clue:"Grad u kojem se nalazi jedan od najstarijih kontinuirano naseljenih prostora Europe.", group:"Gradovi" },
+  { word:"VINKOVCI", clue:"Grad s arheološkim tragovima naseljenosti koji sežu više tisućljeća u prošlost.", group:"Gradovi" },
   { word:"ILOK", clue:"Istočnoslavonski grad poznat po vinogradima i staroj jezgri.", group:"Gradovi" },
   { word:"SINJSKA ALKA", clue:"Viteško natjecanje koje se održava u Sinju.", group:"Običaji" },
   { word:"MOREŠKA", clue:"Tradicionalni mačevni ples s Korčule.", group:"Običaji" },
@@ -116,7 +117,7 @@ const BANK = [
   { word:"LIKA", clue:"Planinska hrvatska regija između Velebita i Plješivice.", group:"Zemljopis" },
   { word:"SLAVONIJA", clue:"Istočna hrvatska povijesna regija poznata po ravnicama i tradiciji.", group:"Zemljopis" },
   { word:"BARANJA", clue:"Regija između Drave i Dunava, poznata po vinima i tradiciji.", group:"Zemljopis" },
-  { word:"MEĐIMURJE", clue:"Najsjevernija hrvatska županija i povijesna regija između Mure i Drave.", group:"Zemljopis" },
+  { word:"MEĐIMURJE", clue:"Povijesno-geografska regija između Mure i Drave; na njezinu se području nalazi Međimurska županija.", group:"Zemljopis" },
   { word:"ZAGORJE", clue:"Hrvatska regija s brežuljcima, dvorcima i tradicijskim običajima.", group:"Zemljopis" },
   { word:"ISTRA", clue:"Poluotok na sjevernom Jadranu s bogatom kulturnom baštinom.", group:"Zemljopis" },
   { word:"SALONA", clue:"Antički grad i arheološko nalazište pokraj Solina.", group:"Povijest" },
@@ -158,13 +159,12 @@ const BANK = [
   { word:"METKOVIĆ", clue:"Grad na Neretvi, blizu arheološkog lokaliteta Narona.", group:"Gradovi" },
   { word:"OPATIJA", clue:"Kvarnerski grad poznat po povijesti turizma i obalnoj šetnici.", group:"Gradovi" },
   { word:"CAVTAT", clue:"Primorsko mjesto južno od Dubrovnika, poznato po mauzoleju obitelji Račić.", group:"Gradovi" },
-  { word:"KAMENICA", clue:"Naselje u Hrvatskoj; naziv nose brojna mjesta.", group:"Gradovi" },
   { word:"IMOTSKI", clue:"Grad u Dalmatinskoj zagori poznat po Modrom i Crvenom jezeru.", group:"Gradovi" },
   { word:"MAKARSKA", clue:"Primorski grad podno Biokova.", group:"Gradovi" },
   { word:"OMIŠ", clue:"Grad na ušću Cetine u Jadransko more.", group:"Gradovi" },
   { word:"BIOGRAD", clue:"Obalni grad između Zadra i Šibenika.", group:"Gradovi" },
   { word:"VODICE", clue:"Turistički grad na šibenskoj rivijeri.", group:"Gradovi" },
-  { word:"NOVIGRAD", clue:"Ime više hrvatskih mjesta; poznat je istarski i dalmatinski Novigrad.", group:"Gradovi" },
+  { word:"NOVIGRAD", clue:"Istarski grad na sjeverozapadnoj obali poluotoka, poznat po očuvanoj staroj jezgri.", group:"Gradovi" },
   { word:"UMAG", clue:"Istarski grad na sjeverozapadnoj obali.", group:"Gradovi" },
   { word:"LABIN", clue:"Istarski grad na brežuljku iznad Rapca.", group:"Gradovi" },
   { word:"BUZET", clue:"Istarski grad poznat kao središte tartufarstva.", group:"Gradovi" },
@@ -403,8 +403,21 @@ const BANK = [
   { word:"BABINA GREDA", clue:"Selo u županjskoj Posavini.", group:"Zemljopis" },
   { word:"TOVARNIK", clue:"Istočnoslavonsko mjesto rodno mjesto Antuna Gustava Matoša.", group:"Zemljopis" },
   { word:"LOVAS", clue:"Naselje u istočnoj Slavoniji stradalo u Domovinskom ratu.", group:"Zemljopis" },
+  { word:"PAŠKA ČIPKA", clue:"Tradicionalna iglena čipka s otoka Paga, dio hrvatskog čipkarstva upisanog na UNESCO-ov popis.", group:"Baština" },
+  { word:"LEPOGLAVSKA ČIPKA", clue:"Čipka iz Lepoglave izrađuje se tehnikom čipkanja na batiće.", group:"Baština" },
+  { word:"HVARSKA ČIPKA", clue:"Čipka koju hvarske benediktinke izrađuju od niti dobivenih iz listova agave.", group:"Baština" },
+  { word:"STAROGRADSKO POLJE", clue:"Kulturni krajolik na otoku Hvaru, oblikovan još u doba grčkih kolonista u 4. stoljeću prije Krista.", group:"Baština" },
+  { word:"LASTOVSKI POKLAD", clue:"Pokladni običaj otoka Lastova, prepoznat po povorci i slamnatoj lutki Pokladu.", group:"Običaji" },
+  { word:"MEĐIMURSKA POPEVKA", clue:"Tradicijska vokalna glazba Međimurja, upisana 2018. na UNESCO-ov Reprezentativni popis.", group:"Glazba" },
+  { word:"ZA KRIŽEN", clue:"Noćna procesija na otoku Hvaru koja se održava od Velikog četvrtka do Velikog petka.", group:"Vjera" },
+  { word:"FESTA SVETOG VLAHA", clue:"Tradicionalna proslava zaštitnika Dubrovnika, upisana 2009. na UNESCO-ov popis nematerijalne baštine.", group:"Običaji" },
+  { word:"OSJEČKA TVRĐA", clue:"Povijesna barokna jezgra Osijeka, oblikovana kao vojna utvrda u 18. stoljeću.", group:"Baština" },
+  { word:"MORSKE ORGULJE", clue:"Zadarska instalacija u kojoj valovi i plima stvaraju zvuk kroz cijevi ugrađene ispod rive.", group:"Baština" },
+  { word:"POZDRAV SUNCU", clue:"Zadarska svjetlosna instalacija sastavljena od 300 višeslojnih staklenih solarnih ploča.", group:"Baština" },
+  { word:"ZLATNI RAT", clue:"Prepoznatljiva šljunčana plaža kod Bola na Braču, čiji se vrh mijenja pod utjecajem valova i morskih struja.", group:"Zemljopis" },
+  { word:"SVETI DONAT", clue:"Predromanička crkva u Zadru, izgrađena u 9. stoljeću i jedna od najpoznatijih znamenitosti grada.", group:"Baština" },
+  { word:"RIMSKI FORUM", clue:"Ostaci rimskog javnog prostora u središtu Zadra, u blizini crkve sv. Donata.", group:"Povijest" },
 ];
-const normalize = (value) => String(value ?? "").toLocaleUpperCase("hr").replace(/Đ/g,"D").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Z]/g,"");
 const shuffle = (items) => {
   const result = [...items];
   for (let i=result.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [result[i],result[j]]=[result[j],result[i]]; }
@@ -430,35 +443,35 @@ const GROUPS = [
   {title:"Gradovi",words:["ZAGREB","SINJ","KNIN","VUKOVAR"]},
   {title:"Istarski i primorski gradovi",words:["PULA","POREČ","RIJEKA","ZADAR"]},
   {title:"Otočje",words:["PAG","HVAR","KRK","CRES"]},
-  {title:"Rijeke",words:["SAVA","DRAVA","NERETVA","KRKA"]},
-  {title:"Planine i priroda",words:["DINARA","VELEBIT","BIOKOVO","KORNATI"]},
+  {title:"Veće hrvatske rijeke",words:["SAVA","DRAVA","NERETVA","KRKA"]},
+  {title:"Hrvatske planine",words:["DINARA","VELEBIT","BIOKOVO","PAPUK"]},
   {title:"Vjera",words:["MOLITVA","KRUNICA","USKRS","BIBLIJA"]},
-  {title:"Hrvatska baština",words:["GLAGOLJICA","PLETER","ČIPKA","BAŠĆANSKA PLOČA"]},
+  {title:"Hrvatska baština",words:["GLAGOLJICA","PLETER","KAMENITA VRATA","BAŠĆANSKA PLOČA"]},
   {title:"Tradicija",words:["ALKA","MOREŠKA","KUMPANIJA","LICITAR"]},
-  {title:"Domovinski rat",words:["OLUJA","OVČARA","ŠKABRNJA","VUKOVARSKA BITKA"]},
+  {title:"Događaji Domovinskog rata",words:["OLUJA","OVČARA","ŠKABRNJA","VUKOVARSKA BITKA"]},
   {title:"Zajednica",words:["OBITELJ","ZAJEDNIŠTVO","VOLONTERSTVO","ZAVIČAJ"]},
-  {title:"Rijeke",words:["KUPA","MURA","CETINA","ZRMANJA"]},
+  {title:"Rijeke – sjever i jug",words:["KUPA","MURA","CETINA","ZRMANJA"]},
   {title:"Nacionalni parkovi",words:["PLITVICE","KORNATI","MLJET","RISNJAK"]},
   {title:"Hrvatske regije",words:["LIKA","SLAVONIJA","BARANJA","MEĐIMURJE"]},
   {title:"Tradicijsko pjevanje i ples",words:["BEĆARAC","OJKANJE","GANGA","NIJEMO KOLO"]},
   {title:"Povijesne osobe",words:["ZVONIMIR","BRANIMIR","PETAR KREŠIMIR","LJUDEVIT GAJ"]},
-  {title:"Tvrđave i dvorci",words:["NEHAJ","KLIS","TRAKOŠĆAN","KAMENITA VRATA"]},
+  {title:"Tvrđave i dvorci",words:["NEHAJ","KLIS","TRAKOŠĆAN","OSJEČKA TVRĐA"]},
   {title:"Novi gradovi",words:["IMOTSKI","MAKARSKA","OMIŠ","BIOGRAD"]},
   {title:"Istarski gradovi",words:["UMAG","LABIN","BUZET","PAZIN"]},
   {title:"Gradovi sjeverne Hrvatske",words:["KRAPINA","SAMOBOR","ZAPREŠIĆ","VARAŽDINSKE TOPLICE"]},
-  {title:"Slavonski gradovi",words:["NAŠICE","ĐURĐEVAC","SLAVONSKI BROD","KUTJEVO"]},
+  {title:"Slavonija i Podravina",words:["NAŠICE","ĐURĐEVAC","SLAVONSKI BROD","KUTJEVO"]},
   {title:"Otoci Jadrana",words:["VIR","UGLJAN","PAŠMAN","ŠOLTA"]},
   {title:"Otoci i otočne skupine",words:["ŠIPAN","LOPUD","KOLOČEP","ZLARIN"]},
-  {title:"Jezera i zaljevi",words:["VRANSKO JEZERO","MODRO JEZERO","CRVENO JEZERO","BAĆINSKA JEZERA"]},
+  {title:"Hrvatska jezera",words:["VRANSKO JEZERO","MODRO JEZERO","CRVENO JEZERO","BAĆINSKA JEZERA"]},
   {title:"Parkovi i zaštićena područja",words:["LONJSKO POLJE","TELAŠĆICA","BRIJUNI","SJEVERNI VELEBIT"]},
   {title:"Hrvatske rijeke",words:["DOBRA","KORANA","MREŽNICA","DUNAV"]},
   {title:"Hrvatske planine",words:["UČKA","MOSOR","KOZJAK","MEDVEDNICA"]},
   {title:"Povijesni dokumenti",words:["TRPIMIROVA DAROVNICA","HRVOJEV MISAL","MISAL PO ZAKONU RIMSKOGA DVORA","ZAGREBAČKA ZLATNA BULA"]},
-  {title:"Domovinski rat",words:["MASLENICA","MEDAČKI DŽEP","BLJESAK","MIRNA REINTEGRACIJA"]},
+  {title:"Operacije i mirna reintegracija",words:["MASLENICA","MEDAČKI DŽEP","BLJESAK","MIRNA REINTEGRACIJA"]},
   {title:"Hrvatske utvrde",words:["TVRĐAVA SISAK","TVRĐAVA BROD","TVRĐAVA MEDVEDGRAD","TVRĐAVA GVOZDANSKO"]},
-  {title:"Povijesni dvorci",words:["DVORAC VELIKI TABOR","DVORAC ORŠIĆ","DVORAC LUŽNICA","DVORAC OZALJ"]},
+  {title:"Dvorci i kurije",words:["DVORAC VELIKI TABOR","DVORAC ORŠIĆ","DVORAC LUŽNICA","DVORAC OZALJ"]},
   {title:"Gradovi – novi pojmovi",words:["DUBROVNIK","ŠIBENIK","ĐAKOVO","ČAKOVEC"]},
-  {title:"Baština – novi pojmovi",words:["BAŠTINA","NASLJEĐE","EUPHRASIANA","KATEDRALA SV JAKOVA"]},
+  {title:"Baština – novi pojmovi",words:["BAŠTINA","NASLJEĐE","ARENA","GLAGOLJAŠI"]},
   {title:"Običaji – novi pojmovi",words:["SINJSKA ALKA","FAŠNIK","KARNEVAL","LICITARSKO SRCE"]},
   {title:"Vjera – novi pojmovi",words:["ANĐEO","SVETIŠTE","HODOČAŠĆE","EVANĐELJE"]},
   {title:"Povijest – novi pojmovi",words:["VUKOVARSKI VODOTORANJ","DOMOVINSKI RAT","KRALJ TOMISLAV","PETAR ZRINSKI"]},
@@ -471,7 +484,7 @@ const GROUPS = [
   {title:"Gradovi – proširenje 3",words:["HUM","KRAŠIĆ","SOLIN","SISAK"]},
   {title:"Gradovi – proširenje 4",words:["SENJ","POŽEGA","BJELOVAR","KOPRIVNICA"]},
   {title:"Gradovi – proširenje 5",words:["GOSPIĆ","METKOVIĆ","OPATIJA","CAVTAT"]},
-  {title:"Gradovi – proširenje 6",words:["KAMENICA","VODICE","NOVIGRAD","ROVINJ"]},
+  {title:"Gradovi i mjesta – proširenje 6",words:["TOVARNIK","VODICE","NOVIGRAD","ROVINJ"]},
   {title:"Gradovi – proširenje 7",words:["VRSAR","MALI LOŠINJ","KLANJEC","ZLATAR"]},
   {title:"Gradovi – proširenje 8",words:["DONJI MIHOLJAC","SLATINA","KRIŽEVCI","IVANIĆ-GRAD"]},
   {title:"Gradovi – proširenje 9",words:["JASTREBARSKO","DUGO SELO","PETRINJA","GLINA"]},
@@ -509,7 +522,7 @@ const GROUPS = [
   {title:"Povijest – proširenje 13",words:["DAN POBJEDE","DAN HRVATSKIH BRANITELJA","DAN SJEĆANJA NA ŽRTVU VUKOVARA","DAN SJEĆANJA NA ŠKABRNJU"]},
   {title:"Povijest – proširenje 14",words:["DAN EUROPE","KULTURA SJEĆANJA","KONCENTRACIJSKI LOGOR","JASENOVAC"]},
   {title:"Povijest – proširenje 15",words:["STARA GRADIŠKA","BLEIBURG","KRIŽNI PUT","TEZNO"]},
-  {title:"Priroda – proširenje 1",words:["BJELOGLAVI SUP","PAPUK","PAKLENICA","ĐURĐEVAČKI PIJESCI"]},
+  {title:"Prirodne vrijednosti – proširenje 1",words:["BJELOGLAVI SUP","ZLATNI RAT","PAKLENICA","ĐURĐEVAČKI PIJESCI"]},
   {title:"Priroda – proširenje 2",words:["ŽUMBERAK","PSUNJ","BILOGORA","MOSLAVAČKA GORA"]},
   {title:"Priroda – proširenje 3",words:["PETROVA GORA","KALNIK","IVANŠČICA","RAVNA GORA"]},
   {title:"Priroda – proširenje 4",words:["PLITVIČKA JEZERA","KRAPINSKE TOPLICE","TOPUSKO","UNA"]},
@@ -522,6 +535,10 @@ const GROUPS = [
   {title:"Zemljopis – proširenje 5",words:["LIMSKI KANAL","NOVIGRADSKO MORE","PROKLJANSKO JEZERO","PAZINSKA JAMA"]},
   {title:"Zemljopis – proširenje 6",words:["LEGRAD","DONJA DUBRAVA","KOTORIBA","SIRAČ"]},
   {title:"Zemljopis – proširenje 7",words:["VETOVO","GUNJA","DRENOVCI","BABINA GREDA"]},
+  {title:"Hrvatsko čipkarstvo",words:["PAŠKA ČIPKA","LEPOGLAVSKA ČIPKA","HVARSKA ČIPKA","ČIPKA"]},
+  {title:"UNESCO prepoznate tradicije",words:["LASTOVSKI POKLAD","MEĐIMURSKA POPEVKA","ZA KRIŽEN","FESTA SVETOG VLAHA"]},
+  {title:"Zadarske znamenitosti",words:["MORSKE ORGULJE","POZDRAV SUNCU","SVETI DONAT","RIMSKI FORUM"]},
+  {title:"UNESCO-ova svjetska baština",words:["STAROGRADSKO POLJE","EUPHRASIANA","KATEDRALA SV JAKOVA","DUBROVAČKE ZIDINE"]},
 ];
 const DAILY = WORDS.filter(item=>item.clean.length>=4&&item.clean.length<=10&&!item.word.includes(" ")).map(item=>item.word);
 const GAMES = [
@@ -678,10 +695,11 @@ export default function CentarIgaraRijeci({onBack,playerName}) {
   const [groupWords,setGroupWords]=useState(()=>shuffle(activeGroups.flatMap(group=>group.words)));
   const [selected,setSelected]=useState([]);
   const [found,setFound]=useState([]);
-  const todayKey=new Date().toLocaleDateString("sv-SE");
+  const today = new Date();
+  const todayKey = getLocalDateKey(today);
   const dailyKey=`patriasoul_wordgames_daily_${todayKey}`;
   const [dailyGuesses,setDailyGuesses]=useState(()=>{try{return JSON.parse(localStorage.getItem(dailyKey)||"[]");}catch{return [];}});
-  const dailyWord=DAILY[(Math.floor(new Date().setHours(0,0,0,0)/86400000))%DAILY.length];
+  const dailyWord=DAILY[getLocalCalendarDayNumber(today)%DAILY.length];
   const dailyWon=dailyGuesses.some(guess=>normalize(guess)===normalize(dailyWord));
   const dailyDone=dailyWon||dailyGuesses.length>=6;
   const scrambled=useMemo(()=>shuffle(item.clean.split("")),[item]);
