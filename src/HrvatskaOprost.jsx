@@ -60,7 +60,7 @@ export default function HrvatskaOprost() {
       </section>
 
       <section className="ho-method">
-        <div className="ho-wrap ho-method-grid"><div><div className="ho-section-kicker">UREDNČKI STANDARD</div><h2>Svjedočanstvo je važno.<br/><em>Dokaz je obveza.</em></h2></div><div className="ho-method-list">
+        <div className="ho-wrap ho-method-grid"><div><div className="ho-section-kicker">UREDNIČKI STANDARD</div><h2>Svjedočanstvo je važno.<br/><em>Dokaz je obveza.</em></h2></div><div className="ho-method-list">
           <div><b>01</b><p><strong>Izvori uz svaku tvrdnju</strong><br/>Arhivski dokumenti, službene evidencije, sudske presude, relevantna historiografija i vjerodostojna svjedočanstva.</p></div>
           <div><b>02</b><p><strong>Precizno imenovanje</strong><br/>Počinitelje, postrojbe i zapovjednu odgovornost navodimo samo kada ih pouzdani izvori utvrđuju.</p></div>
           <div><b>03</b><p><strong>Poštovanje prema žrtvama</strong><br/>Bez senzacionalizma, uznemirujućih prikaza i objave privatnih podataka koji nisu javno potvrđeni.</p></div>
