@@ -7,6 +7,7 @@ const primary = [
     { label: "Hrvatska pamti", href: "/hrvatska-pamti.html" },
     { label: "Registar grobišta", href: "/hrvatska-pamti-grobnice.html" },
     { label: "Video arhiva", href: "/video-arhiva.html" },
+    { label: "Kako oprostiti, kako zaboraviti?", href: "/kako-oprostiti-kako-zaboraviti.html" },
   ]},
   { label: "Zajednica", href: "/forum.html", children: [
     { label: "Forum", href: "/forum.html" }, { label: "Grupe", href: "/#grupe" }, { label: "Događaji", href: "/dogadaji.html" },
