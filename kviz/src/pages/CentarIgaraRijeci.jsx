@@ -634,9 +634,8 @@ function WordSearch({onBack}) {
     const path=makePath(anchor,index);
     if(path.length)setDrag(path);
   };
-  const finish = () => {
-    if(anchor===null)return;
-    const chosen=drag;
+  const finishPath = (chosen) => {
+    if(!chosen.length)return;
     const value=chosen.map(index=>board.cells[index]).join("");
     const match=board.placements.find(item=>!found.includes(item.word)&&
       (value===item.word||value===[...item.word].reverse().join("")));
@@ -652,6 +651,22 @@ function WordSearch({onBack}) {
     }
     setAnchor(null);setDrag([]);
   };
+  const finish = () => {
+    if(anchor===null)return;
+    finishPath(drag);
+  };
+  const chooseWithKeyboard = (index) => {
+    if(complete)return;
+    if(anchor===null){
+      setAnchor(index);setDrag([index]);setLastFound([]);
+      setMessage("Početno slovo odabrano. Odaberi završno slovo i pritisni Enter ili razmaknicu.");
+      return;
+    }
+    const path=makePath(anchor,index);
+    if(path.length>1){finishPath(path);return;}
+    setAnchor(null);setDrag([]);
+    setMessage("Odaberi završno slovo u istom retku ili stupcu.");
+  };
   const reset = () => {setFound([]);setDrag([]);setAnchor(null);setLastFound([]);setMessage("Pronađi sve riječi u mreži.");};
 
   return <Frame title="Pronađi riječi" subtitle="Pronađi više hrvatskih riječi. Mogu biti vodoravno ili okomito, naprijed ili unatrag. Povuci mišem ili prstom preko slova." onBack={onBack}>
@@ -664,12 +679,12 @@ function WordSearch({onBack}) {
       {board.cells.map((letter,index)=>{
         const isDragging=drag.includes(index);
         const isLast=board.placements.some(item=>found.includes(item.word)&&item.path.includes(index));
-        return <button key={index} type="button" data-cell-index={index} onPointerDown={event=>begin(event,index)} aria-label={`Red ${Math.floor(index/size)+1}, stupac ${index%size+1}, slovo ${letter}`} className={`aspect-square min-w-0 rounded-md border text-[11px] font-black transition sm:rounded-lg sm:text-base ${isDragging?"border-amber-200 bg-amber-300 text-slate-950 scale-105":isLast?"border-emerald-300 bg-emerald-500 text-white shadow-[0_0_12px_rgba(16,185,129,.3)]":"border-white/10 bg-white/[.055] text-white hover:border-amber-200/50 hover:bg-white/10"}`}>{letter}</button>;
+        return <button key={index} type="button" data-cell-index={index} onPointerDown={event=>begin(event,index)} onKeyDown={event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();chooseWithKeyboard(index);}}} aria-label={`Red ${Math.floor(index/size)+1}, stupac ${index%size+1}, slovo ${letter}`} className={`aspect-square min-w-0 rounded-md border text-[11px] font-black transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200 sm:rounded-lg sm:text-base ${isDragging?"border-amber-200 bg-amber-300 text-slate-950 scale-105":isLast?"border-emerald-300 bg-emerald-500 text-white shadow-[0_0_12px_rgba(16,185,129,.3)]":"border-white/10 bg-white/[.055] text-white hover:border-amber-200/50 hover:bg-white/10"}`}>{letter}</button>;
       })}
     </div>
     <p className="mt-4 min-h-10 text-center text-sm font-semibold text-amber-100" role="status" aria-live="polite">{complete?"Sjajno! Pronašao/la si sve riječi!":message}</p>
     <div className="mt-3 flex justify-center">{complete?<Success>Sve riječi su pronađene!</Success>:<button type="button" onClick={reset} className="rounded-xl border border-white/15 px-4 py-2.5 text-sm font-bold text-white/75 transition hover:bg-white/10">Ponovi igru</button>}</div>
-    <p className="mt-3 text-center text-[11px] text-white/40">Na računalu: drži lijevu tipku miša i povuci. Na mobitelu: pritisni slovo i povuci prstom. Pusti na zadnjem slovu.</p>
+    <p className="mt-3 text-center text-[11px] text-white/50">Mišem ili prstom povuci od prvog do zadnjeg slova. Tipkovnicom: fokusiraj početno slovo, pritisni Enter ili razmaknicu, zatim odaberi završno slovo.</p>
   </Frame>;
 }
 
