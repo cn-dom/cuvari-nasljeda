@@ -145,6 +145,39 @@ try {
     }
   }
 
+  // Keyboard accessibility smoke for the word-search game.
+  {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    const pageErrors = [];
+    page.on("pageerror", error => pageErrors.push(error.message));
+    await page.route("**/*", route => {
+      const parsed = new URL(route.request().url());
+      if (["http:", "https:"].includes(parsed.protocol) && !["127.0.0.1", "localhost"].includes(parsed.hostname)) {
+        return route.abort();
+      }
+      return route.continue();
+    });
+    try {
+      const response = await page.goto(new URL("/kviz/?mode=words", base).href, { waitUntil: "domcontentloaded", timeout: 20000 });
+      assert.ok(response && response.status() === 200, "word games should return HTTP 200 for keyboard testing");
+      await page.getByRole("button", { name: "Otvori igru: Pronađi riječ" }).click();
+      const firstCell = page.locator('[data-cell-index="0"]');
+      await firstCell.focus();
+      await page.keyboard.press("Enter");
+      assert.match(await page.locator('[role="status"]').innerText(), /Početno slovo odabrano/, "Enter should select the starting letter");
+      await page.locator('[data-cell-index="1"]').focus();
+      await page.keyboard.press("Space");
+      assert.match(await page.locator('[role="status"]').innerText(), /To nije tražena riječ/, "Space should finish a keyboard-selected path");
+      assert.deepEqual(pageErrors, [], `keyboard word-search interaction produced browser errors: ${pageErrors.join("; ")}`);
+      console.log("PASS word-search keyboard interaction");
+    } catch (error) {
+      failures.push(`/kviz/?mode=words keyboard interaction: ${error.message}`);
+      console.error(`FAIL word-search keyboard interaction: ${error.message}`);
+    } finally {
+      await page.close();
+    }
+  }
+
   // Dedicated smoke for the video archive: add a URL, render its card, and open the embedded player.
   {
     const page = await browser.newPage();
