@@ -102,6 +102,11 @@ assert.ok(centerSource.includes('Tajni pojam ima {normalize(dailyWord).length} s
 assert.match(centerSource, /DAILY\[getLocalCalendarDayNumber\(today\)%DAILY\.length\]/);
 assert.match(centerSource, /alphabet=\["A","B","C","Č","Ć","D","Đ"/);
 assert.match(centerSource, /"S","Š","T","U","V","Z","Ž"/);
+const wordSearchSection = sectionBetween(centerSource, "function WordSearch", "export default function");
+assert.match(wordSearchSection, /onKeyDown=/, "Word search must support keyboard selection");
+assert.match(wordSearchSection, /focus-visible:outline/, "Word-search cells must show a visible keyboard focus");
+assert.ok(wordSearchSection.includes("Početno slovo odabrano"), "Word search must explain the two-step keyboard selection");
+
 const scrambleUi = sectionBetween(centerSource, '{active==="scramble"&&', '{active==="guess"&&');
 assert.match(scrambleUi, /Odaberi slovo/);
 assert.doesNotMatch(scrambleUi, /<LetterKeyboard/);
